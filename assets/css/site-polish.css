@@ -34,13 +34,9 @@ body::before{display:none!important}
 .metrics-grid{border-radius:16px;background:#10151b}
 .metrics-grid div{padding:22px 24px}
 
-.section,.section-dark,.section-accent,.cta-band,.atlas,.atlas-page{
-  background:#0c0f13;
-}
+.section,.section-dark,.section-accent,.cta-band,.atlas,.atlas-page{background:#0c0f13}
 .section-dark{background:#07090c}
-.section-accent,.cta-band,.atlas,.atlas-page{
-  background:radial-gradient(circle at 82% 20%,rgba(244,122,32,.1),transparent 34%),#0e1217;
-}
+.section-accent,.cta-band,.atlas,.atlas-page{background:radial-gradient(circle at 82% 20%,rgba(244,122,32,.1),transparent 34%),#0e1217}
 .section{padding:86px 0}
 .section h2{font-size:clamp(2.1rem,3.5vw,3.5rem);max-width:900px}
 .section-heading{margin-bottom:34px}
@@ -53,7 +49,7 @@ body::before{display:none!important}
 .case-card img{height:220px}
 .case-card-body{padding:22px}
 .case-facts{font-size:.8rem}
-.process-grid{gap:12px}
+.process-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .process-grid li{padding:20px;border-radius:14px}
 
 .page-hero{padding:132px 0 72px;background:radial-gradient(circle at 80% 20%,rgba(244,122,32,.12),transparent 34%),linear-gradient(180deg,#080a0d,#0c1015)}
@@ -76,6 +72,7 @@ body::before{display:none!important}
   .hero-visual{aspect-ratio:16/9}
   .quote-layout{grid-template-columns:1fr;gap:36px}
   .quote-form{max-width:720px}
+  .process-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
 @media(max-width:720px){
