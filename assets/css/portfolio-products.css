@@ -1,32 +1,39 @@
-/* Portfólio de produtos — imagens otimizadas em sprite */
+/* Portfólio de produtos — recorte do sprite por elemento <img>, compatível com Safari/iOS */
 .portfolio-products .portfolio-card{
   isolation:isolate;
   position:relative;
   min-height:220px;
+  overflow:hidden;
   background:#11161c;
 }
-.portfolio-products .portfolio-sprite{
+
+.portfolio-products .portfolio-crop{
   position:absolute;
   inset:0;
   display:block;
-  width:100%;
-  height:100%;
-  min-height:100%;
-  background-image:url('../img/portfolio-produtos-sprite.webp');
-  background-repeat:no-repeat;
-  background-size:300% 200%;
-  background-color:#11161c;
-  transform:translateZ(0);
-  backface-visibility:hidden;
-  transition:transform .5s ease;
+  overflow:hidden;
+  background:#11161c;
 }
-.portfolio-products .portfolio-card:hover .portfolio-sprite{transform:scale(1.04)}
-.portfolio-sprite-1{background-position:0 0}
-.portfolio-sprite-2{background-position:50% 0}
-.portfolio-sprite-3{background-position:100% 0}
-.portfolio-sprite-4{background-position:0 100%}
-.portfolio-sprite-5{background-position:50% 100%}
-.portfolio-sprite-6{background-position:100% 100%}
+
+.portfolio-products .portfolio-crop img{
+  position:absolute;
+  display:block;
+  width:300%;
+  height:200%;
+  max-width:none;
+  object-fit:fill;
+  margin:0;
+  padding:0;
+  border:0;
+}
+
+.portfolio-products .portfolio-sprite-1 img{left:0;top:0}
+.portfolio-products .portfolio-sprite-2 img{left:-100%;top:0}
+.portfolio-products .portfolio-sprite-3 img{left:-200%;top:0}
+.portfolio-products .portfolio-sprite-4 img{left:0;top:-100%}
+.portfolio-products .portfolio-sprite-5 img{left:-100%;top:-100%}
+.portfolio-products .portfolio-sprite-6 img{left:-200%;top:-100%}
+
 .portfolio-products .portfolio-card figcaption{
   z-index:2;
   max-width:calc(100% - 32px);
@@ -41,12 +48,4 @@
     aspect-ratio:4/3;
     min-height:260px;
   }
-  .portfolio-products .portfolio-sprite{
-    position:absolute;
-    inset:0;
-  }
-}
-
-@media(prefers-reduced-motion:reduce){
-  .portfolio-products .portfolio-sprite{transition:none}
 }
