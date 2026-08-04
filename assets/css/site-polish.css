@@ -56,6 +56,11 @@ body::before{display:none!important}
 .process-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .process-grid li{padding:20px;border-radius:14px}
 
+/* Fallback para navegadores móveis que calculam incorretamente altura percentual em cards com aspect-ratio. */
+.portfolio-products .portfolio-card{position:relative;min-height:220px;background:#11161c}
+.portfolio-products .portfolio-sprite{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:100%;display:block}
+.portfolio-products .portfolio-card figcaption{z-index:2}
+
 .page-hero{padding:132px 0 72px;background:radial-gradient(circle at 80% 20%,rgba(244,122,32,.12),transparent 34%),linear-gradient(180deg,#080a0d,#0c1015)}
 .page-hero .narrow{max-width:900px;margin-inline:auto}
 .page-hero h1{font-size:clamp(2.8rem,5vw,4.8rem)}
@@ -92,6 +97,7 @@ body::before{display:none!important}
   .metrics-grid div{border-right:0;border-bottom:1px solid var(--line)}
   .metrics-grid div:last-child{border-bottom:0}
   .four-cols,.process-grid,.case-grid,.line-grid,.portfolio-grid{grid-template-columns:1fr}
+  .portfolio-products .portfolio-card{width:100%;aspect-ratio:4/3;min-height:260px}
   .quote-form{grid-template-columns:1fr;padding:22px}
   .quote-form .full{grid-column:auto}
   .page-hero{padding:112px 0 58px}
