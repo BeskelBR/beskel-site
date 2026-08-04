@@ -182,6 +182,74 @@ document.querySelectorAll(".form-note").forEach(note => {
   }
 });
 
+// Ampliação das imagens do portfólio em modal de tela cheia.
+const portfolioImages = document.querySelectorAll(".portfolio-products .portfolio-card > img");
+if (portfolioImages.length) {
+  const lightbox = document.createElement("div");
+  lightbox.className = "portfolio-lightbox";
+  lightbox.setAttribute("aria-hidden", "true");
+  lightbox.innerHTML = `
+    <figure class="portfolio-lightbox__dialog" role="dialog" aria-modal="true" aria-label="Imagem ampliada do portfólio">
+      <button class="portfolio-lightbox__close" type="button" aria-label="Fechar imagem ampliada">×</button>
+      <img class="portfolio-lightbox__image" alt="">
+      <figcaption class="portfolio-lightbox__caption"></figcaption>
+    </figure>`;
+  document.body.appendChild(lightbox);
+
+  const lightboxImage = lightbox.querySelector(".portfolio-lightbox__image");
+  const lightboxCaption = lightbox.querySelector(".portfolio-lightbox__caption");
+  const closeButton = lightbox.querySelector(".portfolio-lightbox__close");
+  let lastTrigger = null;
+
+  function getPortfolioTitle(image) {
+    return image.closest(".portfolio-card")?.querySelector("figcaption b")?.textContent.trim() || image.alt;
+  }
+
+  function openLightbox(image) {
+    lastTrigger = image;
+    const title = getPortfolioTitle(image);
+    lightboxImage.src = image.currentSrc || image.src;
+    lightboxImage.alt = image.alt;
+    lightboxCaption.textContent = title;
+    lightbox.classList.add("is-open");
+    lightbox.setAttribute("aria-hidden", "false");
+    document.body.classList.add("lightbox-open");
+    requestAnimationFrame(() => closeButton.focus());
+  }
+
+  function closeLightbox() {
+    if (!lightbox.classList.contains("is-open")) return;
+    lightbox.classList.remove("is-open");
+    lightbox.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("lightbox-open");
+    lightboxImage.removeAttribute("src");
+    if (lastTrigger) lastTrigger.focus();
+  }
+
+  portfolioImages.forEach(image => {
+    const title = getPortfolioTitle(image);
+    image.tabIndex = 0;
+    image.setAttribute("role", "button");
+    image.setAttribute("aria-haspopup", "dialog");
+    image.setAttribute("aria-label", `Ampliar imagem: ${title}`);
+    image.addEventListener("click", () => openLightbox(image));
+    image.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openLightbox(image);
+      }
+    });
+  });
+
+  closeButton.addEventListener("click", closeLightbox);
+  lightbox.addEventListener("click", event => {
+    if (event.target === lightbox) closeLightbox();
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && lightbox.classList.contains("is-open")) closeLightbox();
+  });
+}
+
 if (!document.querySelector(".whatsapp-float")) {
   const shortcut = document.createElement("a");
   shortcut.className = "whatsapp-float";
