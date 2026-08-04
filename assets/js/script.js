@@ -147,16 +147,23 @@ document.querySelectorAll("#quoteForm").forEach(form => {
   });
 });
 
-// Padroniza contatos em páginas antigas e novas.
+// Padroniza contatos em páginas antigas e novas sem destruir a estrutura dos cards.
 document.querySelectorAll('a[href*="instagram.com"], [data-beskel-instagram]').forEach(link => {
   link.href = INSTAGRAM_URL;
-  const full = link.dataset.label === "full" || /Instagram/i.test(link.textContent);
-  link.textContent = full ? `Instagram @${INSTAGRAM_USER}` : `@${INSTAGRAM_USER}`;
+  const value = link.querySelector("span");
+  if (value) {
+    value.textContent = `@${INSTAGRAM_USER}`;
+  } else {
+    const full = link.dataset.label === "full" || /Instagram/i.test(link.textContent);
+    link.textContent = full ? `Instagram @${INSTAGRAM_USER}` : `@${INSTAGRAM_USER}`;
+  }
 });
 
 document.querySelectorAll("[data-beskel-email]").forEach(link => {
-  link.textContent = CONTACT_EMAIL;
   link.href = `mailto:${CONTACT_EMAIL}`;
+  const value = link.querySelector("span");
+  if (value) value.textContent = CONTACT_EMAIL;
+  else link.textContent = CONTACT_EMAIL;
 });
 
 document.querySelectorAll("[data-beskel-whatsapp]").forEach(link => {
