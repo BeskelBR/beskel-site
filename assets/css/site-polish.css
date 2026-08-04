@@ -17,6 +17,10 @@ body::before{display:none!important}
 
 .site-header{background:rgba(7,9,12,.96)}
 .container{width:min(var(--max),calc(100% - 40px))}
+.brand img{border-radius:12px;object-fit:contain;background:transparent;border:0}
+.btn{background:var(--orange);color:#090b0e;border-radius:10px;box-shadow:none}
+.btn:hover{background:#ff8a32}
+.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.28);box-shadow:none}
 
 .hero{
   padding:108px 0 48px;
