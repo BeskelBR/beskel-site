@@ -1,1 +1,0 @@
-Imagens individuais do portfólio BESKEL.
