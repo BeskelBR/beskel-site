@@ -6,6 +6,15 @@ const CONTACT_EMAIL = CONFIG.email || "contato@beskel.com.br";
 const INSTAGRAM_USER = CONFIG.instagramUser || "beskelbr";
 const INSTAGRAM_URL = CONFIG.instagramUrl || "https://instagram.com/beskelbr";
 
+// Garante que todas as páginas usem a camada editorial mais recente.
+const currentScript = document.currentScript;
+if (currentScript && !document.querySelector('link[href*="site-polish.css"]')) {
+  const polish = document.createElement("link");
+  polish.rel = "stylesheet";
+  polish.href = new URL("../css/site-polish.css", currentScript.src).href;
+  document.head.appendChild(polish);
+}
+
 const menuButton = document.querySelector(".menu-toggle");
 const mainNav = document.querySelector(".main-nav");
 
@@ -64,14 +73,18 @@ filterButtons.forEach(button => {
       item.setAttribute("aria-pressed", String(selected));
     });
     portfolioCards.forEach(card => {
-      const show = filter === "all" || card.dataset.category.split(" ").includes(filter);
+      const categories = (card.dataset.category || "").split(" ");
+      const show = filter === "all" || categories.includes(filter);
       card.classList.toggle("is-hidden", !show);
       card.setAttribute("aria-hidden", String(!show));
     });
   });
 });
 
-function onlyDigits(value) { return value.replace(/\D/g, ""); }
+function onlyDigits(value) {
+  return value.replace(/\D/g, "");
+}
+
 function formatPhone(value) {
   const digits = onlyDigits(value).slice(0, 11);
   if (digits.length <= 2) return digits;
@@ -83,27 +96,30 @@ function formatPhone(value) {
 document.querySelectorAll('input[name="telefone"]').forEach(input => {
   input.setAttribute("inputmode", "tel");
   input.setAttribute("autocomplete", "tel");
-  input.addEventListener("input", () => { input.value = formatPhone(input.value); });
+  input.addEventListener("input", () => {
+    input.value = formatPhone(input.value);
+  });
 });
 document.querySelectorAll('input[name="nome"]').forEach(input => input.setAttribute("autocomplete", "name"));
 
 function buildQuoteMessage(form) {
   const data = new FormData(form);
+  const fields = [
+    ["Nome", data.get("nome")],
+    ["Telefone", data.get("telefone")],
+    ["Tipo de projeto", data.get("tipo")],
+    ["Quantidade", data.get("quantidade")],
+    ["Descrição", data.get("descricao")]
+  ];
+
+  const details = fields
+    .filter(([, value]) => String(value || "").trim())
+    .map(([label, value]) => `${label}: ${String(value).trim()}`);
+
   return [
-    "Olá, BESKEL! Gostaria de solicitar uma avaliação técnica.",
+    "Olá, BESKEL! Gostaria de solicitar um orçamento.",
     "",
-    `Nome: ${data.get("nome") || "Não informado"}`,
-    `Telefone: ${data.get("telefone") || "Não informado"}`,
-    `Tipo de projeto: ${data.get("tipo") || "Não informado"}`,
-    `Quantidade: ${data.get("quantidade") || "Não informada"}`,
-    `Prazo desejado: ${data.get("prazo") || "Não informado"}`,
-    `Medidas aproximadas: ${data.get("medidas") || "Não informadas"}`,
-    `Ambiente de uso: ${data.get("ambiente") || "Não informado"}`,
-    `Material: ${data.get("material") || "Desejo orientação"}`,
-    "",
-    `Descrição: ${data.get("descricao") || "Não informada"}`,
-    "",
-    "Tenho fotos, desenhos ou arquivos para enviar: " + (data.get("referencias") ? "Sim" : "Não")
+    ...details
   ].join("\n");
 }
 
@@ -116,6 +132,7 @@ document.querySelectorAll("#quoteForm").forEach(form => {
     status.setAttribute("aria-live", "polite");
     form.appendChild(status);
   }
+
   form.addEventListener("submit", event => {
     event.preventDefault();
     if (!form.reportValidity()) {
@@ -123,37 +140,41 @@ document.querySelectorAll("#quoteForm").forEach(form => {
       status.className = "form-status error";
       return;
     }
-    status.textContent = "Abrindo o WhatsApp com a sua solicitação...";
+
+    status.textContent = "Abrindo o WhatsApp...";
     status.className = "form-status success";
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildQuoteMessage(form))}`, "_blank", "noopener,noreferrer");
   });
 });
 
-// Unifica contatos antigos e novos em todas as páginas.
+// Padroniza contatos em páginas antigas e novas.
 document.querySelectorAll('a[href*="instagram.com"], [data-beskel-instagram]').forEach(link => {
   link.href = INSTAGRAM_URL;
   const full = link.dataset.label === "full" || /Instagram/i.test(link.textContent);
   link.textContent = full ? `Instagram @${INSTAGRAM_USER}` : `@${INSTAGRAM_USER}`;
 });
+
 document.querySelectorAll("[data-beskel-email]").forEach(link => {
   link.textContent = CONTACT_EMAIL;
   link.href = `mailto:${CONTACT_EMAIL}`;
 });
+
 document.querySelectorAll("[data-beskel-whatsapp]").forEach(link => {
   link.href = `https://wa.me/${WHATSAPP_NUMBER}`;
 });
 
-// Corrige textos de configuração remanescentes na página de contato.
 document.querySelectorAll(".contact-list div").forEach(row => {
   if (/WhatsApp/i.test(row.textContent)) {
     row.innerHTML = `<b>WhatsApp</b><span><a href="https://wa.me/${WHATSAPP_NUMBER}" target="_blank" rel="noopener noreferrer">Falar com a BESKEL</a></span>`;
   }
 });
+
 document.querySelectorAll(".form-note").forEach(note => {
-  if (/configur/i.test(note.textContent)) note.textContent = "Arquivos e referências podem ser anexados após a abertura da conversa no WhatsApp.";
+  if (/configur/i.test(note.textContent)) {
+    note.textContent = "Você será direcionado ao WhatsApp para continuar o atendimento.";
+  }
 });
 
-// Insere atalho flutuante nas páginas que ainda não o possuem.
 if (!document.querySelector(".whatsapp-float")) {
   const shortcut = document.createElement("a");
   shortcut.className = "whatsapp-float";
@@ -161,6 +182,6 @@ if (!document.querySelector(".whatsapp-float")) {
   shortcut.target = "_blank";
   shortcut.rel = "noopener noreferrer";
   shortcut.setAttribute("aria-label", "Falar com a BESKEL pelo WhatsApp");
-  shortcut.innerHTML = "<span>WhatsApp</span>";
+  shortcut.textContent = "WhatsApp";
   document.body.appendChild(shortcut);
 }
