@@ -1,0 +1,98 @@
+/* Revisão editorial BESKEL — layout mais limpo e formulário simplificado */
+:root{
+  --bg:#07090c;
+  --bg-soft:#0d1116;
+  --card:#11161c;
+  --text:#f7f7f8;
+  --muted:#aeb5bf;
+  --orange:#f47a20;
+  --line:#252c34;
+  --max:1180px;
+  --radius:16px;
+}
+
+html{background:var(--bg)}
+body{background:var(--bg)}
+body::before{display:none!important}
+
+.site-header{background:rgba(7,9,12,.96)}
+.container{width:min(var(--max),calc(100% - 40px))}
+
+.hero{
+  padding:108px 0 48px;
+  background:
+    radial-gradient(circle at 78% 34%,rgba(244,122,32,.12),transparent 32%),
+    linear-gradient(180deg,#07090c 0%,#0b0f14 100%);
+}
+.hero-grid{grid-template-columns:minmax(0,.94fr) minmax(0,1.06fr);gap:44px}
+.hero-copy-panel{padding:34px 0;max-width:600px}
+.hero h1{font-size:clamp(3rem,4.7vw,5.1rem);max-width:600px}
+.hero-copy{font-size:1.05rem;line-height:1.75}
+.hero-visual{aspect-ratio:16/11;min-height:0;border-radius:20px;box-shadow:0 24px 60px rgba(0,0,0,.38)}
+
+.metrics{padding:0 0 34px;background:#0b0f14}
+.metrics-grid{border-radius:16px;background:#10151b}
+.metrics-grid div{padding:22px 24px}
+
+.section,.section-dark,.section-accent,.cta-band,.atlas,.atlas-page{
+  background:#0c0f13;
+}
+.section-dark{background:#07090c}
+.section-accent,.cta-band,.atlas,.atlas-page{
+  background:radial-gradient(circle at 82% 20%,rgba(244,122,32,.1),transparent 34%),#0e1217;
+}
+.section{padding:86px 0}
+.section h2{font-size:clamp(2.1rem,3.5vw,3.5rem);max-width:900px}
+.section-heading{margin-bottom:34px}
+.split{gap:60px}
+
+.card{min-height:220px;padding:26px;border-radius:16px}
+.card .icon{margin-bottom:18px}
+.case-grid{gap:18px}
+.case-card{border-radius:16px}
+.case-card img{height:220px}
+.case-card-body{padding:22px}
+.case-facts{font-size:.8rem}
+.process-grid{gap:12px}
+.process-grid li{padding:20px;border-radius:14px}
+
+.page-hero{padding:132px 0 72px;background:radial-gradient(circle at 80% 20%,rgba(244,122,32,.12),transparent 34%),linear-gradient(180deg,#080a0d,#0c1015)}
+.page-hero .narrow{max-width:900px;margin-inline:auto}
+.page-hero h1{font-size:clamp(2.8rem,5vw,4.8rem)}
+
+.quote-layout{grid-template-columns:minmax(0,.9fr) minmax(420px,1.1fr);gap:52px;align-items:center}
+.quote-form{gap:16px;padding:26px;border-radius:18px;background:#101419}
+.quote-form label{gap:7px}
+.quote-form input,.quote-form select,.quote-form textarea{padding:13px 14px;border-radius:9px;background:#090c10}
+.quote-form textarea{resize:vertical;min-height:130px}
+.form-note,.form-help{font-size:.78rem;color:var(--muted);margin:0}
+
+.site-footer{background:#050607;padding:48px 0 22px}
+.whatsapp-float{background:var(--orange);color:#090b0e}
+
+@media(max-width:1040px){
+  .hero-grid{grid-template-columns:1fr;gap:28px}
+  .hero-copy-panel{max-width:760px;padding-bottom:8px}
+  .hero-visual{aspect-ratio:16/9}
+  .quote-layout{grid-template-columns:1fr;gap:36px}
+  .quote-form{max-width:720px}
+}
+
+@media(max-width:720px){
+  .container{width:min(100% - 28px,var(--max))}
+  .hero{padding-top:94px}
+  .hero h1{font-size:clamp(2.45rem,11vw,3.6rem)}
+  .hero-actions{flex-direction:column}
+  .hero-actions .btn{width:100%}
+  .hero-visual{aspect-ratio:4/3}
+  .section{padding:66px 0}
+  .split{gap:32px}
+  .metrics-grid{grid-template-columns:1fr}
+  .metrics-grid div{border-right:0;border-bottom:1px solid var(--line)}
+  .metrics-grid div:last-child{border-bottom:0}
+  .four-cols,.process-grid,.case-grid,.line-grid,.portfolio-grid{grid-template-columns:1fr}
+  .quote-form{grid-template-columns:1fr;padding:22px}
+  .quote-form .full{grid-column:auto}
+  .page-hero{padding:112px 0 58px}
+  .page-hero h1{font-size:clamp(2.35rem,11vw,3.5rem)}
+}
