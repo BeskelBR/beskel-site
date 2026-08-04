@@ -134,3 +134,128 @@ noscript{display:block;background:#f28c28;color:#080a0d;padding:10px 20px;text-a
   .hero-visual{aspect-ratio:4/3;border-radius:20px}
   .hero-visual img{object-position:58% center}
 }
+
+/* Etapa 6 — legibilidade móvel e adaptação ao zoom do navegador */
+.menu-toggle{
+  min-width:44px;
+  min-height:44px;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  cursor:pointer;
+}
+.footer-grid a,
+.contact-list a,
+.contact-list span{
+  overflow-wrap:anywhere;
+}
+
+/* Abre o menu compacto um pouco antes para evitar aperto em zoom ampliado. */
+@media (max-width:1040px){
+  .main-nav{
+    position:absolute;
+    top:76px;
+    left:20px;
+    right:20px;
+    max-height:calc(100vh - 96px);
+    overflow-y:auto;
+    background:#101318;
+    border:1px solid #2a3037;
+    border-radius:16px;
+    padding:20px;
+    display:none;
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .main-nav.open{display:flex}
+  .menu-toggle{display:inline-flex}
+}
+
+@media (max-width:620px){
+  .nav-wrap{height:68px}
+  .main-nav{
+    top:68px;
+    left:14px;
+    right:14px;
+    max-height:calc(100vh - 82px);
+    padding:16px;
+  }
+  .hero{padding-top:92px}
+  .hero-copy-panel{padding-top:22px}
+  .hero h1{font-size:clamp(2.2rem,11vw,3.25rem);letter-spacing:-.035em}
+  .hero-copy,.body-copy,.section p{font-size:max(1rem,16px)}
+  .eyebrow{font-size:.8rem;line-height:1.5}
+  .trust-row{font-size:.86rem;line-height:1.55}
+  .metrics-grid span,.process-grid p{font-size:.9rem}
+  .hero-actions .btn{width:100%;min-height:48px}
+  .section{padding:68px 0}
+  .page-hero{padding:112px 0 60px}
+  .page-hero h1{font-size:clamp(2.15rem,11vw,3.35rem);letter-spacing:-.035em}
+  .page-hero p:not(.eyebrow){font-size:1rem}
+  .quote-form{padding:22px}
+  .quote-form input,.quote-form select,.quote-form textarea{font-size:16px}
+  .footer-grid a,.footer-grid span,.footer-grid p,.footer-bottom{font-size:.9rem}
+}
+
+@media (max-width:360px){
+  .container{width:calc(100% - 24px)}
+  .brand{gap:8px}
+  .brand img{width:40px;height:40px}
+  .hero h1,.page-hero h1{font-size:2.1rem}
+  .card,.service-row,.quote-form{padding:20px}
+}
+
+/* Etapa 7 — papel de parede temático de manufatura digital */
+html{background:#07090c}
+body{
+  position:relative;
+  isolation:isolate;
+  background:transparent;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(7,9,12,.34),rgba(7,9,12,.48)),
+    url("../img/background-beskel-v1.webp") center/cover no-repeat;
+}
+.hero{
+  background:
+    radial-gradient(circle at 78% 36%,rgba(242,140,40,.14),transparent 34%),
+    linear-gradient(180deg,rgba(7,9,12,.56),rgba(11,15,20,.68));
+}
+.metrics{background:rgba(11,15,20,.72)}
+.section{background:rgba(12,15,19,.76)}
+.section-dark{background:rgba(7,9,12,.72)}
+.atlas{
+  background:
+    radial-gradient(circle at 85% 10%,rgba(242,140,40,.16),transparent 35%),
+    rgba(13,16,20,.74);
+}
+.page-hero{
+  background:
+    radial-gradient(circle at 80% 20%,rgba(242,140,40,.16),transparent 34%),
+    linear-gradient(180deg,rgba(8,10,13,.62),rgba(12,16,21,.72));
+}
+.cta-band{
+  background:
+    radial-gradient(circle at 80% 50%,rgba(242,140,40,.2),transparent 35%),
+    rgba(13,17,22,.72);
+}
+.atlas-page{
+  background:
+    radial-gradient(circle at 70% 20%,rgba(242,140,40,.22),transparent 36%),
+    linear-gradient(135deg,rgba(9,11,14,.7),rgba(18,24,32,.74));
+}
+.site-footer{background:rgba(5,6,7,.9)}
+
+@media (max-width:620px){
+  body::before{background-position:62% center}
+}
+
+@media (prefers-reduced-data:reduce){
+  body::before{background-image:linear-gradient(180deg,#07090c,#0b0f14)}
+}
