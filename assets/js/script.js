@@ -18,6 +18,20 @@ if (currentScript && !document.querySelector('link[href*="site-polish.css"]')) {
 const menuButton = document.querySelector(".menu-toggle");
 const mainNav = document.querySelector(".main-nav");
 
+// Mantém a arquitetura de navegação objetiva em todas as páginas antigas e novas.
+document.querySelectorAll(".main-nav a").forEach(link => {
+  const href = link.getAttribute("href") || "";
+  if (/processo\.html/.test(href)) {
+    link.remove();
+    return;
+  }
+  if (/servicos\.html/.test(href)) link.textContent = "Soluções";
+});
+document.querySelectorAll(".site-footer a").forEach(link => {
+  const href = link.getAttribute("href") || "";
+  if (/servicos\.html/.test(href)) link.textContent = "Soluções";
+});
+
 function closeMenu({ returnFocus = false } = {}) {
   if (!menuButton || !mainNav) return;
   mainNav.classList.remove("open");
@@ -101,6 +115,21 @@ document.querySelectorAll('input[name="telefone"]').forEach(input => {
   });
 });
 document.querySelectorAll('input[name="nome"]').forEach(input => input.setAttribute("autocomplete", "name"));
+
+// Pré-seleciona o tipo de projeto quando o cliente chega por um CTA de Soluções.
+const intent = new URLSearchParams(window.location.search).get("tipo");
+const intentMap = {
+  producao: "Impressão 3D",
+  desenvolvimento: "Modelagem 3D",
+  validacao: "Protótipo",
+  personalizacao: "Produto personalizado"
+};
+if (intent && intentMap[intent]) {
+  document.querySelectorAll('select[name="tipo"]').forEach(select => {
+    const option = Array.from(select.options).find(item => item.textContent.trim() === intentMap[intent]);
+    if (option) select.value = option.value;
+  });
+}
 
 function buildQuoteMessage(form) {
   const data = new FormData(form);
@@ -257,6 +286,6 @@ if (!document.querySelector(".whatsapp-float")) {
   shortcut.target = "_blank";
   shortcut.rel = "noopener noreferrer";
   shortcut.setAttribute("aria-label", "Falar com a BESKEL pelo WhatsApp");
-  shortcut.textContent = "WhatsApp";
+  shortcut.textContent = "Falar sobre meu projeto";
   document.body.appendChild(shortcut);
 }
