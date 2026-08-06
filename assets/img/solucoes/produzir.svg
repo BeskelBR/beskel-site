@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+<title id="title">Produção em impressão 3D</title><desc id="desc">Ilustração técnica escura de uma impressora 3D produzindo uma peça laranja.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#080b10"/><stop offset="1" stop-color="#151b22"/></linearGradient>
+  <linearGradient id="orange" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffad4b"/><stop offset=".5" stop-color="#f47a20"/><stop offset="1" stop-color="#d95511"/></linearGradient>
+  <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#33404d" stroke-width="1" opacity=".32"/></pattern>
+  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="22"/></filter>
+</defs>
+<rect width="1600" height="1000" fill="url(#bg)"/><rect width="1600" height="1000" fill="url(#grid)"/>
+<circle cx="1160" cy="420" r="260" fill="#f47a20" opacity=".12" filter="url(#glow)"/>
+<g transform="translate(250 118)">
+  <rect x="150" y="40" width="820" height="660" rx="36" fill="#0c1117" stroke="#4b5663" stroke-width="14"/>
+  <rect x="210" y="105" width="700" height="500" rx="20" fill="#111821" stroke="#252f3a" stroke-width="8"/>
+  <path d="M290 172H830M290 520H830" stroke="#707b88" stroke-width="16" stroke-linecap="round"/>
+  <path d="M330 170V520M790 170V520" stroke="#39434e" stroke-width="12"/>
+  <rect x="448" y="188" width="224" height="68" rx="14" fill="#202a35" stroke="#7a8593" stroke-width="6"/>
+  <path d="M560 256V337" stroke="#b9c0c8" stroke-width="14" stroke-linecap="round"/>
+  <path d="m520 336 40-28 40 28-40 28Z" fill="#b9c0c8"/>
+  <path d="M340 546h440l72 58H268Z" fill="#1f2933" stroke="#788390" stroke-width="8"/>
+  <g transform="translate(410 330)">
+    <path d="m150 0 122 70v140l-122 70L28 210V70Z" fill="url(#orange)" opacity=".96"/>
+    <g fill="none" stroke="#ffd2a1" stroke-width="8" opacity=".78">
+      <path d="m150 0 122 70-122 70L28 70Z"/><path d="M150 140v140M28 70v140l122 70 122-70V70"/>
+      <path d="m72 96 78 44 78-44M72 154l78 44 78-44M72 212l78 44 78-44"/>
+    </g>
+  </g>
+  <rect x="350" y="650" width="420" height="38" rx="19" fill="#f47a20" opacity=".72"/>
+</g>
+<g opacity=".85">
+  <circle cx="1290" cy="188" r="10" fill="#f47a20"/><circle cx="1335" cy="188" r="10" fill="#5d6875"/><circle cx="1380" cy="188" r="10" fill="#5d6875"/>
+  <path d="M1180 790h250" stroke="#3b4652" stroke-width="3"/><path d="M1180 820h180" stroke="#f47a20" stroke-width="6"/>
+</g>
+</svg>
