@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+<title id="title">Personalização de produtos</title><desc id="desc">Ilustração escura de produtos personalizados, etiquetas e identidade visual em laranja.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#080b10"/><stop offset="1" stop-color="#151b22"/></linearGradient>
+  <linearGradient id="orange" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffb861"/><stop offset=".52" stop-color="#f47a20"/><stop offset="1" stop-color="#d55110"/></linearGradient>
+  <pattern id="grid" width="52" height="52" patternUnits="userSpaceOnUse"><path d="M52 0H0V52" fill="none" stroke="#35414d" stroke-width="1" opacity=".26"/></pattern>
+  <filter id="glow"><feGaussianBlur stdDeviation="24"/></filter>
+</defs>
+<rect width="1600" height="1000" fill="url(#bg)"/><rect width="1600" height="1000" fill="url(#grid)"/>
+<circle cx="1120" cy="430" r="290" fill="#f47a20" opacity=".11" filter="url(#glow)"/>
+<g transform="translate(205 150)">
+  <rect x="30" y="120" width="430" height="520" rx="42" fill="#101720" stroke="#66727f" stroke-width="12"/>
+  <path d="M110 120V66h270v54" fill="none" stroke="#66727f" stroke-width="20" stroke-linecap="round"/>
+  <rect x="94" y="214" width="302" height="224" rx="30" fill="#171f28" stroke="#2f3b47" stroke-width="8"/>
+  <path d="M245 242 340 296v108l-95 54-95-54V296Z" fill="url(#orange)"/>
+  <path d="m245 242 95 54-95 54-95-54Z" fill="#ffc17e" opacity=".82"/>
+  <path d="M245 350v108" stroke="#d35110" stroke-width="8"/>
+  <rect x="112" y="492" width="266" height="20" rx="10" fill="#f47a20" opacity=".78"/>
+  <rect x="154" y="538" width="182" height="12" rx="6" fill="#6f7a87"/>
+
+  <g transform="translate(560 75)">
+    <path d="M0 145 220 20l220 125v250L220 520 0 395Z" fill="#111820" stroke="#6e7986" stroke-width="12"/>
+    <path d="m220 20 220 125-220 125L0 145Z" fill="#222c36" stroke="#f47a20" stroke-width="8"/>
+    <path d="M220 270v250" stroke="#f47a20" stroke-width="8"/>
+    <circle cx="220" cy="278" r="68" fill="#0b1016" stroke="#f47a20" stroke-width="10"/>
+    <path d="m220 230 16 32 36 5-26 25 6 36-32-17-32 17 6-36-26-25 36-5Z" fill="url(#orange)"/>
+  </g>
+
+  <g transform="translate(1060 170)">
+    <path d="M0 40 42 0h248l42 40v250l-42 42H42L0 290Z" fill="#121922" stroke="#6d7885" stroke-width="10"/>
+    <circle cx="56" cy="56" r="16" fill="#f47a20"/>
+    <path d="M82 82h172M82 132h220M82 182h170" stroke="#4a5663" stroke-width="10" stroke-linecap="round"/>
+    <path d="M82 242h132" stroke="#f47a20" stroke-width="14" stroke-linecap="round"/>
+  </g>
+
+  <path d="M520 655h825" stroke="#34404b" stroke-width="4"/>
+  <circle cx="660" cy="655" r="14" fill="#f47a20"/><circle cx="850" cy="655" r="14" fill="#f47a20"/><circle cx="1040" cy="655" r="14" fill="#f47a20"/>
+</g>
+</svg>
