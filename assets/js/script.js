@@ -21,6 +21,18 @@ ensureStylesheet("site-polish.css");
 ensureStylesheet("revision-v10.css");
 
 const BRAND_LOGO = "/assets/img/logo-beskel-transparent.svg";
+const BRAND_FAVICON = "/assets/img/favicon-beskel-v2.svg";
+
+// Padroniza o ícone exibido na aba do navegador em todo o site.
+let favicon = document.querySelector('link[rel="icon"]');
+if (!favicon) {
+  favicon = document.createElement("link");
+  favicon.rel = "icon";
+  document.head.appendChild(favicon);
+}
+favicon.type = "image/svg+xml";
+favicon.href = BRAND_FAVICON;
+document.querySelectorAll('link[rel="shortcut icon"]').forEach(link => link.remove());
 
 // Padroniza a marca no cabeçalho com a mesma logo utilizada na página inicial.
 document.querySelectorAll(".brand img").forEach(image => {
