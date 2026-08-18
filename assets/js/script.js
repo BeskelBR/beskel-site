@@ -6,19 +6,32 @@ const CONTACT_EMAIL = CONFIG.email || "contato@beskel.com.br";
 const INSTAGRAM_USER = CONFIG.instagramUser || "beskelbr";
 const INSTAGRAM_URL = CONFIG.instagramUrl || "https://instagram.com/beskelbr";
 
-// Garante que todas as páginas usem a camada editorial mais recente.
 const currentScript = document.currentScript;
-if (currentScript && !document.querySelector('link[href*="site-polish.css"]')) {
-  const polish = document.createElement("link");
-  polish.rel = "stylesheet";
-  polish.href = new URL("../css/site-polish.css", currentScript.src).href;
-  document.head.appendChild(polish);
+
+function ensureStylesheet(filename) {
+  if (!currentScript || document.querySelector(`link[href*="${filename}"]`)) return;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = new URL(`../css/${filename}`, currentScript.src).href;
+  document.head.appendChild(link);
 }
 
-const menuButton = document.querySelector(".menu-toggle");
-const mainNav = document.querySelector(".main-nav");
+// Garante a mesma camada visual em todas as páginas, inclusive páginas legadas.
+ensureStylesheet("site-polish.css");
+ensureStylesheet("revision-v10.css");
 
-// Mantém a arquitetura de navegação objetiva em todas as páginas antigas e novas.
+const BRAND_LOGO = "/assets/img/logo-beskel-transparent.svg";
+
+// Padroniza a marca no cabeçalho com a mesma logo utilizada na página inicial.
+document.querySelectorAll(".brand img").forEach(image => {
+  image.src = BRAND_LOGO;
+  image.alt = "Símbolo BESKEL";
+  image.width = 512;
+  image.height = 512;
+  image.removeAttribute("loading");
+});
+
+// Mantém a arquitetura de navegação idêntica em todas as páginas.
 document.querySelectorAll(".main-nav a").forEach(link => {
   const href = link.getAttribute("href") || "";
   if (/processo\.html/.test(href)) {
@@ -27,10 +40,37 @@ document.querySelectorAll(".main-nav a").forEach(link => {
   }
   if (/servicos\.html/.test(href)) link.textContent = "Soluções";
 });
-document.querySelectorAll(".site-footer a").forEach(link => {
-  const href = link.getAttribute("href") || "";
-  if (/servicos\.html/.test(href)) link.textContent = "Soluções";
+
+// Padroniza o rodapé de todas as páginas em uma única estrutura visual e editorial.
+document.querySelectorAll(".site-footer .footer-grid").forEach(footer => {
+  footer.innerHTML = `
+    <div>
+      <div class="footer-brand">
+        <img src="${BRAND_LOGO}" alt="Símbolo BESKEL" width="512" height="512" loading="lazy">
+        <strong>BESKEL</strong>
+      </div>
+      <p>Conhecimento Transformado em Criação.</p>
+      <span>Engenharia criativa, design e fabricação digital.</span>
+    </div>
+    <div>
+      <b>Navegação</b>
+      <a href="/pages/servicos.html">Soluções</a>
+      <a href="/pages/portfolio.html">Portfólio</a>
+      <a href="/pages/produtos.html">Produtos</a>
+      <a href="/pages/projeto-atlas.html">Projeto Atlas</a>
+    </div>
+    <div>
+      <b>Contato</b>
+      <span>Brasília • Distrito Federal</span>
+      <a href="/pages/contato.html">Solicitar orçamento</a>
+      <a href="${INSTAGRAM_URL}" data-beskel-instagram data-label="full" target="_blank" rel="noopener noreferrer">Instagram @${INSTAGRAM_USER}</a>
+      <a href="mailto:${CONTACT_EMAIL}" data-beskel-email>${CONTACT_EMAIL}</a>
+      <a href="/pages/privacidade.html">Política de Privacidade</a>
+    </div>`;
 });
+
+const menuButton = document.querySelector(".menu-toggle");
+const mainNav = document.querySelector(".main-nav");
 
 function closeMenu({ returnFocus = false } = {}) {
   if (!menuButton || !mainNav) return;
@@ -116,7 +156,6 @@ document.querySelectorAll('input[name="telefone"]').forEach(input => {
 });
 document.querySelectorAll('input[name="nome"]').forEach(input => input.setAttribute("autocomplete", "name"));
 
-// Pré-seleciona o tipo de projeto quando o cliente chega por um CTA de Soluções.
 const intent = new URLSearchParams(window.location.search).get("tipo");
 const intentMap = {
   producao: "Impressão 3D",
@@ -176,7 +215,6 @@ document.querySelectorAll("#quoteForm").forEach(form => {
   });
 });
 
-// Padroniza contatos em páginas antigas e novas sem destruir a estrutura dos cards.
 document.querySelectorAll('a[href*="instagram.com"], [data-beskel-instagram]').forEach(link => {
   link.href = INSTAGRAM_URL;
   const value = link.querySelector("span");
@@ -211,7 +249,6 @@ document.querySelectorAll(".form-note").forEach(note => {
   }
 });
 
-// Ampliação das imagens do portfólio em modal de tela cheia.
 const portfolioImages = document.querySelectorAll(".portfolio-products .portfolio-card > img");
 if (portfolioImages.length) {
   const lightbox = document.createElement("div");
