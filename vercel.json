@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/hvb",
+      "destination": "https://www.instagram.com/hospitalveterinariobrasiliahvb/",
+      "permanent": false
+    }
+  ]
+}
