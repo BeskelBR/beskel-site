@@ -3,7 +3,7 @@
 window.BESKEL_CONFIG = Object.freeze({
   businessName: "BESKEL",
   domain: "https://beskel.com.br",
-  whatsapp: "5561995555411",
+  whatsapp: "5561991668921",
   email: "contato@beskel.com.br",
   instagramUser: "beskelbr",
   instagramUrl: "https://instagram.com/beskelbr",
