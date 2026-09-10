@@ -1,7 +1,7 @@
 "use strict";
 
 const CONFIG = window.BESKEL_CONFIG || {};
-const WHATSAPP_NUMBER = CONFIG.whatsapp || "5561995555411";
+const WHATSAPP_NUMBER = CONFIG.whatsapp || "5561991668921";
 const CONTACT_EMAIL = CONFIG.email || "contato@beskel.com.br";
 const INSTAGRAM_USER = CONFIG.instagramUser || "beskelbr";
 const INSTAGRAM_URL = CONFIG.instagramUrl || "https://instagram.com/beskelbr";
