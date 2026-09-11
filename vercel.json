@@ -10,13 +10,12 @@
     }
   ],
   "rewrites": [
-    { "source": "/", "destination": "/hvb/index.html" },
-    { "source": "/auth/:token", "destination": "/hvb/index.html" },
-    { "source": "/atendimentos", "destination": "/hvb/index.html" },
-    { "source": "/atendimento/:id", "destination": "/hvb/index.html" },
-    { "source": "/materiais", "destination": "/hvb/index.html" },
-    { "source": "/retirada", "destination": "/hvb/index.html" },
-    { "source": "/sucesso", "destination": "/hvb/index.html" },
-    { "source": "/admin/auditoria", "destination": "/hvb/index.html" }
+    { "source": "/auth/:token", "destination": "/index.html" },
+    { "source": "/atendimentos", "destination": "/index.html" },
+    { "source": "/atendimento/:id", "destination": "/index.html" },
+    { "source": "/materiais", "destination": "/index.html" },
+    { "source": "/retirada", "destination": "/index.html" },
+    { "source": "/sucesso", "destination": "/index.html" },
+    { "source": "/admin/auditoria", "destination": "/index.html" }
   ]
 }
