@@ -38,6 +38,9 @@ if (config?.contact) {
     }
   });
 
+  const emergencyCopy = document.querySelector('#emergencia .lead');
+  if (emergencyCopy) emergencyCopy.textContent = 'O HVB funciona 24 horas. Fale diretamente com a equipe ou abra a rota até o hospital.';
+
   const emergency = document.querySelector('#emergencia .cta-row');
   if (emergency) {
     emergency.innerHTML = `
@@ -45,6 +48,9 @@ if (config?.contact) {
       <a class="btn btn-cyan" href="${c.phoneHref}">Ligar agora</a>
       <a class="btn btn-light" href="${c.maps}" target="_blank" rel="noopener noreferrer">Como chegar</a>`;
   }
+
+  const locationLead = document.querySelector('#localizacao .section-heading .lead');
+  if (locationLead) locationLead.textContent = 'Na Asa Sul, com atendimento 24 horas e acesso direto pelos canais oficiais do hospital.';
 
   const contactItems = document.querySelectorAll('#contato .contact-item');
   contactItems.forEach((item) => {
@@ -96,4 +102,25 @@ if (config?.contact) {
       <a href="${c.linktree}" target="_blank" rel="noopener noreferrer">Linktree oficial</a>`;
     footerBrand.appendChild(social);
   }
+
+  const structuredData = document.createElement('script');
+  structuredData.type = 'application/ld+json';
+  structuredData.textContent = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'VeterinaryCare',
+    name: 'Hospital Veterinário Brasília HVB',
+    telephone: c.phoneDisplay,
+    email: c.email,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'SHCS CRS 504 Bloco C, Loja 14',
+      addressLocality: 'Brasília',
+      addressRegion: 'DF',
+      postalCode: '70331-535',
+      addressCountry: 'BR'
+    },
+    openingHours: 'Mo-Su 00:00-23:59',
+    sameAs: [c.instagram, c.linktree, c.maps]
+  });
+  document.head.appendChild(structuredData);
 }
