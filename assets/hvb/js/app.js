@@ -1,3 +1,8 @@
+const brandContactCss = document.createElement('link');
+brandContactCss.rel = 'stylesheet';
+brandContactCss.href = 'assets/hvb/css/brand-contact.css';
+document.head.appendChild(brandContactCss);
+
 const menuButton = document.querySelector('[data-menu-toggle]');
 const mainNav = document.querySelector('[data-main-nav]');
 
