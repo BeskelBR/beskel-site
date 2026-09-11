@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>HVB | Hospital Veterinário Brasília</title>
-  <meta name="description" content="Hospital Veterinário Brasília — atendimento 24 horas, estrutura hospitalar, equipe multidisciplinar, diagnóstico, cirurgia, internação e hemodiálise.">
+  <meta name="description" content="Hospital Veterinário Brasília — atendimento 24 horas, ambulância, estrutura hospitalar, equipe multidisciplinar, diagnóstico, cirurgia, internação e hemodiálise.">
   <meta name="theme-color" content="#0A3983">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,6 +20,7 @@
     <div class="utility-group">
       <span>24h Atendimento</span>
       <span>Emergências</span>
+      <span>Ambulância</span>
       <a href="#localizacao">Brasília — DF</a>
     </div>
     <div class="utility-group secondary">
@@ -32,7 +33,9 @@
 <header class="site-header" id="topo">
   <div class="container header-inner">
     <a class="brand" href="#topo" aria-label="Hospital Veterinário Brasília — início">
-      <div class="brand-placeholder" aria-label="Aguardando aplicação do arquivo oficial da marca">LOGO OFICIAL HVB</div>
+      <span class="brand-shell">
+        <img class="brand-logo" src="assets/hvb/brand/logo-hvb-oficial.png" alt="Hospital Veterinário Brasília — HVB" onerror="this.style.display='none'">
+      </span>
     </a>
     <button class="menu-toggle" type="button" data-menu-toggle aria-controls="menu-principal" aria-expanded="false" aria-label="Abrir menu">☰</button>
     <nav class="main-nav" id="menu-principal" data-main-nav aria-label="Navegação principal">
@@ -41,7 +44,6 @@
       <a href="#servicos">Serviços</a>
       <a href="#especialidades">Especialidades</a>
       <a href="#equipe">Equipe</a>
-      <a href="#integra">HVB Integra</a>
       <a href="#conteudo-editorial">Conteúdo</a>
       <a href="#contato">Contato</a>
     </nav>
@@ -62,6 +64,7 @@
         </div>
         <div class="trust-row" aria-label="Principais recursos do HVB">
           <span class="trust-chip">Atendimento 24h</span>
+          <span class="trust-chip trust-chip-accent">Ambulância</span>
           <span class="trust-chip">Equipe especializada</span>
           <span class="trust-chip">Internação</span>
           <span class="trust-chip">Diagnóstico</span>
@@ -75,6 +78,18 @@
     </div>
   </section>
 
+  <section class="ambulance-strip" aria-labelledby="ambulancia-title">
+    <div class="container ambulance-strip-inner">
+      <div class="ambulance-icon" aria-hidden="true">✚</div>
+      <div>
+        <p class="eyebrow">Diferencial HVB</p>
+        <h2 id="ambulancia-title">Serviço de ambulância veterinária</h2>
+        <p>Suporte ao deslocamento de pacientes quando o atendimento exige transporte até o hospital.</p>
+      </div>
+      <a class="btn btn-light" href="#contato">Falar com o HVB</a>
+    </div>
+  </section>
+
   <section class="section section-soft" id="servicos">
     <div class="container">
       <div class="section-heading">
@@ -83,12 +98,13 @@
         <p class="lead">Acesso rápido às principais frentes de atendimento do hospital.</p>
       </div>
       <div class="quick-grid">
-        <a class="quick-card" href="#emergencia"><div class="icon">24h</div><h3>Emergência 24h</h3><p>Atendimento imediato para situações de urgência.</p></a>
-        <a class="quick-card" href="#"><div class="icon">C</div><h3>Consultas</h3><p>Clínica geral e acompanhamento especializado.</p></a>
-        <a class="quick-card" href="#"><div class="icon">E</div><h3>Exames</h3><p>Diagnóstico e acompanhamento clínico.</p></a>
-        <a class="quick-card" href="#"><div class="icon">+</div><h3>Cirurgias</h3><p>Estrutura para procedimentos cirúrgicos.</p></a>
-        <a class="quick-card" href="#"><div class="icon">I</div><h3>Internação</h3><p>Monitoramento e assistência contínua.</p></a>
-        <a class="quick-card" href="#"><div class="icon">H</div><h3>Hemodiálise</h3><p>Suporte especializado para pacientes renais.</p></a>
+        <a class="quick-card quick-card-featured" href="#emergencia"><div class="icon">24h</div><h3>Emergência 24h</h3><p>Atendimento imediato para situações de urgência.</p></a>
+        <a class="quick-card quick-card-featured" href="#contato"><div class="icon">A</div><h3>Ambulância</h3><p>Transporte veterinário integrado ao atendimento hospitalar.</p></a>
+        <a class="quick-card" href="pages/servicos/consultas/"><div class="icon">C</div><h3>Consultas</h3><p>Clínica geral e acompanhamento especializado.</p></a>
+        <a class="quick-card" href="pages/servicos/exames/"><div class="icon">E</div><h3>Exames</h3><p>Diagnóstico e acompanhamento clínico.</p></a>
+        <a class="quick-card" href="pages/servicos/cirurgias/"><div class="icon">+</div><h3>Cirurgias</h3><p>Estrutura para procedimentos cirúrgicos.</p></a>
+        <a class="quick-card" href="pages/servicos/internacao/"><div class="icon">I</div><h3>Internação</h3><p>Monitoramento e assistência contínua.</p></a>
+        <a class="quick-card" href="pages/servicos/hemodialise/"><div class="icon">H</div><h3>Hemodiálise</h3><p>Suporte especializado para pacientes renais.</p></a>
       </div>
     </div>
   </section>
@@ -103,9 +119,9 @@
           <div class="metric"><strong>24h</strong><span>Atendimento</span></div>
           <div class="metric"><strong>[X]</strong><span>Especialidades</span></div>
           <div class="metric"><strong>[X]</strong><span>Profissionais</span></div>
-          <div class="metric"><strong>[X]</strong><span>Indicador institucional</span></div>
+          <div class="metric"><strong>Ambulância</strong><span>Suporte de transporte</span></div>
         </div>
-        <div class="cta-row" style="margin-top:24px"><a class="btn btn-ghost" href="#">Conheça nossa história</a></div>
+        <div class="cta-row" style="margin-top:24px"><a class="btn btn-ghost" href="pages/hvb/">Conheça nossa história</a></div>
       </div>
       <div class="photo-placeholder"><strong>FOTO REAL</strong><span>“Recepção, circulação principal ou ambiente institucional representativo do HVB”</span></div>
     </div>
@@ -113,11 +129,7 @@
 
   <section class="section section-soft" id="estrutura">
     <div class="container">
-      <div class="section-heading">
-        <p class="eyebrow">Estrutura</p>
-        <h2>Estrutura que acompanha a complexidade de cada caso.</h2>
-        <p class="lead">Conheça os ambientes e recursos que sustentam o cuidado hospitalar do HVB.</p>
-      </div>
+      <div class="section-heading"><p class="eyebrow">Estrutura</p><h2>Estrutura que acompanha a complexidade de cada caso.</h2><p class="lead">Conheça os ambientes e recursos que sustentam o cuidado hospitalar do HVB.</p></div>
       <div class="structure-grid">
         <article class="structure-card"><div class="photo-placeholder"><strong>FOTO REAL</strong><span>“Recepção real do HVB”</span></div><div class="structure-card-body"><h3>Recepção e acolhimento</h3><p>Entrada e acolhimento do paciente e de sua família.</p></div></article>
         <article class="structure-card"><div class="photo-placeholder"><strong>FOTO REAL</strong><span>“Sala/equipamento real de diagnóstico por imagem”</span></div><div class="structure-card-body"><h3>Diagnóstico por imagem</h3><p>Ambientes e recursos dedicados à investigação diagnóstica.</p></div></article>
@@ -131,11 +143,7 @@
 
   <section class="section" id="especialidades">
     <div class="container">
-      <div class="section-heading">
-        <p class="eyebrow">Especialidades</p>
-        <h2>Medicina veterinária integrada.</h2>
-        <p class="lead">A lista definitiva será publicada após validação institucional. A estrutura abaixo já está preparada para crescer em páginas próprias.</p>
-      </div>
+      <div class="section-heading"><p class="eyebrow">Especialidades</p><h2>Medicina veterinária integrada.</h2><p class="lead">A lista definitiva será publicada após validação institucional.</p></div>
       <div class="specialties">
         <div class="specialty"><span class="specialty-bullet"></span>Clínica Médica</div>
         <div class="specialty"><span class="specialty-bullet"></span>Cardiologia</div>
@@ -155,12 +163,7 @@
 
   <section class="section section-soft" id="equipe">
     <div class="container team-layout">
-      <div>
-        <p class="eyebrow">Corpo Clínico</p>
-        <h2>Pessoas que fazem o HVB.</h2>
-        <p class="lead">Profissionais que unem excelência técnica, atualização constante e compromisso com cada paciente.</p>
-        <div class="photo-placeholder"><strong>FOTO REAL</strong><span>“Equipe clínica real do HVB reunida”</span></div>
-      </div>
+      <div><p class="eyebrow">Corpo Clínico</p><h2>Pessoas que fazem o HVB.</h2><p class="lead">Profissionais que unem excelência técnica, atualização constante e compromisso com cada paciente.</p><div class="photo-placeholder"><strong>FOTO REAL</strong><span>“Equipe clínica real do HVB reunida”</span></div></div>
       <div class="team-cards">
         <article class="team-card"><div class="photo-placeholder"><strong>FOTO REAL</strong><span>“Retrato profissional do membro da equipe”</span></div><h3>Nome do profissional</h3><p>Especialidade / função — CRMV somente após validação.</p></article>
         <article class="team-card"><div class="photo-placeholder"><strong>FOTO REAL</strong><span>“Retrato profissional do membro da equipe”</span></div><h3>Nome do profissional</h3><p>Especialidade / função — CRMV somente após validação.</p></article>
@@ -172,17 +175,8 @@
 
   <section class="section section-blue" id="emergencia">
     <div class="container emergency-panel">
-      <div><p class="eyebrow">Emergência 24h</p><h2>Seu pet precisa de atendimento agora?</h2><p class="lead">O HVB funciona 24 horas. Os canais definitivos serão ativados após validação dos dados institucionais.</p></div>
+      <div><p class="eyebrow">Emergência 24h</p><h2>Seu pet precisa de atendimento agora?</h2><p class="lead">O HVB funciona 24 horas e conta com serviço de ambulância veterinária.</p></div>
       <div class="cta-row"><a class="btn btn-light" href="#contato">Falar no WhatsApp</a><a class="btn btn-cyan" href="#contato">Ligar agora</a><a class="btn btn-light" href="#localizacao">Como chegar</a></div>
-    </div>
-  </section>
-
-  <section class="section" id="integra">
-    <div class="container">
-      <div class="integra-card">
-        <div class="integra-copy"><p class="eyebrow">HVB Integra</p><h2>Cuidado contínuo, além do atendimento pontual.</h2><p class="lead">Uma proposta pensada para ampliar acompanhamento, prevenção, vínculo e continuidade do cuidado.</p><ul><li>Acompanhamento</li><li>Prevenção</li><li>Continuidade</li><li>Condições especiais</li></ul><a class="btn" href="#">Conheça o HVB Integra</a></div>
-        <div class="photo-placeholder"><strong>FOTO REAL</strong><span>“Tutor e pet em interação acolhedora no HVB ou equipe com paciente”</span></div>
-      </div>
     </div>
   </section>
 
@@ -199,19 +193,10 @@
 
   <section class="section" id="localizacao">
     <div class="container">
-      <div class="section-heading"><p class="eyebrow">Localização</p><h2>Encontre o HVB</h2><p class="lead">A estrutura está pronta para receber endereço, canais oficiais e mapa após validação.</p></div>
+      <div class="section-heading"><p class="eyebrow">Localização</p><h2>Encontre o HVB</h2><p class="lead">Atendimento 24 horas em Brasília — DF.</p></div>
       <div class="location-grid" id="contato">
-        <div class="contact-card">
-          <h3>Hospital Veterinário Brasília</h3>
-          <div class="contact-list">
-            <div class="contact-item"><strong>Endereço</strong><span>[ENDEREÇO OFICIAL A VALIDAR]</span></div>
-            <div class="contact-item"><strong>Atendimento</strong><span>24 horas</span></div>
-            <div class="contact-item"><strong>Telefone</strong><span>[TELEFONE OFICIAL]</span></div>
-            <div class="contact-item"><strong>WhatsApp</strong><span>[WHATSAPP OFICIAL]</span></div>
-          </div>
-          <div class="cta-row"><a class="btn" href="#">Como chegar</a><a class="btn btn-ghost" href="#">Falar no WhatsApp</a></div>
-        </div>
-        <div class="map-placeholder" aria-label="Espaço reservado para mapa incorporado"><div><strong>GOOGLE MAPS</strong><p>Mapa será incorporado após confirmação do endereço oficial.</p></div></div>
+        <div class="contact-card"><h3>Hospital Veterinário Brasília</h3><div class="contact-list"><div class="contact-item"><strong>Endereço</strong><span></span></div><div class="contact-item"><strong>Atendimento</strong><span>24 horas</span></div><div class="contact-item"><strong>Telefone</strong><span></span></div><div class="contact-item"><strong>WhatsApp</strong><span></span></div></div><div class="cta-row"><a class="btn" href="#">Como chegar</a><a class="btn btn-ghost" href="#">Falar no WhatsApp</a></div></div>
+        <div class="map-placeholder" aria-label="Mapa do Hospital Veterinário Brasília"><div><strong>GOOGLE MAPS</strong></div></div>
         <div class="photo-placeholder"><strong>FOTO REAL</strong><span>“Fachada / entrada real do HVB vista a partir da chegada do cliente”</span></div>
       </div>
     </div>
@@ -221,10 +206,10 @@
 <footer class="site-footer">
   <div class="container">
     <div class="footer-grid">
-      <div><div class="brand-placeholder" style="display:inline-block;background:white">LOGO OFICIAL HVB</div><p>Hospital Veterinário Brasília</p><span>Site institucional público em desenvolvimento.</span></div>
+      <div><span class="footer-brand-shell"><img class="footer-brand-logo" src="assets/hvb/brand/logo-hvb-oficial.png" alt="Hospital Veterinário Brasília — HVB" onerror="this.style.display='none'"></span><p>Hospital Veterinário Brasília</p><span>Atendimento 24 horas em Brasília.</span></div>
       <div><h3>Institucional</h3><a href="#hvb">O HVB</a><a href="#estrutura">Estrutura</a><a href="#equipe">Equipe</a><a href="#">Trabalhe conosco</a></div>
-      <div><h3>Atendimento</h3><a href="#emergencia">Emergência 24h</a><a href="#servicos">Consultas</a><a href="#servicos">Exames</a><a href="#servicos">Cirurgias</a><a href="#servicos">Internação</a></div>
-      <div><h3>Especialidades</h3><a href="#especialidades">Ver especialidades</a><a href="#integra">HVB Integra</a><a href="#conteudo-editorial">Conteúdo</a></div>
+      <div><h3>Atendimento</h3><a href="#emergencia">Emergência 24h</a><a href="#servicos">Ambulância</a><a href="#servicos">Consultas</a><a href="#servicos">Exames</a><a href="#servicos">Cirurgias</a><a href="#servicos">Internação</a></div>
+      <div><h3>Especialidades</h3><a href="#especialidades">Ver especialidades</a><a href="#conteudo-editorial">Conteúdo</a></div>
       <div><h3>Contato</h3><a href="#localizacao">Endereço</a><a href="#contato">Telefone</a><a href="#contato">WhatsApp</a><a href="https://hvb-dev.beskel.com.br" rel="nofollow">Área do colaborador ↗</a></div>
     </div>
     <div class="footer-bottom"><span>© <span data-current-year></span> Hospital Veterinário Brasília.</span><span>Ambiente DEV: hvb-site-dev.beskel.com.br</span></div>
