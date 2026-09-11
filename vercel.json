@@ -10,6 +10,8 @@
     }
   ],
   "rewrites": [
+    { "source": "/hvb/assets/logo-principal.webp", "destination": "/assets/logo-principal.png" },
+    { "source": "/hvb/assets/logo-lateral.webp", "destination": "/assets/logo-lateral.png" },
     { "source": "/auth/:token", "destination": "/index.html" },
     { "source": "/atendimentos", "destination": "/index.html" },
     { "source": "/atendimento/:id", "destination": "/index.html" },
