@@ -1,10 +1,22 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "redirects": [
+  "headers": [
     {
-      "source": "/hvb",
-      "destination": "https://www.instagram.com/hospitalveterinariobrasiliahvb/",
-      "permanent": false
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
     }
+  ],
+  "rewrites": [
+    { "source": "/", "destination": "/hvb/index.html" },
+    { "source": "/auth/:token", "destination": "/hvb/index.html" },
+    { "source": "/atendimentos", "destination": "/hvb/index.html" },
+    { "source": "/atendimento/:id", "destination": "/hvb/index.html" },
+    { "source": "/materiais", "destination": "/hvb/index.html" },
+    { "source": "/retirada", "destination": "/hvb/index.html" },
+    { "source": "/sucesso", "destination": "/hvb/index.html" },
+    { "source": "/admin/auditoria", "destination": "/hvb/index.html" }
   ]
 }
