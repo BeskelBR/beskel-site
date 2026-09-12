@@ -20,19 +20,25 @@
 }
 .footer-brand-shell{
   width:128px;
-  min-height:96px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
+  height:96px;
+  display:grid;
+  place-items:center;
   padding:10px 12px;
   border-radius:14px;
   background:#FFFFFF;
+  line-height:0;
+  overflow:hidden;
 }
 .footer-brand-logo{
   display:block;
-  width:100%;
+  width:auto;
   height:auto;
+  max-width:104px;
+  max-height:74px;
+  margin:0 auto;
   object-fit:contain;
+  object-position:center center;
+  transform:translateX(1px);
 }
 .header-inner{
   gap:18px;
@@ -144,7 +150,8 @@
 @media (max-width:640px){
   .brand-shell{width:168px;min-height:50px;}
   .brand-logo{max-height:50px;}
-  .footer-brand-shell{width:112px;min-height:84px;}
+  .footer-brand-shell{width:112px;height:84px;padding:8px 10px;}
+  .footer-brand-logo{max-width:92px;max-height:66px;transform:translateX(1px);}
   .ambulance-strip-inner{grid-template-columns:1fr;padding-top:28px;padding-bottom:28px;}
   .ambulance-icon{width:54px;height:54px;}
   .ambulance-strip .btn{grid-column:auto;margin-bottom:0;}
