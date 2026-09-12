@@ -25,6 +25,9 @@ if (menuButton && mainNav) {
 const yearNode = document.querySelector('[data-current-year]');
 if (yearNode) yearNode.textContent = String(new Date().getFullYear());
 
+const footerLogo = document.querySelector('.footer-brand-logo');
+if (footerLogo) footerLogo.src = 'assets/hvb/brand/logo-hvb-footer-384x288.png';
+
 const config = window.HVB_SITE_CONFIG;
 if (config?.contact) {
   const c = config.contact;
