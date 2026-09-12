@@ -150,23 +150,6 @@
 @media (max-width:640px){
   .brand-shell{width:168px;min-height:50px;}
   .brand-logo{max-height:50px;}
-  @media (max-width:640px){
-  .footer-brand-shell{
-    width:118px;
-    height:88px;
-    padding:0;
-  }
-
-  .footer-brand-logo{
-    width:145%;
-    height:145%;
-    max-width:none;
-    max-height:none;
-    object-fit:contain;
-    object-position:center center;
-    transform:translateY(-20px);
-  }
-}
   .ambulance-strip-inner{grid-template-columns:1fr;padding-top:28px;padding-bottom:28px;}
   .ambulance-icon{width:54px;height:54px;}
   .ambulance-strip .btn{grid-column:auto;margin-bottom:0;}
