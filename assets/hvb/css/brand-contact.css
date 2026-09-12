@@ -167,21 +167,3 @@
   .ambulance-strip .btn{grid-column:auto;margin-bottom:0;}
   .quick-grid{grid-template-columns:1fr;}
 }
-@media (min-width:981px){
-  .header-inner{
-    display:grid;
-    grid-template-columns:auto minmax(0,1fr) auto;
-    column-gap:32px;
-  }
-  .brand{
-    justify-self:start;
-  }
-  .main-nav{
-    margin-left:0;
-    justify-self:center;
-    gap:42px;
-  }
-  .btn-header{
-    justify-self:end;
-  }
-}
