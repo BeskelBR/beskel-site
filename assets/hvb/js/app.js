@@ -17,6 +17,25 @@ if (menuButton && mainNav) {
   });
 }
 
+const hoverMenuQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+document.querySelectorAll('.nav-dropdown').forEach((dropdown) => {
+  const summary = dropdown.querySelector('summary');
+  if (!summary) return;
+
+  dropdown.addEventListener('mouseenter', () => {
+    if (hoverMenuQuery.matches) dropdown.open = true;
+  });
+
+  dropdown.addEventListener('mouseleave', () => {
+    if (hoverMenuQuery.matches) dropdown.open = false;
+  });
+
+  summary.addEventListener('click', (event) => {
+    if (hoverMenuQuery.matches) event.preventDefault();
+  });
+});
+
 const yearNode = document.querySelector('[data-current-year]');
 if (yearNode) yearNode.textContent = String(new Date().getFullYear());
 
