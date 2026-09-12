@@ -19,25 +19,26 @@
   object-position:left center;
 }
 .footer-brand-shell{
-  width: 138px;
-  height: 104px;
-  display: grid;
-  place-items: center;
-  padding: 4px;
-  border-radius: 14px;
-  background: #FFFFFF;
-  overflow: hidden;
-  line-height: 0;
+  width:128px;
+  height:96px;
+  display:grid;
+  place-items:center;
+  padding:0;
+  border-radius:14px;
+  background:#FFFFFF;
+  overflow:hidden;
+  line-height:0;
 }
-
 .footer-brand-logo{
-  display: block;
-  width: 112%;
-  height: 112%;
-  object-fit: contain;
-  object-position: center center;
-  margin: 0;
-  transform: none;
+  display:block;
+  width:145%;
+  height:145%;
+  max-width:none;
+  max-height:none;
+  margin:0;
+  object-fit:contain;
+  object-position:center center;
+  transform:none;
 }
 .header-inner{
   gap:18px;
@@ -149,20 +150,8 @@
 @media (max-width:640px){
   .brand-shell{width:168px;min-height:50px;}
   .brand-logo{max-height:50px;}
-  .footer-brand-shell{
-  width:126px;
-  height:96px;
-  padding:0;
-}
-  .footer-brand-logo{
-  width:112%;
-  height:112%;
-  max-width:none;
-  max-height:none;
-  transform:none;
-  object-fit:contain;
-  object-position:center center;
-}
+  .footer-brand-shell{width:118px;height:88px;padding:0;}
+  .footer-brand-logo{width:145%;height:145%;max-width:none;max-height:none;transform:none;object-fit:contain;object-position:center center;}
   .ambulance-strip-inner{grid-template-columns:1fr;padding-top:28px;padding-bottom:28px;}
   .ambulance-icon{width:54px;height:54px;}
   .ambulance-strip .btn{grid-column:auto;margin-bottom:0;}
