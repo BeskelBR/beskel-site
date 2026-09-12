@@ -1,0 +1,2 @@
+# Keep HVB Integra versioned in the branch, but exclude it from Vercel deploys until approved.
+pages/hvb-integra/**
