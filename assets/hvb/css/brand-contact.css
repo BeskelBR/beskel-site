@@ -38,7 +38,7 @@
   margin:0;
   object-fit:contain;
   object-position:center center;
-  transform:none;
+  transform:translateY(-7px);
 }
 .header-inner{
   gap:18px;
@@ -151,7 +151,7 @@
   .brand-shell{width:168px;min-height:50px;}
   .brand-logo{max-height:50px;}
   .footer-brand-shell{width:118px;height:88px;padding:0;}
-  .footer-brand-logo{width:145%;height:145%;max-width:none;max-height:none;transform:none;object-fit:contain;object-position:center center;}
+  .footer-brand-logo{width:145%;height:145%;max-width:none;max-height:none;transform:translateY(-6px);object-fit:contain;object-position:center center;}
   .ambulance-strip-inner{grid-template-columns:1fr;padding-top:28px;padding-bottom:28px;}
   .ambulance-icon{width:54px;height:54px;}
   .ambulance-strip .btn{grid-column:auto;margin-bottom:0;}
