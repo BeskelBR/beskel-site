@@ -26,31 +26,37 @@ Compartilhar apenas identidade institucional e decisões arquiteturais explicita
 - Ciano HVB: `#25B0E6`
 - Branco: `#FFFFFF`
 - Tipografia operacional: Nunito
-- Logo: usar exclusivamente o arquivo oficial do Brand Book v5. Enquanto o asset oficial não estiver incorporado, o site exibe um placeholder explícito `LOGO OFICIAL HVB`.
+- Logos oficiais versionados em `assets/hvb/brand/`
+- Não redesenhar, reconstruir ou aproximar a marca quando houver asset oficial disponível.
 
-## Estrutura inicial
+## Estrutura atual
 
 - `index.html` — Home pública
+- `404.html` — página de erro institucional
 - `assets/hvb/css/styles.css` — design system e responsividade
+- `assets/hvb/css/brand-contact.css` — ajustes de marca, contato e componentes institucionais
 - `assets/hvb/js/app.js` — interações da interface
 - `config/site.js` — URLs e dados institucionais configuráveis
-- `pages/` — páginas internas em expansão
+- `pages/` — páginas internas do HVB em expansão
+- `docs/HVB_ASSETS.md` — política de assets do site público
 
-## Home v1
+## Home atual
 
 1. TopBar
 2. Header
 3. Hero
-4. Como podemos ajudar
-5. O HVB
-6. Estrutura
-7. Especialidades
-8. Corpo clínico
-9. Emergência 24h
-10. HVB Integra
+4. Ambulância veterinária
+5. Como podemos ajudar
+6. O HVB
+7. Estrutura
+8. Especialidades
+9. Corpo clínico
+10. Emergência 24h
 11. Conteúdo
 12. Localização e contato
 13. Footer
+
+O HVB Integra permanece como frente em desenvolvimento e não integra a navegação pública atual.
 
 ## Fotografias reais
 
@@ -60,19 +66,22 @@ Onde ainda não existe fotografia validada, utilizar o componente visual:
 
 Não substituir esses espaços por imagens genéricas de banco ou IA.
 
-## Dados ainda não validados
+## Dados institucionais
 
-Não publicar como definitivos até validação:
+Os dados utilizados pela interface pública ficam centralizados em `config/site.js`.
+Alterações de endereço, telefone, WhatsApp, e-mail, redes sociais ou URLs devem ser feitas nessa fonte após validação institucional.
 
-- endereço
-- telefones
-- WhatsApp
-- e-mail
-- números institucionais
-- nomes/CRMVs
-- lista final de especialidades
-- textos finais do HVB Integra
+Ainda dependem de validação antes de publicação definitiva, entre outros:
+
+- números institucionais apresentados como métricas;
+- nomes e CRMVs;
+- lista final de especialidades;
+- textos e regras da futura frente HVB Integra.
 
 ## Indexação
 
 O ambiente de desenvolvimento está configurado como `noindex, nofollow` até a migração para o domínio público definitivo.
+
+## Higiene da branch
+
+A branch deve conter apenas arquivos necessários ao site público do HVB e sua documentação técnica. Assets, páginas, estilos e scripts legados do site BESKEL não devem ser mantidos aqui.
