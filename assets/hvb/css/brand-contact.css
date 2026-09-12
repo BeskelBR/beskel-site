@@ -38,7 +38,7 @@
   max-height:none;
   object-fit:contain;
   object-position:center center;
-  transform:translateY(-1.5px);
+  transform:translateY(-15px);
 }
 .header-inner{
   gap:18px;
