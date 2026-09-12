@@ -38,11 +38,14 @@
     <a class="brand" href="#topo" aria-label="Hospital Veterinário Brasília — início"><span class="brand-shell"><img class="brand-logo" src="assets/hvb/brand/logo-hvb-horizontal.webp" alt="Hospital Veterinário Brasília — HVB"></span></a>
     <button class="menu-toggle" type="button" data-menu-toggle aria-controls="menu-principal" aria-expanded="false" aria-label="Abrir menu">☰</button>
     <nav class="main-nav" id="menu-principal" data-main-nav aria-label="Navegação principal">
-      <a href="/o-hvb">O HVB</a>
-      <a href="/estrutura">Estrutura</a>
-      <a href="#especialidades">Especialidades</a>
-      <a href="/corpo-clinico">Corpo Clínico</a>
-      <a href="#conteudo-editorial">Conteúdo</a>
+      <details class="nav-dropdown">
+        <summary>O HVB <span aria-hidden="true">⌄</span></summary>
+        <div class="nav-submenu">
+          <a href="/o-hvb">Sobre o HVB</a>
+          <a href="/estrutura">Estrutura</a>
+          <a href="/corpo-clinico">Corpo Clínico</a>
+        </div>
+      </details>
       <a href="#localizacao">Contato</a>
     </nav>
     <a class="btn btn-cyan btn-header" href="https://wa.me/5561996468881" target="_blank" rel="noopener noreferrer">Falar com o HVB</a>
