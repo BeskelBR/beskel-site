@@ -18,9 +18,6 @@
   object-fit:contain;
   object-position:left center;
 }
-.site-footer{
-  background:var(--hvb-blue);
-}
 .footer-brand-shell{
   width:184px;
   display:block;
@@ -145,6 +142,7 @@
 @media (max-width:980px){
   .brand{min-width:auto;}
   .brand-shell{width:195px;}
+  .main-nav a{white-space:normal;}
   .ambulance-strip-inner{grid-template-columns:auto 1fr;}
   .ambulance-strip .btn{grid-column:1/-1;justify-self:start;margin-bottom:24px;}
   .quick-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
