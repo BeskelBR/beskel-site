@@ -25,9 +25,6 @@ if (menuButton && mainNav) {
 const yearNode = document.querySelector('[data-current-year]');
 if (yearNode) yearNode.textContent = String(new Date().getFullYear());
 
-// The footer logo is defined in the HTML with the verified WebP asset.
-// Do not replace it at runtime: the PNG footer variant can render blank inside the white shell.
-
 const config = window.HVB_SITE_CONFIG;
 if (config?.contact) {
   const c = config.contact;
