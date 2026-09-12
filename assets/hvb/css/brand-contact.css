@@ -31,6 +31,7 @@
   height:100%;
   object-fit:cover;
   object-position:center;
+  transform:none;
 }
 .header-inner{
   gap:18px;
