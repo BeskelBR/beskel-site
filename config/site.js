@@ -16,9 +16,9 @@ window.HVB_SITE_CONFIG = {
   },
   contact: {
     address: "SHCS CRS 504 Bloco C, Loja 14 — Asa Sul, Brasília — DF, 70331-535",
-    phoneDisplay: "+55 61 3226-8431",
+    phoneDisplay: "61 3226-8431",
     phoneHref: "tel:+556132268431",
-    whatsappDisplay: "+55 61 99646-8881",
+    whatsappDisplay: "61 99646-8881",
     whatsappHref: "https://wa.me/5561996468881",
     email: "hospitalveterinariobrasiliahvb@gmail.com",
     maps: "https://maps.app.goo.gl/1JYqmnTk32ADkFcJA",
