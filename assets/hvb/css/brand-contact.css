@@ -21,24 +21,16 @@
 .footer-brand-shell{
   width:128px;
   height:96px;
-  display:grid;
-  place-items:center;
-  padding:0;
-  border-radius:14px;
-  background:#FFFFFF;
   overflow:hidden;
-  line-height:0;
+  border-radius:14px;
+  background:#fff;
 }
+
 .footer-brand-logo{
-  display:block;
-  width:145%;
-  height:145%;
-  max-width:none;
-  max-height:none;
-  margin:0;
-  object-fit:contain;
-  object-position:center center;
-  transform:translateY(-10px);
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
 }
 .header-inner{
   gap:18px;
