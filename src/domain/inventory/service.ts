@@ -83,14 +83,22 @@ type Move = {
   apresentacoes?: string;
   fator?: string;
 };
-async function record(tx: PoolClient, a: Actor, cmd: string, m: Move) {
+async function recordLocked(
+  tx: PoolClient,
+  a: Actor,
+  cmd: string,
+  m: Move,
+  locked?: Position[],
+) {
   if (exact(m.quantidade) <= 0n)
     throw new DomainError(400, "quantidade_deve_ser_positiva");
-  const rows = await lockPositions(
-    tx,
-    a,
-    [m.origem, m.destino].filter((v): v is string => !!v),
-  );
+  const rows =
+    locked ??
+    (await lockPositions(
+      tx,
+      a,
+      [m.origem, m.destino].filter((v): v is string => !!v),
+    ));
   const first = rows[0];
   if (!first) throw new DomainError(404, "posicao_nao_encontrada");
   for (const p of rows) {
@@ -185,6 +193,44 @@ async function record(tx: PoolClient, a: Actor, cmd: string, m: Move) {
     ],
   );
   return { id };
+}
+export async function record(tx: PoolClient, a: Actor, cmd: string, m: Move) {
+  return recordLocked(tx, a, cmd, m);
+}
+// One ordered lock acquisition for a bounded batch; each movement keeps the same ledger checks.
+export async function recordMany(
+  tx: PoolClient,
+  a: Actor,
+  cmd: string,
+  moves: Move[],
+  expectedUnit: string,
+) {
+  if (
+    moves.some((m) => m.tipo !== "consumo" || !m.origem || m.destino) ||
+    new Set(moves.map((m) => m.origem)).size !== moves.length
+  )
+    throw new DomainError(400, "lote_exige_consumos_de_posicoes_distintas");
+  const rows = await lockPositions(
+    tx,
+    a,
+    moves.flatMap((m) =>
+      [m.origem, m.destino].filter((id): id is string => !!id),
+    ),
+  );
+  if (rows.some((p) => p.unidade_id !== expectedUnit))
+    throw new DomainError(409, "material_fora_da_unidade_do_episodio");
+  const results = [];
+  for (const m of moves)
+    results.push(
+      await recordLocked(
+        tx,
+        a,
+        cmd,
+        m,
+        rows.filter((p) => p.id === m.origem || p.id === m.destino),
+      ),
+    );
+  return results;
 }
 export const inventoryActions: Action[] = [
   catalog("unidades", "stockUnit", "unidade", [

@@ -1,0 +1,56 @@
+{
+  "executed_at": "2026-09-13T18:16:00.471Z",
+  "branch": "hvb-sistema-dev",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 1142,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 105,
+      "output": "Checked 33 files in 19ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 95,
+      "output": "Checked 36 files in 13ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 226,
+      "output": "✔ quantidades de estoque usam aritmética inteira e conversão sem arredondamento (0.7621ms)\n✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (6.4893ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (0.8942ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.2528ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (5.8845ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 161.2779",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 297,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 6739,
+      "output": "✔ execução confirmada sem lote preserva saldo e abre pendência; confirmação não é inferida (1120.2962ms)\n✔ programação só conclui uma vez sob concorrência e evento real deduplica chaves diferentes (297.0556ms)\n✔ parciais e conclusão ficam distintas; retificação preserva o original (111.9016ms)\n✔ ordem versionada exige versão esperada e mantém programação anterior para revisão (61.7313ms)\n✔ sobreposição gera revisão e não exclui ordem; material previsto não cria execução nem consumo (50.9156ms)\n✔ consumo identificado baixa uma vez, preserva custódia do tutor e resolve a pendência (81.6984ms)\n✔ falha em um item desfaz o lote inteiro sem apagar execução; decimais aninhados são exatos (95.7806ms)\n✔ consumos concorrentes e reserva não excedem saldo disponível (59.3579ms)\n✔ material de outro tutor, episódio ou unidade não pode ser alocado ao paciente (199.0399ms)\n✔ estorno agregado reabre pendência, compensa todos os itens e permite retificar (92.6011ms)\n✔ registro tardio compara horário ocorrido com alta; programação não executada não vira fato (85.1193ms)\n✔ permissões clínicas, contexto de unidade e SQL imutável não admitem atalhos (81.3083ms)\n✔ consumo em dois lotes preserva custo exato e estorno integral; validade e custo desconhecido ficam pendentes (73.6946ms)\n✔ retirada transfere e o consumo debita somente o destino identificado (56.1309ms)\n✔ alta preserva programações futuras e fatos anteriores com pendência de revisão (50.63ms)\n✔ SQL não pode adicionar lançamento usando comando já confirmado (38.6405ms)\n✔ listas clínicas paginadas respeitam filtros e mapa exige período limitado (60.4379ms)\n✔ todas as consultas publicadas serializam conforme contrato sem SELECT irrestrito (718.6076ms)\n✔ retry transacional desfaz tentativa anterior e respeita limite de três tentativas (130.2854ms)\n✔ health, readiness, organização, contrato OpenAPI e autenticação (22.3807ms)\n✔ cadastro, vínculo, papéis, dispositivo e proveniência sintética executáveis (47.5998ms)\n✔ oito comandos concorrentes e retry após resposta perdida produzem um único efeito (54.0946ms)\n✔ falha de integridade reverte comando, domínio, auditoria e outbox (12.9329ms)\n✔ FK composta e RLS bloqueiam outra organização; contexto não vaza no pool (9.8455ms)\n✔ RBAC nega escrita ao leitor e ABAC restringe unidade/dispositivo no servidor (16.0433ms)\n✔ credencial opaca, expirada, NFC e revogada; desativação de usuário/dispositivo (30.9219ms)\n✔ capacidade por vaga, concorrência, intervalo e consistência de unidade (57.0567ms)\n✔ alta clínica separada da ocupação e saída, com versão esperada e histórico (36.6869ms)\n✔ paginação keyset, limites, entradas desconhecidas e datas futuras (8.2036ms)\n✔ privilégios: app não altera auditoria, apaga cadastro, assume worker ou cria tabela (5.6256ms)\n✔ workers concorrentes não reservam o mesmo job; inbox deduplica repetição (70.7431ms)\n✔ lease expirada, fencing, backoff e erro permanente viram pendência (7.1526ms)\n✔ apresentações são dimensionais, exatas, versionadas e imutáveis (754.9736ms)\n✔ frações decimais preservam precisão e rejeitam arredondamento silencioso (32.503ms)\n✔ repetição concorrente de entrada e timeout simulado geram um único par (73.5618ms)\n✔ duas retiradas concorrentes não excedem saldo e não registram consumo (71.7612ms)\n✔ transferências opostas usam ordem determinística e preservam total (61.9728ms)\n✔ reserva protege disponibilidade e efetivação transfere uma única vez (42.7662ms)\n✔ reservas concorrentes, liberação e expiração não alteram saldo físico (513.5402ms)\n✔ devolução parcial é vinculada, limitada e reversível antes da origem (56.2497ms)\n✔ perda e reversão preservam razão; reversão de entrada não pode consumir reserva (44.7615ms)\n✔ custódia do tutor e custo desconhecido ficam explícitos sem custo hospitalar inventado (73.5544ms)\n✔ validade pendente, vencida e recipiente aberto sem regra impedem retirada, preservando entrada (83.01ms)\n✔ inventário aplica diferença vinculada e rejeita contagem após movimentação concorrente (70.4901ms)\n✔ inventário sem divergência não inventa movimento e ajuste não passa por cima de reserva (42.5219ms)\n✔ isolamento, permissões e proteção SQL impedem atalhos de saldo e livro incompleto (31.6114ms)\n✔ consultas paginadas de estoque seguem OpenAPI e devolvem decimais como strings (22.5378ms)\nℹ tests 47\nℹ suites 0\nℹ pass 47\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 6683.5998",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 771,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

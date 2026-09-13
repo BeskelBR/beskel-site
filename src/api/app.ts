@@ -14,6 +14,31 @@ import {
   inventoryLists,
 } from "../domain/inventory/service.ts";
 import { inventoryInputs, amount } from "../domain/inventory/schemas.ts";
+import { clinicalActions, clinicalLists } from "../domain/clinical/service.ts";
+import { clinicalInputs } from "../domain/clinical/schemas.ts";
+
+function strictValues(schema: unknown, value: unknown): void {
+  if (value === undefined) return;
+  const field = schema as {
+    properties?: Record<string, unknown>;
+    items?: unknown;
+    const?: unknown;
+  };
+  if (schema === amount && typeof value !== "string")
+    throw new DomainError(400, "decimais_devem_ser_strings");
+  if (field.const === true && value !== true)
+    throw new DomainError(400, "confirmacao_humana_explicita_obrigatoria");
+  if (field.items && Array.isArray(value))
+    for (const item of value) strictValues(field.items, item);
+  if (
+    field.properties &&
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value)
+  )
+    for (const [key, child] of Object.entries(field.properties))
+      strictValues(child, (value as Record<string, unknown>)[key]);
+}
 
 const errorSchema = object({ erro: text, correlation_id: uuid });
 const errors = Object.fromEntries(
@@ -44,7 +69,10 @@ export async function buildApp(db: pg.Pool, logging = false) {
   });
   await app.register(swagger, {
     openapi: {
-      info: { title: "HVB Sistema — Fundação e Estoque", version: "0.2.0" },
+      info: {
+        title: "HVB Sistema — Fundação, Estoque e Clínica",
+        version: "0.3.0",
+      },
       servers: [{ url: "http://127.0.0.1:3100" }],
       components: {
         securitySchemes: {
@@ -167,7 +195,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     async () => {
       try {
         const r = await db.query(
-          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='010_inventory_index_cleanup.sql') AS ready, current_user AS role",
+          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='013_clinical_traceability.sql') AS ready, current_user AS role",
         );
         if (!r.rows[0].ready || r.rows[0].role !== "hvb_app")
           throw new Error("not ready");
@@ -212,24 +240,17 @@ export async function buildApp(db: pg.Pool, logging = false) {
         ).rows[0];
       }),
   );
-  const allInputs: Record<string, unknown> = { ...inputs, ...inventoryInputs };
-  for (const action of [...actions, ...inventoryActions]) {
+  const allInputs: Record<string, unknown> = {
+    ...inputs,
+    ...inventoryInputs,
+    ...clinicalInputs,
+  };
+  for (const action of [...actions, ...inventoryActions, ...clinicalActions]) {
     app.post(
       `/v1${action.path}`,
       {
         preValidation: async (req) => {
-          const schema = allInputs[action.input] as {
-            properties?: Record<string, unknown>;
-          };
-          const body = req.body as Record<string, unknown> | undefined;
-          for (const [key, field] of Object.entries(schema.properties ?? {})) {
-            if (
-              field === amount &&
-              body?.[key] !== undefined &&
-              typeof body[key] !== "string"
-            )
-              throw new DomainError(400, "decimais_devem_ser_strings");
-          }
+          strictValues(allInputs[action.input], req.body);
         },
         schema: {
           operationId: `post_${action.path.replace(/[^a-z]/g, "_")}`,
@@ -247,6 +268,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
                 estado: { type: "string", const: "confirmado" },
                 repetido: { type: "boolean" },
                 versao: { type: "integer" },
+                ordem_id: uuid,
+                ordem_versao_id: uuid,
               },
               ["id", "comando_id", "estado", "repetido"],
             ),
@@ -284,9 +307,23 @@ export async function buildApp(db: pg.Pool, logging = false) {
         }),
     );
   }
-  for (const list of [...lists, ...inventoryLists]) {
+  for (const list of [...lists, ...inventoryLists, ...clinicalLists]) {
     const stockPosition = list.table === "posicao_estoque";
     const stockLedger = list.table === "lancamento_estoque_consulta";
+    const clinical = list.path.startsWith("/clinica/");
+    const schedule = list.table === "programacao_consulta";
+    const clinicalFilters = clinical
+      ? [
+          "episodio_id",
+          "ordem_id",
+          "ordem_versao_id",
+          "programacao_id",
+          "execucao_id",
+          "consumo_id",
+          "produto_id",
+          "item_clinico_id",
+        ].filter((f) => list.columns.split(",").includes(f))
+      : [];
     const query = object(
       {
         limit: { type: "integer", minimum: 1, maximum: 100, default: 25 },
@@ -302,11 +339,21 @@ export async function buildApp(db: pg.Pool, logging = false) {
             }
           : {}),
         ...(stockLedger ? { transacao_id: uuid } : {}),
+        ...Object.fromEntries(clinicalFilters.map((f) => [f, uuid])),
+        ...(schedule
+          ? {
+              inicio: { type: "string", format: "date-time" },
+              fim: { type: "string", format: "date-time" },
+            }
+          : {}),
+        ...(list.table === "pendencia_clinica_consulta"
+          ? { situacao: { type: "string", enum: ["aberta", "resolvida"] } }
+          : {}),
         ...(list.table === "episodio"
           ? { paciente_id: uuid, ativos: { type: "boolean" } }
           : {}),
       },
-      list.unit ? ["unidade_id"] : [],
+      list.unit ? ["unidade_id", ...(schedule ? ["inicio", "fim"] : [])] : [],
     );
     const properties = Object.fromEntries(
       list.columns.split(",").map((column) => [
@@ -347,6 +394,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
       (req) =>
         authenticated(req, async (tx, a) => {
           const q = req.query as {
+            [key: string]: unknown;
             limit: number;
             cursor?: string;
             unidade_id?: string;
@@ -395,6 +443,30 @@ export async function buildApp(db: pg.Pool, logging = false) {
           }
           if (stockPosition && q.disponiveis !== undefined)
             where.push(`disponivel_base ${q.disponiveis ? ">" : "="} 0`);
+          for (const field of clinicalFilters)
+            if (q[field]) {
+              values.push(q[field]);
+              where.push(`${field}=$${values.length}`);
+            }
+          if (schedule) {
+            const start = Date.parse(q.inicio as string),
+              end = Date.parse(q.fim as string);
+            if (
+              !Number.isFinite(start) ||
+              !Number.isFinite(end) ||
+              end <= start ||
+              end - start > 7 * 86400000
+            )
+              throw new DomainError(400, "mapa_exige_periodo_de_ate_sete_dias");
+            values.push(q.inicio, q.fim);
+            where.push(
+              `prevista_em>=$${values.length - 1} AND prevista_em<$${values.length}`,
+            );
+          }
+          if (list.table === "pendencia_clinica_consulta" && q.situacao) {
+            values.push(q.situacao);
+            where.push(`situacao=$${values.length}`);
+          }
           const r = await tx.query(
             `SELECT ${list.columns} FROM ${list.table} WHERE ${where.join(" AND ")} ORDER BY id LIMIT $3`,
             values,

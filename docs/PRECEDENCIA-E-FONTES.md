@@ -1,6 +1,6 @@
 # Precedência e fontes — 13/09/2026
 
-1. Pedido inicial do usuário: executar primeiro M0/M1; pedidos posteriores de continuidade conforme o caminho traçado foram aplicados ao próximo recorte, M2, preservando pendências para resolução conjunta. Permanecem as restrições: exclusivamente `hvb-sistema-dev`, alterações apenas sob `SISTEMA`, nenhuma infraestrutura externa paga sem autorização. M3 não foi iniciado nesta continuação.
+1. Pedido inicial do usuário: executar primeiro M0/M1; pedidos posteriores de continuidade conforme o caminho traçado foram aplicados aos recortes M2 e depois M3. O usuário informou estar indisponível para sanar pendências; elas foram preservadas para resolução conjunta, sem promover propostas a regras hospitalares aprovadas. Permanecem as restrições: exclusivamente `hvb-sistema-dev`, alterações apenas sob `SISTEMA`, nenhuma infraestrutura externa paga sem autorização. M4 não foi iniciado nesta continuação.
 2. Prompt mestre fornecido e decisões atuais do pacote: identidade, arquitetura, performance, requisitos, contrato do Terminal, backlog, estado do GitHub, governança e escopo vigente.
 3. Modelo, relatório aplicável, arquitetura e triagem: evidência e propostas que informam a implementação, sem promover hipótese a regra aprovada.
 4. Histórico/auditoria e contexto completo: somente proveniência, sem autoridade para restaurar plano próprio, Petlove, acesso ao SimplesVet ou integração não autorizada.

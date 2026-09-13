@@ -3,7 +3,7 @@ import type { PoolClient } from "pg";
 import { authorize, digest, DomainError, occurred, one } from "./core.ts";
 import type { Actor } from "./core.ts";
 
-export type Body = Record<string, string | number | string[]>;
+export type Body = Record<string, unknown>;
 export type Action = {
   path: string;
   input: string;

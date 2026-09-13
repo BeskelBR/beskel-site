@@ -1,12 +1,12 @@
 # HVB Sistema
 
-Fundação de desenvolvimento **M0 + M1** e estoque físico **M2**, em `hvb-sistema-dev`. API modular, PostgreSQL real local e worker. Dados exclusivamente fictícios. Produto: **HVB Sistema**; `Core` designa somente o domínio interno.
+Fundação **M0 + M1**, estoque físico **M2** e recorte de clínica operacional **M3**, em `hvb-sistema-dev`. API modular, PostgreSQL real local e worker. Dados exclusivamente fictícios. Produto: **HVB Sistema**; `Core` designa somente o domínio interno.
 
 Implementado: organização/unidades, contas individuais, papéis/permissões, credenciais opacas e revogação, dispositivos, responsáveis/pacientes/vínculos, episódios, locais/ocupações, comandos idempotentes, auditoria, outbox/inbox e proveniência sintética com FKs tipadas. A organização inicial nasce pelo bootstrap administrativo local.
 
 M2 acrescenta unidades de medida, produtos, apresentações versionadas, lotes, recipientes, custódia hospital/tutor, posições, reservas, entrada, transferência, retirada, devolução, perda, reversão e inventário com ajuste. Retirada transfere para destino identificado; não registra execução clínica, consumo ou cobrança.
 
-Este lote entrega backend e contratos. Não inclui telas, execução clínica M3, regras de diária, cobrança, integração com Terminal, migração real ou produção.
+M3 acrescenta item clínico, prescrição, ordem versionada, programação, confirmação de execução, material previsto, consumo identificado, estorno e pendências clínicas. A execução não baixa estoque automaticamente; material desconhecido permanece pendente. Este lote entrega backend e contratos, sem telas, regras de diária, cobrança, integração com Terminal, migração real ou produção.
 
 ## Executar neste Windows
 
@@ -19,6 +19,7 @@ Set-Location 'C:\Users\Admin\OneDrive\BESKEL\PARCEIROS\HVB\SISTEMA'
 .\scripts\pnpm.ps1 db:migrate
 .\scripts\pnpm.ps1 db:seed
 .\scripts\pnpm.ps1 db:seed:inventory
+.\scripts\pnpm.ps1 db:seed:clinical
 .\scripts\pnpm.ps1 check
 .\scripts\pnpm.ps1 dev
 ```
@@ -66,6 +67,23 @@ Invoke-RestMethod http://127.0.0.1:3100/v1/estoque/retiradas -Method Post -Heade
 
 Quantidades, fatores e custos são strings decimais exatas, com até seis casas; números JSON são rejeitados. Estoque disponível é saldo físico menos reservas ativas. A expiração exige comando explícito e mantém a reserva protegida até ser processada. A contagem de inventário exige `versao_esperada` obtida na consulta da posição; movimentação ou reserva posterior impede aplicar uma contagem obsoleta. Transferências deste recorte são dentro da mesma unidade hospitalar, lote, recipiente e custódia. Veja os demais limites no [relatório M2](docs/RELATORIO-M2.md).
 
+### Exercitar a clínica fictícia
+
+`db:seed:clinical` cria uma prescrição e uma execução **simuladas**, com material pendente, sem representar ato assistencial real. Repetir o seed preserva as identidades e não duplica o fato. Referências em `.local/clinical-demo.json`.
+
+```powershell
+$hvbClinical = Get-Content .local/clinical-demo.json -Raw | ConvertFrom-Json
+Invoke-RestMethod "http://127.0.0.1:3100/v1/clinica/execucoes?unidade_id=$($hvbDev.unit)&episodio_id=$($hvbClinical.episode)" -Headers $hvbHeaders
+Invoke-RestMethod "http://127.0.0.1:3100/v1/clinica/pendencias?unidade_id=$($hvbDev.unit)&execucao_id=$($hvbClinical.execution)&situacao=aberta" -Headers $hvbHeaders
+$hvbHeaders['Idempotency-Key'] = [guid]::NewGuid().ToString()
+$hvbConsumption = @{ episodio_id = $hvbClinical.episode; execucao_id = $hvbClinical.execution; evento_referencia = [guid]::NewGuid().ToString(); ocorrido_em = '2026-09-01T12:00:00.000Z'; finalidade = 'Material fictício usado'; motivo = 'Conciliação de exemplo DEV'; itens_confirmados = $true; itens = @(@{ posicao_id = $hvbClinical.position; quantidade_base = '1' }) } | ConvertTo-Json -Depth 4
+Invoke-RestMethod http://127.0.0.1:3100/v1/clinica/consumos -Method Post -Headers $hvbHeaders -ContentType 'application/json' -Body $hvbConsumption
+```
+
+O exemplo debita uma unidade da posição indicada e resolve a pendência de material dessa execução simulada. Para repetir uma requisição após timeout, reutilize **o mesmo corpo e a mesma chave**. `evento_referencia` identifica o fato no cliente e também deve ser preservado; nova chave para o mesmo evento retorna conflito, evitando um segundo registro. Consumo sem execução é permitido quando ligado ao episódio com finalidade e motivo explícitos.
+
+A programação referencia uma versão exata. `POST /v1/clinica/ordens` retorna `id` da ordem e `ordem_versao_id`; novas versões exigem `versao_esperada`. O mapa `GET /v1/clinica/programacoes` exige `unidade_id`, `inicio` e `fim` com fuso e intervalo máximo de sete dias. Alta e nova versão geram revisão de programações afetadas. Retificação clínica e estorno físico são comandos separados, com histórico preservado. Os limites operacionais estão no [relatório M3](docs/RELATORIO-M3.md).
+
 ## Docker, Linux e macOS
 
 Alternativa ao banco portátil, usando Docker já instalado:
@@ -78,6 +96,7 @@ node --env-file=.env scripts/bootstrap.ts
 pnpm db:migrate
 pnpm db:seed
 pnpm db:seed:inventory
+pnpm db:seed:clinical
 pnpm check
 pnpm dev
 ```
@@ -86,16 +105,18 @@ O gerador não sobrescreve `.env`. Não executar os dois bancos na porta 55432 s
 
 ## Verificação e documentação
 
-`pnpm check` exige a branch autorizada e executa typecheck, lint, formatação, testes unitários, migrations, integração PostgreSQL e OpenAPI. Evidências atuais: [35 testes M1/M2](docs/evidencias/checks-m2.json) e [benchmark e HTTP M2](docs/evidencias/benchmark-m2.json). As evidências históricas de M1 foram preservadas. `pnpm benchmark` usa somente TEST e gera 10 mil pacientes e 2 mil episódios fictícios por execução. `pnpm benchmark:inventory` cria mil posições fictícias em TEST, abastece por comandos, mede consultas/transferências e reconcilia saldos com lançamentos. Ambos preservam execuções anteriores.
+`pnpm check` exige a branch autorizada e executa typecheck, lint, formatação, testes unitários, migrations, integração PostgreSQL e OpenAPI. Evidências atuais: [52 testes M1/M2/M3](docs/evidencias/checks-m3.json) e [benchmark e HTTP M3](docs/evidencias/benchmark-m3.json). As evidências históricas de M1/M2 foram preservadas. `pnpm benchmark` usa somente TEST e gera 10 mil pacientes e 2 mil episódios fictícios por execução. `pnpm benchmark:inventory` cria mil posições fictícias, abastece por comandos e mede consultas/transferências. `pnpm benchmark:clinical` cria mil programações por comandos, mede mapa/execução/consumo e reconcilia saldos. Os benchmarks preservam execuções anteriores.
 
 O workflow de CI é **manual**, limitado a `hvb-sistema-dev`; não foi disparado. Ações futuras com custos, serviços externos, DNS, produção e dados reais continuam dependendo de autorização.
 
 - [Relatório M0 + M1](docs/RELATORIO-M0-M1.md)
 - [Relatório M2](docs/RELATORIO-M2.md)
+- [Relatório M3](docs/RELATORIO-M3.md)
 - [Decisões de stack](docs/adr/0001-stack.md)
 - [Integridade e acesso](docs/adr/0002-integridade-acesso.md)
 - [Estoque físico e concorrência](docs/adr/0003-estoque-fisico.md)
-- [Dicionário M1](docs/DADOS-M1.md) e [dicionário M2](docs/DADOS-M2.md)
+- [Execução e consumo identificado](docs/adr/0004-clinica-consumo.md)
+- [Dicionário M1](docs/DADOS-M1.md), [M2](docs/DADOS-M2.md) e [M3](docs/DADOS-M3.md)
 - [Pendências](docs/PENDENCIAS-HVB.md)
 - [Precedência e proveniência](docs/PRECEDENCIA-E-FONTES.md)
 
