@@ -4,6 +4,15 @@ import { randomUUID } from "node:crypto";
 import { canonical, digest, occurred } from "../src/domain/core.ts";
 import { localUrl } from "../src/persistence/database.ts";
 import { LocalPrivateStorage } from "../src/storage/private.ts";
+import { exact, decimal, multiply } from "../src/domain/inventory/decimal.ts";
+
+test("quantidades de estoque usam aritmética inteira e conversão sem arredondamento", () => {
+  assert.equal(decimal(exact("0.1") + exact("0.2")), "0.300000");
+  assert.equal(multiply("0.1", "0.1"), "0.010000");
+  assert.throws(() => multiply("0.000001", "0.1"));
+  assert.throws(() => exact("NaN"));
+  assert.throws(() => exact("1e3"));
+});
 
 test("hash canônico ignora ordem das chaves e distingue operação/conteúdo", () => {
   assert.equal(

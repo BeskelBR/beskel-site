@@ -61,7 +61,7 @@ export async function command(
   payload: unknown,
   device: string | undefined,
   correlation: string,
-  work: () => Promise<{ id: string; [key: string]: unknown }>,
+  work: (commandId: string) => Promise<{ id: string; [key: string]: unknown }>,
 ) {
   if (!/^[A-Za-z0-9._:-]{8,128}$/.test(key))
     throw new DomainError(400, "chave_idempotencia_invalida");
@@ -102,7 +102,7 @@ export async function command(
     return { ...existing.resultado, repetido: true };
   }
   const result = {
-    ...(await work()),
+    ...(await work(id)),
     comando_id: id,
     estado: "confirmado",
     repetido: false,
@@ -110,8 +110,12 @@ export async function command(
   const reason =
     (payload as { body?: { motivo?: string } }).body?.motivo ?? null;
   await tx.query(
-    `INSERT INTO evento_auditoria(id,organizacao_id,comando_id,autor_id,acao,entidade_id,correlation_id,motivo)
-    VALUES($1,$2,$3,$4,$5,$6,$7,$8)`,
+    `WITH audit AS (
+      INSERT INTO evento_auditoria(id,organizacao_id,comando_id,autor_id,acao,entidade_id,correlation_id,motivo)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8)
+    ), event AS (
+      INSERT INTO outbox(id,organizacao_id,comando_id,tipo,entidade_id) VALUES($9,$2,$3,$5,$6)
+    ) UPDATE comando SET resultado=$10,concluido_em=now() WHERE organizacao_id=$2 AND id=$3`,
     [
       randomUUID(),
       actor.organizacao_id,
@@ -121,15 +125,9 @@ export async function command(
       result.id,
       correlation,
       reason,
+      randomUUID(),
+      result,
     ],
-  );
-  await tx.query(
-    "INSERT INTO outbox(id,organizacao_id,comando_id,tipo,entidade_id) VALUES($1,$2,$3,$4,$5)",
-    [randomUUID(), actor.organizacao_id, id, operation, result.id],
-  );
-  await tx.query(
-    "UPDATE comando SET resultado=$1,concluido_em=now() WHERE organizacao_id=$2 AND id=$3",
-    [result, actor.organizacao_id, id],
   );
   return result;
 }

@@ -1,0 +1,56 @@
+{
+  "executed_at": "2026-09-13T16:51:07.149Z",
+  "branch": "hvb-sistema-dev",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 1076,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 97,
+      "output": "Checked 27 files in 16ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 90,
+      "output": "Checked 30 files in 10ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 220,
+      "output": "✔ quantidades de estoque usam aritmética inteira e conversão sem arredondamento (0.7355ms)\n✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (6.9323ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (0.8758ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.2526ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (5.633ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 160.7683",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 351,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 4010,
+      "output": "✔ todas as consultas publicadas serializam conforme contrato sem SELECT irrestrito (998.7595ms)\n✔ retry transacional desfaz tentativa anterior e respeita limite de três tentativas (135.2206ms)\n✔ health, readiness, organização, contrato OpenAPI e autenticação (21.2611ms)\n✔ cadastro, vínculo, papéis, dispositivo e proveniência sintética executáveis (49.2923ms)\n✔ oito comandos concorrentes e retry após resposta perdida produzem um único efeito (57.037ms)\n✔ falha de integridade reverte comando, domínio, auditoria e outbox (10.0324ms)\n✔ FK composta e RLS bloqueiam outra organização; contexto não vaza no pool (10.2266ms)\n✔ RBAC nega escrita ao leitor e ABAC restringe unidade/dispositivo no servidor (17.083ms)\n✔ credencial opaca, expirada, NFC e revogada; desativação de usuário/dispositivo (32.6902ms)\n✔ capacidade por vaga, concorrência, intervalo e consistência de unidade (67.7521ms)\n✔ alta clínica separada da ocupação e saída, com versão esperada e histórico (30.3709ms)\n✔ paginação keyset, limites, entradas desconhecidas e datas futuras (9.6592ms)\n✔ privilégios: app não altera auditoria, apaga cadastro, assume worker ou cria tabela (8.6247ms)\n✔ workers concorrentes não reservam o mesmo job; inbox deduplica repetição (70.067ms)\n✔ lease expirada, fencing, backoff e erro permanente viram pendência (6.8789ms)\n✔ apresentações são dimensionais, exatas, versionadas e imutáveis (685.511ms)\n✔ frações decimais preservam precisão e rejeitam arredondamento silencioso (31.9497ms)\n✔ repetição concorrente de entrada e timeout simulado geram um único par (70.7326ms)\n✔ duas retiradas concorrentes não excedem saldo e não registram consumo (67.9323ms)\n✔ transferências opostas usam ordem determinística e preservam total (61.3915ms)\n✔ reserva protege disponibilidade e efetivação transfere uma única vez (44.3449ms)\n✔ reservas concorrentes, liberação e expiração não alteram saldo físico (502.0998ms)\n✔ devolução parcial é vinculada, limitada e reversível antes da origem (48.6668ms)\n✔ perda e reversão preservam razão; reversão de entrada não pode consumir reserva (41.2656ms)\n✔ custódia do tutor e custo desconhecido ficam explícitos sem custo hospitalar inventado (75.8703ms)\n✔ validade pendente, vencida e recipiente aberto sem regra impedem retirada, preservando entrada (83.6766ms)\n✔ inventário aplica diferença vinculada e rejeita contagem após movimentação concorrente (61.1051ms)\n✔ inventário sem divergência não inventa movimento e ajuste não passa por cima de reserva (40.4917ms)\n✔ isolamento, permissões e proteção SQL impedem atalhos de saldo e livro incompleto (27.2342ms)\n✔ consultas paginadas de estoque seguem OpenAPI e devolvem decimais como strings (21.2695ms)\nℹ tests 30\nℹ suites 0\nℹ pass 30\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 3953.9513",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 695,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

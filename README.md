@@ -1,10 +1,12 @@
 # HVB Sistema
 
-Fundação de desenvolvimento **M0 + M1**, em `hvb-sistema-dev`. API modular, PostgreSQL real local e worker. Dados exclusivamente fictícios. Produto: **HVB Sistema**; `Core` designa somente o domínio interno.
+Fundação de desenvolvimento **M0 + M1** e estoque físico **M2**, em `hvb-sistema-dev`. API modular, PostgreSQL real local e worker. Dados exclusivamente fictícios. Produto: **HVB Sistema**; `Core` designa somente o domínio interno.
 
 Implementado: organização/unidades, contas individuais, papéis/permissões, credenciais opacas e revogação, dispositivos, responsáveis/pacientes/vínculos, episódios, locais/ocupações, comandos idempotentes, auditoria, outbox/inbox e proveniência sintética com FKs tipadas. A organização inicial nasce pelo bootstrap administrativo local.
 
-Este lote entrega backend e contratos. Não inclui telas, estoque M2, execução clínica M3, regras de diária, cobrança, integração com Terminal, migração real ou produção.
+M2 acrescenta unidades de medida, produtos, apresentações versionadas, lotes, recipientes, custódia hospital/tutor, posições, reservas, entrada, transferência, retirada, devolução, perda, reversão e inventário com ajuste. Retirada transfere para destino identificado; não registra execução clínica, consumo ou cobrança.
+
+Este lote entrega backend e contratos. Não inclui telas, execução clínica M3, regras de diária, cobrança, integração com Terminal, migração real ou produção.
 
 ## Executar neste Windows
 
@@ -16,6 +18,7 @@ Set-Location 'C:\Users\Admin\OneDrive\BESKEL\PARCEIROS\HVB\SISTEMA'
 .\scripts\pnpm.ps1 db:local
 .\scripts\pnpm.ps1 db:migrate
 .\scripts\pnpm.ps1 db:seed
+.\scripts\pnpm.ps1 db:seed:inventory
 .\scripts\pnpm.ps1 check
 .\scripts\pnpm.ps1 dev
 ```
@@ -49,6 +52,20 @@ Todas as listas usam `limit` (padrão 25, máximo 100) e `cursor` UUID. Episódi
 
 Contrato completo: [OpenAPI](openapi/hvb-sistema.json). Schemas de entrada e saída são os mesmos usados pela API; `pnpm openapi` regenera o artefato.
 
+### Exercitar o estoque fictício
+
+O seed M2 usa comandos idempotentes: repetir não duplica a entrada de 20 unidades. As referências ficam em `.local/inventory-demo.json`; as credenciais continuam em `.local/dev-access.json`.
+
+```powershell
+$hvbStock = Get-Content .local/inventory-demo.json -Raw | ConvertFrom-Json
+Invoke-RestMethod "http://127.0.0.1:3100/v1/estoque/posicoes?unidade_id=$($hvbStock.unit_id)&produto_id=$($hvbStock.product)" -Headers $hvbHeaders
+$hvbHeaders['Idempotency-Key'] = [guid]::NewGuid().ToString()
+$hvbMovement = @{ origem_id = $hvbStock.origin; destino_id = $hvbStock.destination; quantidade_base = '1'; ocorrido_em = [DateTimeOffset]::UtcNow.ToString('o'); motivo = 'Retirada fictícia de demonstração' } | ConvertTo-Json
+Invoke-RestMethod http://127.0.0.1:3100/v1/estoque/retiradas -Method Post -Headers $hvbHeaders -ContentType 'application/json' -Body $hvbMovement
+```
+
+Quantidades, fatores e custos são strings decimais exatas, com até seis casas; números JSON são rejeitados. Estoque disponível é saldo físico menos reservas ativas. A expiração exige comando explícito e mantém a reserva protegida até ser processada. A contagem de inventário exige `versao_esperada` obtida na consulta da posição; movimentação ou reserva posterior impede aplicar uma contagem obsoleta. Transferências deste recorte são dentro da mesma unidade hospitalar, lote, recipiente e custódia. Veja os demais limites no [relatório M2](docs/RELATORIO-M2.md).
+
 ## Docker, Linux e macOS
 
 Alternativa ao banco portátil, usando Docker já instalado:
@@ -60,6 +77,7 @@ docker compose up -d --wait
 node --env-file=.env scripts/bootstrap.ts
 pnpm db:migrate
 pnpm db:seed
+pnpm db:seed:inventory
 pnpm check
 pnpm dev
 ```
@@ -68,14 +86,16 @@ O gerador não sobrescreve `.env`. Não executar os dois bancos na porta 55432 s
 
 ## Verificação e documentação
 
-`pnpm check` exige a branch autorizada e executa typecheck, lint, formatação, testes unitários, migrations, integração PostgreSQL e OpenAPI. Evidências: [checks](docs/evidencias/checks.json), [HTTP real](docs/evidencias/http-smoke.json) e [benchmark](docs/evidencias/benchmark-m1.json). `pnpm benchmark` usa somente TEST e gera 10 mil pacientes e 2 mil episódios fictícios por execução, preservando execuções anteriores.
+`pnpm check` exige a branch autorizada e executa typecheck, lint, formatação, testes unitários, migrations, integração PostgreSQL e OpenAPI. Evidências atuais: [35 testes M1/M2](docs/evidencias/checks-m2.json) e [benchmark e HTTP M2](docs/evidencias/benchmark-m2.json). As evidências históricas de M1 foram preservadas. `pnpm benchmark` usa somente TEST e gera 10 mil pacientes e 2 mil episódios fictícios por execução. `pnpm benchmark:inventory` cria mil posições fictícias em TEST, abastece por comandos, mede consultas/transferências e reconcilia saldos com lançamentos. Ambos preservam execuções anteriores.
 
 O workflow de CI é **manual**, limitado a `hvb-sistema-dev`; não foi disparado. Ações futuras com custos, serviços externos, DNS, produção e dados reais continuam dependendo de autorização.
 
 - [Relatório M0 + M1](docs/RELATORIO-M0-M1.md)
+- [Relatório M2](docs/RELATORIO-M2.md)
 - [Decisões de stack](docs/adr/0001-stack.md)
 - [Integridade e acesso](docs/adr/0002-integridade-acesso.md)
-- [Dicionário de dados](docs/DADOS-M1.md)
+- [Estoque físico e concorrência](docs/adr/0003-estoque-fisico.md)
+- [Dicionário M1](docs/DADOS-M1.md) e [dicionário M2](docs/DADOS-M2.md)
 - [Pendências](docs/PENDENCIAS-HVB.md)
 - [Precedência e proveniência](docs/PRECEDENCIA-E-FONTES.md)
 

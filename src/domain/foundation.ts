@@ -19,6 +19,7 @@ export type Action = {
     actor: Actor,
     body: Body,
     id: string,
+    commandId: string,
   ) => Promise<{ id: string; [key: string]: unknown }>;
 };
 const val = (b: Body, k: string) => b[k] as string;

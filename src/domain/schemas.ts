@@ -109,4 +109,11 @@ export const permissions = [
   "auditoria:ler",
   "dispositivos:usar",
   "proveniencia:administrar",
+  "estoque:ler",
+  "estoque:catalogar",
+  "estoque:movimentar",
+  "estoque:reservar",
+  "estoque:inventariar",
+  "estoque:ajustar",
+  "estoque:reverter",
 ];

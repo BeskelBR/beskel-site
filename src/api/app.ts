@@ -9,6 +9,11 @@ import { actions, lists } from "../domain/foundation.ts";
 import type { Body } from "../domain/foundation.ts";
 import { inputs, object, uuid, text } from "../domain/schemas.ts";
 import { transaction } from "../persistence/database.ts";
+import {
+  inventoryActions,
+  inventoryLists,
+} from "../domain/inventory/service.ts";
+import { inventoryInputs, amount } from "../domain/inventory/schemas.ts";
 
 const errorSchema = object({ erro: text, correlation_id: uuid });
 const errors = Object.fromEntries(
@@ -39,7 +44,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
   });
   await app.register(swagger, {
     openapi: {
-      info: { title: "HVB Sistema — M0 + M1", version: "0.1.0" },
+      info: { title: "HVB Sistema — Fundação e Estoque", version: "0.2.0" },
       servers: [{ url: "http://127.0.0.1:3100" }],
       components: {
         securitySchemes: {
@@ -84,9 +89,14 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ) {
       status = 400;
       code = "requisicao_invalida";
-    } else if (["23503", "23505", "23514", "23P01"].includes(e.code ?? "")) {
+    } else if (
+      ["23503", "23505", "23514", "23P01", "P0002"].includes(e.code ?? "")
+    ) {
       status = 409;
       code = "conflito_de_integridade";
+    } else if (e.code === "22003") {
+      status = 400;
+      code = "quantidade_fora_do_limite";
     } else if (
       ["55P03", "57014", "40P01", "40001", "ECONNREFUSED", "57P01"].includes(
         e.code ?? "",
@@ -157,7 +167,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     async () => {
       try {
         const r = await db.query(
-          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='005_bounded_outbox_recovery.sql') AS ready, current_user AS role",
+          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='010_inventory_index_cleanup.sql') AS ready, current_user AS role",
         );
         if (!r.rows[0].ready || r.rows[0].role !== "hvb_app")
           throw new Error("not ready");
@@ -202,15 +212,30 @@ export async function buildApp(db: pg.Pool, logging = false) {
         ).rows[0];
       }),
   );
-  for (const action of actions) {
+  const allInputs: Record<string, unknown> = { ...inputs, ...inventoryInputs };
+  for (const action of [...actions, ...inventoryActions]) {
     app.post(
       `/v1${action.path}`,
       {
+        preValidation: async (req) => {
+          const schema = allInputs[action.input] as {
+            properties?: Record<string, unknown>;
+          };
+          const body = req.body as Record<string, unknown> | undefined;
+          for (const [key, field] of Object.entries(schema.properties ?? {})) {
+            if (
+              field === amount &&
+              body?.[key] !== undefined &&
+              typeof body[key] !== "string"
+            )
+              throw new DomainError(400, "decimais_devem_ser_strings");
+          }
+        },
         schema: {
           operationId: `post_${action.path.replace(/[^a-z]/g, "_")}`,
           security: [{ bearer: [] }],
           headers,
-          body: inputs[action.input as keyof typeof inputs],
+          body: allInputs[action.input],
           ...(action.path.includes(":id")
             ? { params: object({ id: uuid }) }
             : {}),
@@ -254,17 +279,29 @@ export async function buildApp(db: pg.Pool, logging = false) {
             { id, body },
             device,
             req.id,
-            () => action.run(tx, a, body, id),
+            (commandId) => action.run(tx, a, body, id, commandId),
           );
         }),
     );
   }
-  for (const list of lists) {
+  for (const list of [...lists, ...inventoryLists]) {
+    const stockPosition = list.table === "posicao_estoque";
+    const stockLedger = list.table === "lancamento_estoque_consulta";
     const query = object(
       {
         limit: { type: "integer", minimum: 1, maximum: 100, default: 25 },
         cursor: uuid,
         ...(list.unit ? { unidade_id: uuid } : {}),
+        ...(stockPosition
+          ? {
+              produto_id: uuid,
+              lote_id: uuid,
+              local_id: uuid,
+              custodia_id: uuid,
+              disponiveis: { type: "boolean" },
+            }
+          : {}),
+        ...(stockLedger ? { transacao_id: uuid } : {}),
         ...(list.table === "episodio"
           ? { paciente_id: uuid, ativos: { type: "boolean" } }
           : {}),
@@ -277,16 +314,17 @@ export async function buildApp(db: pg.Pool, logging = false) {
         column === "id" || column.endsWith("_id")
           ? {
               ...uuid,
-              nullable:
-                column === "pai_id" ||
-                column === "unidade_id" ||
-                ["paciente_id", "responsavel_id", "episodio_id"].includes(
-                  column,
-                ),
+              nullable: column !== "id",
             }
           : ["ativo"].includes(column)
             ? { type: "boolean" }
-            : ["capacidade", "vaga", "versao", "tentativas"].includes(column)
+            : [
+                  "capacidade",
+                  "vaga",
+                  "versao",
+                  "tentativas",
+                  "versao_snapshot",
+                ].includes(column)
               ? { type: "integer" }
               : { type: "string", nullable: true },
       ]),
@@ -314,6 +352,12 @@ export async function buildApp(db: pg.Pool, logging = false) {
             unidade_id?: string;
             paciente_id?: string;
             ativos?: boolean;
+            produto_id?: string;
+            lote_id?: string;
+            local_id?: string;
+            custodia_id?: string;
+            transacao_id?: string;
+            disponiveis?: boolean;
           };
           await authorize(tx, a, list.permission, q.unidade_id);
           const values: unknown[] = [
@@ -332,6 +376,25 @@ export async function buildApp(db: pg.Pool, logging = false) {
           }
           if (q.ativos !== undefined)
             where.push(`encerrado_em IS ${q.ativos ? "" : "NOT "}NULL`);
+          for (const field of [
+            "lote_id",
+            "local_id",
+            "custodia_id",
+            "transacao_id",
+          ] as const) {
+            if (q[field]) {
+              values.push(q[field]);
+              where.push(`${field}=$${values.length}`);
+            }
+          }
+          if (stockPosition && q.produto_id) {
+            values.push(q.produto_id);
+            where.push(
+              `lote_id IN (SELECT id FROM lote WHERE organizacao_id=$1 AND produto_id=$${values.length})`,
+            );
+          }
+          if (stockPosition && q.disponiveis !== undefined)
+            where.push(`disponivel_base ${q.disponiveis ? ">" : "="} 0`);
           const r = await tx.query(
             `SELECT ${list.columns} FROM ${list.table} WHERE ${where.join(" AND ")} ORDER BY id LIMIT $3`,
             values,

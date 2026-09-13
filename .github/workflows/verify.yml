@@ -1,4 +1,4 @@
-name: HVB Sistema M0-M1
+name: HVB Sistema M0-M2
 # Manual para não consumir runner/créditos sem decisão do mantenedor.
 on: workflow_dispatch
 permissions:
@@ -21,7 +21,7 @@ jobs:
       - run: node scripts/configure-env.mjs
       - run: docker compose up -d --wait
       - run: node --env-file=.env scripts/bootstrap.ts
-      - run: pnpm db:migrate && pnpm db:seed && pnpm check
+      - run: pnpm db:migrate && pnpm db:seed && pnpm db:seed:inventory && pnpm check
       - name: Contrato consistente
         run: git diff --exit-code -- openapi/hvb-sistema.json
       - name: Parar banco
