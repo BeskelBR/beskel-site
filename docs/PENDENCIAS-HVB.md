@@ -1,4 +1,4 @@
-# Pendências — HVB Sistema M0/M1 + M2 + M3
+# Pendências — HVB Sistema M0/M1 + M2 + M3 + M4
 
 M0/M1 foi limitado à fundação local com dados fictícios. As decisões abaixo não bloqueiam o desenvolvimento independente já validado.
 
@@ -66,3 +66,23 @@ O usuário solicitou continuidade e informou indisponibilidade para resolver as 
 | M4/diárias | PENDENTE próximo marco; nenhuma inclusão, franquia, limite ou cobrança presumida | Implementar somente modelo configurável até aprovação das regras reais |
 
 Todas as pendências que dependem de decisão humana permanecem abertas. O seed M3 deixa uma execução simulada com conciliação pendente para exercitar o fluxo; não é uma solicitação operacional à equipe do hospital.
+
+## Continuação M4 — 13/09/2026
+
+As linhas históricas foram preservadas. O mecanismo de diária configurável foi entregue apenas para simulação, sem promover nenhuma proposta a regra hospitalar. O usuário cuidará da configuração de Vercel/Cloudflare; o código segue no GitHub em `hvb-sistema-dev`. O backend atual usa PostgreSQL local; adaptação de hospedagem, banco, worker e autenticação operacional permanece necessária antes de publicação funcional.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Classes, critérios clínicos, faixas de peso e suporte ventilatório | PENDENTE; classificação explicitamente informada, sem cálculo ou recomendação; peso referenciado somente no mesmo episódio | Antes de classificar internações reais; definir validade e reutilização de medições anteriores |
+| Janelas, tolerâncias, calendário, fuso e encerramento | PENDENTE; simulação usa intervalo explícito [início, fim), sem tolerância e limite escolhido explicitamente | Aprovar regras de entrada, alta clínica, saída física e permanência administrativa |
+| Grupos, medicamentos simples/especiais, prioridades e exceções | PENDENTE; membros tipados e prioridade explícita; empate vira pendência | Conciliar redações divergentes do legado com a equipe, sem associação pelo nome |
+| Aprovação de regras operacionais | PENDENTE; endpoint aprova SOMENTE simulação com autoria e confirmação | Definir aprovação hospitalar, papéis, vigência, revisão e ativação segura |
+| Administração parcial, unidade clínica e unidade física | PENDENTE; parciais ficam pendentes, administração integral conta uma execução; quantidade física exige produto e unidade base | Validar semântica de parciais/acúmulo, dose e conversões; não inferir equivalência |
+| Cobertura física de material do tutor | PENDENTE; fato físico e custo preservados, cobertura permanece pendente | Definir propriedade, serviços associados e efeito comercial sem custo hospitalar inventado |
+| Cancelamento/correção de associação, período e classificação | PENDENTE; associação e período imutáveis; classificação só admite encerramento único; reavaliação preserva histórico | Definir fatos compensatórios, mudanças retroativas e migração entre pacotes |
+| Reservas de diária | PROPOSTO DEV; somente evento já identificado, cobertura integral, até 24h, liberação/expiração explícitas | Definir reserva de planejamento, efetivação parcial e expiração automática; reserva vencida ainda compromete capacidade |
+| Revisão de origem/período alterado | PENDENTE fluxo operacional; consulta sinaliza revisão, sem liberação automática da capacidade | Definir responsável, prazo, fila dedicada e efeito sobre outras avaliações; revisar/reverter explicitamente |
+| Orçamento SQL e concorrência M4 | INVESTIGADO; avaliação 17/14 statements totais/funcionais e reavaliação 19/16; compromisso é agregado do histórico por uso | Medir histórico longo, muitos grupos/regras e concorrência por episódio antes de homologação; sem SLA local |
+| M5 comercial/financeiro | PENDENTE próximo marco; M4 não gera preço, conta, título ou recebimento | Implementar modelo sem ativar políticas ambíguas; validar fontes de preço, exceções e permissões reais |
+
+As pendências antigas e novas serão resolvidas em conjunto. Testes de integridade e aprovação de simulação não encerram decisões clínicas, comerciais ou operacionais.

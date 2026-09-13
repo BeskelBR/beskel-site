@@ -1,12 +1,14 @@
 # HVB Sistema
 
-Fundação **M0 + M1**, estoque físico **M2** e recorte de clínica operacional **M3**, em `hvb-sistema-dev`. API modular, PostgreSQL real local e worker. Dados exclusivamente fictícios. Produto: **HVB Sistema**; `Core` designa somente o domínio interno.
+Fundação **M0 + M1**, estoque físico **M2**, clínica operacional **M3** e diárias configuráveis **M4**, em `hvb-sistema-dev`. API modular, PostgreSQL real local e worker. Dados exclusivamente fictícios. Produto: **HVB Sistema**; `Core` designa somente o domínio interno.
 
 Implementado: organização/unidades, contas individuais, papéis/permissões, credenciais opacas e revogação, dispositivos, responsáveis/pacientes/vínculos, episódios, locais/ocupações, comandos idempotentes, auditoria, outbox/inbox e proveniência sintética com FKs tipadas. A organização inicial nasce pelo bootstrap administrativo local.
 
 M2 acrescenta unidades de medida, produtos, apresentações versionadas, lotes, recipientes, custódia hospital/tutor, posições, reservas, entrada, transferência, retirada, devolução, perda, reversão e inventário com ajuste. Retirada transfere para destino identificado; não registra execução clínica, consumo ou cobrança.
 
-M3 acrescenta item clínico, prescrição, ordem versionada, programação, confirmação de execução, material previsto, consumo identificado, estorno e pendências clínicas. A execução não baixa estoque automaticamente; material desconhecido permanece pendente. Este lote entrega backend e contratos, sem telas, regras de diária, cobrança, integração com Terminal, migração real ou produção.
+M3 acrescenta item clínico, prescrição, ordem versionada, programação, confirmação de execução, material previsto, consumo identificado, estorno e pendências clínicas. A execução não baixa estoque automaticamente; material desconhecido permanece pendente.
+
+M4 acrescenta classificação versionada, peso referenciado, pacotes, grupos, regras, períodos explícitos e avaliação de cobertura com reserva, reversão e histórico. **Somente simulação**: as regras reais do hospital permanecem pendentes. Este lote entrega backend e contratos, sem telas, preços, cobrança, integração com Terminal, migração real ou produção. O código fica no GitHub; Vercel e Cloudflare serão configurados pelo usuário. O backend atual exige PostgreSQL local e não está adaptado à execução serverless.
 
 ## Executar neste Windows
 
@@ -20,6 +22,7 @@ Set-Location 'C:\Users\Admin\OneDrive\BESKEL\PARCEIROS\HVB\SISTEMA'
 .\scripts\pnpm.ps1 db:seed
 .\scripts\pnpm.ps1 db:seed:inventory
 .\scripts\pnpm.ps1 db:seed:clinical
+.\scripts\pnpm.ps1 db:seed:daily
 .\scripts\pnpm.ps1 check
 .\scripts\pnpm.ps1 dev
 ```
@@ -84,6 +87,17 @@ O exemplo debita uma unidade da posição indicada e resolve a pendência de mat
 
 A programação referencia uma versão exata. `POST /v1/clinica/ordens` retorna `id` da ordem e `ordem_versao_id`; novas versões exigem `versao_esperada`. O mapa `GET /v1/clinica/programacoes` exige `unidade_id`, `inicio` e `fim` com fuso e intervalo máximo de sete dias. Alta e nova versão geram revisão de programações afetadas. Retificação clínica e estorno físico são comandos separados, com histórico preservado. Os limites operacionais estão no [relatório M3](docs/RELATORIO-M3.md).
 
+### Exercitar a diária fictícia
+
+`db:seed:daily` cria uma internação, classe e pacote fictícios, um período explícito e uma avaliação incluída na simulação. Repetir preserva as identidades. Isso não aprova regra hospitalar nem gera valor a receber.
+
+```powershell
+$hvbDaily = Get-Content .local/daily-demo.json -Raw | ConvertFrom-Json
+Invoke-RestMethod "http://127.0.0.1:3100/v1/diarias/avaliacoes?unidade_id=$($hvbDev.unit)&evento_id=$($hvbDaily.event)" -Headers $hvbHeaders
+```
+
+Configurações incompletas não podem ser aprovadas, e `/aprovar-simulacao` exige confirmação literal. Cada evento referencia uma execução ou item de consumo; avaliação e reserva exigem contexto explícito. Reavaliação usa `versao_esperada` e preserva a avaliação anterior por compensação. A consulta distingue resultado original e `situacao_atual`, incluindo revisão após retificação, estorno ou mudança do período. Reservas vencidas mantêm capacidade comprometida até expiração explícita. Veja o [relatório M4](docs/RELATORIO-M4.md).
+
 ## Docker, Linux e macOS
 
 Alternativa ao banco portátil, usando Docker já instalado:
@@ -97,6 +111,7 @@ pnpm db:migrate
 pnpm db:seed
 pnpm db:seed:inventory
 pnpm db:seed:clinical
+pnpm db:seed:daily
 pnpm check
 pnpm dev
 ```
@@ -105,18 +120,20 @@ O gerador não sobrescreve `.env`. Não executar os dois bancos na porta 55432 s
 
 ## Verificação e documentação
 
-`pnpm check` exige a branch autorizada e executa typecheck, lint, formatação, testes unitários, migrations, integração PostgreSQL e OpenAPI. Evidências atuais: [52 testes M1/M2/M3](docs/evidencias/checks-m3.json) e [benchmark e HTTP M3](docs/evidencias/benchmark-m3.json). As evidências históricas de M1/M2 foram preservadas. `pnpm benchmark` usa somente TEST e gera 10 mil pacientes e 2 mil episódios fictícios por execução. `pnpm benchmark:inventory` cria mil posições fictícias, abastece por comandos e mede consultas/transferências. `pnpm benchmark:clinical` cria mil programações por comandos, mede mapa/execução/consumo e reconcilia saldos. Os benchmarks preservam execuções anteriores.
+`pnpm check` exige a branch autorizada e executa typecheck, lint, formatação, testes unitários, migrations, integração PostgreSQL e OpenAPI. Evidências atuais: [69 testes M1–M4](docs/evidencias/checks-m4.json) e [benchmark e HTTP M4](docs/evidencias/benchmark-m4.json). As evidências históricas foram preservadas. `pnpm benchmark` usa somente TEST e gera 10 mil pacientes e 2 mil episódios fictícios por execução. `pnpm benchmark:inventory` cria mil posições fictícias, abastece por comandos e mede consultas/transferências. `pnpm benchmark:clinical` cria mil programações por comandos, mede mapa/execução/consumo e reconcilia saldos. `pnpm benchmark:daily` prepara mil avaliações e mede lista, avaliação e reavaliação, verificando limites e saldo preservado. Os benchmarks preservam execuções anteriores.
 
 O workflow de CI é **manual**, limitado a `hvb-sistema-dev`; não foi disparado. Ações futuras com custos, serviços externos, DNS, produção e dados reais continuam dependendo de autorização.
 
 - [Relatório M0 + M1](docs/RELATORIO-M0-M1.md)
 - [Relatório M2](docs/RELATORIO-M2.md)
 - [Relatório M3](docs/RELATORIO-M3.md)
+- [Relatório M4](docs/RELATORIO-M4.md)
 - [Decisões de stack](docs/adr/0001-stack.md)
 - [Integridade e acesso](docs/adr/0002-integridade-acesso.md)
 - [Estoque físico e concorrência](docs/adr/0003-estoque-fisico.md)
 - [Execução e consumo identificado](docs/adr/0004-clinica-consumo.md)
-- [Dicionário M1](docs/DADOS-M1.md), [M2](docs/DADOS-M2.md) e [M3](docs/DADOS-M3.md)
+- [Diária configurável](docs/adr/0005-diaria-configuravel.md)
+- [Dicionário M1](docs/DADOS-M1.md), [M2](docs/DADOS-M2.md), [M3](docs/DADOS-M3.md) e [M4](docs/DADOS-M4.md)
 - [Pendências](docs/PENDENCIAS-HVB.md)
 - [Precedência e proveniência](docs/PRECEDENCIA-E-FONTES.md)
 

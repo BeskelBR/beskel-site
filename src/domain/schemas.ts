@@ -125,4 +125,12 @@ export const permissions = [
   "clinica:consumir",
   "clinica:reverter_consumo",
   "clinica:revisar",
+  "diarias:ler",
+  "diarias:configurar",
+  "diarias:aprovar_simulacao",
+  "diarias:classificar",
+  "diarias:associar",
+  "diarias:avaliar",
+  "diarias:reservar",
+  "diarias:reverter",
 ];

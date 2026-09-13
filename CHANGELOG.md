@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0 — 2026-09-13
+
+- M4: classificação, medição de peso, grupos, pacotes e regras versionados; aprovação restrita à simulação e períodos explícitos.
+- Avaliação não monetária por quantidade física, administrações ou itens distintos; limites concorrentes, reserva, reversão e reavaliação com histórico.
+- Origem retificada, estorno, mudança de classificação e encerramento sinalizam revisão; cobertura não altera consumo, custo ou saldo.
+- Migrations 014–016, 16 tabelas e quatro views; 33 operações de diária, total de 130 operações em 88 caminhos. Sem dependências novas.
+- 69 testes aprovados, incluindo instalação em banco vazio; seed repetido e benchmark com mil avaliações, HTTP idempotente e zero limites ultrapassados.
+- Pendências anteriores preservadas e ampliadas. M5/cobrança não iniciado; Vercel e Cloudflare ficam a cargo do usuário.
+
 ## 0.3.0 — 2026-09-13
 
 - M3: item clínico, prescrição, ordem/versão, programação, execução confirmada e retificação; fatos planejados, ocorridos e registrados separados.

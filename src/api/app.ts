@@ -16,6 +16,8 @@ import {
 import { inventoryInputs, amount } from "../domain/inventory/schemas.ts";
 import { clinicalActions, clinicalLists } from "../domain/clinical/service.ts";
 import { clinicalInputs } from "../domain/clinical/schemas.ts";
+import { dailyActions, dailyLists } from "../domain/daily/service.ts";
+import { dailyInputs } from "../domain/daily/schemas.ts";
 
 function strictValues(schema: unknown, value: unknown): void {
   if (value === undefined) return;
@@ -70,8 +72,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
   await app.register(swagger, {
     openapi: {
       info: {
-        title: "HVB Sistema — Fundação, Estoque e Clínica",
-        version: "0.3.0",
+        title: "HVB Sistema — Clínica e Diária Configurável",
+        version: "0.4.0",
       },
       servers: [{ url: "http://127.0.0.1:3100" }],
       components: {
@@ -195,7 +197,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     async () => {
       try {
         const r = await db.query(
-          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='013_clinical_traceability.sql') AS ready, current_user AS role",
+          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='016_daily_links.sql') AS ready, current_user AS role",
         );
         if (!r.rows[0].ready || r.rows[0].role !== "hvb_app")
           throw new Error("not ready");
@@ -244,8 +246,14 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...inputs,
     ...inventoryInputs,
     ...clinicalInputs,
+    ...dailyInputs,
   };
-  for (const action of [...actions, ...inventoryActions, ...clinicalActions]) {
+  for (const action of [
+    ...actions,
+    ...inventoryActions,
+    ...clinicalActions,
+    ...dailyActions,
+  ]) {
     app.post(
       `/v1${action.path}`,
       {
@@ -270,6 +278,16 @@ export async function buildApp(db: pg.Pool, logging = false) {
                 versao: { type: "integer" },
                 ordem_id: uuid,
                 ordem_versao_id: uuid,
+                resultado: {
+                  type: "string",
+                  enum: [
+                    "incluido",
+                    "parcial",
+                    "excedente",
+                    "excluido",
+                    "pendente",
+                  ],
+                },
               },
               ["id", "comando_id", "estado", "repetido"],
             ),
@@ -307,10 +325,16 @@ export async function buildApp(db: pg.Pool, logging = false) {
         }),
     );
   }
-  for (const list of [...lists, ...inventoryLists, ...clinicalLists]) {
+  for (const list of [
+    ...lists,
+    ...inventoryLists,
+    ...clinicalLists,
+    ...dailyLists,
+  ]) {
     const stockPosition = list.table === "posicao_estoque";
     const stockLedger = list.table === "lancamento_estoque_consulta";
-    const clinical = list.path.startsWith("/clinica/");
+    const clinical =
+      list.path.startsWith("/clinica/") || list.path.startsWith("/diarias/");
     const schedule = list.table === "programacao_consulta";
     const clinicalFilters = clinical
       ? [
@@ -322,6 +346,13 @@ export async function buildApp(db: pg.Pool, logging = false) {
           "consumo_id",
           "produto_id",
           "item_clinico_id",
+          "grupo_versao_id",
+          "pacote_versao_id",
+          "pacote_episodio_id",
+          "periodo_diaria_id",
+          "evento_id",
+          "uso_id",
+          "regra_id",
         ].filter((f) => list.columns.split(",").includes(f))
       : [];
     const query = object(
@@ -363,7 +394,14 @@ export async function buildApp(db: pg.Pool, logging = false) {
               ...uuid,
               nullable: column !== "id",
             }
-          : ["ativo"].includes(column)
+          : [
+                "ativo",
+                "simulacao",
+                "origem_ativa",
+                "execucao_integral",
+                "material_tutor",
+                "necessita_revisao",
+              ].includes(column)
             ? { type: "boolean" }
             : [
                   "capacidade",
@@ -371,6 +409,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
                   "versao",
                   "tentativas",
                   "versao_snapshot",
+                  "prioridade",
                 ].includes(column)
               ? { type: "integer" }
               : { type: "string", nullable: true },

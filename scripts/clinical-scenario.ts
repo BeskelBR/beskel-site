@@ -6,6 +6,7 @@ export async function clinicalScenario(
   token: string,
   unit: string,
   prefix: string = randomUUID(),
+  episodeType: "atendimento" | "internacao" = "atendimento",
 ) {
   async function create(name: string, path: string, body: unknown) {
     const r = await app.inject({
@@ -31,7 +32,7 @@ export async function clinicalScenario(
     await create("episodio", "/episodios", {
       paciente_id: patient,
       unidade_id: unit,
-      tipo: "atendimento",
+      tipo: episodeType,
       admitido_em: "2026-09-01T08:00:00Z",
     })
   ).id;
