@@ -1,0 +1,12 @@
+{
+  "executed_at": "2026-09-13T11:41:33.164Z",
+  "transport": "HTTP real em loopback, porta efêmera",
+  "health": 200,
+  "ready": 200,
+  "create": 200,
+  "replay": 200,
+  "replay_same_id": true,
+  "malformed_json": 400,
+  "unauthenticated": 401,
+  "worker_claimed": 1
+}

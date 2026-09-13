@@ -1,0 +1,56 @@
+{
+  "executed_at": "2026-09-13T11:41:32.183Z",
+  "branch": "hvb-sistema-dev",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 1105,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 101,
+      "output": "Checked 21 files in 16ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 101,
+      "output": "Checked 24 files in 10ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 218,
+      "output": "✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (7.4401ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (1.0398ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.635ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (5.8195ms)\nℹ tests 4\nℹ suites 0\nℹ pass 4\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 160.9809",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 223,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 1670,
+      "output": "✔ todas as consultas publicadas serializam conforme contrato sem SELECT irrestrito (772.7489ms)\n✔ retry transacional desfaz tentativa anterior e respeita limite de três tentativas (121.638ms)\n✔ health, readiness, organização, contrato OpenAPI e autenticação (14.9561ms)\n✔ cadastro, vínculo, papéis, dispositivo e proveniência sintética executáveis (53.9669ms)\n✔ oito comandos concorrentes e retry após resposta perdida produzem um único efeito (60.5889ms)\n✔ falha de integridade reverte comando, domínio, auditoria e outbox (9.2737ms)\n✔ FK composta e RLS bloqueiam outra organização; contexto não vaza no pool (11.9448ms)\n✔ RBAC nega escrita ao leitor e ABAC restringe unidade/dispositivo no servidor (17.7739ms)\n✔ credencial opaca, expirada, NFC e revogada; desativação de usuário/dispositivo (36.0186ms)\n✔ capacidade por vaga, concorrência, intervalo e consistência de unidade (67.415ms)\n✔ alta clínica separada da ocupação e saída, com versão esperada e histórico (32.4576ms)\n✔ paginação keyset, limites, entradas desconhecidas e datas futuras (8.8978ms)\n✔ privilégios: app não altera auditoria, apaga cadastro, assume worker ou cria tabela (6.0157ms)\n✔ workers concorrentes não reservam o mesmo job; inbox deduplica repetição (72.6222ms)\n✔ lease expirada, fencing, backoff e erro permanente viram pendência (8.3846ms)\nℹ tests 15\nℹ suites 0\nℹ pass 15\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1608.9386",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 633,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

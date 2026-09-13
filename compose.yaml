@@ -1,0 +1,19 @@
+name: hvb-sistema-local
+services:
+  postgres:
+    image: postgres:17.10
+    environment:
+      POSTGRES_USER: hvb_dev_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Execute node scripts/configure-env.mjs}
+      POSTGRES_DB: hvb_sistema_dev
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - ./.local/docker-postgres:/var/lib/postgresql/data
+    command: [postgres, -c, max_connections=30]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U hvb_dev_admin -d hvb_sistema_dev]
+      interval: 2s
+      timeout: 2s
+      retries: 30

@@ -1,0 +1,41 @@
+{
+  "name": "hvb-sistema",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "node --env-file=.env src/api/server.ts",
+    "worker": "node --env-file=.env src/worker/main.ts",
+    "db:local": "node scripts/local-postgres.mjs start",
+    "db:stop": "node scripts/local-postgres.mjs stop",
+    "db:migrate": "node --env-file=.env scripts/migrate.ts",
+    "db:seed": "node --env-file=.env scripts/seed.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint src scripts tests",
+    "format": "biome format --write src scripts tests package.json tsconfig.json biome.json",
+    "format:check": "biome format src scripts tests package.json tsconfig.json biome.json",
+    "test": "node --test tests/unit.test.ts",
+    "test:integration": "node --env-file=.env --test --test-concurrency=1 tests/integration.test.ts",
+    "openapi": "node scripts/openapi.ts",
+    "benchmark": "node --env-file=.env scripts/benchmark.ts",
+    "check": "node scripts/check.mjs"
+  },
+  "dependencies": {
+    "@fastify/swagger": "9.8.1",
+    "fastify": "5.12.4",
+    "pg": "8.23.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.13",
+    "@types/node": "24.13.4",
+    "@types/pg": "8.23.1",
+    "typescript": "5.9.3"
+  },
+  "optionalDependencies": {
+    "@embedded-postgres/windows-x64": "17.10.0-beta.17"
+  }
+}

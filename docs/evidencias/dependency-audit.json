@@ -1,0 +1,14 @@
+{
+  "date": "2026-09-13",
+  "command": "pnpm audit --prod --json",
+  "source": "npm registry audit",
+  "exit_code": 0,
+  "advisories": {},
+  "metadata": {
+    "vulnerabilities": {"info": 0, "low": 0, "moderate": 0, "high": 0, "critical": 0},
+    "dependencies": 68,
+    "devDependencies": 0,
+    "optionalDependencies": 2,
+    "totalDependencies": 70
+  }
+}
