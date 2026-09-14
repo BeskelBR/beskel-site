@@ -1,4 +1,4 @@
-# Pendências — HVB Sistema M0/M1 + M2 + M3 + M4 + M5 + M6A + M6B
+# Pendências — HVB Sistema M0/M1 + M2 + M3 + M4 + M5 + M6A + M6B + M6C
 
 M0/M1 foi limitado à fundação local com dados fictícios. As decisões abaixo não bloqueiam o desenvolvimento independente já validado.
 
@@ -153,3 +153,24 @@ Protocolos preventivos entregues em simulação. Pendências anteriores preserva
 | Documentos gerais, agenda, portal/comunicação e interface | PENDENTE próximos recortes M6 | Seguir backlog, preservando assinatura real, hospedagem e comunicação como decisões específicas |
 
 O usuário pediu economia de cota: [roteiro de chat e testes](ROTEIRO-CHAT-E-TESTES.md) registra a divisão sugerida. Modelo não alterado e nenhum reset de cota consumido. Código segue no GitHub; Vercel/Cloudflare e decisões humanas anteriores continuam pendentes.
+
+## Continuação M6C — 14/09/2026
+
+Documentos gerais em simulação, preservando todas as linhas anteriores. Aprovação técnica não confirma consentimento, identidade profissional, assinatura válida ou entrega real.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Modelos e textos reais | PENDENTE; modelo e campos imutáveis, aprovação somente DEV | Homologar textos, identificação, linguagem, campos e obrigatoriedade por documento; tipo termo não prova consentimento |
+| Preenchimento e vínculo ao prontuário | PROPOSTO DEV; campos informados, paciente/episódio tipados, sem inferência clínica | Definir dados automáticos, conferência humana e snapshot de identidade; texto digitado não é validado semanticamente contra o paciente |
+| Solicitante e autorização | PENDENTE poderes reais; usuário ou responsável identificado, autorização explícita e prazo | Validar representante, relação, finalidade e evidência; vínculo cadastral não concede acesso automaticamente |
+| Renovação, negativa, revogação e cancelamento | PROPOSTO DEV; uma autorização por solicitação e revogação preservada | Definir renovação, reconsideração, cancelamento e delegação sem sobrescrever decisões |
+| Público e acesso de operadores | PROPOSTO DEV; interno/responsável na versão, conteúdo tem permissão própria | Homologar escopos, minimização e trilha de leitura; revogação do solicitante não revoga automaticamente RBAC dos operadores |
+| Assinatura profissional e aceite | PENDENTE; apenas declaração não verificada com versão/hash/signatário | Validar mecanismo, certificado, identidade, poderes, evidências e verificação; não promover declaração legada a assinatura criptográfica |
+| Política de assinatura por modelo | PENDENTE; aprovação de conteúdo não exige assinatura declarada para todos os tipos | Definir documentos que exigem assinatura/aceite antes de entrega e responsáveis pela conferência |
+| Arquivos e apresentação | PENDENTE; texto privado no PostgreSQL | Implementar PDF/DOCX, anexos, arquivo privado, verificação de conteúdo e download autorizado; UI deve mostrar texto sem interpretar HTML |
+| Entrega e comunicação | PROPOSTO DEV; registro manual simulado, versão e destinatário exatos, autorização vigente | Definir comprovantes reais, múltiplos destinatários, falhas/reenvio e canal; nenhum envio ou integração ativado |
+| Correção, prazo e entrega histórica | PROPOSTO DEV; nova versão preserva evidências; rascunho posterior bloqueia nova entrega obsoleta | Definir reabertura de prazo, comunicação de correção e registro tardio anterior à aprovação; não reabrir ou comunicar automaticamente |
+| Escala e limites documentais | INVESTIGADO; 50 campos, texto base até 20 mil e final até 120 mil caracteres; trava por solicitação | Medir documentos extensos, histórico e carga concorrente; benchmark local não é SLA |
+| Agenda, portal/comunicação e interface | PENDENTE próximos recortes M6 | Seguir backlog sem iniciar produção, migração real ou serviços pagos |
+
+Código segue no GitHub, em hvb-sistema-dev. Vercel/Cloudflare e demais decisões humanas continuam pendentes. Nenhuma pasta externa a SISTEMA ou outra branch foi alterada.

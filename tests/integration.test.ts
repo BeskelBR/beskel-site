@@ -707,11 +707,25 @@ test("workers concorrentes não reservam o mesmo job; inbox deduplica repetiçã
   for (const j of [...a.slice(1), ...b]) await deliverLocal(worker, j);
 });
 test("lease expirada, fencing, backoff e erro permanente viram pendência", async () => {
+  // Use a fresh identified event: preserved TEST runs may contain nearly exhausted jobs.
+  const created = await patient();
+  const fresh = (
+    await admin.query(
+      "SELECT id FROM hvb.outbox WHERE organizacao_id=$1 AND entidade_id=$2",
+      [f.org, created],
+    )
+  ).rows[0].id;
+  await admin.query(
+    "UPDATE hvb.outbox SET disponivel_em=(SELECT min(disponivel_em)-interval '1 second' FROM hvb.outbox) WHERE id=$1",
+    [fresh],
+  );
   const jobs = await claim(worker, 1),
     job = jobs[0];
   assert.ok(job);
+  assert.equal(job.id, fresh);
+  assert.equal(job.tentativas, 1);
   await admin.query(
-    "UPDATE hvb.outbox SET lease_ate=now()-interval '1 second',disponivel_em=now()-interval '1 day' WHERE id=$1",
+    "UPDATE hvb.outbox SET lease_ate=now()-interval '1 second' WHERE id=$1",
     [job.id],
   );
   const replacement = (await claim(worker, 1))[0];
@@ -729,7 +743,7 @@ test("lease expirada, fencing, backoff e erro permanente viram pendência", asyn
   assert.ok(row.disponivel_em > new Date());
   assert.equal(row.lease_token, null);
   await admin.query(
-    "UPDATE hvb.outbox SET tentativas=5,lease_ate=now()-interval '1 second' WHERE id=$1",
+    "UPDATE hvb.outbox SET tentativas=5,lease_ate=least(now(),(SELECT min(lease_ate) FROM hvb.outbox))-interval '1 second' WHERE id=$1",
     [job.id],
   );
   await runBatch(worker, 1);

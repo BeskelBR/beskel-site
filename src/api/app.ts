@@ -1,3 +1,5 @@
+import { documentActions, documentLists } from "../domain/documents/service.ts";
+import { documentInputs, documentFields } from "../domain/documents/schemas.ts";
 import {
   preventiveActions,
   preventiveLists,
@@ -37,6 +39,13 @@ import {
 
 function strictValues(schema: unknown, value: unknown): void {
   if (value === undefined) return;
+  if (
+    schema === documentFields &&
+    value &&
+    typeof value === "object" &&
+    Object.values(value).some((v) => typeof v !== "string")
+  )
+    throw new DomainError(400, "campos_documentais_devem_ser_texto");
   const field = schema as {
     properties?: Record<string, unknown>;
     items?: unknown;
@@ -94,7 +103,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     openapi: {
       info: {
         title: "HVB Sistema — Clínica, Financeiro e Exames",
-        version: "0.7.0",
+        version: "0.8.0",
       },
       servers: [{ url: "http://127.0.0.1:3100" }],
       components: {
@@ -218,7 +227,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     async () => {
       try {
         const r = await db.query(
-          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='029_preventive_lineage_bounds.sql') AS ready, current_user AS role",
+          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='033_document_placeholder_binding.sql') AS ready, current_user AS role",
         );
         if (!r.rows[0].ready || r.rows[0].role !== "hvb_app")
           throw new Error("not ready");
@@ -271,6 +280,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...financialInputs,
     ...examInputs,
     ...preventiveInputs,
+    ...documentInputs,
   };
   for (const action of [
     ...actions,
@@ -280,6 +290,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...financialActions,
     ...examActions,
     ...preventiveActions,
+    ...documentActions,
   ]) {
     app.post(
       `/v1${action.path}`,
@@ -360,6 +371,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...financialLists,
     ...examLists,
     ...preventiveLists,
+    ...documentLists,
   ]) {
     const stockPosition = list.table === "posicao_estoque";
     const stockLedger = list.table === "lancamento_estoque_consulta";
@@ -368,7 +380,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
       list.path.startsWith("/diarias/") ||
       list.path.startsWith("/financeiro/") ||
       list.path.startsWith("/exames/") ||
-      list.path.startsWith("/protocolos/");
+      list.path.startsWith("/protocolos/") ||
+      list.path.startsWith("/documentos/");
     const schedule = list.table === "programacao_consulta";
     const clinicalFilters = clinical
       ? [
@@ -416,6 +429,10 @@ export async function buildApp(db: pg.Pool, logging = false) {
           "ocorrencia_id",
           "aplicacao_id",
           "revisao_id",
+          "modelo_id",
+          "modelo_versao_id",
+          "documento_versao_id",
+          "autorizacao_id",
         ].filter((f) => list.columns.split(",").includes(f))
       : [];
     const query = object(
@@ -443,7 +460,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
         ...(list.table === "pendencia_clinica_consulta"
           ? { situacao: { type: "string", enum: ["aberta", "resolvida"] } }
           : {}),
-        ...(list.path.startsWith("/protocolos/") &&
+        ...((list.path.startsWith("/protocolos/") ||
+          list.path.startsWith("/documentos/")) &&
         list.columns.split(",").includes("paciente_id")
           ? { paciente_id: uuid }
           : {}),
@@ -455,6 +473,9 @@ export async function buildApp(db: pg.Pool, logging = false) {
         ? [
             "unidade_id",
             ...(schedule ? ["inicio", "fim"] : []),
+            ...(list.table === "documento_conteudo_consulta"
+              ? ["documento_versao_id"]
+              : []),
             ...(list.table === "documento_resultado_consulta"
               ? ["resultado_id"]
               : []),
@@ -496,6 +517,10 @@ export async function buildApp(db: pg.Pool, logging = false) {
                   "ativa",
                   "material_revisao",
                   "estornado",
+                  "acesso_vigente",
+                  "prazo_vencido",
+                  "aprovado",
+                  "ha_versao_posterior",
                 ].includes(column)
               ? { type: "boolean", nullable: column === "booleano" }
               : [

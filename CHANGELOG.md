@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.0 — 2026-09-14
+
+- M6C: modelos/campos versionados, solicitação com protocolo, autorização/revogação, conteúdo privado, aprovação e registro de entrega em simulação.
+- Preenchimento textual sem recursão, versão esperada, hash exato e histórico preservado. Declaração de assinatura sempre não verificada.
+- Permissão própria para conteúdo; documento interno não admite entrega a responsável. Papéis comportam as 72 permissões existentes, sem novas concessões implícitas.
+- Migrations 030–033; 11 tabelas e três views; 22 operações novas, total de 245 operações em 150 caminhos.
+- 126 testes aprovados, seed idempotente, instalação vazia e ensaio de mil documentos com HTTP e hash conferidos. Teste de lease usa evento novo identificado para não depender do histórico de TEST.
+- Pendências anteriores preservadas e ampliadas; agenda é o próximo recorte. Sem PDF/DOCX, assinatura validada, envio externo, deploy ou infraestrutura paga.
+
 ## 0.7.0 — 2026-09-14
 
 - M6B: protocolos e etapas versionados, aprovação em simulação, adesão e ocorrências por dias ou calendário com âncora explícita.
