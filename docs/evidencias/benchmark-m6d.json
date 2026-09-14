@@ -1,0 +1,47 @@
+{
+  "executed_at": "2026-09-14T19:46:26.216Z",
+  "node": "v24.19.0",
+  "postgres": "17.10",
+  "synthetic_appointments": 1000,
+  "mode": "Fastify inject e PostgreSQL local; um recurso, slots 30 minutos; HTTP separado; sem SLA",
+  "measurements": [
+    {
+      "mode": "mapa",
+      "samples": 100,
+      "p50_ms": 7.29,
+      "p95_ms": 11.49,
+      "sql_statements": [
+        7
+      ]
+    },
+    {
+      "mode": "agendar",
+      "samples": 100,
+      "p50_ms": 4.05,
+      "p95_ms": 4.63,
+      "sql_statements": [
+        12
+      ]
+    },
+    {
+      "mode": "reprogramar",
+      "samples": 100,
+      "p50_ms": 4.53,
+      "p95_ms": 5.49,
+      "sql_statements": [
+        13
+      ]
+    }
+  ],
+  "http_smoke": {
+    "create": 200,
+    "retry": 200,
+    "same_id": true,
+    "map": 200
+  },
+  "integrity": {
+    "execucoes": 0,
+    "cobrancas": 0,
+    "saldo_fisico": "20.000000"
+  }
+}

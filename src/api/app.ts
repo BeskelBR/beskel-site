@@ -1,3 +1,5 @@
+import { scheduleActions, scheduleLists } from "../domain/schedule/service.ts";
+import { scheduleInputs } from "../domain/schedule/schemas.ts";
 import { documentActions, documentLists } from "../domain/documents/service.ts";
 import { documentInputs, documentFields } from "../domain/documents/schemas.ts";
 import {
@@ -103,7 +105,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     openapi: {
       info: {
         title: "HVB Sistema — Clínica, Financeiro e Exames",
-        version: "0.8.0",
+        version: "0.9.0",
       },
       servers: [{ url: "http://127.0.0.1:3100" }],
       components: {
@@ -227,7 +229,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     async () => {
       try {
         const r = await db.query(
-          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='033_document_placeholder_binding.sql') AS ready, current_user AS role",
+          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='035_schedule_integrity.sql') AS ready, current_user AS role",
         );
         if (!r.rows[0].ready || r.rows[0].role !== "hvb_app")
           throw new Error("not ready");
@@ -281,6 +283,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...examInputs,
     ...preventiveInputs,
     ...documentInputs,
+    ...scheduleInputs,
   };
   for (const action of [
     ...actions,
@@ -291,6 +294,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...examActions,
     ...preventiveActions,
     ...documentActions,
+    ...scheduleActions,
   ]) {
     app.post(
       `/v1${action.path}`,
@@ -316,6 +320,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
                 versao: { type: "integer" },
                 ordem_id: uuid,
                 ordem_versao_id: uuid,
+                agendamento_versao_id: uuid,
                 resultado: {
                   type: "string",
                   enum: [
@@ -372,6 +377,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...examLists,
     ...preventiveLists,
     ...documentLists,
+    ...scheduleLists,
   ]) {
     const stockPosition = list.table === "posicao_estoque";
     const stockLedger = list.table === "lancamento_estoque_consulta";
@@ -381,8 +387,10 @@ export async function buildApp(db: pg.Pool, logging = false) {
       list.path.startsWith("/financeiro/") ||
       list.path.startsWith("/exames/") ||
       list.path.startsWith("/protocolos/") ||
-      list.path.startsWith("/documentos/");
-    const schedule = list.table === "programacao_consulta";
+      list.path.startsWith("/documentos/") ||
+      list.path.startsWith("/agenda/");
+    const agendaMap = list.table === "agenda_mapa_consulta";
+    const schedule = list.table === "programacao_consulta" || agendaMap;
     const clinicalFilters = clinical
       ? [
           "episodio_id",
@@ -433,6 +441,10 @@ export async function buildApp(db: pg.Pool, logging = false) {
           "modelo_versao_id",
           "documento_versao_id",
           "autorizacao_id",
+          "agendamento_id",
+          "agendamento_versao_id",
+          "recurso_id",
+          "disponibilidade_id",
         ].filter((f) => list.columns.split(",").includes(f))
       : [];
     const query = object(
@@ -451,6 +463,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
           : {}),
         ...(stockLedger ? { transacao_id: uuid } : {}),
         ...Object.fromEntries(clinicalFilters.map((f) => [f, uuid])),
+        ...(agendaMap ? { recurso_id: uuid } : {}),
         ...(schedule
           ? {
               inicio: { type: "string", format: "date-time" },
@@ -461,7 +474,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
           ? { situacao: { type: "string", enum: ["aberta", "resolvida"] } }
           : {}),
         ...((list.path.startsWith("/protocolos/") ||
-          list.path.startsWith("/documentos/")) &&
+          list.path.startsWith("/documentos/") ||
+          list.path.startsWith("/agenda/")) &&
         list.columns.split(",").includes("paciente_id")
           ? { paciente_id: uuid }
           : {}),
@@ -521,6 +535,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
                   "prazo_vencido",
                   "aprovado",
                   "ha_versao_posterior",
+                  "atual",
+                  "revogada",
                 ].includes(column)
               ? { type: "boolean", nullable: column === "booleano" }
               : [
@@ -634,7 +650,15 @@ export async function buildApp(db: pg.Pool, logging = false) {
               throw new DomainError(400, "mapa_exige_periodo_de_ate_sete_dias");
             values.push(q.inicio, q.fim);
             where.push(
-              `prevista_em>=$${values.length - 1} AND prevista_em<$${values.length}`,
+              agendaMap
+                ? `inicio<$${values.length} AND fim>$${values.length - 1}`
+                : `prevista_em>=$${values.length - 1} AND prevista_em<$${values.length}`,
+            );
+          }
+          if (agendaMap && q.recurso_id) {
+            values.push(q.recurso_id);
+            where.push(
+              `EXISTS(SELECT 1 FROM agendamento_recurso ar WHERE ar.organizacao_id=$1 AND ar.agendamento_versao_id=agenda_mapa_consulta.id AND ar.recurso_id=$${values.length})`,
             );
           }
           if (list.table === "pendencia_clinica_consulta" && q.situacao) {

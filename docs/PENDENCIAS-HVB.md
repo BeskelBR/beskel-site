@@ -174,3 +174,22 @@ Documentos gerais em simulação, preservando todas as linhas anteriores. Aprova
 | Agenda, portal/comunicação e interface | PENDENTE próximos recortes M6 | Seguir backlog sem iniciar produção, migração real ou serviços pagos |
 
 Código segue no GitHub, em hvb-sistema-dev. Vercel/Cloudflare e demais decisões humanas continuam pendentes. Nenhuma pasta externa a SISTEMA ou outra branch foi alterada.
+
+## Continuação M6D — 14/09/2026
+
+Agenda em simulação. Todas as pendências anteriores permanecem registradas; propostas técnicas não aprovam regras hospitalares.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Profissional, equipe, sala e instituição | PROPOSTO DEV; vínculos tipados e usuário ativo | Validar habilitação, membros de equipe, equivalência de recursos e tipo físico do local; instituição não substitui autor clínico |
+| Disponibilidade e escala | PROPOSTO DEV; intervalos explícitos e bloqueios revogáveis | Definir escala real, recorrência, feriados, fuso e união de intervalos adjacentes |
+| Capacidade e encaixes | PROPOSTO DEV; um compromisso ativo por recurso/intervalo | Aprovar capacidade, sobreposição autorizada, prioridade, fila e conflito do mesmo paciente |
+| Recursos entre unidades | PENDENTE; conflito atual dentro da unidade | Definir deslocamento e impedir profissional compartilhado de receber agendas simultâneas em unidades distintas |
+| Reprogramação e revisão | PROPOSTO DEV; versões preservadas, disponibilidade retirada não libera reserva | Definir responsáveis/prazos da revisão, reconfirmação e notificações; flag histórica usa disponibilidade atual |
+| Transições e retrospectividade | PROPOSTO DEV; sequência, instante ocorrido e autor; passado aceito na simulação | Aprovar registro tardio, correção de chegada, cancelamento após chegada e reabertura de estados terminais |
+| Responsável e acesso | PENDENTE poderes reais; responsável indicado não recebe acesso | Homologar vínculo, representação, confirmação e autorização do portal |
+| Planejamento versus atendimento | SEPARADO; chegada/conclusão não criam episódio, presença física ou execução | Definir vínculos explícitos com episódio, exame, protocolo e profissional executor |
+| Concorrência e desempenho | INVESTIGADO; trava por unidade, mil agendamentos medidos | Medir histórico longo e múltiplas unidades; avaliar trava mais granular sem perder atomicidade |
+| Interface e comunicações | PENDENTE; somente API e mapa paginado | Implementar calendário visual e portal; homologar canal e conteúdo antes de qualquer envio |
+
+Código no GitHub; Vercel/Cloudflare ficam com o usuário. Migração real, SimplesVet, dados reais, serviços externos e infraestrutura paga não iniciados.

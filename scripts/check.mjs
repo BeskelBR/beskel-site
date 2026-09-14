@@ -49,6 +49,7 @@ const steps = [
       "tests/exams.test.ts",
       "tests/preventive.test.ts",
       "tests/documents.test.ts",
+      "tests/schedule.test.ts",
     ],
   ],
   ["openapi", ["scripts/openapi.ts"]],
@@ -74,7 +75,7 @@ for (const [name, args] of steps) {
 }
 await mkdir("docs/evidencias", { recursive: true });
 await writeFile(
-  "docs/evidencias/checks-m6c.json",
+  "docs/evidencias/checks-m6d.json",
   `${JSON.stringify({ executed_at: new Date().toISOString(), branch: branch.stdout.trim(), node: process.version, results }, null, 2)}\n`,
 );
 if (results.length !== steps.length || results.some((r) => r.status !== 0))

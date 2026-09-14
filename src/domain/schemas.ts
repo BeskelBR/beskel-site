@@ -99,6 +99,12 @@ export const inputs = {
   }),
 };
 export const permissions = [
+  "agenda:ler",
+  "agenda:configurar",
+  "agenda:disponibilidade",
+  "agenda:agendar",
+  "agenda:reprogramar",
+  "agenda:transicionar",
   "documentos:ler",
   "documentos:conteudo",
   "documentos:configurar",

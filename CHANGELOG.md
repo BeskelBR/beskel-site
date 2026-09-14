@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.0 — 2026-09-14
+
+- M6D: recursos tipados, disponibilidade/bloqueios com revogação, agendamentos multirrecurso, reprogramação e histórico de transições.
+- Conflitos concorrentes recusados; retirada de disponibilidade sinaliza revisão sem liberar reserva ativa. Planejamento e chegada não geram execução clínica.
+- Migrations 034–035, oito tabelas e três views; 16 operações novas, total de 261 operações em 159 caminhos e 78 permissões.
+- 138 testes aprovados, seed idempotente, instalação vazia e mil agendamentos no ensaio com HTTP local. Sem dependências novas.
+- Pendências cumulativas preservadas. Próximo recorte: portal/comunicação simulados; sem interface, mensagens externas, deploy ou serviços pagos.
+
 ## 0.8.0 — 2026-09-14
 
 - M6C: modelos/campos versionados, solicitação com protocolo, autorização/revogação, conteúdo privado, aprovação e registro de entrega em simulação.

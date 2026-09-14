@@ -1,6 +1,6 @@
 {
   "name": "hvb-sistema",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.19.0",
@@ -22,7 +22,7 @@
     "format": "biome format --write src scripts tests package.json tsconfig.json biome.json",
     "format:check": "biome format src scripts tests package.json tsconfig.json biome.json",
     "test": "node --test tests/unit.test.ts",
-    "test:integration": "node --env-file=.env --test --test-concurrency=1 tests/integration.test.ts tests/inventory.test.ts tests/clinical.test.ts tests/daily.test.ts tests/financial.test.ts tests/exams.test.ts tests/preventive.test.ts tests/documents.test.ts",
+    "test:integration": "node --env-file=.env --test --test-concurrency=1 tests/integration.test.ts tests/inventory.test.ts tests/clinical.test.ts tests/daily.test.ts tests/financial.test.ts tests/exams.test.ts tests/preventive.test.ts tests/documents.test.ts tests/schedule.test.ts",
     "benchmark:daily": "node --env-file=.env scripts/benchmark-daily.ts",
     "benchmark:clinical": "node --env-file=.env scripts/benchmark-clinical.ts",
     "benchmark:inventory": "node --env-file=.env scripts/benchmark-inventory.ts",
@@ -36,7 +36,9 @@
     "db:seed:preventive": "node --env-file=.env scripts/seed-preventive.ts",
     "benchmark:preventive": "node --env-file=.env scripts/benchmark-preventive.ts",
     "db:seed:documents": "node --env-file=.env scripts/seed-documents.ts",
-    "benchmark:documents": "node --env-file=.env scripts/benchmark-documents.ts"
+    "benchmark:documents": "node --env-file=.env scripts/benchmark-documents.ts",
+    "db:seed:schedule": "node --env-file=.env scripts/seed-schedule.ts",
+    "benchmark:schedule": "node --env-file=.env scripts/benchmark-schedule.ts"
   },
   "dependencies": {
     "@fastify/swagger": "9.8.1",
