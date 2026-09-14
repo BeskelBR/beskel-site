@@ -99,6 +99,11 @@ export const inputs = {
   }),
 };
 export const permissions = [
+  "compras:ler",
+  "compras:configurar",
+  "compras:solicitar",
+  "compras:decidir",
+  "compras:receber",
   "portal:administrar",
   "portal:ler",
   "portal:autorizar",

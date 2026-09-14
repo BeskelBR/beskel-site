@@ -1,3 +1,5 @@
+import { purchaseActions, purchaseLists } from "../domain/purchases/service.ts";
+import { purchaseInputs } from "../domain/purchases/schemas.ts";
 import { portalActions, portalLists } from "../domain/portal/service.ts";
 import { portalInputs } from "../domain/portal/schemas.ts";
 import { registerPortal } from "../domain/portal/routes.ts";
@@ -108,7 +110,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     openapi: {
       info: {
         title: "HVB Sistema — Clínica, Financeiro e Exames",
-        version: "0.10.0",
+        version: "0.11.0",
       },
       servers: [{ url: "http://127.0.0.1:3100" }],
       components: {
@@ -238,7 +240,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     async () => {
       try {
         const r = await db.query(
-          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='038_portal_predicate_plans.sql') AS ready, current_user AS role",
+          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='040_purchase_integrity.sql') AS ready, current_user AS role",
         );
         if (!r.rows[0].ready || r.rows[0].role !== "hvb_app")
           throw new Error("not ready");
@@ -294,6 +296,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...documentInputs,
     ...scheduleInputs,
     ...portalInputs,
+    ...purchaseInputs,
   };
   for (const action of [
     ...actions,
@@ -306,6 +309,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...documentActions,
     ...scheduleActions,
     ...portalActions,
+    ...purchaseActions,
   ]) {
     app.post(
       `/v1${action.path}`,
@@ -390,6 +394,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...documentLists,
     ...scheduleLists,
     ...portalLists,
+    ...purchaseLists,
   ]) {
     const stockPosition = list.table === "posicao_estoque";
     const stockLedger = list.table === "lancamento_estoque_consulta";
@@ -401,7 +406,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
       list.path.startsWith("/protocolos/") ||
       list.path.startsWith("/documentos/") ||
       list.path.startsWith("/agenda/") ||
-      list.path.startsWith("/comunicacao/");
+      list.path.startsWith("/comunicacao/") ||
+      list.path.startsWith("/compras/");
     const agendaMap = list.table === "agenda_mapa_consulta";
     const schedule = list.table === "programacao_consulta" || agendaMap;
     const clinicalFilters = clinical
@@ -462,6 +468,11 @@ export async function buildApp(db: pg.Pool, logging = false) {
           "concessao_id",
           "mensagem_id",
           "tentativa_id",
+          "pedido_id",
+          "fornecedor_id",
+          "apresentacao_id",
+          "item_pedido_id",
+          "posicao_id",
         ].filter((f) => list.columns.split(",").includes(f))
       : [];
     const query = object(

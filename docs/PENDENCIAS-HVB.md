@@ -214,3 +214,20 @@ Portal e comunicação em simulação. O usuário prefere concluir o núcleo fun
 | Interface e publicação | PENDENTE; apenas API local | Implementar experiência visual e homologação após consolidação; Vercel/Cloudflare continuam com o usuário |
 
 Somente SISTEMA e hvb-sistema-dev. Nenhum serviço externo, dado real, SimplesVet, migração ou infraestrutura paga foi acionado.
+
+## Consolidação C1 — 14/09/2026
+
+Compras e recebimento físico integrados em simulação. Pendências anteriores preservadas; a resolução conjunta e a verificação geral permanecem posteriores à consolidação do núcleo.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Identidade e cadastro do fornecedor | PROPOSTO DEV; nome/referência por unidade, imutável | Validar cadastro fiscal, contatos, correção e fornecedores compartilhados entre unidades |
+| Pedido e alçadas | PROPOSTO DEV; itens atômicos e aprovação/cancelamento explícitos | Definir orçamento, cotação, alçadas, edição/sucessão e segregação de funções |
+| Recebimento parcial e excesso | PROPOSTO DEV; teto por apresentação exata e custódia hospitalar | Aprovar tolerância, substituição, divergência de embalagem e recebimento sem pedido; não inferir conversão |
+| Custo e financeiro da aquisição | A IMPLEMENTAR/VALIDAR; custo vem do lote M2, sem título ou pagamento | Completar capacidades de preço/tributos/frete/desconto/contas a pagar conforme escopo e regras; entrada não comprova quitação |
+| Documento fornecedor | DECLARADO DEV; referência textual, sem validação fiscal | Definir arquivo, identificadores, duplicidade documental e vínculo fiscal antes de uso real |
+| Reversão e devolução comercial | PROPOSTO DEV; reversão física integral libera quantidade, sem crédito | Definir devolução parcial ao fornecedor, compensação financeira e pedido substituto |
+| Datas e cancelamento após parcial | PROPOSTO DEV; data ocorrida separada do registro, saldo recebido preservado | Aprovar registro tardio, correções e reabertura sem apagar histórico |
+| Volume e verificação geral | ADIADO conforme orientação; recorte pontual aprovado | Medir até 50 itens por pedido/20 entradas por lote, concorrência entre pedidos e executar suíte geral/instalação vazia posteriormente |
+
+Nenhum envio ao fornecedor, pagamento, nota fiscal real, migração ou serviço externo foi acionado.

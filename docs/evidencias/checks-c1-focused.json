@@ -1,0 +1,57 @@
+{
+  "executed_at": "2026-09-14T22:32:08.980Z",
+  "branch": "hvb-sistema-dev",
+  "scope": "compras e estoque",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 1484,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 141,
+      "output": "Checked 81 files in 39ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 131,
+      "output": "Checked 84 files in 24ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 222,
+      "output": "✔ quantidades de estoque usam aritmética inteira e conversão sem arredondamento (1.1102ms)\n✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (6.3754ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (0.8395ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.2376ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (4.9418ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 164.0945",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 199,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 5647,
+      "output": "✔ apresentações são dimensionais, exatas, versionadas e imutáveis (1310.7795ms)\n✔ frações decimais preservam precisão e rejeitam arredondamento silencioso (36.4517ms)\n✔ repetição concorrente de entrada e timeout simulado geram um único par (91.4318ms)\n✔ duas retiradas concorrentes não excedem saldo e não registram consumo (68.8891ms)\n✔ transferências opostas usam ordem determinística e preservam total (62.4613ms)\n✔ reserva protege disponibilidade e efetivação transfere uma única vez (43.0783ms)\n✔ reservas concorrentes, liberação e expiração não alteram saldo físico (515.7961ms)\n✔ devolução parcial é vinculada, limitada e reversível antes da origem (61.0024ms)\n✔ perda e reversão preservam razão; reversão de entrada não pode consumir reserva (48.331ms)\n✔ custódia do tutor e custo desconhecido ficam explícitos sem custo hospitalar inventado (87.4441ms)\n✔ validade pendente, vencida e recipiente aberto sem regra impedem retirada, preservando entrada (92.1268ms)\n✔ inventário aplica diferença vinculada e rejeita contagem após movimentação concorrente (67.0838ms)\n✔ inventário sem divergência não inventa movimento e ajuste não passa por cima de reserva (43.7397ms)\n✔ isolamento, permissões e proteção SQL impedem atalhos de saldo e livro incompleto (28.7449ms)\n✔ consultas paginadas de estoque seguem OpenAPI e devolvem decimais como strings (23.9347ms)\n✔ pedido e aprovação não geram estoque, pagamento ou compra externa (1388.1706ms)\n✔ recebimento parcial usa a mesma transação física, fator e retry (166.7376ms)\n✔ concorrência não ultrapassa quantidade solicitada (174.1716ms)\n✔ falha posterior desfaz o lote inteiro de entradas e permite correção (98.2699ms)\n✔ compra não aceita outra apresentação, custódia de tutor ou item de outro pedido (154.8734ms)\n✔ cancelamento preserva recebimento parcial e impede novas entradas (76.6699ms)\n✔ reversão física preserva recibo e libera quantidade do pedido sem crédito fictício (89.9176ms)\n✔ escopo, permissão de estoque e SQL imutável impedem atalhos (104.025ms)\n✔ contratos paginados e datas/quantidades inválidas não alteram saldo (110.2212ms)\nℹ tests 24\nℹ suites 0\nℹ pass 24\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 5583.95",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 1359,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

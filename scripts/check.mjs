@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
+const focused = process.argv.includes("--purchases");
 const envFile = process.env.CHECK_ENV_FILE ?? ".env";
 const branch = spawnSync(
   "git",
@@ -41,16 +42,21 @@ const steps = [
       `--env-file=${envFile}`,
       "--test",
       "--test-concurrency=1",
-      "tests/integration.test.ts",
-      "tests/inventory.test.ts",
-      "tests/clinical.test.ts",
-      "tests/daily.test.ts",
-      "tests/financial.test.ts",
-      "tests/exams.test.ts",
-      "tests/preventive.test.ts",
-      "tests/documents.test.ts",
-      "tests/schedule.test.ts",
-      "tests/portal.test.ts",
+      ...(focused
+        ? ["tests/inventory.test.ts", "tests/purchases.test.ts"]
+        : [
+            "tests/integration.test.ts",
+            "tests/inventory.test.ts",
+            "tests/clinical.test.ts",
+            "tests/daily.test.ts",
+            "tests/financial.test.ts",
+            "tests/exams.test.ts",
+            "tests/preventive.test.ts",
+            "tests/documents.test.ts",
+            "tests/schedule.test.ts",
+            "tests/portal.test.ts",
+            "tests/purchases.test.ts",
+          ]),
     ],
   ],
   ["openapi", ["scripts/openapi.ts"]],
@@ -76,8 +82,10 @@ for (const [name, args] of steps) {
 }
 await mkdir("docs/evidencias", { recursive: true });
 await writeFile(
-  "docs/evidencias/checks-m6e.json",
-  `${JSON.stringify({ executed_at: new Date().toISOString(), branch: branch.stdout.trim(), node: process.version, results }, null, 2)}\n`,
+  focused
+    ? "docs/evidencias/checks-c1-focused.json"
+    : "docs/evidencias/checks-c1-full.json",
+  `${JSON.stringify({ executed_at: new Date().toISOString(), branch: branch.stdout.trim(), scope: focused ? "compras e estoque" : "completo", node: process.version, results }, null, 2)}\n`,
 );
 if (results.length !== steps.length || results.some((r) => r.status !== 0))
   process.exitCode = 1;

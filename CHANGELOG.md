@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.11.0 — 2026-09-14
+
+- C1: fornecedor, pedido com itens, aprovação/cancelamento e recebimentos parciais em simulação.
+- Cada linha recebida compartilha o ID da entrada física M2; atomicidade, teto do pedido, custódia hospitalar e apresentação exata.
+- Reversão preserva recibo e recalcula quantidade recebida ativa; não cria crédito/pagamento.
+- Migrations 039–040; seis tabelas e três views; dez operações novas, total de 290 em 176 caminhos.
+- Verificação pontual: 29 testes de unidades/estoque/compras, TypeScript, lint, formato e OpenAPI. Suíte geral, instalação vazia e desempenho adiados conforme a orientação atual.
+- Pendências preservadas; próximo recorte é prontuário longitudinal. Sem envio de pedido, documentos fiscais reais ou infraestrutura externa.
+
 ## 0.10.0 — 2026-09-14
 
 - M6E: contas/credenciais próprias do portal, concessões por paciente, revogações e preferências versionadas.
