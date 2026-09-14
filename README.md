@@ -1,6 +1,6 @@
 # HVB Sistema
 
-Fundação **M0 + M1**, estoque físico **M2**, clínica operacional **M3** e diárias configuráveis **M4**, em `hvb-sistema-dev`. API modular, PostgreSQL real local e worker. Dados exclusivamente fictícios. Produto: **HVB Sistema**; `Core` designa somente o domínio interno.
+Fundação **M0 + M1**, estoque físico **M2**, clínica operacional **M3**, diárias configuráveis **M4** e recorte comercial/financeiro **M5**, em `hvb-sistema-dev`. API modular, PostgreSQL real local e worker. Dados exclusivamente fictícios. Produto: **HVB Sistema**; `Core` designa somente o domínio interno.
 
 Implementado: organização/unidades, contas individuais, papéis/permissões, credenciais opacas e revogação, dispositivos, responsáveis/pacientes/vínculos, episódios, locais/ocupações, comandos idempotentes, auditoria, outbox/inbox e proveniência sintética com FKs tipadas. A organização inicial nasce pelo bootstrap administrativo local.
 
@@ -8,7 +8,9 @@ M2 acrescenta unidades de medida, produtos, apresentações versionadas, lotes, 
 
 M3 acrescenta item clínico, prescrição, ordem versionada, programação, confirmação de execução, material previsto, consumo identificado, estorno e pendências clínicas. A execução não baixa estoque automaticamente; material desconhecido permanece pendente.
 
-M4 acrescenta classificação versionada, peso referenciado, pacotes, grupos, regras, períodos explícitos e avaliação de cobertura com reserva, reversão e histórico. **Somente simulação**: as regras reais do hospital permanecem pendentes. Este lote entrega backend e contratos, sem telas, preços, cobrança, integração com Terminal, migração real ou produção. O código fica no GitHub; Vercel e Cloudflare serão configurados pelo usuário. O backend atual exige PostgreSQL local e não está adaptado à execução serverless.
+M4 acrescenta classificação versionada, peso referenciado, pacotes, grupos, regras, períodos explícitos e avaliação de cobertura com reserva, reversão e histórico. **Somente simulação**: as regras reais do hospital permanecem pendentes.
+
+M5 acrescenta catálogo/preço versionados, conta, avaliação comercial, responsabilidade, título, recebimento, liquidação, crédito, caixa, parcelas da adquirente, depósito e conciliação. São comandos **somente de simulação**, sem dinheiro real ou integração externa. Diária ambígua permanece pendente; inclusão documenta valor zero sem inventar devedor. Este lote entrega backend e contratos, sem telas, Terminal, migração real ou produção. O código fica no GitHub; Vercel e Cloudflare serão configurados pelo usuário. O backend atual exige PostgreSQL local e não está adaptado à execução serverless.
 
 ## Executar neste Windows
 
@@ -23,6 +25,7 @@ Set-Location 'C:\Users\Admin\OneDrive\BESKEL\PARCEIROS\HVB\SISTEMA'
 .\scripts\pnpm.ps1 db:seed:inventory
 .\scripts\pnpm.ps1 db:seed:clinical
 .\scripts\pnpm.ps1 db:seed:daily
+.\scripts\pnpm.ps1 db:seed:financial
 .\scripts\pnpm.ps1 check
 .\scripts\pnpm.ps1 dev
 ```
@@ -98,6 +101,18 @@ Invoke-RestMethod "http://127.0.0.1:3100/v1/diarias/avaliacoes?unidade_id=$($hvb
 
 Configurações incompletas não podem ser aprovadas, e `/aprovar-simulacao` exige confirmação literal. Cada evento referencia uma execução ou item de consumo; avaliação e reserva exigem contexto explícito. Reavaliação usa `versao_esperada` e preserva a avaliação anterior por compensação. A consulta distingue resultado original e `situacao_atual`, incluindo revisão após retificação, estorno ou mudança do período. Reservas vencidas mantêm capacidade comprometida até expiração explícita. Veja o [relatório M4](docs/RELATORIO-M4.md).
 
+### Exercitar o financeiro fictício
+
+`db:seed:financial` cria um título de R$ 100, recebimento **simulado** de R$ 120, liquidação de R$ 100 e crédito de R$ 20. Repetir não duplica documentos ou valores. Nenhum dinheiro foi transferido. Referências em `.local/financial-demo.json`.
+
+```powershell
+$hvbFinancial = Get-Content .local/financial-demo.json -Raw | ConvertFrom-Json
+Invoke-RestMethod "http://127.0.0.1:3100/v1/financeiro/titulos?unidade_id=$($hvbDev.unit)&pagador_id=$($hvbFinancial.payer)" -Headers $hvbHeaders
+Invoke-RestMethod "http://127.0.0.1:3100/v1/financeiro/creditos?unidade_id=$($hvbDev.unit)&pagador_id=$($hvbFinancial.payer)" -Headers $hvbHeaders
+```
+
+Todos os comandos financeiros exigem `unidade_id`, `motivo`, `simulacao: true` e `confirmacao_humana: true`. Valores são strings em BRL com até duas casas; quantidade/preço que exigiria arredondamento é rejeitada. `versao_esperada` protege reavaliações; rateios são informados no mesmo comando do item/título. Receber, liquidar, transformar saldo disponível em crédito e conciliar repasse são ações distintas. Consulte os limites e exemplos no [relatório M5](docs/RELATORIO-M5.md).
+
 ## Docker, Linux e macOS
 
 Alternativa ao banco portátil, usando Docker já instalado:
@@ -112,6 +127,7 @@ pnpm db:seed
 pnpm db:seed:inventory
 pnpm db:seed:clinical
 pnpm db:seed:daily
+pnpm db:seed:financial
 pnpm check
 pnpm dev
 ```
@@ -120,7 +136,7 @@ O gerador não sobrescreve `.env`. Não executar os dois bancos na porta 55432 s
 
 ## Verificação e documentação
 
-`pnpm check` exige a branch autorizada e executa typecheck, lint, formatação, testes unitários, migrations, integração PostgreSQL e OpenAPI. Evidências atuais: [69 testes M1–M4](docs/evidencias/checks-m4.json) e [benchmark e HTTP M4](docs/evidencias/benchmark-m4.json). As evidências históricas foram preservadas. `pnpm benchmark` usa somente TEST e gera 10 mil pacientes e 2 mil episódios fictícios por execução. `pnpm benchmark:inventory` cria mil posições fictícias, abastece por comandos e mede consultas/transferências. `pnpm benchmark:clinical` cria mil programações por comandos, mede mapa/execução/consumo e reconcilia saldos. `pnpm benchmark:daily` prepara mil avaliações e mede lista, avaliação e reavaliação, verificando limites e saldo preservado. Os benchmarks preservam execuções anteriores.
+`pnpm check` exige a branch autorizada e executa typecheck, lint, formatação, testes unitários, migrations, integração PostgreSQL e OpenAPI. Evidências atuais: [88 testes M1–M5](docs/evidencias/checks-m5.json) e [benchmark e HTTP M5](docs/evidencias/benchmark-m5.json). As evidências históricas foram preservadas. `pnpm benchmark` usa somente TEST e gera 10 mil pacientes e 2 mil episódios fictícios por execução. `pnpm benchmark:inventory` cria mil posições fictícias, abastece por comandos e mede consultas/transferências. `pnpm benchmark:clinical` cria mil programações por comandos, mede mapa/execução/consumo e reconcilia saldos. `pnpm benchmark:daily` prepara mil avaliações e mede lista, avaliação e reavaliação, verificando limites e saldo preservado. `pnpm benchmark:financial` prepara mil recebimentos e mede consulta, avaliação, recebimento e liquidação com reconciliação dos saldos. Os benchmarks preservam execuções anteriores.
 
 O workflow de CI é **manual**, limitado a `hvb-sistema-dev`; não foi disparado. Ações futuras com custos, serviços externos, DNS, produção e dados reais continuam dependendo de autorização.
 
@@ -128,12 +144,14 @@ O workflow de CI é **manual**, limitado a `hvb-sistema-dev`; não foi disparado
 - [Relatório M2](docs/RELATORIO-M2.md)
 - [Relatório M3](docs/RELATORIO-M3.md)
 - [Relatório M4](docs/RELATORIO-M4.md)
+- [Relatório M5](docs/RELATORIO-M5.md)
 - [Decisões de stack](docs/adr/0001-stack.md)
 - [Integridade e acesso](docs/adr/0002-integridade-acesso.md)
 - [Estoque físico e concorrência](docs/adr/0003-estoque-fisico.md)
 - [Execução e consumo identificado](docs/adr/0004-clinica-consumo.md)
 - [Diária configurável](docs/adr/0005-diaria-configuravel.md)
-- [Dicionário M1](docs/DADOS-M1.md), [M2](docs/DADOS-M2.md), [M3](docs/DADOS-M3.md) e [M4](docs/DADOS-M4.md)
+- [Comercial e financeiro](docs/adr/0006-comercial-financeiro.md)
+- [Dicionário M1](docs/DADOS-M1.md), [M2](docs/DADOS-M2.md), [M3](docs/DADOS-M3.md), [M4](docs/DADOS-M4.md) e [M5](docs/DADOS-M5.md)
 - [Pendências](docs/PENDENCIAS-HVB.md)
 - [Precedência e proveniência](docs/PRECEDENCIA-E-FONTES.md)
 

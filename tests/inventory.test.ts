@@ -309,11 +309,11 @@ test("duas retiradas concorrentes não excedem saldo e não registram consumo", 
   assert.equal((await balance(st.origin)).saldo_base, "3.000000");
   assert.equal((await balance(st.target)).saldo_base, "7.000000");
   const absent = await admin.query(
-    "SELECT (SELECT count(*)::int FROM hvb.consumo WHERE organizacao_id=$1) AS consumo,to_regclass('hvb.item_conta') AS cobranca",
+    "SELECT (SELECT count(*)::int FROM hvb.consumo WHERE organizacao_id=$1) AS consumo,(SELECT count(*)::int FROM hvb.item_conta WHERE organizacao_id=$1) AS cobranca",
     [f.org],
   );
   assert.equal(absent.rows[0].consumo, 0);
-  assert.equal(absent.rows[0].cobranca, null);
+  assert.equal(absent.rows[0].cobranca, 0);
 });
 test("transferências opostas usam ordem determinística e preservam total", async () => {
   const st = await stock();

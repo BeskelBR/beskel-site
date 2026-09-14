@@ -1,0 +1,56 @@
+{
+  "executed_at": "2026-09-14T01:21:43.154Z",
+  "branch": "hvb-sistema-dev",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 1234,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 106,
+      "output": "Checked 45 files in 25ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 98,
+      "output": "Checked 48 files in 16ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 205,
+      "output": "✔ quantidades de estoque usam aritmética inteira e conversão sem arredondamento (1.1541ms)\n✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (6.2927ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (0.8434ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.229ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (5.0771ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 150.6986",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 490,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 16271,
+      "output": "✔ execução confirmada sem lote preserva saldo e abre pendência; confirmação não é inferida (1871.0518ms)\n✔ programação só conclui uma vez sob concorrência e evento real deduplica chaves diferentes (216.1939ms)\n✔ parciais e conclusão ficam distintas; retificação preserva o original (107.9403ms)\n✔ ordem versionada exige versão esperada e mantém programação anterior para revisão (63.6568ms)\n✔ sobreposição gera revisão e não exclui ordem; material previsto não cria execução nem consumo (55.4988ms)\n✔ consumo identificado baixa uma vez, preserva custódia do tutor e resolve a pendência (83.1151ms)\n✔ falha em um item desfaz o lote inteiro sem apagar execução; decimais aninhados são exatos (98.1867ms)\n✔ consumos concorrentes e reserva não excedem saldo disponível (61.5184ms)\n✔ material de outro tutor, episódio ou unidade não pode ser alocado ao paciente (215.8271ms)\n✔ estorno agregado reabre pendência, compensa todos os itens e permite retificar (99.5192ms)\n✔ registro tardio compara horário ocorrido com alta; programação não executada não vira fato (89.522ms)\n✔ permissões clínicas, contexto de unidade e SQL imutável não admitem atalhos (82.9439ms)\n✔ consumo em dois lotes preserva custo exato e estorno integral; validade e custo desconhecido ficam pendentes (76.6172ms)\n✔ retirada transfere e o consumo debita somente o destino identificado (58.3726ms)\n✔ alta preserva programações futuras e fatos anteriores com pendência de revisão (47.5641ms)\n✔ SQL não pode adicionar lançamento usando comando já confirmado (40.0587ms)\n✔ listas clínicas paginadas respeitam filtros e mapa exige período limitado (69.2371ms)\n✔ pacote incompleto não pode ser aprovado; simulação exige confirmação explícita (1068.8612ms)\n✔ aprovação congela regras e membros de grupo; versões evoluem sem sobrescrever (92.9555ms)\n✔ limite concorrente inclui apenas uma administração e nunca gera cobrança (158.6798ms)\n✔ repetição e versão esperada impedem duplicação de avaliação e consumo de limite (185.4289ms)\n✔ reavaliação compensa anterior e preserva cadeia; reversão libera limite (217.6691ms)\n✔ reserva protege limite e efetivação mantém efeito único (115.371ms)\n✔ reservas concorrentes, liberação e expiração não criam fato ou avaliação (760.887ms)\n✔ itens distintos contam identidade clínica compartilhada, incluindo reserva e reversão (170.8213ms)\n✔ janela por episódio compartilha limite entre períodos; fronteira temporal é explícita (110.7514ms)\n✔ prioridade decide regra explícita e empate vira pendência (143.9859ms)\n✔ classificação referencia medição de peso informada e mudança invalida período sem apagar avaliação (97.3392ms)\n✔ alta retroativa e retificação da origem exigem revisão, preservando capacidade até decisão (167.9657ms)\n✔ execução parcial fica pendente sem converter parcial em administração integral (55.3854ms)\n✔ isolamento e permissões impedem avaliar outra unidade ou aprovar regra sem papel (50.5131ms)\n✔ quantidade física é exata, não muda consumo/custo e material do tutor permanece pendente (111.9184ms)\n✔ limites por período são independentes e cobertura ilimitada é somente explícita (187.3184ms)\n✔ consultas de diária serializam regras, alocações e estados com filtros paginados (101.4272ms)\n✔ catálogo e preço preservam versão, vigência e centavos sem coerção (1362.4774ms)\n✔ origem comercial única, confirmação literal e reavaliação com versão esperada (177.829ms)\n✔ preço ausente fica pendente e emissão não produz conta a receber fictícia (191.8776ms)\n✔ responsabilidades fecham valor; falha desfaz item, comando e rateio (142.2334ms)\n✔ títulos parciais concorrentes não duplicam valor da responsabilidade (170.9318ms)\n✔ recebimento deduplica referência e retry sem liquidar automaticamente (170.5718ms)\n✔ liquidações concorrentes respeitam saldo de ambos os lados (147.8296ms)\n✔ crédito usa recebimento disponível e aplicação não duplica dinheiro (123.1225ms)\n✔ reversão encadeada preserva histórico e permite nova avaliação (182.2557ms)\n✔ caixa tem uma sessão aberta, diferença explícita e fechamento preservado (99.8552ms)\n✔ cartão, depósito e conciliação permanecem fatos separados com limites (175.9979ms)\n✔ RBAC, organização, unidade e pagador impedem alocação cruzada (157.4398ms)\n✔ listas financeiras paginadas serializam valores exatos e estado (66.4889ms)\n✔ diária omitida permanece pendente; inclusão documenta zero e reversão sinaliza revisão (149.3815ms)\n✔ retificação clínica preserva dívida histórica e impede nova emissão obsoleta (99.1259ms)\n✔ consumo do tutor mantém custo e cobertura comercial pendente (108.7557ms)\n✔ SQL não acrescenta efeito financeiro a comando confirmado nem arredonda centavos (140.0506ms)\n✔ depósito agregado admite repasses parciais sem liquidar tutor novamente (87.5219ms)\n✔ execução substituta exige reverter documento anterior para não duplicar dívida (125.0726ms)\n✔ todas as consultas publicadas serializam conforme contrato sem SELECT irrestrito (932.6286ms)\n✔ retry transacional desfaz tentativa anterior e respeita limite de três tentativas (117.7414ms)\n✔ health, readiness, organização, contrato OpenAPI e autenticação (23.5019ms)\n✔ cadastro, vínculo, papéis, dispositivo e proveniência sintética executáveis (48.3521ms)\n✔ oito comandos concorrentes e retry após resposta perdida produzem um único efeito (54.0681ms)\n✔ falha de integridade reverte comando, domínio, auditoria e outbox (8.0115ms)\n✔ FK composta e RLS bloqueiam outra organização; contexto não vaza no pool (9.1589ms)\n✔ RBAC nega escrita ao leitor e ABAC restringe unidade/dispositivo no servidor (16.3539ms)\n✔ credencial opaca, expirada, NFC e revogada; desativação de usuário/dispositivo (30.8091ms)\n✔ capacidade por vaga, concorrência, intervalo e consistência de unidade (57.244ms)\n✔ alta clínica separada da ocupação e saída, com versão esperada e histórico (36.986ms)\n✔ paginação keyset, limites, entradas desconhecidas e datas futuras (8.187ms)\n✔ privilégios: app não altera auditoria, apaga cadastro, assume worker ou cria tabela (5.6984ms)\n✔ workers concorrentes não reservam o mesmo job; inbox deduplica repetição (68.0705ms)\n✔ lease expirada, fencing, backoff e erro permanente viram pendência (7.811ms)\n✔ apresentações são dimensionais, exatas, versionadas e imutáveis (970.1412ms)\n✔ frações decimais preservam precisão e rejeitam arredondamento silencioso (34.8107ms)\n✔ repetição concorrente de entrada e timeout simulado geram um único par (175.0772ms)\n✔ duas retiradas concorrentes não excedem saldo e não registram consumo (68.1391ms)\n✔ transferências opostas usam ordem determinística e preservam total (61.1122ms)\n✔ reserva protege disponibilidade e efetivação transfere uma única vez (40.7649ms)\n✔ reservas concorrentes, liberação e expiração não alteram saldo físico (501.6835ms)\n✔ devolução parcial é vinculada, limitada e reversível antes da origem (63.6556ms)\n✔ perda e reversão preservam razão; reversão de entrada não pode consumir reserva (45.15ms)\n✔ custódia do tutor e custo desconhecido ficam explícitos sem custo hospitalar inventado (83.5417ms)\n✔ validade pendente, vencida e recipiente aberto sem regra impedem retirada, preservando entrada (85.1098ms)\n✔ inventário aplica diferença vinculada e rejeita contagem após movimentação concorrente (62.8594ms)\n✔ inventário sem divergência não inventa movimento e ajuste não passa por cima de reserva (42.9588ms)\n✔ isolamento, permissões e proteção SQL impedem atalhos de saldo e livro incompleto (26.707ms)\n✔ consultas paginadas de estoque seguem OpenAPI e devolvem decimais como strings (23.1087ms)\nℹ tests 83\nℹ suites 0\nℹ pass 83\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 16215.9302",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 1103,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

@@ -99,6 +99,16 @@ export const inputs = {
   }),
 };
 export const permissions = [
+  "financeiro:ler",
+  "financeiro:configurar",
+  "financeiro:avaliar",
+  "financeiro:emitir",
+  "financeiro:receber",
+  "financeiro:alocar",
+  "financeiro:credito",
+  "financeiro:caixa",
+  "financeiro:conciliar",
+  "financeiro:reverter",
   "cadastros:ler",
   "cadastros:escrever",
   "episodios:ler",

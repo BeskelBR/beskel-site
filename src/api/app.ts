@@ -18,6 +18,11 @@ import { clinicalActions, clinicalLists } from "../domain/clinical/service.ts";
 import { clinicalInputs } from "../domain/clinical/schemas.ts";
 import { dailyActions, dailyLists } from "../domain/daily/service.ts";
 import { dailyInputs } from "../domain/daily/schemas.ts";
+import {
+  financialActions,
+  financialLists,
+} from "../domain/financial/service.ts";
+import { financialInputs, money } from "../domain/financial/schemas.ts";
 
 function strictValues(schema: unknown, value: unknown): void {
   if (value === undefined) return;
@@ -26,7 +31,7 @@ function strictValues(schema: unknown, value: unknown): void {
     items?: unknown;
     const?: unknown;
   };
-  if (schema === amount && typeof value !== "string")
+  if ((schema === amount || schema === money) && typeof value !== "string")
     throw new DomainError(400, "decimais_devem_ser_strings");
   if (field.const === true && value !== true)
     throw new DomainError(400, "confirmacao_humana_explicita_obrigatoria");
@@ -72,8 +77,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
   await app.register(swagger, {
     openapi: {
       info: {
-        title: "HVB Sistema — Clínica e Diária Configurável",
-        version: "0.4.0",
+        title: "HVB Sistema — Clínica, Diária e Financeiro",
+        version: "0.5.0",
       },
       servers: [{ url: "http://127.0.0.1:3100" }],
       components: {
@@ -197,7 +202,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     async () => {
       try {
         const r = await db.query(
-          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='016_daily_links.sql') AS ready, current_user AS role",
+          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='023_financial_lineage.sql') AS ready, current_user AS role",
         );
         if (!r.rows[0].ready || r.rows[0].role !== "hvb_app")
           throw new Error("not ready");
@@ -247,12 +252,14 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...inventoryInputs,
     ...clinicalInputs,
     ...dailyInputs,
+    ...financialInputs,
   };
   for (const action of [
     ...actions,
     ...inventoryActions,
     ...clinicalActions,
     ...dailyActions,
+    ...financialActions,
   ]) {
     app.post(
       `/v1${action.path}`,
@@ -330,11 +337,14 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...inventoryLists,
     ...clinicalLists,
     ...dailyLists,
+    ...financialLists,
   ]) {
     const stockPosition = list.table === "posicao_estoque";
     const stockLedger = list.table === "lancamento_estoque_consulta";
     const clinical =
-      list.path.startsWith("/clinica/") || list.path.startsWith("/diarias/");
+      list.path.startsWith("/clinica/") ||
+      list.path.startsWith("/diarias/") ||
+      list.path.startsWith("/financeiro/");
     const schedule = list.table === "programacao_consulta";
     const clinicalFilters = clinical
       ? [
@@ -353,6 +363,20 @@ export async function buildApp(db: pg.Pool, logging = false) {
           "evento_id",
           "uso_id",
           "regra_id",
+          "conta_id",
+          "pagador_id",
+          "titulo_id",
+          "recebimento_id",
+          "credito_id",
+          "sessao_id",
+          "caixa_id",
+          "item_conta_id",
+          "avaliacao_id",
+          "responsabilidade_id",
+          "deposito_id",
+          "parcela_id",
+          "conta_financeira_id",
+          "item_comercial_id",
         ].filter((f) => list.columns.split(",").includes(f))
       : [];
     const query = object(
@@ -401,6 +425,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
                 "execucao_integral",
                 "material_tutor",
                 "necessita_revisao",
+                "revertido",
+                "fechada",
               ].includes(column)
             ? { type: "boolean" }
             : [
@@ -410,6 +436,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
                   "tentativas",
                   "versao_snapshot",
                   "prioridade",
+                  "numero",
                 ].includes(column)
               ? { type: "integer" }
               : { type: "string", nullable: true },

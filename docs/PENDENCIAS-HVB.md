@@ -1,4 +1,4 @@
-# Pendências — HVB Sistema M0/M1 + M2 + M3 + M4
+# Pendências — HVB Sistema M0/M1 + M2 + M3 + M4 + M5
 
 M0/M1 foi limitado à fundação local com dados fictícios. As decisões abaixo não bloqueiam o desenvolvimento independente já validado.
 
@@ -86,3 +86,27 @@ As linhas históricas foram preservadas. O mecanismo de diária configurável fo
 | M5 comercial/financeiro | PENDENTE próximo marco; M4 não gera preço, conta, título ou recebimento | Implementar modelo sem ativar políticas ambíguas; validar fontes de preço, exceções e permissões reais |
 
 As pendências antigas e novas serão resolvidas em conjunto. Testes de integridade e aprovação de simulação não encerram decisões clínicas, comerciais ou operacionais.
+
+## Continuação M5 — 13/09/2026
+
+O núcleo comercial/financeiro foi implementado com registros fictícios. As linhas anteriores foram preservadas; mecanismos técnicos não aprovam preços, descontos, cobranças ou poderes reais. Não houve transação bancária, envio, conciliação externa ou emissão fiscal.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Catálogo comercial, tabelas e aprovação de preços | PENDENTE; serviço/produto e preço versionados por unidade, vigência explícita, sem sobreposição | Antes de cadastrar preços reais; composição de conjuntos, materiais previstos e múltiplas tabelas comerciais continuam futuros |
+| Origem e quantidade comercial | PROPOSTO DEV; um evento por execução, item de consumo ou período; serviço informado explicitamente, produto confere quantidade física e período conta uma unidade | Validar mapeamentos, frações, preços por peso e faturamento de composições; não associar por nome |
+| Moeda, arredondamento, juros, taxas e impostos | PENDENTE; BRL, centavos exatos; produto quantidade/preço inexato é recusado | Aprovar regra de arredondamento e ajustes antes de valores reais; não calcular imposto ou juros por inferência |
+| Pagador, responsabilidade e desconto | PENDENTE; pagador referencia responsável cadastrado; até 20 responsabilidades explícitas por item; motivo e autorização DEV | Validar poderes, aceite de dívida, descontos e eventual terceiro pagador; sem plano próprio/Petlove |
+| Diária comercial | PENDENTE regra real; inclusão simulada preserva item zero sem título; conflito, parcial/excedente, tutor e execução parcial permanecem pendentes | Conciliar regras HVB e precificação; não há cobrança automática de excedente |
+| Correção de documentos e origem substituta | PROPOSTO DEV; reverter liquidações/título/item antes de reavaliar ou faturar substituto; histórico preservado | Definir documentos de ajuste, cancelamento fiscal e correções de consumo avulso sem execução compartilhada; origens novas sem linhagem não são deduplicadas por semelhança |
+| Título, vencimento e parcelamento | PENDENTE política; até 20 alocações explícitas por título, sem duplicar responsabilidade | Definir calendário, juros, renegociação, abatimento e cobrança; títulos não bloqueiam alta |
+| Formas de recebimento e evidências reais | PENDENTE; dinheiro, transferência e cartão declarados, referência UUID persistente; sem integração ou forma versionada de provedor | Antes de receber pagamentos; idempotência de referência depende de o cliente preservar o ID do mesmo fato |
+| Crédito de cliente | PROPOSTO DEV; somente saldo não alocado de recebimento do mesmo pagador/unidade; aplicação imediata atômica | Definir crédito reconhecido sem recebimento, reserva futura, devolução efetiva, transferência e tratamento de legado |
+| Caixa e conferência | PENDENTE processo; abertura, entradas em dinheiro, contagem e diferença explícitas; uma sessão aberta | Definir suprimento, sangria, saídas, ajustes de sessão fechada, revisão/dupla aprovação e responsáveis |
+| Adquirente, taxas e parcelas | PENDENTE regras; bruto/taxa/líquido e datas informados por parcela; repasse separado da quitação do tutor | Validar taxas reais, antecipação, chargeback, estorno e diferença de repasse; recebimento com parcela registrada não pode ser revertido pelo fluxo simples |
+| Depósito, extrato e conciliação | PROPOSTO DEV; dados fictícios manuais, mesma conta/adquirente, alocação parcial/múltiplas parcelas, evidência humana | Integração/extrato real exige autorização; divergência permanece saldo aberto; um vínculo por par, reabertura do mesmo par após reversão e correção de depósito/extrato exigem fluxo futuro |
+| Despesas, compras, contas a pagar, comissões e fiscal | PENDENTE refinamento posterior; este recorte entrega recebíveis e repasses | Validar processos reais; nenhuma obrigação fiscal ou contábil inferida |
+| Relatórios e revisão comercial | PENDENTE apresentação operacional; consultas mostram valores originais, reversão, saldos e revisão por origem/cobertura | Definir indicadores, regime, período, fila agregada e responsáveis; filtrar reversões explicitamente, não somar saldos históricos como dívida atual |
+| Concorrência e desempenho financeiro | INVESTIGADO; advisory lock por organização/unidade; avaliação usa 14 statements totais/11 funcionais no benchmark | Medir muitas unidades/pagadores, história longa, muitos rateios e contenção; metas locais não são SLA |
+
+Vercel/Cloudflare continuam a cargo do usuário; banco, autenticação, worker e hospedagem funcional ainda dependem das decisões já registradas. M6 é o próximo marco do backlog, sem encerrar as pendências M0–M5.

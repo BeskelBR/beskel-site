@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0 — 2026-09-13
+
+- M5: catálogo/preço versionados, conta, evento de origem tipada, avaliação comercial, responsabilidade por pagador e título com rateio atômico.
+- Recebimentos, liquidações, créditos/aplicações, sessão/conferência de caixa e reversões vinculadas; valores exatos em centavos, sem transferência real.
+- Parcelas da adquirente, taxas informadas, depósito, extrato fictício e conciliação humana com limites dos dois lados.
+- Diária ambígua, material do tutor e execução parcial permanecem pendentes; valor zero documentado sem dívida. Origem substituta exige reverter documento anterior para evitar duplicação.
+- Migrations 017–023, 24 tabelas e 15 views; 46 operações financeiras novas, total de 176 operações em 112 caminhos. Sem dependências novas.
+- 88 testes aprovados em PostgreSQL, inclusive instalação vazia; seed idempotente, benchmark com mil recebimentos, HTTP real local e zero saldos negativos.
+- Pendências cumulativas preservadas. Sem deploy, DNS, integração bancária ou fiscal; M6 ainda não iniciado.
+
 ## 0.4.0 — 2026-09-13
 
 - M4: classificação, medição de peso, grupos, pacotes e regras versionados; aprovação restrita à simulação e períodos explícitos.

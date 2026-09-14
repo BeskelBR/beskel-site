@@ -308,9 +308,13 @@ test("limite concorrente inclui apenas uma administração e nunca gera cobranç
     "20.000000",
   );
   assert.equal(
-    (await admin.query("SELECT to_regclass('hvb.item_conta') AS conta")).rows[0]
-      .conta,
-    null,
+    (
+      await admin.query(
+        "SELECT count(*)::int AS conta FROM hvb.item_conta WHERE organizacao_id=$1",
+        [f.org],
+      )
+    ).rows[0].conta,
+    0,
   );
 });
 test("repetição e versão esperada impedem duplicação de avaliação e consumo de limite", async () => {
