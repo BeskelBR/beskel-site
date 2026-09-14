@@ -99,6 +99,15 @@ export const inputs = {
   }),
 };
 export const permissions = [
+  "exames:ler",
+  "exames:configurar",
+  "exames:aprovar_simulacao",
+  "exames:solicitar",
+  "exames:coletar",
+  "exames:avaliar_amostra",
+  "exames:registrar_resultado",
+  "exames:liberar",
+  "exames:cancelar",
   "financeiro:ler",
   "financeiro:configurar",
   "financeiro:avaliar",

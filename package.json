@@ -1,6 +1,6 @@
 {
   "name": "hvb-sistema",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.19.0",
@@ -22,7 +22,7 @@
     "format": "biome format --write src scripts tests package.json tsconfig.json biome.json",
     "format:check": "biome format src scripts tests package.json tsconfig.json biome.json",
     "test": "node --test tests/unit.test.ts",
-    "test:integration": "node --env-file=.env --test --test-concurrency=1 tests/integration.test.ts tests/inventory.test.ts tests/clinical.test.ts tests/daily.test.ts tests/financial.test.ts",
+    "test:integration": "node --env-file=.env --test --test-concurrency=1 tests/integration.test.ts tests/inventory.test.ts tests/clinical.test.ts tests/daily.test.ts tests/financial.test.ts tests/exams.test.ts",
     "benchmark:daily": "node --env-file=.env scripts/benchmark-daily.ts",
     "benchmark:clinical": "node --env-file=.env scripts/benchmark-clinical.ts",
     "benchmark:inventory": "node --env-file=.env scripts/benchmark-inventory.ts",
@@ -30,7 +30,9 @@
     "benchmark": "node --env-file=.env scripts/benchmark.ts",
     "check": "node scripts/check.mjs",
     "db:seed:financial": "node --env-file=.env scripts/seed-financial.ts",
-    "benchmark:financial": "node --env-file=.env scripts/benchmark-financial.ts"
+    "benchmark:financial": "node --env-file=.env scripts/benchmark-financial.ts",
+    "db:seed:exams": "node --env-file=.env scripts/seed-exams.ts",
+    "benchmark:exams": "node --env-file=.env scripts/benchmark-exams.ts"
   },
   "dependencies": {
     "@fastify/swagger": "9.8.1",

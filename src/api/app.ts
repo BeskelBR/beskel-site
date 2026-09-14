@@ -23,6 +23,12 @@ import {
   financialLists,
 } from "../domain/financial/service.ts";
 import { financialInputs, money } from "../domain/financial/schemas.ts";
+import { examActions, examLists } from "../domain/exams/service.ts";
+import {
+  examInputs,
+  examNumber,
+  examBoolean,
+} from "../domain/exams/schemas.ts";
 
 function strictValues(schema: unknown, value: unknown): void {
   if (value === undefined) return;
@@ -31,8 +37,13 @@ function strictValues(schema: unknown, value: unknown): void {
     items?: unknown;
     const?: unknown;
   };
-  if ((schema === amount || schema === money) && typeof value !== "string")
+  if (
+    (schema === amount || schema === money || schema === examNumber) &&
+    typeof value !== "string"
+  )
     throw new DomainError(400, "decimais_devem_ser_strings");
+  if (schema === examBoolean && typeof value !== "boolean")
+    throw new DomainError(400, "booleanos_devem_ser_explicitos");
   if (field.const === true && value !== true)
     throw new DomainError(400, "confirmacao_humana_explicita_obrigatoria");
   if (field.items && Array.isArray(value))
@@ -77,8 +88,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
   await app.register(swagger, {
     openapi: {
       info: {
-        title: "HVB Sistema — Clínica, Diária e Financeiro",
-        version: "0.5.0",
+        title: "HVB Sistema — Clínica, Financeiro e Exames",
+        version: "0.6.0",
       },
       servers: [{ url: "http://127.0.0.1:3100" }],
       components: {
@@ -202,7 +213,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     async () => {
       try {
         const r = await db.query(
-          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='023_financial_lineage.sql') AS ready, current_user AS role",
+          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='025_exam_integrity.sql') AS ready, current_user AS role",
         );
         if (!r.rows[0].ready || r.rows[0].role !== "hvb_app")
           throw new Error("not ready");
@@ -253,6 +264,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...clinicalInputs,
     ...dailyInputs,
     ...financialInputs,
+    ...examInputs,
   };
   for (const action of [
     ...actions,
@@ -260,6 +272,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...clinicalActions,
     ...dailyActions,
     ...financialActions,
+    ...examActions,
   ]) {
     app.post(
       `/v1${action.path}`,
@@ -338,13 +351,15 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...clinicalLists,
     ...dailyLists,
     ...financialLists,
+    ...examLists,
   ]) {
     const stockPosition = list.table === "posicao_estoque";
     const stockLedger = list.table === "lancamento_estoque_consulta";
     const clinical =
       list.path.startsWith("/clinica/") ||
       list.path.startsWith("/diarias/") ||
-      list.path.startsWith("/financeiro/");
+      list.path.startsWith("/financeiro/") ||
+      list.path.startsWith("/exames/");
     const schedule = list.table === "programacao_consulta";
     const clinicalFilters = clinical
       ? [
@@ -377,6 +392,14 @@ export async function buildApp(db: pg.Pool, logging = false) {
           "parcela_id",
           "conta_financeira_id",
           "item_comercial_id",
+          "resultado_id",
+          "item_exame_id",
+          "solicitacao_id",
+          "exame_id",
+          "exame_versao_id",
+          "atributo_id",
+          "laboratorio_id",
+          "coleta_id",
         ].filter((f) => list.columns.split(",").includes(f))
       : [];
     const query = object(
@@ -408,7 +431,15 @@ export async function buildApp(db: pg.Pool, logging = false) {
           ? { paciente_id: uuid, ativos: { type: "boolean" } }
           : {}),
       },
-      list.unit ? ["unidade_id", ...(schedule ? ["inicio", "fim"] : [])] : [],
+      list.unit
+        ? [
+            "unidade_id",
+            ...(schedule ? ["inicio", "fim"] : []),
+            ...(list.table === "documento_resultado_consulta"
+              ? ["resultado_id"]
+              : []),
+          ]
+        : [],
     );
     const properties = Object.fromEntries(
       list.columns.split(",").map((column) => [
@@ -418,28 +449,54 @@ export async function buildApp(db: pg.Pool, logging = false) {
               ...uuid,
               nullable: column !== "id",
             }
-          : [
-                "ativo",
-                "simulacao",
-                "origem_ativa",
-                "execucao_integral",
-                "material_tutor",
-                "necessita_revisao",
-                "revertido",
-                "fechada",
-              ].includes(column)
-            ? { type: "boolean" }
+          : column === "numero" && list.table === "valor_resultado"
+            ? { type: "string", nullable: true }
             : [
-                  "capacidade",
-                  "vaga",
-                  "versao",
-                  "tentativas",
-                  "versao_snapshot",
-                  "prioridade",
-                  "numero",
+                  "ativo",
+                  "simulacao",
+                  "origem_ativa",
+                  "execucao_integral",
+                  "material_tutor",
+                  "necessita_revisao",
+                  "revertido",
+                  "fechada",
+                  "exige_coleta",
+                  "obrigatorio",
+                  "inclui_idade_min",
+                  "inclui_idade_max",
+                  "inclui_inferior",
+                  "inclui_superior",
+                  "booleano",
+                  "pendencias_confirmadas",
+                  "liberado",
+                  "substituido",
+                  "ha_versao_pendente",
+                  "faltam_obrigatorios",
+                  "tem_pendencias",
                 ].includes(column)
-              ? { type: "integer" }
-              : { type: "string", nullable: true },
+              ? { type: "boolean", nullable: column === "booleano" }
+              : [
+                    "capacidade",
+                    "vaga",
+                    "versao",
+                    "tentativas",
+                    "versao_snapshot",
+                    "prioridade",
+                    "numero",
+                    "idade_dias",
+                    "idade_min_dias",
+                    "idade_max_dias",
+                    "ordem",
+                  ].includes(column)
+                ? {
+                    type: "integer",
+                    nullable: [
+                      "idade_dias",
+                      "idade_min_dias",
+                      "idade_max_dias",
+                    ].includes(column),
+                  }
+                : { type: "string", nullable: true },
       ]),
     );
     app.get(

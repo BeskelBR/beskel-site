@@ -1,4 +1,4 @@
-# Pendências — HVB Sistema M0/M1 + M2 + M3 + M4 + M5
+# Pendências — HVB Sistema M0/M1 + M2 + M3 + M4 + M5 + M6A
 
 M0/M1 foi limitado à fundação local com dados fictícios. As decisões abaixo não bloqueiam o desenvolvimento independente já validado.
 
@@ -110,3 +110,24 @@ O núcleo comercial/financeiro foi implementado com registros fictícios. As lin
 | Concorrência e desempenho financeiro | INVESTIGADO; advisory lock por organização/unidade; avaliação usa 14 statements totais/11 funcionais no benchmark | Medir muitas unidades/pagadores, história longa, muitos rateios e contenção; metas locais não são SLA |
 
 Vercel/Cloudflare continuam a cargo do usuário; banco, autenticação, worker e hospedagem funcional ainda dependem das decisões já registradas. M6 é o próximo marco do backlog, sem encerrar as pendências M0–M5.
+
+## Continuação M6A — 14/09/2026
+
+Primeiro recorte M6 entregue em simulação: exames e resultados. As linhas históricas e decisões anteriores foram preservadas para resolução conjunta. Nenhum catálogo, referência ou poder profissional real foi aprovado por esta implementação.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Catálogo técnico, laboratório, método e material | PENDENTE; estrutura versionada, imutável e aprovada somente em simulação | Validar catálogo real, associação clínica e versões por unidade; identificação externa é declarada |
+| Atributos, unidade e referência clínica | PENDENTE; tipo e unidade textual explícitos; até 100 atributos, referências versionadas | Aprovar fonte, método, laboratório, limites e unidades; sem interpretação automática ou conversão |
+| Espécie, idade e seleção de referência | PROPOSTO DEV; associação explícita; espécie confere e faixa etária exige idade informada compatível | Definir fonte/instante da idade, tratamento de estimativas e referências sobrepostas; nenhuma referência é escolhida automaticamente |
+| Coleta interna e material usado | PROPOSTO DEV; execução integral ativa identificada do mesmo episódio/horário | Validar associação semântica do procedimento ao exame; não cria execução, consumo ou cobrança |
+| Coleta externa e proveniência | PENDENTE validação; coletor e evidência declarados, sem usuário fictício | Definir confirmação externa, importação documental e integridade de anexos |
+| Amostra, rejeição e correção | PROPOSTO DEV; decisão única, nova coleta preserva rejeição | Definir correção da aceitação/rejeição, amostra compartilhada e cadeia de custódia; o fluxo atual não altera decisão antiga |
+| Resultado não obtido ou referência pendente | PENDENTE política clínica; ausência explícita e confirmação das pendências para liberar | Aprovar quem pode liberar e como comunicar limitações; campo obrigatório omitido bloqueia liberação |
+| Correção, cancelamento e invalidação | PROPOSTO DEV; versão esperada, rascunho separado da publicação e hash anterior preservado | Definir invalidação de laudo publicado e sua comunicação; cancelamento simples só antes da primeira liberação |
+| Assinatura profissional e documento | PENDENTE; autoria DEV e hash técnico, sem assinatura profissional validada | Validar poderes, identificação profissional, assinatura exata por versão e verificação; declaração legada não vira assinatura |
+| Laudo visual, anexos e entrega | PENDENTE; consulta restrita de JSON técnico por resultado | Criar apresentação, armazenamento privado de anexos e fluxo de entrega aprovado; nenhum envio ou portal ativado |
+| Desempenho M6A | INVESTIGADO; três valores usam 15/12 statements totais/funcionais; trava de episódio e item | Medir painéis de 100 valores, histórico longo e carga concorrente; números locais não são SLA |
+| Demais recortes M6 | PENDENTE; protocolos preventivos, documentos gerais, agenda, portal/comunicação e interface | Seguir backlog sem assumir políticas hospitalares; migração real/M7 exige autorização específica |
+
+Vercel, Cloudflare, hospedagem funcional, banco, autenticação e worker continuam com as pendências anteriores. Não houve infraestrutura externa paga, acesso ao SimplesVet, dados reais ou alteração de outras pastas/branches.

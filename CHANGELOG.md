@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 — 2026-09-14
+
+- M6A: catálogo técnico e referências versionados, solicitação, coleta interna/externa, avaliação da amostra e resultados estruturados.
+- Valores exatos, texto original e booleanos preservados; correção por versão esperada e liberação humana DEV com hash verificável do conteúdo.
+- Migrations 024–025, 14 tabelas e três views; 26 operações novas, total de 202 operações em 127 caminhos. Sem dependências novas.
+- 102 testes aprovados, instalação vazia, seed idempotente, benchmark de mil resultados e HTTP local com SHA-256 conferido.
+- M6 permanece em andamento. Pendências anteriores preservadas e ampliadas; sem assinatura profissional validada, interpretação clínica, integração, deploy ou DNS.
+
 ## 0.5.0 — 2026-09-13
 
 - M5: catálogo/preço versionados, conta, evento de origem tipada, avaliação comercial, responsabilidade por pagador e título com rateio atômico.
