@@ -1,3 +1,6 @@
+import { portalActions, portalLists } from "../domain/portal/service.ts";
+import { portalInputs } from "../domain/portal/schemas.ts";
+import { registerPortal } from "../domain/portal/routes.ts";
 import { scheduleActions, scheduleLists } from "../domain/schedule/service.ts";
 import { scheduleInputs } from "../domain/schedule/schemas.ts";
 import { documentActions, documentLists } from "../domain/documents/service.ts";
@@ -105,11 +108,16 @@ export async function buildApp(db: pg.Pool, logging = false) {
     openapi: {
       info: {
         title: "HVB Sistema — Clínica, Financeiro e Exames",
-        version: "0.9.0",
+        version: "0.10.0",
       },
       servers: [{ url: "http://127.0.0.1:3100" }],
       components: {
         securitySchemes: {
+          portalBearer: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "opaque-portal-dev",
+          },
           bearer: { type: "http", scheme: "bearer", bearerFormat: "opaque" },
         },
       },
@@ -207,6 +215,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
       return work(tx, actor);
     });
   }
+  registerPortal(app, db, errors);
   app.get(
     "/health",
     {
@@ -229,7 +238,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     async () => {
       try {
         const r = await db.query(
-          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='035_schedule_integrity.sql') AS ready, current_user AS role",
+          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='038_portal_predicate_plans.sql') AS ready, current_user AS role",
         );
         if (!r.rows[0].ready || r.rows[0].role !== "hvb_app")
           throw new Error("not ready");
@@ -284,6 +293,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...preventiveInputs,
     ...documentInputs,
     ...scheduleInputs,
+    ...portalInputs,
   };
   for (const action of [
     ...actions,
@@ -295,6 +305,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...preventiveActions,
     ...documentActions,
     ...scheduleActions,
+    ...portalActions,
   ]) {
     app.post(
       `/v1${action.path}`,
@@ -378,6 +389,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...preventiveLists,
     ...documentLists,
     ...scheduleLists,
+    ...portalLists,
   ]) {
     const stockPosition = list.table === "posicao_estoque";
     const stockLedger = list.table === "lancamento_estoque_consulta";
@@ -388,7 +400,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
       list.path.startsWith("/exames/") ||
       list.path.startsWith("/protocolos/") ||
       list.path.startsWith("/documentos/") ||
-      list.path.startsWith("/agenda/");
+      list.path.startsWith("/agenda/") ||
+      list.path.startsWith("/comunicacao/");
     const agendaMap = list.table === "agenda_mapa_consulta";
     const schedule = list.table === "programacao_consulta" || agendaMap;
     const clinicalFilters = clinical
@@ -445,6 +458,10 @@ export async function buildApp(db: pg.Pool, logging = false) {
           "agendamento_versao_id",
           "recurso_id",
           "disponibilidade_id",
+          "conta_portal_id",
+          "concessao_id",
+          "mensagem_id",
+          "tentativa_id",
         ].filter((f) => list.columns.split(",").includes(f))
       : [];
     const query = object(
@@ -475,7 +492,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
           : {}),
         ...((list.path.startsWith("/protocolos/") ||
           list.path.startsWith("/documentos/") ||
-          list.path.startsWith("/agenda/")) &&
+          list.path.startsWith("/agenda/") ||
+          list.path.startsWith("/comunicacao/")) &&
         list.columns.split(",").includes("paciente_id")
           ? { paciente_id: uuid }
           : {}),
@@ -537,6 +555,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
                   "ha_versao_posterior",
                   "atual",
                   "revogada",
+                  "vigente",
+                  "permitida",
                 ].includes(column)
               ? { type: "boolean", nullable: column === "booleano" }
               : [

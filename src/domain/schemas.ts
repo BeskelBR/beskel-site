@@ -99,6 +99,13 @@ export const inputs = {
   }),
 };
 export const permissions = [
+  "portal:administrar",
+  "portal:ler",
+  "portal:autorizar",
+  "comunicacao:preferencias",
+  "comunicacao:preparar",
+  "comunicacao:simular",
+  "comunicacao:ler",
   "agenda:ler",
   "agenda:configurar",
   "agenda:disponibilidade",

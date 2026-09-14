@@ -193,3 +193,24 @@ Agenda em simulação. Todas as pendências anteriores permanecem registradas; p
 | Interface e comunicações | PENDENTE; somente API e mapa paginado | Implementar calendário visual e portal; homologar canal e conteúdo antes de qualquer envio |
 
 Código no GitHub; Vercel/Cloudflare ficam com o usuário. Migração real, SimplesVet, dados reais, serviços externos e infraestrutura paga não iniciados.
+
+## Continuação M6E — 14/09/2026
+
+Portal e comunicação em simulação. O usuário prefere concluir o núcleo funcional antes de revisar estas decisões. As pendências anteriores são preservadas; o [roteiro técnico](NUCLEO-FUNCIONAL.md) distingue capacidades ainda a implementar das políticas humanas.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Identidade de portal e poderes reais | PROPOSTO DEV; token próprio, vínculo e concessão explícita por paciente | Homologar identidade, representação, escopo por finalidade/documento, validade e evidência; vínculo cadastral não autoriza sozinho |
+| Login, convite e recuperação | PENDENTE; credencial local por hash, validade de sete dias no seed | Implementar autenticação operacional, MFA, emissão/revogação individual, recuperação e limites de abuso antes da exposição |
+| Reativação e renovação | PENDENTE; conta/concessão revogada permanece no histórico | Definir sucessor, renovação, reativação e troca de unidade sem sobrescrever fatos |
+| Preferências e consentimentos | PROPOSTO DEV; histórico por finalidade, registrado por operador | Validar autoatendimento, evidência e finalidades reais; não converter preferência de canal em consentimento clínico/imagem |
+| Contatos e canais | PENDENTE; somente portal_dev, sem contato real | Versionar contato/destinatário, validar canal e custos; não reescrever destinatário de mensagens anteriores |
+| Publicação documental | PROPOSTO DEV; versão aprovada exata, público responsável e acesso vigente | Definir assinatura obrigatória, conteúdo permitido e retirada/correção; mensagem antiga fica oculta quando há versão posterior |
+| Mensagem de agenda | PROPOSTO DEV; versão exata de paciente e responsável | Definir lembrete, cancelamento e notificação de reprogramação; não copiar observação interna automaticamente |
+| Tentativa, retorno e resultado incerto | PROPOSTO DEV; até cinco tentativas, retry só depois de falha conhecida | Integrar consulta/conciliação autenticada com provedor antes de permitir envio real; enviado não implica lido |
+| Leitura e auditoria | PROPOSTO DEV; GET não marca lido; logs minimizados | Homologar recibos, trilha detalhada de leitura, retenção e finalidade; leitura não prova aceite |
+| Integração documental e worker | PENDENTE; entrega simulada não cria entrega_documento; outbox segue local | Definir fluxo idempotente entre canais/documentos e consumidor real, sem envio implícito pelo worker |
+| Desempenho do portal | INVESTIGADO; plano corrigido, mil mensagens com p95 de caixa 15,80 ms | Medir múltiplos responsáveis, cinco documentos extensos, concessões históricas e concorrência; benchmark local não é SLA |
+| Interface e publicação | PENDENTE; apenas API local | Implementar experiência visual e homologação após consolidação; Vercel/Cloudflare continuam com o usuário |
+
+Somente SISTEMA e hvb-sistema-dev. Nenhum serviço externo, dado real, SimplesVet, migração ou infraestrutura paga foi acionado.

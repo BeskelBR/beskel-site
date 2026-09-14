@@ -12,7 +12,7 @@ M4 acrescenta classificação versionada, peso referenciado, pacotes, grupos, re
 
 M5 acrescenta catálogo/preço versionados, conta, avaliação comercial, responsabilidade, título, recebimento, liquidação, crédito, caixa, parcelas da adquirente, depósito e conciliação. São comandos **somente de simulação**, sem dinheiro real ou integração externa. Diária ambígua permanece pendente; inclusão documenta valor zero sem inventar devedor. Este lote entrega backend e contratos, sem telas, Terminal, migração real ou produção. O código fica no GitHub; Vercel e Cloudflare serão configurados pelo usuário. O backend atual exige PostgreSQL local e não está adaptado à execução serverless.
 
-M6A acrescenta catálogo técnico, solicitações, coletas, avaliação de amostras, resultados estruturados e correções versionadas. A liberação humana DEV preserva conteúdo e hash verificável, sem interpretação clínica automática. M6B acrescenta protocolos versionados, adesão do paciente, recorrência em dias/calendário, aplicações internas/externas, revisão de atrasos e vínculo com consumo físico. M6C acrescenta modelos e campos versionados, autorização, conteúdo privado com hash, aprovação, declaração de assinatura não verificada e registro de entrega simulado. **M6 está em andamento**; M6D acrescenta agenda com recursos, disponibilidade, conflitos, reprogramação e transições operacionais. Portal/comunicação e interface são próximos recortes.
+M6A acrescenta catálogo técnico, solicitações, coletas, avaliação de amostras, resultados estruturados e correções versionadas. A liberação humana DEV preserva conteúdo e hash verificável, sem interpretação clínica automática. M6B acrescenta protocolos versionados, adesão do paciente, recorrência em dias/calendário, aplicações internas/externas, revisão de atrasos e vínculo com consumo físico. M6C acrescenta modelos e campos versionados, autorização, conteúdo privado com hash, aprovação, declaração de assinatura não verificada e registro de entrega simulado. **M6 está em andamento**; M6D acrescenta agenda com recursos, disponibilidade, conflitos, reprogramação e transições operacionais. M6E acrescenta portal com credenciais próprias, acesso por paciente, preferências e comunicação simulada com documentos/agenda versionados. A consolidação do núcleo segue antes das decisões hospitalares; a interface permanece futura.
 
 ## Executar neste Windows
 
@@ -32,6 +32,7 @@ Set-Location 'C:\Users\Admin\OneDrive\BESKEL\PARCEIROS\HVB\SISTEMA'
 .\scripts\pnpm.ps1 db:seed:preventive
 .\scripts\pnpm.ps1 db:seed:documents
 .\scripts\pnpm.ps1 db:seed:schedule
+.\scripts\pnpm.ps1 db:seed:portal
 .\scripts\pnpm.ps1 check
 .\scripts\pnpm.ps1 dev
 ```
@@ -181,7 +182,7 @@ O gerador não sobrescreve `.env`. Não executar os dois bancos na porta 55432 s
 
 ## Verificação e documentação
 
-`pnpm check` exige a branch autorizada e executa typecheck, lint, formatação, testes unitários, migrations, integração PostgreSQL e OpenAPI. Evidências atuais: [138 testes M1–M6D](docs/evidencias/checks-m6d.json) e [benchmark e HTTP M6D](docs/evidencias/benchmark-m6d.json). As evidências históricas foram preservadas. `pnpm benchmark` usa somente TEST e gera 10 mil pacientes e 2 mil episódios fictícios por execução. `pnpm benchmark:inventory` cria mil posições fictícias, abastece por comandos e mede consultas/transferências. `pnpm benchmark:clinical` cria mil programações por comandos, mede mapa/execução/consumo e reconcilia saldos. `pnpm benchmark:daily` prepara mil avaliações e mede lista, avaliação e reavaliação, verificando limites e saldo preservado. `pnpm benchmark:financial` prepara mil recebimentos e mede consulta, avaliação, recebimento e liquidação com reconciliação dos saldos. `pnpm benchmark:exams` prepara mil resultados com três valores e mede lista, gravação e liberação, com hash conferido por HTTP. `pnpm benchmark:preventive` prepara mil ocorrências e mede lista, programação e aplicação externa sem alterar estoque. `pnpm benchmark:documents` prepara mil documentos e mede metadados, preenchimento e aprovação, com hash e entrega idempotente por HTTP local. `pnpm benchmark:schedule` prepara mil agendamentos, mede mapa/criação/reprogramação e verifica retry por HTTP sem efeitos clínicos ou financeiros. Os benchmarks preservam execuções anteriores.
+`pnpm check` exige a branch autorizada e executa typecheck, lint, formatação, testes unitários, migrations, integração PostgreSQL e OpenAPI. Evidências atuais: [152 testes M1–M6E](docs/evidencias/checks-m6e.json) e [benchmark e HTTP M6E](docs/evidencias/benchmark-m6e.json). As evidências históricas foram preservadas. `pnpm benchmark` usa somente TEST e gera 10 mil pacientes e 2 mil episódios fictícios por execução. `pnpm benchmark:inventory` cria mil posições fictícias, abastece por comandos e mede consultas/transferências. `pnpm benchmark:clinical` cria mil programações por comandos, mede mapa/execução/consumo e reconcilia saldos. `pnpm benchmark:daily` prepara mil avaliações e mede lista, avaliação e reavaliação, verificando limites e saldo preservado. `pnpm benchmark:financial` prepara mil recebimentos e mede consulta, avaliação, recebimento e liquidação com reconciliação dos saldos. `pnpm benchmark:exams` prepara mil resultados com três valores e mede lista, gravação e liberação, com hash conferido por HTTP. `pnpm benchmark:preventive` prepara mil ocorrências e mede lista, programação e aplicação externa sem alterar estoque. `pnpm benchmark:documents` prepara mil documentos e mede metadados, preenchimento e aprovação, com hash e entrega idempotente por HTTP local. `pnpm benchmark:schedule` prepara mil agendamentos, mede mapa/criação/reprogramação e verifica retry por HTTP sem efeitos clínicos ou financeiros. `pnpm benchmark:portal` prepara mil mensagens, mede caixa/preparação/tentativa e verifica conteúdo documental por HTTP com credencial de portal. Os benchmarks preservam execuções anteriores.
 
 O workflow de CI é **manual**, limitado a `hvb-sistema-dev`; não foi disparado. Ações futuras com custos, serviços externos, DNS, produção e dados reais continuam dependendo de autorização.
 
@@ -194,6 +195,10 @@ O workflow de CI é **manual**, limitado a `hvb-sistema-dev`; não foi disparado
 - [Relatório M6B](docs/RELATORIO-M6B.md)
 - [Relatório M6C](docs/RELATORIO-M6C.md)
 - [Relatório M6D](docs/RELATORIO-M6D.md)
+- [Relatório M6E](docs/RELATORIO-M6E.md)
+- [Portal e comunicação](docs/adr/0011-portal-comunicacao.md)
+- [Dicionário M6E](docs/DADOS-M6E.md)
+- [Próximos passos do núcleo funcional](docs/NUCLEO-FUNCIONAL.md)
 - [Agenda e recursos](docs/adr/0010-agenda.md)
 - [Dicionário M6D](docs/DADOS-M6D.md)
 - [Discussões no chat e testes locais](docs/ROTEIRO-CHAT-E-TESTES.md)

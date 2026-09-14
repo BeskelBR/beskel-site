@@ -1,6 +1,6 @@
 {
   "name": "hvb-sistema",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.19.0",
@@ -22,7 +22,7 @@
     "format": "biome format --write src scripts tests package.json tsconfig.json biome.json",
     "format:check": "biome format src scripts tests package.json tsconfig.json biome.json",
     "test": "node --test tests/unit.test.ts",
-    "test:integration": "node --env-file=.env --test --test-concurrency=1 tests/integration.test.ts tests/inventory.test.ts tests/clinical.test.ts tests/daily.test.ts tests/financial.test.ts tests/exams.test.ts tests/preventive.test.ts tests/documents.test.ts tests/schedule.test.ts",
+    "test:integration": "node --env-file=.env --test --test-concurrency=1 tests/integration.test.ts tests/inventory.test.ts tests/clinical.test.ts tests/daily.test.ts tests/financial.test.ts tests/exams.test.ts tests/preventive.test.ts tests/documents.test.ts tests/schedule.test.ts tests/portal.test.ts",
     "benchmark:daily": "node --env-file=.env scripts/benchmark-daily.ts",
     "benchmark:clinical": "node --env-file=.env scripts/benchmark-clinical.ts",
     "benchmark:inventory": "node --env-file=.env scripts/benchmark-inventory.ts",
@@ -38,7 +38,9 @@
     "db:seed:documents": "node --env-file=.env scripts/seed-documents.ts",
     "benchmark:documents": "node --env-file=.env scripts/benchmark-documents.ts",
     "db:seed:schedule": "node --env-file=.env scripts/seed-schedule.ts",
-    "benchmark:schedule": "node --env-file=.env scripts/benchmark-schedule.ts"
+    "benchmark:schedule": "node --env-file=.env scripts/benchmark-schedule.ts",
+    "db:seed:portal": "node --env-file=.env scripts/seed-portal.ts",
+    "benchmark:portal": "node --env-file=.env scripts/benchmark-portal.ts"
   },
   "dependencies": {
     "@fastify/swagger": "9.8.1",

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.10.0 — 2026-09-14
+
+- M6E: contas/credenciais próprias do portal, concessões por paciente, revogações e preferências versionadas.
+- Mensagens com versão documental/agenda exata, tentativas e retornos simulados; resultado incerto exige conciliação antes de repetir.
+- Caixa e conteúdo isolados por conta, sem reaproveitar permissões da equipe; leitura não confirma aceite ou estado lido.
+- Migrations 036–038, dez tabelas e três views; 19 operações novas, total de 280 em 170 caminhos.
+- 152 testes, seed repetido, instalação vazia, mil mensagens e HTTP local com hash documental. Predicados reutilizam planos após timeout identificado no ensaio.
+- Roteiro de consolidação do núcleo antes da discussão das pendências, conforme pedido. Sem interface, mensagem externa, deploy ou serviços pagos.
+
 ## 0.9.0 — 2026-09-14
 
 - M6D: recursos tipados, disponibilidade/bloqueios com revogação, agendamentos multirrecurso, reprogramação e histórico de transições.
