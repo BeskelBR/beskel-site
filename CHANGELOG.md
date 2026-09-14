@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.0 — 2026-09-14
+
+- M6B: protocolos e etapas versionados, aprovação em simulação, adesão e ocorrências por dias ou calendário com âncora explícita.
+- Aplicação interna estende a execução identificada; externa preserva profissional/lote/fabricante declarados. Correções mantêm linhagem e vínculo físico não duplica baixa.
+- Revisão de atraso, resolução humana e encerramento com sucessor explícito, sem aplicação ou comunicação automática.
+- Migrations 026–029, 11 tabelas e quatro views; 21 operações novas, total de 223 operações em 138 caminhos. Sem dependências novas.
+- 115 testes aprovados, seed repetido sem duplicação, instalação vazia e ensaio de mil ocorrências com HTTP idempotente.
+- Roteiro para discussões no chat e testes locais; pendências cumulativas preservadas. M6 segue em andamento, sem dados reais, deploy ou infraestrutura paga.
+
 ## 0.6.0 — 2026-09-14
 
 - M6A: catálogo técnico e referências versionados, solicitação, coleta interna/externa, avaliação da amostra e resultados estruturados.

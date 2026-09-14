@@ -1,3 +1,8 @@
+import {
+  preventiveActions,
+  preventiveLists,
+} from "../domain/preventive/service.ts";
+import { preventiveInputs } from "../domain/preventive/schemas.ts";
 import { randomUUID } from "node:crypto";
 import Fastify, { LogController } from "fastify";
 import swagger from "@fastify/swagger";
@@ -89,7 +94,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     openapi: {
       info: {
         title: "HVB Sistema — Clínica, Financeiro e Exames",
-        version: "0.6.0",
+        version: "0.7.0",
       },
       servers: [{ url: "http://127.0.0.1:3100" }],
       components: {
@@ -213,7 +218,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     async () => {
       try {
         const r = await db.query(
-          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='025_exam_integrity.sql') AS ready, current_user AS role",
+          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='029_preventive_lineage_bounds.sql') AS ready, current_user AS role",
         );
         if (!r.rows[0].ready || r.rows[0].role !== "hvb_app")
           throw new Error("not ready");
@@ -265,6 +270,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...dailyInputs,
     ...financialInputs,
     ...examInputs,
+    ...preventiveInputs,
   };
   for (const action of [
     ...actions,
@@ -273,6 +279,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...dailyActions,
     ...financialActions,
     ...examActions,
+    ...preventiveActions,
   ]) {
     app.post(
       `/v1${action.path}`,
@@ -352,6 +359,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...dailyLists,
     ...financialLists,
     ...examLists,
+    ...preventiveLists,
   ]) {
     const stockPosition = list.table === "posicao_estoque";
     const stockLedger = list.table === "lancamento_estoque_consulta";
@@ -359,7 +367,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
       list.path.startsWith("/clinica/") ||
       list.path.startsWith("/diarias/") ||
       list.path.startsWith("/financeiro/") ||
-      list.path.startsWith("/exames/");
+      list.path.startsWith("/exames/") ||
+      list.path.startsWith("/protocolos/");
     const schedule = list.table === "programacao_consulta";
     const clinicalFilters = clinical
       ? [
@@ -400,6 +409,13 @@ export async function buildApp(db: pg.Pool, logging = false) {
           "atributo_id",
           "laboratorio_id",
           "coleta_id",
+          "protocolo_id",
+          "protocolo_versao_id",
+          "protocolo_paciente_id",
+          "etapa_id",
+          "ocorrencia_id",
+          "aplicacao_id",
+          "revisao_id",
         ].filter((f) => list.columns.split(",").includes(f))
       : [];
     const query = object(
@@ -426,6 +442,10 @@ export async function buildApp(db: pg.Pool, logging = false) {
           : {}),
         ...(list.table === "pendencia_clinica_consulta"
           ? { situacao: { type: "string", enum: ["aberta", "resolvida"] } }
+          : {}),
+        ...(list.path.startsWith("/protocolos/") &&
+        list.columns.split(",").includes("paciente_id")
+          ? { paciente_id: uuid }
           : {}),
         ...(list.table === "episodio"
           ? { paciente_id: uuid, ativos: { type: "boolean" } }
@@ -473,6 +493,9 @@ export async function buildApp(db: pg.Pool, logging = false) {
                   "ha_versao_pendente",
                   "faltam_obrigatorios",
                   "tem_pendencias",
+                  "ativa",
+                  "material_revisao",
+                  "estornado",
                 ].includes(column)
               ? { type: "boolean", nullable: column === "booleano" }
               : [
@@ -487,6 +510,9 @@ export async function buildApp(db: pg.Pool, logging = false) {
                     "idade_min_dias",
                     "idade_max_dias",
                     "ordem",
+                    "sequencia",
+                    "deslocamento_dias",
+                    "intervalo",
                   ].includes(column)
                 ? {
                     type: "integer",

@@ -99,6 +99,15 @@ export const inputs = {
   }),
 };
 export const permissions = [
+  "protocolos:ler",
+  "protocolos:configurar",
+  "protocolos:aprovar_simulacao",
+  "protocolos:aderir",
+  "protocolos:programar",
+  "protocolos:registrar_aplicacao",
+  "protocolos:conciliar",
+  "protocolos:revisar",
+  "protocolos:encerrar",
   "exames:ler",
   "exames:configurar",
   "exames:aprovar_simulacao",

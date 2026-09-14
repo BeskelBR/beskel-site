@@ -1,4 +1,4 @@
-# Pendências — HVB Sistema M0/M1 + M2 + M3 + M4 + M5 + M6A
+# Pendências — HVB Sistema M0/M1 + M2 + M3 + M4 + M5 + M6A + M6B
 
 M0/M1 foi limitado à fundação local com dados fictícios. As decisões abaixo não bloqueiam o desenvolvimento independente já validado.
 
@@ -131,3 +131,25 @@ Primeiro recorte M6 entregue em simulação: exames e resultados. As linhas hist
 | Demais recortes M6 | PENDENTE; protocolos preventivos, documentos gerais, agenda, portal/comunicação e interface | Seguir backlog sem assumir políticas hospitalares; migração real/M7 exige autorização específica |
 
 Vercel, Cloudflare, hospedagem funcional, banco, autenticação e worker continuam com as pendências anteriores. Não houve infraestrutura externa paga, acesso ao SimplesVet, dados reais ou alteração de outras pastas/branches.
+
+## Continuação M6B — 14/09/2026
+
+Protocolos preventivos entregues em simulação. Pendências anteriores preservadas. Nenhuma regra clínica, produto, dose, equivalência ou poder profissional foi aprovado implicitamente.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Protocolos e etapas reais | PENDENTE; versão e etapas imutáveis, espécie confere, aprovação somente simulação | Validar elegibilidade, produtos, doses, intervalos, contraindicações e responsáveis profissionais |
+| Recorrência em dias e calendário | PROPOSTO DEV; âncora original, mês curto ajusta ao último dia válido; sem acumular deslocamento | Aprovar regra hospitalar, fuso, datas especiais e alteração de âncora; não inferir equivalência entre dias/meses |
+| Geração de próximas ocorrências | PROPOSTO DEV; comando explícito por etapa/sequência/data, validação no banco, limite 1.000 sequências e horizonte 2020–2100 | Definir lote, agenda automática, gatilho após aplicação e deslocamento por atraso; nenhum agendamento externo foi criado |
+| Adesões simultâneas e substituição | PENDENTE política; adesões distintas coexistem; sucessor ativo do mesmo paciente com motivo | Detectar duplicidade clínica e definir migração de ocorrências; nenhum protocolo é equivalente por nome |
+| Atraso, tarefas e reabertura | PROPOSTO DEV; situação derivada por fuso, revisão e resolução explícitas, uma por ocorrência | Definir responsável/prazo, varredura automática, reabertura e escalonamento; revisão não cria aplicação |
+| Reprogramação, suspensão e não realização | PENDENTE; planejamentos preservados, encerramento da adesão impede novos | Definir fatos compensatórios e cancelamento individual sem apagar histórico |
+| Aplicação interna e identidade profissional | PROPOSTO DEV; mesmo ID da execução integral ativa; confere item, paciente e horário | Validar adequação clínica, assinatura profissional e atribuição de autoria; confirmação DEV não é assinatura assistencial |
+| Aplicação externa | PENDENTE verificação; profissional, lote e fabricante declarados, sem execução/consumo HVB | Aprovar evidências, anexos e reconhecimento de aplicações externas; declaração não é verificação do prestador |
+| Correção e invalidação | PROPOSTO DEV; sucessor único, interna segue retificação clínica | Definir invalidação sem sucessor, ajuste de metadados mantendo execução e mudança de origem; não fabricar eventos compensatórios |
+| Lote/fabricante e consumo físico | PROPOSTO DEV; consumo identificado da mesma execução, lote vem da posição, sem segunda baixa | Conciliar divergência entre texto declarado e lote físico; manter custódia do tutor e revisão de estornos |
+| Encerramento retroativo conflitante | PENDENTE política; encerramento anterior a aplicação registrada é recusado | Aprovar tratamento da exceção sem apagar aplicações |
+| Concorrência/desempenho preventivo | INVESTIGADO; lock por paciente, episódio antes quando há fato clínico; 7/9/9 statements no ensaio | Medir múltiplos pacientes, histórico longo e até 50 etapas por versão; ensaio local não é SLA |
+| Documentos gerais, agenda, portal/comunicação e interface | PENDENTE próximos recortes M6 | Seguir backlog, preservando assinatura real, hospedagem e comunicação como decisões específicas |
+
+O usuário pediu economia de cota: [roteiro de chat e testes](ROTEIRO-CHAT-E-TESTES.md) registra a divisão sugerida. Modelo não alterado e nenhum reset de cota consumido. Código segue no GitHub; Vercel/Cloudflare e decisões humanas anteriores continuam pendentes.

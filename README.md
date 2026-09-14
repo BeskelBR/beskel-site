@@ -1,6 +1,6 @@
 # HVB Sistema
 
-Fundação **M0 + M1**, estoque físico **M2**, clínica operacional **M3**, diárias configuráveis **M4**, recorte comercial/financeiro **M5** e exames/resultados **M6A**, em `hvb-sistema-dev`. API modular, PostgreSQL real local e worker. Dados exclusivamente fictícios. Produto: **HVB Sistema**; `Core` designa somente o domínio interno.
+Fundação **M0 + M1**, estoque físico **M2**, clínica operacional **M3**, diárias configuráveis **M4**, recorte comercial/financeiro **M5**, exames/resultados **M6A** e protocolos preventivos **M6B**, em `hvb-sistema-dev`. API modular, PostgreSQL real local e worker. Dados exclusivamente fictícios. Produto: **HVB Sistema**; `Core` designa somente o domínio interno.
 
 Implementado: organização/unidades, contas individuais, papéis/permissões, credenciais opacas e revogação, dispositivos, responsáveis/pacientes/vínculos, episódios, locais/ocupações, comandos idempotentes, auditoria, outbox/inbox e proveniência sintética com FKs tipadas. A organização inicial nasce pelo bootstrap administrativo local.
 
@@ -12,7 +12,7 @@ M4 acrescenta classificação versionada, peso referenciado, pacotes, grupos, re
 
 M5 acrescenta catálogo/preço versionados, conta, avaliação comercial, responsabilidade, título, recebimento, liquidação, crédito, caixa, parcelas da adquirente, depósito e conciliação. São comandos **somente de simulação**, sem dinheiro real ou integração externa. Diária ambígua permanece pendente; inclusão documenta valor zero sem inventar devedor. Este lote entrega backend e contratos, sem telas, Terminal, migração real ou produção. O código fica no GitHub; Vercel e Cloudflare serão configurados pelo usuário. O backend atual exige PostgreSQL local e não está adaptado à execução serverless.
 
-M6A acrescenta catálogo técnico, solicitações, coletas, avaliação de amostras, resultados estruturados e correções versionadas. A liberação humana DEV preserva conteúdo e hash verificável, sem interpretação clínica automática. **M6 está em andamento**; protocolos preventivos, documentos gerais, agenda, portal/comunicação e interface são próximos recortes.
+M6A acrescenta catálogo técnico, solicitações, coletas, avaliação de amostras, resultados estruturados e correções versionadas. A liberação humana DEV preserva conteúdo e hash verificável, sem interpretação clínica automática. M6B acrescenta protocolos versionados, adesão do paciente, recorrência em dias/calendário, aplicações internas/externas, revisão de atrasos e vínculo com consumo físico. **M6 está em andamento**; documentos gerais, agenda, portal/comunicação e interface são próximos recortes.
 
 ## Executar neste Windows
 
@@ -29,6 +29,7 @@ Set-Location 'C:\Users\Admin\OneDrive\BESKEL\PARCEIROS\HVB\SISTEMA'
 .\scripts\pnpm.ps1 db:seed:daily
 .\scripts\pnpm.ps1 db:seed:financial
 .\scripts\pnpm.ps1 db:seed:exams
+.\scripts\pnpm.ps1 db:seed:preventive
 .\scripts\pnpm.ps1 check
 .\scripts\pnpm.ps1 dev
 ```
@@ -128,6 +129,18 @@ Invoke-RestMethod "http://127.0.0.1:3100/v1/exames/documentos?unidade_id=$($hvbD
 
 Comandos exigem simulação e confirmação humana literais. Números de resultados são strings exatas, com sinal e até oito casas; texto original e `false` são preservados. Nova versão exige `versao_esperada`. O documento é JSON técnico: confira SHA-256 sobre a string `conteudo_json` exata, sem reserializá-la. Não é laudo final nem assinatura profissional validada. Consulte o [relatório M6A](docs/RELATORIO-M6A.md).
 
+### Exercitar protocolos preventivos fictícios
+
+`db:seed:preventive` cria protocolo, ocorrência, revisão de atraso e aplicação externa declarada, sem registrar execução ou consumo hospitalar. Repetir não duplica fatos.
+
+```powershell
+$hvbPreventive = Get-Content .local/preventive-demo.json -Raw | ConvertFrom-Json
+Invoke-RestMethod "http://127.0.0.1:3100/v1/protocolos/ocorrencias?unidade_id=$($hvbDev.unit)&paciente_id=$($hvbPreventive.patient)" -Headers $hvbHeaders
+Invoke-RestMethod "http://127.0.0.1:3100/v1/protocolos/revisoes?unidade_id=$($hvbDev.unit)&paciente_id=$($hvbPreventive.patient)" -Headers $hvbHeaders
+```
+
+A recorrência em meses usa a âncora original com ajuste ao último dia válido; dias e meses são regras distintas. Ocorrências exigem data compatível com etapa/sequência. Aplicação interna estende a mesma execução clínica; vínculo com consumo não baixa estoque novamente. Regras reais e poderes profissionais continuam pendentes. Consulte o [relatório M6B](docs/RELATORIO-M6B.md).
+
 ## Docker, Linux e macOS
 
 Alternativa ao banco portátil, usando Docker já instalado:
@@ -144,6 +157,7 @@ pnpm db:seed:clinical
 pnpm db:seed:daily
 pnpm db:seed:financial
 pnpm db:seed:exams
+pnpm db:seed:preventive
 pnpm check
 pnpm dev
 ```
@@ -152,7 +166,7 @@ O gerador não sobrescreve `.env`. Não executar os dois bancos na porta 55432 s
 
 ## Verificação e documentação
 
-`pnpm check` exige a branch autorizada e executa typecheck, lint, formatação, testes unitários, migrations, integração PostgreSQL e OpenAPI. Evidências atuais: [102 testes M1–M6A](docs/evidencias/checks-m6a.json) e [benchmark e HTTP M6A](docs/evidencias/benchmark-m6a.json). As evidências históricas foram preservadas. `pnpm benchmark` usa somente TEST e gera 10 mil pacientes e 2 mil episódios fictícios por execução. `pnpm benchmark:inventory` cria mil posições fictícias, abastece por comandos e mede consultas/transferências. `pnpm benchmark:clinical` cria mil programações por comandos, mede mapa/execução/consumo e reconcilia saldos. `pnpm benchmark:daily` prepara mil avaliações e mede lista, avaliação e reavaliação, verificando limites e saldo preservado. `pnpm benchmark:financial` prepara mil recebimentos e mede consulta, avaliação, recebimento e liquidação com reconciliação dos saldos. `pnpm benchmark:exams` prepara mil resultados com três valores e mede lista, gravação e liberação, com hash conferido por HTTP. Os benchmarks preservam execuções anteriores.
+`pnpm check` exige a branch autorizada e executa typecheck, lint, formatação, testes unitários, migrations, integração PostgreSQL e OpenAPI. Evidências atuais: [115 testes M1–M6B](docs/evidencias/checks-m6b.json) e [benchmark e HTTP M6B](docs/evidencias/benchmark-m6b.json). As evidências históricas foram preservadas. `pnpm benchmark` usa somente TEST e gera 10 mil pacientes e 2 mil episódios fictícios por execução. `pnpm benchmark:inventory` cria mil posições fictícias, abastece por comandos e mede consultas/transferências. `pnpm benchmark:clinical` cria mil programações por comandos, mede mapa/execução/consumo e reconcilia saldos. `pnpm benchmark:daily` prepara mil avaliações e mede lista, avaliação e reavaliação, verificando limites e saldo preservado. `pnpm benchmark:financial` prepara mil recebimentos e mede consulta, avaliação, recebimento e liquidação com reconciliação dos saldos. `pnpm benchmark:exams` prepara mil resultados com três valores e mede lista, gravação e liberação, com hash conferido por HTTP. `pnpm benchmark:preventive` prepara mil ocorrências e mede lista, programação e aplicação externa sem alterar estoque. Os benchmarks preservam execuções anteriores.
 
 O workflow de CI é **manual**, limitado a `hvb-sistema-dev`; não foi disparado. Ações futuras com custos, serviços externos, DNS, produção e dados reais continuam dependendo de autorização.
 
@@ -162,6 +176,8 @@ O workflow de CI é **manual**, limitado a `hvb-sistema-dev`; não foi disparado
 - [Relatório M4](docs/RELATORIO-M4.md)
 - [Relatório M5](docs/RELATORIO-M5.md)
 - [Relatório M6A](docs/RELATORIO-M6A.md)
+- [Relatório M6B](docs/RELATORIO-M6B.md)
+- [Discussões no chat e testes locais](docs/ROTEIRO-CHAT-E-TESTES.md)
 - [Decisões de stack](docs/adr/0001-stack.md)
 - [Integridade e acesso](docs/adr/0002-integridade-acesso.md)
 - [Estoque físico e concorrência](docs/adr/0003-estoque-fisico.md)
@@ -169,7 +185,8 @@ O workflow de CI é **manual**, limitado a `hvb-sistema-dev`; não foi disparado
 - [Diária configurável](docs/adr/0005-diaria-configuravel.md)
 - [Comercial e financeiro](docs/adr/0006-comercial-financeiro.md)
 - [Exames e resultados](docs/adr/0007-exames-resultados.md)
-- [Dicionário M1](docs/DADOS-M1.md), [M2](docs/DADOS-M2.md), [M3](docs/DADOS-M3.md), [M4](docs/DADOS-M4.md), [M5](docs/DADOS-M5.md) e [M6A](docs/DADOS-M6A.md)
+- [Protocolos preventivos](docs/adr/0008-protocolos-preventivos.md)
+- [Dicionário M1](docs/DADOS-M1.md), [M2](docs/DADOS-M2.md), [M3](docs/DADOS-M3.md), [M4](docs/DADOS-M4.md), [M5](docs/DADOS-M5.md), [M6A](docs/DADOS-M6A.md) e [M6B](docs/DADOS-M6B.md)
 - [Pendências](docs/PENDENCIAS-HVB.md)
 - [Precedência e proveniência](docs/PRECEDENCIA-E-FONTES.md)
 
