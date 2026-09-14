@@ -3,3 +3,5 @@
 *.jpg binary
 *.pptx binary
 *.zip binary
+# Preserve the exact bytes already applied and verified by the migration ledger.
+migrations/037_portal_integrity.sql -text
