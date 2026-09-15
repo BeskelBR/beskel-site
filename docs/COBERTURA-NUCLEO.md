@@ -1,8 +1,8 @@
-# Cobertura do núcleo — C6
+# Cobertura do núcleo — C7
 
 Conferência em 15/09/2026 contra a lista de capacidades do documento 10-ESCOPO-ATUAL.md fornecido pelo usuário. A fonte local permanece em .local/reference, fora do Git. Instruções históricas de acesso ao fornecedor não foram tratadas como pedidos de acesso. Esta matriz relaciona capacidade, implementação e falta conhecida; não aprova política hospitalar nem substitui homologação.
 
-**DEV** significa que há comandos/entidades e testes no recorte descrito. **Parcial** indica falta funcional ou operacional explícita. As evidências M0–C2 são históricas; C3 exercitou a jornada abaixo, e C4 verificou pontualmente compras/contas a pagar; C5 verificou terminal simulado/fundação; C6 verificou preços/conciliação e contas a pagar.
+**DEV** significa que há comandos/entidades e testes no recorte descrito. **Parcial** indica falta funcional ou operacional explícita. As evidências M0–C2 são históricas; C3 exercitou a jornada abaixo, e C4 verificou pontualmente compras/contas a pagar; C5 verificou terminal simulado/fundação; C6 verificou preços/conciliação e contas a pagar; C7 verificou compras, preços e custo de aquisição.
 
 | Capacidade do escopo | Base e evidência no repositório | Cobertura e falta conhecida |
 |---|---|---|
@@ -16,9 +16,9 @@ Conferência em 15/09/2026 contra a lista de capacidades do documento 10-ESCOPO-
 | Produtos e apresentações | inventory; tests/inventory.test.ts | DEV: produto, apresentação versionada e recipiente. Catálogo hospitalar e abertura real não carregados |
 | Unidades e conversões | inventory; tests/unit.test.ts, tests/inventory.test.ts | DEV: quantidade/fator decimal exatos; conversão não deduzida de nome |
 | Lote, validade, local, custódia e movimentos | inventory; tests/inventory.test.ts | DEV: hospital/tutor, reserva, retirada/transferência, consumo, devolução, perda e reversão separados |
-| Compras e recebimentos | purchases; tests/purchases.test.ts | Parcial C1: fornecedor/pedido/aprovação/recebimento parcial e mesmo movimento físico. C4 acrescenta obrigação, pagamento declarado, liquidação parcial, reversão e correção. C6 acrescenta preços negociados e conciliação parcial/reversível com obrigação. Faltam fiscal/rateio e crédito comercial |
+| Compras e recebimentos | purchases; tests/purchases.test.ts | Parcial C1: fornecedor/pedido/aprovação/recebimento parcial e mesmo movimento físico. C4 acrescenta obrigação, pagamento declarado, liquidação parcial, reversão e correção. C6 acrescenta preços negociados e conciliação parcial/reversível com obrigação. C7 acrescenta rateio e custo explícito por recebimento. Fiscal e crédito comercial permanecem separados |
 | Contagem, perdas e ajustes | inventory; tests/inventory.test.ts | DEV: contagem com versão esperada e ajuste rastreável. Inventário de abertura real exige evidência/aprovação |
-| Custo | inventory, clinical; tests/core-journeys.test.ts | DEV: snapshot físico de custo; C3 confirma consumo hospitalar de duas unidades a 1,25 = 2,50. C6 registra componentes comerciais explícitos; parcial: custo contábil da aquisição e rateio de frete/tributos |
+| Custo | inventory, clinical; tests/core-journeys.test.ts | DEV: snapshot físico de custo; C3 confirma consumo hospitalar de duas unidades a 1,25 = 2,50. C7 registra rateio explícito de componentes e custo analítico por recebimento. Política contábil/fiscal e método de valorização real permanecem pendentes |
 | Cobertura de diárias | daily; tests/daily.test.ts, tests/core-journeys.test.ts | DEV configurável: regra/limite/reserva/revisão. Ambiguidade não libera cobrança; política real pendente |
 | Comercial/financeiro | financial; tests/financial.test.ts | DEV do lado do cliente: preço, avaliação, conta, responsabilidade e título. C4 acrescenta contas a pagar de fornecedor/despesas; parcelas, crédito comercial e conciliação bancária de saídas permanecem parciais |
 | Créditos e liquidações | financial; tests/financial.test.ts | DEV: recebimento, saldo disponível, crédito/aplicação e reversão explícita. Dinheiro real e integração bancária não ativados |
@@ -42,14 +42,14 @@ Estorno de material devolve saldo e reabre conciliação da execução; a cobert
 
 ## Ordem das próximas entregas
 
-1. **Entregue em C4:** obrigação de fornecedor/despesa, pagamento declarado, liquidação, reversão e correção documental, separadas do recebimento físico. Fiscal/rateio, parcelas e crédito comercial continuam capacidades parciais, sem presumir políticas.
+1. **Entregue em C4:** obrigação de fornecedor/despesa, pagamento declarado, liquidação, reversão e correção documental, separadas do recebimento físico. C7 entrega rateio explícito; fiscal, parcelas e crédito comercial continuam capacidades parciais, sem presumir políticas.
 2. **Entregue em C5:** contrato de terminal simulado dentro de SISTEMA, com etiqueta/leitura, retirada confirmada e consulta do próprio comando. Cliente e hardware permanecem etapas próprias.
-3. **Entregue em C6:** preços negociados e vínculo explícito entre compra e obrigação. Próximo recorte: composição/rateio explícito do custo de aquisição por item/recebimento, preservando histórico e sem presumir tratamento fiscal.
-4. Consolidar as demais faltas de vínculos e correção indicadas na matriz, mantendo separadas funções técnicas de políticas e integrações humanas. Atualizar a cobertura antes de declarar o núcleo encerrado.
+3. **Entregue em C6:** preços negociados e vínculo explícito entre compra e obrigação. C7 entrega composição/rateio explícito e avaliação por recebimento, preservando histórico e sem presumir tratamento fiscal.
+4. **Próximo:** complementos financeiros de fornecedores, começando por plano de parcelas, depois crédito comercial e conciliação de saídas. Consolidar as demais faltas de vínculos e correção indicadas na matriz, mantendo separadas funções técnicas de políticas e integrações humanas. Atualizar a cobertura antes de declarar o núcleo encerrado.
 
 Assinatura válida, autenticação operacional, interfaces, canais reais, homologação, infraestrutura e migração continuam etapas próprias. A verificação geral, carga e instalação vazia serão realizadas depois, conforme o usuário. A existência de uma API ou de teste aprovado não fecha toda a capacidade operacional.
 
 
 ## Estimativa de fechamento do core
 
-Continuam quatro grupos com complementos: compras/custos (preços e conciliação entregues em C6; rateio ainda falta), financeiro de fornecedores (parcelas/crédito/conciliação de saídas), prontuário (modelos/anexos/busca/coautoria) e vínculos/auditoria. São agrupamentos de faltas da matriz, não quatro módulos do zero nem promessa de quatro execuções. Decisões humanas e operação seguem separadas.
+C7 entrega a composição explícita de compras/custos prevista no primeiro grupo. Permanecem três grupos de complementos funcionais: financeiro de fornecedores (parcelas/crédito/conciliação de saídas), prontuário (modelos/anexos/busca/coautoria) e vínculos/auditoria. São agrupamentos de faltas da matriz, não módulos inteiramente ausentes nem promessa de três execuções. Método contábil/fiscal real, decisões humanas e operação seguem separados; a conferência geral posterior deverá confirmar essa cobertura.

@@ -1,4 +1,9 @@
 import {
+  acquisitionActions,
+  acquisitionLists,
+} from "../domain/acquisition-cost/service.ts";
+import { acquisitionInputs } from "../domain/acquisition-cost/schemas.ts";
+import {
   pricingActions,
   pricingLists,
 } from "../domain/purchase-pricing/service.ts";
@@ -131,7 +136,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     openapi: {
       info: {
         title: "HVB Sistema — Clínica, Financeiro e Exames",
-        version: "0.15.0",
+        version: "0.16.0",
       },
       servers: [{ url: "http://127.0.0.1:3100" }],
       components: {
@@ -262,7 +267,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     async () => {
       try {
         const r = await db.query(
-          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='050_purchase_pricing_integrity.sql') AS ready, current_user AS role",
+          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='052_acquisition_cost_integrity.sql') AS ready, current_user AS role",
         );
         if (!r.rows[0].ready || r.rows[0].role !== "hvb_app")
           throw new Error("not ready");
@@ -322,6 +327,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...payableInputs,
     ...terminalInputs,
     ...pricingInputs,
+    ...acquisitionInputs,
     ...medicalInputs,
   };
   for (const action of [
@@ -339,6 +345,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...payableActions,
     ...terminalActions,
     ...pricingActions,
+    ...acquisitionActions,
     ...medicalActions,
   ]) {
     app.post(
@@ -431,6 +438,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...payableLists,
     ...terminalLists,
     ...pricingLists,
+    ...acquisitionLists,
     ...medicalLists,
   ]) {
     const stockPosition = list.table === "posicao_estoque";
@@ -521,7 +529,15 @@ export async function buildApp(db: pg.Pool, logging = false) {
           "apresentacao_id",
           "item_pedido_id",
           ...(list.path.startsWith("/compras/")
-            ? ["precificacao_id", "vinculo_id", "obrigacao_id"]
+            ? [
+                "precificacao_id",
+                "vinculo_id",
+                "obrigacao_id",
+                "rateio_id",
+                "item_rateio_id",
+                "recebimento_item_id",
+                "custo_recebimento_id",
+              ]
             : []),
           "evolucao_id",
           ...(list.path.startsWith("/terminal/")

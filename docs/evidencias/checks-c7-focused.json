@@ -1,0 +1,57 @@
+{
+  "executed_at": "2026-09-15T16:08:14.670Z",
+  "branch": "hvb-sistema-dev",
+  "scope": "custo de aquisição, compras e preços",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 1666,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 135,
+      "output": "Checked 112 files in 46ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 114,
+      "output": "Checked 115 files in 29ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 209,
+      "output": "✔ quantidades de estoque usam aritmética inteira e conversão sem arredondamento (1.0782ms)\n✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (6.6324ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (0.8836ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.2501ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (4.95ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 153.1567",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 294,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 9404,
+      "output": "✔ custo de aquisição fecha recebimentos parciais e preserva custo físico e dívida (1810.1607ms)\n✔ rateio incompleto, duplicado ou com componente divergente desfaz toda a versão (121.4366ms)\n✔ rateio distribui cada componente entre itens distintos e conserva total do preço (115.1464ms)\n✔ retry concorrente não duplica custo e nova intenção no mesmo recebimento é recusada (169.8554ms)\n✔ custos concorrentes respeitam orçamento e última quantidade fecha o saldo exato (222.6843ms)\n✔ revisão de rateio exige desfazer custos ativos e preserva versão e avaliações antigas (136.0153ms)\n✔ reversão física inativa custo analítico sem apagar avaliação e permite recebimento substituto (163.7424ms)\n✔ preço posterior sinaliza divergência sem recalcular rateio aceito ou custo físico (125.8977ms)\n✔ contextos cruzados, RLS e permissões protegem custos e suas consultas (229.9747ms)\n✔ avaliação concorrente com estorno físico não deixa custo ativo de entrada revertida (135.5559ms)\n✔ preço por apresentação e componentes fecham total sem reescrever dívida ou custo (1708.9479ms)\n✔ precificação cobre todos os itens uma vez e falha não deixa versão parcial (92.7666ms)\n✔ centavos exatos rejeitam arredondamento, números JSON e desconto excessivo (84.5024ms)\n✔ versões concorrentes têm uma sucessora e preço anterior permanece consultável (134.0849ms)\n✔ retry e vínculos concorrentes respeitam orçamento e obrigação sem criar pagamento (163.3127ms)\n✔ limite do pedido agrega versões e baixa de total exige rever conciliação (109.1486ms)\n✔ reversão de vínculo libera conciliação e reversão de dívida preserva vínculo histórico inativo (95.7672ms)\n✔ contexto, RLS e permissões de conciliação impedem associações cruzadas (197.9602ms)\n✔ pedido e aprovação não geram estoque, pagamento ou compra externa (1630.1754ms)\n✔ recebimento parcial usa a mesma transação física, fator e retry (141.2415ms)\n✔ concorrência não ultrapassa quantidade solicitada (143.7704ms)\n✔ falha posterior desfaz o lote inteiro de entradas e permite correção (86.2983ms)\n✔ compra não aceita outra apresentação, custódia de tutor ou item de outro pedido (139.9891ms)\n✔ cancelamento preserva recebimento parcial e impede novas entradas (73.7884ms)\n✔ reversão física preserva recibo e libera quantidade do pedido sem crédito fictício (82.9988ms)\n✔ escopo, permissão de estoque e SQL imutável impedem atalhos (103.6791ms)\n✔ contratos paginados e datas/quantidades inválidas não alteram saldo (105.8065ms)\nℹ tests 27\nℹ suites 0\nℹ pass 27\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 9333.6813",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 1504,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

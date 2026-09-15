@@ -39,6 +39,7 @@ Set-Location 'C:\Users\Admin\OneDrive\BESKEL\PARCEIROS\HVB\SISTEMA'
 .\scripts\pnpm.ps1 db:seed:payables
 .\scripts\pnpm.ps1 db:seed:terminal
 .\scripts\pnpm.ps1 db:seed:pricing
+.\scripts\pnpm.ps1 db:seed:acquisition
 .\scripts\pnpm.ps1 check
 .\scripts\pnpm.ps1 dev
 ```
@@ -259,4 +260,11 @@ Em resposta perdida, consultar/repetir a mesma chave e corpo; não criar uma nov
 
 Preços por apresentação versionados, componentes explícitos e conciliação parcial com obrigações de fornecedor. O vínculo respeita o orçamento do pedido entre versões e o valor da obrigação; não cria pagamento nem altera custo físico. Reversões preservam o histórico.
 
-pnpm db:seed:pricing demonstra preço 105, obrigação 100 e vínculo 100, com saldo comercial 5. pnpm check:pricing executa o recorte de 23 testes. Ver [relatório C6](docs/RELATORIO-C6.md), [dicionário](docs/DADOS-C6.md) e [decisões/limites](docs/adr/0016-precos-conciliacao-compras.md). Rateio de aquisição permanece próximo; pendências e verificação geral serão tratadas depois.
+pnpm db:seed:pricing demonstra preço 105, obrigação 100 e vínculo 100, com saldo comercial 5. pnpm check:pricing executa o recorte de 23 testes. Ver [relatório C6](docs/RELATORIO-C6.md), [dicionário](docs/DADOS-C6.md) e [decisões/limites](docs/adr/0016-precos-conciliacao-compras.md). C7 acrescenta o rateio de aquisição abaixo; pendências e verificação geral serão tratadas depois.
+
+
+### Custo de aquisição C7
+
+Rateio explícito de frete/acréscimo/desconto entre os itens do pedido e custo atribuído a cada entrada recebida. Componentes fecham contra a precificação; recebimentos parciais respeitam orçamento e quantidade. Revisão e reversão preservam histórico; preço posterior fica sinalizado. Custos analíticos de aquisição não reescrevem o custo físico do lote ou de consumos anteriores.
+
+pnpm db:seed:acquisition demonstra rateio 105, entradas de duas e três caixas, custos 42 e 63. pnpm check:acquisition executa o recorte de 32 testes. Ver [relatório C7](docs/RELATORIO-C7.md), [dicionário](docs/DADOS-C7.md) e [decisões/limites](docs/adr/0017-custo-aquisicao.md). Próximo: plano de parcelas de fornecedor.

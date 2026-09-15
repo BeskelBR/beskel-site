@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.16.0 — 2026-09-15
+
+- C7: rateio versionado dos componentes de aquisição por item, fechado contra a precificação original.
+- Custo explícito por recebimento parcial, com limites de valor/quantidade, reversões e preservação do custo físico histórico.
+- Alteração de preço sinalizada; entrada revertida torna custo analítico inativo sem apagar avaliação.
+- Migrations 051–052; quatro tabelas, três views, duas permissões e sete operações; total 328 operações em 198 caminhos.
+- 32 testes pontuais aprovados e seed repetível. Próximo grupo: complementos financeiros de fornecedores.
+
 ## 0.15.0 — 2026-09-15
 
 - C6: preços negociados versionados por item, frete/acréscimo/desconto explícitos e centavos exatos.

@@ -111,6 +111,8 @@ export const permissions = [
   "prontuario:conteudo",
   "prontuario:escrever",
   "prontuario:retificar",
+  "compras:ratear_custo",
+  "compras:avaliar_custo",
   "compras:precificar",
   "compras:conciliar_valores",
   "compras:ler",

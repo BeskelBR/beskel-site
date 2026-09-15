@@ -312,3 +312,20 @@ Pendências anteriores preservadas. Valores comerciais DEV não aprovam polític
 | Operação e verificação geral | ADIADAS; 23 testes pontuais passaram | Retomar carga, suíte geral, instalação vazia e homologação após consolidação |
 
 Nenhum pagamento real, alteração fiscal, contato com fornecedor ou serviço externo foi executado.
+
+
+## Consolidação C7 — 15/09/2026
+
+Pendências anteriores preservadas. O rateio DEV é explícito; não aprova tratamento fiscal, valorização contábil real ou recálculo de consumo.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Critério de rateio | DEV: descrição e valores por item, componentes fechados | Homologar critério, alçadas, natureza dos acréscimos, tributos recuperáveis e documentos comprobatórios |
+| Custo analítico versus físico | Separados; movimentos e consumos históricos preservados | Definir método contábil de estoque, corte temporal, ajustes e eventual integração com valorização real |
+| Recebimento parcial | Valor explícito por entrada; última quantidade fecha saldo do item | Aprovar distribuição, arredondamento e apresentação da razão valor/quantidade na interface |
+| Correção do rateio | Nova versão exige reverter avaliações ativas; histórico preservado | Homologar revisão em lote, ergonomia, responsabilidade e retomada após falha parcial |
+| Mudança de preço e estorno físico | Preço posterior sinalizado; entrada revertida inativa custo analítico | Definir revisão fiscal/comercial e crédito/devolução, sem inferência financeira |
+| Pedido cancelado ou incompleto | Custos anteriores podem ser registrados; restante continua pendente | Homologar encerramento residual e diferença de aquisição sem apagar fatos |
+| Verificação geral e operação | ADIADAS; 32 testes pontuais passaram | Retomar suíte geral, instalação vazia, carga e homologação após consolidação |
+
+Nenhum custo histórico sobrescrito, documento fiscal emitido, pagamento ou contato externo executado.
