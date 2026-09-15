@@ -1,3 +1,6 @@
+import { registerTerminal } from "../domain/terminal/routes.ts";
+import { terminalActions, terminalLists } from "../domain/terminal/service.ts";
+import { terminalInputs } from "../domain/terminal/schemas.ts";
 import { payableActions, payableLists } from "../domain/payables/service.ts";
 import { payableInputs } from "../domain/payables/schemas.ts";
 import {
@@ -123,7 +126,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     openapi: {
       info: {
         title: "HVB Sistema — Clínica, Financeiro e Exames",
-        version: "0.13.0",
+        version: "0.14.0",
       },
       servers: [{ url: "http://127.0.0.1:3100" }],
       components: {
@@ -254,7 +257,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     async () => {
       try {
         const r = await db.query(
-          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='046_payables_corrections.sql') AS ready, current_user AS role",
+          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='048_terminal_integrity.sql') AS ready, current_user AS role",
         );
         if (!r.rows[0].ready || r.rows[0].role !== "hvb_app")
           throw new Error("not ready");
@@ -312,6 +315,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...portalInputs,
     ...purchaseInputs,
     ...payableInputs,
+    ...terminalInputs,
     ...medicalInputs,
   };
   for (const action of [
@@ -327,6 +331,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...portalActions,
     ...purchaseActions,
     ...payableActions,
+    ...terminalActions,
     ...medicalActions,
   ]) {
     app.post(
@@ -338,7 +343,9 @@ export async function buildApp(db: pg.Pool, logging = false) {
         schema: {
           operationId: `post_${action.path.replace(/[^a-z]/g, "_")}`,
           security: [{ bearer: [] }],
-          headers,
+          headers: action.deviceRequired
+            ? { ...headers, required: [...headers.required, "x-device-id"] }
+            : headers,
           body: allInputs[action.input],
           ...(action.path.includes(":id")
             ? { params: object({ id: uuid }) }
@@ -415,6 +422,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...portalLists,
     ...purchaseLists,
     ...payableLists,
+    ...terminalLists,
     ...medicalLists,
   ]) {
     const stockPosition = list.table === "posicao_estoque";
@@ -430,6 +438,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
       list.path.startsWith("/comunicacao/") ||
       list.path.startsWith("/compras/") ||
       list.path.startsWith("/a-pagar/") ||
+      list.path.startsWith("/terminal/") ||
       list.path.startsWith("/prontuario/");
     const agendaMap = list.table === "agenda_mapa_consulta";
     const schedule = list.table === "programacao_consulta" || agendaMap;
@@ -504,6 +513,9 @@ export async function buildApp(db: pg.Pool, logging = false) {
           "apresentacao_id",
           "item_pedido_id",
           "evolucao_id",
+          ...(list.path.startsWith("/terminal/")
+            ? ["etiqueta_id", "leitura_id", "dispositivo_id"]
+            : []),
           "posicao_id",
         ].filter((f) => list.columns.split(",").includes(f))
       : [];
@@ -575,6 +587,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
                   "execucao_integral",
                   "material_tutor",
                   "necessita_revisao",
+                  "etiqueta_ativa",
+                  "utilizada",
                   "revisao_temporal",
                   "revertido",
                   "fechada",
@@ -742,6 +756,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
         }),
     );
   }
+  registerTerminal(app, authenticated, errors);
   await app.ready();
   return app;
 }

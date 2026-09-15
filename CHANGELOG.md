@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.14.0 — 2026-09-15
+
+- C5: etiquetas fictícias, leitura com contexto explícito, revogação, retirada confirmada e consulta do próprio comando por chave.
+- Retirada compartilha o ID físico M2; uma leitura por intenção, sem execução clínica inferida.
+- Dispositivo travado durante o comando para revalidar desativação concorrente.
+- Migrations 047–048; quatro tabelas, duas views, três permissões e nove operações novas; total de 313 operações em 189 caminhos.
+- 28 testes pontuais aprovados e seed local; nenhum leitor físico, cliente Terminal, offline ou serviço externo.
+
 ## 0.13.0 — 2026-09-15
 
 - C4: obrigações de fornecedor/despesa, pagamentos declarados, liquidações parciais e reversões em simulação.

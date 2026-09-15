@@ -8,6 +8,7 @@ export type Action = {
   path: string;
   input: string;
   permission: string;
+  deviceRequired?: boolean;
   scope?: (
     tx: PoolClient,
     actor: Actor,

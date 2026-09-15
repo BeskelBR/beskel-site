@@ -1,8 +1,8 @@
-# Cobertura do núcleo — C4
+# Cobertura do núcleo — C5
 
 Conferência em 15/09/2026 contra a lista de capacidades do documento 10-ESCOPO-ATUAL.md fornecido pelo usuário. A fonte local permanece em .local/reference, fora do Git. Instruções históricas de acesso ao fornecedor não foram tratadas como pedidos de acesso. Esta matriz relaciona capacidade, implementação e falta conhecida; não aprova política hospitalar nem substitui homologação.
 
-**DEV** significa que há comandos/entidades e testes no recorte descrito. **Parcial** indica falta funcional ou operacional explícita. As evidências M0–C2 são históricas; C3 exercitou a jornada abaixo, e C4 verificou pontualmente compras/contas a pagar.
+**DEV** significa que há comandos/entidades e testes no recorte descrito. **Parcial** indica falta funcional ou operacional explícita. As evidências M0–C2 são históricas; C3 exercitou a jornada abaixo, e C4 verificou pontualmente compras/contas a pagar; C5 verificou terminal simulado/fundação.
 
 | Capacidade do escopo | Base e evidência no repositório | Cobertura e falta conhecida |
 |---|---|---|
@@ -29,7 +29,7 @@ Conferência em 15/09/2026 contra a lista de capacidades do documento 10-ESCOPO-
 | Agenda | schedule; tests/schedule.test.ts | DEV: recursos, disponibilidade, conflito, reprogramação e transições. Parcial: interface e vínculos explícitos com atendimento/episódio |
 | Portal/comunicação | portal; tests/portal.test.ts, tests/core-journeys.test.ts | DEV simulado: credencial própria, concessão, preferências e entrega/revogação. Parcial: login operacional, interface e canais reais |
 | Trilha auditável | core, persistence, worker; tests/integration.test.ts | DEV: comandos idempotentes, auditoria, outbox/inbox. Parcial: auditoria de todas as leituras, retenção e operação de suporte |
-| Dispositivos e terminais NFC | foundation; tests/integration.test.ts | Parcial: dispositivo/autorização e rejeição de NFC como credencial. Falta fluxo de terminal simulado ponta a ponta em SISTEMA; pasta/branch Terminal não autorizadas para edição |
+| Dispositivos e terminais NFC | foundation, terminal; tests/integration.test.ts, tests/terminal.test.ts | C5: etiqueta fictícia, leitura, retirada confirmada, consulta de comando e dispositivo revalidado. Parcial: cliente/hardware, sessão operacional e offline; pasta/branch Terminal não autorizadas para edição |
 | Proveniência e migração futura | foundation; DADOS-M1 | Parcial: lote sintético, IDs externos e FKs. Obtenção/importação de dados reais, anexos e conciliação operacional M7 não autorizadas |
 
 ## Jornada consolidada em C3
@@ -43,7 +43,8 @@ Estorno de material devolve saldo e reabre conciliação da execução; a cobert
 ## Ordem das próximas entregas
 
 1. **Entregue em C4:** obrigação de fornecedor/despesa, pagamento declarado, liquidação, reversão e correção documental, separadas do recebimento físico. Preço negociado/fiscal/rateio, parcelas e crédito comercial continuam capacidades parciais, sem presumir políticas.
-2. **Próximo C5: contrato e fluxo de terminal simulado dentro de SISTEMA.** Reutilizar identidade, dispositivo, comando e confirmação humana; leitura NFC nunca confirma execução. Demais pastas e branches preservadas.
-3. Consolidar as faltas de vínculos e correção identificadas nesta matriz, mantendo separadas funções técnicas de políticas e integrações que dependem de decisão humana. Atualizar a cobertura antes de declarar o núcleo encerrado.
+2. **Entregue em C5:** contrato de terminal simulado dentro de SISTEMA, com etiqueta/leitura, retirada confirmada e consulta do próprio comando. Cliente e hardware permanecem etapas próprias.
+3. **Próximo C6:** preços negociados e vínculo explícito entre compra e obrigação, fechando a lacuna de valores comerciais do pedido sem presumir fiscal/rateio.
+4. Consolidar as demais faltas de vínculos e correção indicadas na matriz, mantendo separadas funções técnicas de políticas e integrações humanas. Atualizar a cobertura antes de declarar o núcleo encerrado.
 
 Assinatura válida, autenticação operacional, interfaces, canais reais, homologação, infraestrutura e migração continuam etapas próprias. A verificação geral, carga e instalação vazia serão realizadas depois, conforme o usuário. A existência de uma API ou de teste aprovado não fecha toda a capacidade operacional.

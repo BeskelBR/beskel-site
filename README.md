@@ -37,6 +37,7 @@ Set-Location 'C:\Users\Admin\OneDrive\BESKEL\PARCEIROS\HVB\SISTEMA'
 .\scripts\pnpm.ps1 db:seed:medical
 .\scripts\pnpm.ps1 db:seed:core
 .\scripts\pnpm.ps1 db:seed:payables
+.\scripts\pnpm.ps1 db:seed:terminal
 .\scripts\pnpm.ps1 check
 .\scripts\pnpm.ps1 dev
 ```
@@ -243,3 +244,11 @@ pnpm check:journeys executa a verificação pontual (nove testes aprovados). Con
 Obrigações de fornecedores e despesas com valores explícitos, pagamentos declarados, liquidações parciais, reversões e correção documental com histórico. Receber estoque não comprova dívida ou pagamento. Rotas sob /v1/a-pagar com permissões próprias e confirmação humana em simulação.
 
 pnpm db:seed:payables demonstra obrigação 100, pagamento declarado 60 e saldo 40; referências locais em .local/payables-demo.json. Não executa pagamento real. pnpm check:payables verifica o recorte (24 testes aprovados). Ver [relatório C4](docs/RELATORIO-C4.md), [dicionário](docs/DADOS-C4.md) e [ADR 0014](docs/adr/0014-contas-pagar.md).
+
+### Contrato de terminal simulado C5
+
+Rotas sob /v1/terminal permitem configurar etiquetas fictícias, registrar leituras, confirmar retirada e consultar o comando por chave. Leitura não é autenticação ou ato clínico. Retirada exige credencial API, dispositivo ativo, permissões e confirmação humana; reutiliza o movimento físico existente.
+
+pnpm db:seed:terminal gera a demonstração (origem 18/destino 2 após retirar duas unidades). Referências em .local/terminal-demo.json, sem credenciais. pnpm check:terminal executa o recorte de 28 testes aprovados. O código permanece dentro de SISTEMA; nenhuma edição ou execução do projeto Terminal.
+
+Em resposta perdida, consultar/repetir a mesma chave e corpo; não criar uma nova intenção automaticamente. Ver [contrato e limites](docs/adr/0015-terminal-simulado.md), [dicionário](docs/DADOS-C5.md) e [relatório C5](docs/RELATORIO-C5.md).

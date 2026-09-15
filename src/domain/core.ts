@@ -68,7 +68,7 @@ export async function command(
   if (device) {
     const d = await one(
       tx,
-      "SELECT unidade_id,ativo FROM dispositivo WHERE organizacao_id=$1 AND id=$2",
+      "SELECT unidade_id,ativo FROM dispositivo WHERE organizacao_id=$1 AND id=$2 FOR SHARE",
       [actor.organizacao_id, device],
     );
     if (!d.ativo) throw new DomainError(403, "dispositivo_inativo");

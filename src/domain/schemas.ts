@@ -99,6 +99,9 @@ export const inputs = {
   }),
 };
 export const permissions = [
+  "terminal:ler",
+  "terminal:configurar",
+  "terminal:usar",
   "pagar:ler",
   "pagar:registrar",
   "pagar:pagar",

@@ -279,3 +279,20 @@ Pendências anteriores preservadas; a existência de comandos financeiros simula
 | Desempenho e operação | ADIADO; 24 testes pontuais passaram | Verificar carga concorrente por unidade, suíte geral, instalação vazia e homologação posteriormente |
 
 Nenhum pagamento real, débito bancário, nota fiscal ou envio ao fornecedor foi executado.
+
+## Consolidação C5 — 15/09/2026
+
+Pendências anteriores preservadas. Terminal físico, hardware e sua branch continuam fora deste lote; a implementação reside apenas em SISTEMA.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Etiquetas e identidade | UUID fictício identifica alvo, sem autenticar | Definir suporte físico, emissão, perda, clonagem, renovação e reassociação; não confiar no UID como segredo |
+| Operador e sessão | Credencial API individual, dispositivo ativo e leitura vinculada ao autor | Homologar login, troca rápida de usuário, bloqueio de tela, MFA e duração de sessão |
+| Contexto e retrospectividade | Episódio escolhido e validado no servidor; leitura passada explícita DEV | Aprovar validade temporal da seleção e política de registro tardio |
+| Repetição e resposta perdida | Retry/consulta por mesma chave, corpo, operador e dispositivo | Implementar experiência de estado desconhecido e reconciliação; 404 não garante que uma transação concorrente terminou |
+| Offline/cache | NÃO IMPLEMENTADO, conforme contrato | Decidir viabilidade e regras antes de guardar fila/contexto ou permitir operação desconectada |
+| Retirada e execução | Movimento físico com confirmação, sem ato clínico inferido | Homologar ergonomia e ação explícita no cliente; leitura/retirada não comprovam administração |
+| Auditoria consultiva | Operador consulta seus comandos com dispositivo ativo | Definir suporte/supervisão, comandos de dispositivo desativado, retenção e auditoria de leituras |
+| Equipamento e verificação geral | NÃO EXERCITADOS; 28 testes pontuais de API/banco passaram | Homologar leitor, rede, energia, cliente visual e carga quando chegar a etapa acordada |
+
+Nenhuma etiqueta física gravada, segredo salvo no terminal ou serviço externo acionado.

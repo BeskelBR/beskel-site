@@ -1,12 +1,15 @@
 import { spawnSync } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
+const terminal = process.argv.includes("--terminal");
 const payables = process.argv.includes("--payables");
 const journeys = process.argv.includes("--journeys");
 const medical = process.argv.includes("--medical");
 const purchases = process.argv.includes("--purchases");
-if ([payables, journeys, medical, purchases].filter(Boolean).length > 1)
+if (
+  [terminal, payables, journeys, medical, purchases].filter(Boolean).length > 1
+)
   throw new Error("Escolha um único recorte de verificação.");
-const focused = payables || journeys || medical || purchases;
+const focused = terminal || payables || journeys || medical || purchases;
 const envFile = process.env.CHECK_ENV_FILE ?? ".env";
 const branch = spawnSync(
   "git",
@@ -48,30 +51,33 @@ const steps = [
       `--env-file=${envFile}`,
       "--test",
       "--test-concurrency=1",
-      ...(payables
-        ? ["tests/purchases.test.ts", "tests/payables.test.ts"]
-        : journeys
-          ? ["tests/core-journeys.test.ts"]
-          : medical
-            ? ["tests/clinical.test.ts", "tests/medical-record.test.ts"]
-            : purchases
-              ? ["tests/inventory.test.ts", "tests/purchases.test.ts"]
-              : [
-                  "tests/integration.test.ts",
-                  "tests/inventory.test.ts",
-                  "tests/clinical.test.ts",
-                  "tests/daily.test.ts",
-                  "tests/financial.test.ts",
-                  "tests/exams.test.ts",
-                  "tests/preventive.test.ts",
-                  "tests/documents.test.ts",
-                  "tests/schedule.test.ts",
-                  "tests/portal.test.ts",
-                  "tests/purchases.test.ts",
-                  "tests/medical-record.test.ts",
-                  "tests/core-journeys.test.ts",
-                  "tests/payables.test.ts",
-                ]),
+      ...(terminal
+        ? ["tests/integration.test.ts", "tests/terminal.test.ts"]
+        : payables
+          ? ["tests/purchases.test.ts", "tests/payables.test.ts"]
+          : journeys
+            ? ["tests/core-journeys.test.ts"]
+            : medical
+              ? ["tests/clinical.test.ts", "tests/medical-record.test.ts"]
+              : purchases
+                ? ["tests/inventory.test.ts", "tests/purchases.test.ts"]
+                : [
+                    "tests/integration.test.ts",
+                    "tests/inventory.test.ts",
+                    "tests/clinical.test.ts",
+                    "tests/daily.test.ts",
+                    "tests/financial.test.ts",
+                    "tests/exams.test.ts",
+                    "tests/preventive.test.ts",
+                    "tests/documents.test.ts",
+                    "tests/schedule.test.ts",
+                    "tests/portal.test.ts",
+                    "tests/purchases.test.ts",
+                    "tests/medical-record.test.ts",
+                    "tests/core-journeys.test.ts",
+                    "tests/payables.test.ts",
+                    "tests/terminal.test.ts",
+                  ]),
     ],
   ],
   ["openapi", ["scripts/openapi.ts"]],
@@ -97,16 +103,18 @@ for (const [name, args] of steps) {
 }
 await mkdir("docs/evidencias", { recursive: true });
 await writeFile(
-  payables
-    ? "docs/evidencias/checks-c4-focused.json"
-    : journeys
-      ? "docs/evidencias/checks-c3-focused.json"
-      : medical
-        ? "docs/evidencias/checks-c2-focused.json"
-        : purchases
-          ? "docs/evidencias/checks-c1-focused.json"
-          : "docs/evidencias/checks-c4-full.json",
-  `${JSON.stringify({ executed_at: new Date().toISOString(), branch: branch.stdout.trim(), scope: focused ? (payables ? "contas a pagar e compras" : journeys ? "jornadas integradas do núcleo" : medical ? "prontuário e clínica" : "compras e estoque") : "completo", node: process.version, results }, null, 2)}\n`,
+  terminal
+    ? "docs/evidencias/checks-c5-focused.json"
+    : payables
+      ? "docs/evidencias/checks-c4-focused.json"
+      : journeys
+        ? "docs/evidencias/checks-c3-focused.json"
+        : medical
+          ? "docs/evidencias/checks-c2-focused.json"
+          : purchases
+            ? "docs/evidencias/checks-c1-focused.json"
+            : "docs/evidencias/checks-c5-full.json",
+  `${JSON.stringify({ executed_at: new Date().toISOString(), branch: branch.stdout.trim(), scope: focused ? (terminal ? "terminal simulado e fundação" : payables ? "contas a pagar e compras" : journeys ? "jornadas integradas do núcleo" : medical ? "prontuário e clínica" : "compras e estoque") : "completo", node: process.version, results }, null, 2)}\n`,
 );
 if (results.length !== steps.length || results.some((r) => r.status !== 0))
   process.exitCode = 1;
