@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.12.0 — 2026-09-15
+
+- C2: evolução clínica com autoria, texto exato, hash, retificação e invalidação versionadas.
+- Linha do tempo por paciente/unidade com permissões por fonte, IDs originais e cursor temporal com microssegundos.
+- Revisão temporal derivada quando alta/saída retroativa diverge de relato preservado.
+- Migrations 041–043; duas tabelas, uma view, quatro permissões e seis operações novas; total de 296 operações em 180 caminhos.
+- 34 testes pontuais aprovados, seed sintético, TypeScript, lint, formato e OpenAPI. Verificação geral e pendências mantidas para depois.
+- Núcleo ainda em consolidação; próximos trabalhos: cobertura funcional e jornadas integradas.
+
 ## 0.11.0 — 2026-09-14
 
 - C1: fornecedor, pedido com itens, aprovação/cancelamento e recebimentos parciais em simulação.

@@ -1,3 +1,12 @@
+import {
+  medicalActions,
+  medicalLists,
+} from "../domain/medical-record/service.ts";
+import {
+  medicalInputs,
+  medicalContent,
+} from "../domain/medical-record/schemas.ts";
+import { registerMedicalRecord } from "../domain/medical-record/routes.ts";
 import { purchaseActions, purchaseLists } from "../domain/purchases/service.ts";
 import { purchaseInputs } from "../domain/purchases/schemas.ts";
 import { portalActions, portalLists } from "../domain/portal/service.ts";
@@ -46,6 +55,8 @@ import {
 
 function strictValues(schema: unknown, value: unknown): void {
   if (value === undefined) return;
+  if (schema === medicalContent && typeof value !== "string")
+    throw new DomainError(400, "evolucao_exige_texto_explicito");
   if (
     schema === documentFields &&
     value &&
@@ -110,7 +121,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     openapi: {
       info: {
         title: "HVB Sistema — Clínica, Financeiro e Exames",
-        version: "0.11.0",
+        version: "0.12.0",
       },
       servers: [{ url: "http://127.0.0.1:3100" }],
       components: {
@@ -218,6 +229,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     });
   }
   registerPortal(app, db, errors);
+  registerMedicalRecord(app, authenticated, errors);
   app.get(
     "/health",
     {
@@ -240,7 +252,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     async () => {
       try {
         const r = await db.query(
-          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='040_purchase_integrity.sql') AS ready, current_user AS role",
+          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='043_medical_record_temporal_review.sql') AS ready, current_user AS role",
         );
         if (!r.rows[0].ready || r.rows[0].role !== "hvb_app")
           throw new Error("not ready");
@@ -297,6 +309,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...scheduleInputs,
     ...portalInputs,
     ...purchaseInputs,
+    ...medicalInputs,
   };
   for (const action of [
     ...actions,
@@ -310,6 +323,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...scheduleActions,
     ...portalActions,
     ...purchaseActions,
+    ...medicalActions,
   ]) {
     app.post(
       `/v1${action.path}`,
@@ -336,6 +350,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
                 ordem_id: uuid,
                 ordem_versao_id: uuid,
                 agendamento_versao_id: uuid,
+                evolucao_versao_id: uuid,
                 resultado: {
                   type: "string",
                   enum: [
@@ -395,6 +410,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...scheduleLists,
     ...portalLists,
     ...purchaseLists,
+    ...medicalLists,
   ]) {
     const stockPosition = list.table === "posicao_estoque";
     const stockLedger = list.table === "lancamento_estoque_consulta";
@@ -407,7 +423,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
       list.path.startsWith("/documentos/") ||
       list.path.startsWith("/agenda/") ||
       list.path.startsWith("/comunicacao/") ||
-      list.path.startsWith("/compras/");
+      list.path.startsWith("/compras/") ||
+      list.path.startsWith("/prontuario/");
     const agendaMap = list.table === "agenda_mapa_consulta";
     const schedule = list.table === "programacao_consulta" || agendaMap;
     const clinicalFilters = clinical
@@ -472,6 +489,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
           "fornecedor_id",
           "apresentacao_id",
           "item_pedido_id",
+          "evolucao_id",
           "posicao_id",
         ].filter((f) => list.columns.split(",").includes(f))
       : [];
@@ -504,7 +522,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
         ...((list.path.startsWith("/protocolos/") ||
           list.path.startsWith("/documentos/") ||
           list.path.startsWith("/agenda/") ||
-          list.path.startsWith("/comunicacao/")) &&
+          list.path.startsWith("/comunicacao/") ||
+          list.path.startsWith("/prontuario/")) &&
         list.columns.split(",").includes("paciente_id")
           ? { paciente_id: uuid }
           : {}),
@@ -542,6 +561,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
                   "execucao_integral",
                   "material_tutor",
                   "necessita_revisao",
+                  "revisao_temporal",
                   "revertido",
                   "fechada",
                   "exige_coleta",

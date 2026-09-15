@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "HVB Sistema — Clínica, Financeiro e Exames",
-    "version": "0.11.0"
+    "version": "0.12.0"
   },
   "components": {
     "securitySchemes": {
@@ -458,6 +458,857 @@
                     "criada_em",
                     "texto",
                     "documentos"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/prontuario/versoes/{id}": {
+      "get": {
+        "operationId": "prontuario_conteudo",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "unidade_id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "paciente_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "episodio_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "versao": {
+                      "type": "integer"
+                    },
+                    "estado": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "conteudo": {
+                      "type": "string"
+                    },
+                    "hash_conteudo": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "autor_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "ocorrida_em": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "criada_em": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "atual": {
+                      "type": "boolean"
+                    },
+                    "revisao_temporal": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "evolucao_id",
+                    "paciente_id",
+                    "episodio_id",
+                    "versao",
+                    "estado",
+                    "conteudo",
+                    "hash_conteudo",
+                    "autor_id",
+                    "ocorrida_em",
+                    "criada_em",
+                    "atual",
+                    "revisao_temporal"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/prontuario/linha-do-tempo": {
+      "get": {
+        "operationId": "prontuario_timeline",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "unidade_id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "paciente_id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "episodio_id",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "inicio_registro",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "fim_registro",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "default": "evolucoes,clinica"
+            },
+            "in": "query",
+            "name": "fontes",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "apos_registro",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "evolucao",
+                "episodio",
+                "prescricao",
+                "ordem",
+                "programacao",
+                "execucao",
+                "consumo",
+                "estorno_consumo",
+                "resultado_exame",
+                "documento",
+                "agendamento",
+                "aplicacao_externa"
+              ]
+            },
+            "in": "query",
+            "name": "apos_tipo",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "apos_id",
+            "required": false
+          }
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "paciente_id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "episodio_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "autor_id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "tipo": {
+                            "type": "string",
+                            "enum": [
+                              "evolucao",
+                              "episodio",
+                              "prescricao",
+                              "ordem",
+                              "programacao",
+                              "execucao",
+                              "consumo",
+                              "estorno_consumo",
+                              "resultado_exame",
+                              "documento",
+                              "agendamento",
+                              "aplicacao_externa"
+                            ]
+                          },
+                          "natureza": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 160,
+                            "pattern": "\\S"
+                          },
+                          "situacao": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 160,
+                            "pattern": "\\S"
+                          },
+                          "ocorrido_em": {
+                            "type": "string",
+                            "format": "date-time",
+                            "nullable": true
+                          },
+                          "registrado_em": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "atual": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "paciente_id",
+                          "episodio_id",
+                          "autor_id",
+                          "tipo",
+                          "natureza",
+                          "situacao",
+                          "ocorrido_em",
+                          "registrado_em",
+                          "atual"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "next_cursor": {
+                      "type": "object",
+                      "properties": {
+                        "registrado_em": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "tipo": {
+                          "type": "string",
+                          "enum": [
+                            "evolucao",
+                            "episodio",
+                            "prescricao",
+                            "ordem",
+                            "programacao",
+                            "execucao",
+                            "consumo",
+                            "estorno_consumo",
+                            "resultado_exame",
+                            "documento",
+                            "agendamento",
+                            "aplicacao_externa"
+                          ]
+                        },
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "registrado_em",
+                        "tipo",
+                        "id"
+                      ],
+                      "additionalProperties": false,
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "next_cursor"
                   ],
                   "additionalProperties": false
                 }
@@ -1671,6 +2522,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -2356,6 +3211,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -3050,6 +3909,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -3734,6 +4597,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -4434,6 +5301,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -5150,6 +6021,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -5873,6 +6748,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -6553,6 +7432,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -7261,6 +8144,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -7962,6 +8849,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -8329,6 +9220,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -8693,6 +9588,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -9068,6 +9967,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -9783,6 +10686,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -10154,6 +11061,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -10911,6 +11822,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -11289,6 +12204,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -11658,6 +12577,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -12388,6 +13311,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -12743,6 +13670,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -13456,6 +14387,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -14182,6 +15117,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -14877,6 +15816,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -15594,6 +16537,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -16335,6 +17282,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -17064,6 +18015,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -17770,6 +18725,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -18467,6 +19426,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -19259,6 +20222,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -19634,6 +20601,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -20015,6 +20986,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -20388,6 +21363,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -20758,6 +21737,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -21488,6 +22471,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -21852,6 +22839,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -22232,6 +23223,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -22609,6 +23604,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -22981,6 +23980,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -23341,6 +24344,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -24078,6 +25085,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -24824,6 +25835,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -25188,6 +26203,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -25556,6 +26575,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -26265,6 +27288,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -27009,6 +28036,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -27777,6 +28808,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -28537,6 +29572,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -28895,6 +29934,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -29683,6 +30726,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -30090,6 +31137,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -30940,6 +31991,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -31352,6 +32407,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -32133,6 +33192,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -32497,6 +33560,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -32868,6 +33935,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -33570,6 +34641,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -34256,6 +35331,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -35015,6 +36094,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -35804,6 +36887,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -36597,6 +37684,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -36972,6 +38063,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -37737,6 +38832,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -38510,6 +39609,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -38892,6 +39995,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -39648,6 +40755,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -40424,6 +41535,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -41240,6 +42355,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -41604,6 +42723,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -41977,6 +43100,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -42762,6 +43889,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -43126,6 +44257,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -43499,6 +44634,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -43881,6 +45020,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -44645,6 +45788,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -45436,6 +46583,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -46204,6 +47355,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -46952,6 +48107,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -47690,6 +48849,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -48486,6 +49649,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -49295,6 +50462,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -50063,6 +51234,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -50844,6 +52019,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -51648,6 +52827,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -52431,6 +53614,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -53190,6 +54377,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -53979,6 +55170,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -54761,6 +55956,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -55547,6 +56746,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -56328,6 +57531,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -57167,6 +58374,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -57999,6 +59210,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -58844,6 +60059,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -59649,6 +60868,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -60417,6 +61640,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -61198,6 +62425,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -61946,6 +63177,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -62689,6 +63924,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -63497,6 +64736,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -64298,6 +65541,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -65078,6 +66325,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -65887,6 +67138,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -66731,6 +67986,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -67545,6 +68804,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -68418,6 +69681,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -69274,6 +70541,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -70034,6 +71305,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -70767,6 +72042,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -71524,6 +72803,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -72302,6 +73585,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -73068,6 +74355,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -73925,6 +75216,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -74767,6 +76062,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -75582,6 +76881,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -76377,6 +77680,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -77209,6 +78516,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -77985,6 +79296,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -78723,6 +80038,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -79510,6 +80829,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -80356,6 +81679,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -81112,6 +82439,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -81850,6 +83181,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -82628,6 +83963,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -83440,6 +84779,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -84260,6 +85603,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -85042,6 +86389,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -85854,6 +87205,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -86606,6 +87961,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -87381,6 +88740,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -88139,6 +89502,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -88932,6 +90299,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -89720,6 +91091,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -90556,6 +91931,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -91317,6 +92696,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -92046,6 +93429,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -92809,6 +94196,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -93589,6 +94980,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -94353,6 +95748,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -95183,6 +96582,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -96010,6 +97413,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -96790,6 +98197,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -97560,6 +98971,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -98335,6 +99750,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -99104,6 +100523,10 @@
                       "format": "uuid"
                     },
                     "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
                       "type": "string",
                       "format": "uuid"
                     },
@@ -99904,6 +101327,10 @@
                       "type": "string",
                       "format": "uuid"
                     },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
                     "resultado": {
                       "type": "string",
                       "enum": [
@@ -100278,6 +101705,1649 @@
                           "referencia",
                           "documento_fornecedor",
                           "ocorrido_em",
+                          "autor_id",
+                          "motivo",
+                          "criada_em"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "next_cursor": {
+                      "type": "string",
+                      "format": "uuid",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "next_cursor"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/prontuario/evolucoes": {
+      "post": {
+        "operationId": "post__prontuario_evolucoes",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "unidade_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "motivo": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160,
+                    "pattern": "\\S"
+                  },
+                  "simulacao": {
+                    "type": "boolean",
+                    "enum": [
+                      true
+                    ]
+                  },
+                  "confirmacao_humana": {
+                    "type": "boolean",
+                    "enum": [
+                      true
+                    ]
+                  },
+                  "paciente_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "episodio_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "tipo": {
+                    "type": "string",
+                    "enum": [
+                      "anamnese",
+                      "evolucao",
+                      "observacao"
+                    ]
+                  },
+                  "referencia": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "ocorrida_em": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "conteudo": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 8000,
+                    "pattern": "\\S"
+                  }
+                },
+                "required": [
+                  "unidade_id",
+                  "motivo",
+                  "simulacao",
+                  "confirmacao_humana",
+                  "paciente_id",
+                  "episodio_id",
+                  "tipo",
+                  "referencia",
+                  "ocorrida_em",
+                  "conteudo"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9._:-]{8,128}$"
+            },
+            "in": "header",
+            "name": "idempotency-key",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "header",
+            "name": "x-device-id",
+            "required": false
+          }
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "comando_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "estado": {
+                      "type": "string",
+                      "enum": [
+                        "confirmado"
+                      ]
+                    },
+                    "repetido": {
+                      "type": "boolean"
+                    },
+                    "versao": {
+                      "type": "integer"
+                    },
+                    "ordem_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "ordem_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "incluido",
+                        "parcial",
+                        "excedente",
+                        "excluido",
+                        "pendente"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "comando_id",
+                    "estado",
+                    "repetido"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "unidade_id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "episodio_id",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "paciente_id",
+            "required": false
+          }
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": false
+                          },
+                          "unidade_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "paciente_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "episodio_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "tipo": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "referencia": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "autor_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "motivo": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "criada_em": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "unidade_id",
+                          "paciente_id",
+                          "episodio_id",
+                          "tipo",
+                          "referencia",
+                          "autor_id",
+                          "motivo",
+                          "criada_em"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "next_cursor": {
+                      "type": "string",
+                      "format": "uuid",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "next_cursor"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/prontuario/versoes": {
+      "post": {
+        "operationId": "post__prontuario_versoes",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "unidade_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "motivo": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160,
+                    "pattern": "\\S"
+                  },
+                  "simulacao": {
+                    "type": "boolean",
+                    "enum": [
+                      true
+                    ]
+                  },
+                  "confirmacao_humana": {
+                    "type": "boolean",
+                    "enum": [
+                      true
+                    ]
+                  },
+                  "evolucao_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "versao_esperada": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483646
+                  },
+                  "estado": {
+                    "type": "string",
+                    "enum": [
+                      "registrada",
+                      "invalidada"
+                    ]
+                  },
+                  "ocorrida_em": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "conteudo": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 8000,
+                    "pattern": "\\S"
+                  }
+                },
+                "required": [
+                  "unidade_id",
+                  "motivo",
+                  "simulacao",
+                  "confirmacao_humana",
+                  "evolucao_id",
+                  "versao_esperada",
+                  "estado",
+                  "ocorrida_em",
+                  "conteudo"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9._:-]{8,128}$"
+            },
+            "in": "header",
+            "name": "idempotency-key",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "header",
+            "name": "x-device-id",
+            "required": false
+          }
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "comando_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "estado": {
+                      "type": "string",
+                      "enum": [
+                        "confirmado"
+                      ]
+                    },
+                    "repetido": {
+                      "type": "boolean"
+                    },
+                    "versao": {
+                      "type": "integer"
+                    },
+                    "ordem_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "ordem_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "agendamento_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "evolucao_versao_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "resultado": {
+                      "type": "string",
+                      "enum": [
+                        "incluido",
+                        "parcial",
+                        "excedente",
+                        "excluido",
+                        "pendente"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "comando_id",
+                    "estado",
+                    "repetido"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "correlation_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "unidade_id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "episodio_id",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "evolucao_id",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "paciente_id",
+            "required": false
+          }
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": false
+                          },
+                          "unidade_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "paciente_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "episodio_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "tipo": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "evolucao_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "versao": {
+                            "type": "integer",
+                            "nullable": false
+                          },
+                          "anterior_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "estado": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "ocorrida_em": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "hash_conteudo": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "atual": {
+                            "type": "boolean",
+                            "nullable": false
+                          },
+                          "revisao_temporal": {
+                            "type": "boolean",
+                            "nullable": false
+                          },
+                          "autor_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "motivo": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "criada_em": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "unidade_id",
+                          "paciente_id",
+                          "episodio_id",
+                          "tipo",
+                          "evolucao_id",
+                          "versao",
+                          "anterior_id",
+                          "estado",
+                          "ocorrida_em",
+                          "hash_conteudo",
+                          "atual",
+                          "revisao_temporal",
                           "autor_id",
                           "motivo",
                           "criada_em"

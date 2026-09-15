@@ -99,6 +99,10 @@ export const inputs = {
   }),
 };
 export const permissions = [
+  "prontuario:ler",
+  "prontuario:conteudo",
+  "prontuario:escrever",
+  "prontuario:retificar",
   "compras:ler",
   "compras:configurar",
   "compras:solicitar",

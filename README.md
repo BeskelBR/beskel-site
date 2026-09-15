@@ -12,7 +12,7 @@ M4 acrescenta classificação versionada, peso referenciado, pacotes, grupos, re
 
 M5 acrescenta catálogo/preço versionados, conta, avaliação comercial, responsabilidade, título, recebimento, liquidação, crédito, caixa, parcelas da adquirente, depósito e conciliação. São comandos **somente de simulação**, sem dinheiro real ou integração externa. Diária ambígua permanece pendente; inclusão documenta valor zero sem inventar devedor. Este lote entrega backend e contratos, sem telas, Terminal, migração real ou produção. O código fica no GitHub; Vercel e Cloudflare serão configurados pelo usuário. O backend atual exige PostgreSQL local e não está adaptado à execução serverless.
 
-M6A acrescenta catálogo técnico, solicitações, coletas, avaliação de amostras, resultados estruturados e correções versionadas. A liberação humana DEV preserva conteúdo e hash verificável, sem interpretação clínica automática. M6B acrescenta protocolos versionados, adesão do paciente, recorrência em dias/calendário, aplicações internas/externas, revisão de atrasos e vínculo com consumo físico. M6C acrescenta modelos e campos versionados, autorização, conteúdo privado com hash, aprovação, declaração de assinatura não verificada e registro de entrega simulado. **M6 está em andamento**; M6D acrescenta agenda com recursos, disponibilidade, conflitos, reprogramação e transições operacionais. M6E acrescenta portal com credenciais próprias, acesso por paciente, preferências e comunicação simulada com documentos/agenda versionados. C1 integra fornecedor/pedido/recebimento à mesma entrada física M2. A consolidação do núcleo segue antes das decisões hospitalares; a interface permanece futura.
+M6A acrescenta catálogo técnico, solicitações, coletas, avaliação de amostras, resultados estruturados e correções versionadas. A liberação humana DEV preserva conteúdo e hash verificável, sem interpretação clínica automática. M6B acrescenta protocolos versionados, adesão do paciente, recorrência em dias/calendário, aplicações internas/externas, revisão de atrasos e vínculo com consumo físico. M6C acrescenta modelos e campos versionados, autorização, conteúdo privado com hash, aprovação, declaração de assinatura não verificada e registro de entrega simulado. **M6 está em andamento**; M6D acrescenta agenda com recursos, disponibilidade, conflitos, reprogramação e transições operacionais. M6E acrescenta portal com credenciais próprias, acesso por paciente, preferências e comunicação simulada com documentos/agenda versionados. C1 integra fornecedor/pedido/recebimento à mesma entrada física M2. C2 acrescenta evolução clínica versionada e linha do tempo por paciente, preservando IDs originais e permissões por fonte. A consolidação do núcleo segue antes das decisões hospitalares; a interface permanece futura.
 
 ## Executar neste Windows
 
@@ -34,6 +34,7 @@ Set-Location 'C:\Users\Admin\OneDrive\BESKEL\PARCEIROS\HVB\SISTEMA'
 .\scripts\pnpm.ps1 db:seed:schedule
 .\scripts\pnpm.ps1 db:seed:portal
 .\scripts\pnpm.ps1 db:seed:purchases
+.\scripts\pnpm.ps1 db:seed:medical
 .\scripts\pnpm.ps1 check
 .\scripts\pnpm.ps1 dev
 ```
@@ -63,7 +64,7 @@ Invoke-RestMethod http://127.0.0.1:3100/v1/pacientes -Method Post -Headers $hvbH
 
 Reenviar o mesmo corpo e chave retorna o mesmo ID, `estado: confirmado` e `repetido: true`. Conteúdo ou operação diferente com a mesma chave resulta em `409`. Uma nova intenção usa uma nova chave. Credenciais fornecidas em `/v1/credenciais` devem ter 32 bytes criptograficamente aleatórios, representados em 64 caracteres hexadecimais; o banco guarda somente SHA-256. NFC não serve como autenticação Bearer nem confirma ato clínico.
 
-Todas as listas usam `limit` (padrão 25, máximo 100) e `cursor` UUID. Episódios, locais e ocupações exigem `unidade_id`; episódios aceitam `paciente_id` e `ativos`. A paginação usa ordem por UUID imutável; não promete ordenação cronológica. Os dados de um registro recém-inserido com UUID anterior ao cursor aparecem ao reiniciar a consulta.
+As listas gerais usam `limit` (padrão 25, máximo 100) e `cursor` UUID. Episódios, locais e ocupações exigem `unidade_id`; episódios aceitam `paciente_id` e `ativos`. A paginação usa ordem por UUID imutável; não promete ordenação cronológica. Os dados de um registro recém-inserido com UUID anterior ao cursor aparecem ao reiniciar a consulta.
 
 Contrato completo: [OpenAPI](openapi/hvb-sistema.json). Schemas de entrada e saída são os mesmos usados pela API; `pnpm openapi` regenera o artefato.
 
@@ -220,3 +221,11 @@ O workflow de CI é **manual**, limitado a `hvb-sistema-dev`; não foi disparado
 - [Precedência e proveniência](docs/PRECEDENCIA-E-FONTES.md)
 
 As fontes originais foram preservadas em Downloads e copiadas para `.local/reference`, ignorada pelo Git. Fontes históricas não integram seeds nem o runtime. Toda alteração deste trabalho ficou sob `SISTEMA`; site e Terminal permanecem separados.
+
+### Prontuário longitudinal C2
+
+Evoluções com versões preservadas e linha do tempo de metadados, sem duplicar execução/consumo ou interpretar conteúdo clínico. O seed db:seed:medical cria narrativa e retificação fictícias; referências locais em .local/medical-record-demo.json. Detalhes e parâmetros em [DADOS-C2](docs/DADOS-C2.md), decisões em [ADR 0013](docs/adr/0013-prontuario-longitudinal.md).
+
+Verificação pontual: pnpm check:medical, com 34 testes aprovados. A linha do tempo exige paciente/unidade e intervalo de registro; usa cursor composto em vez do cursor UUID das listas gerais. Texto integral exige permissão própria. Alta/saída retroativa preserva o relato e sinaliza divergência temporal. Ver [relatório C2](docs/RELATORIO-C2.md).
+
+A consolidação segue pelo [roteiro do núcleo](docs/NUCLEO-FUNCIONAL.md). Revisão geral e pendências hospitalares ficam para depois, conforme orientação atual.

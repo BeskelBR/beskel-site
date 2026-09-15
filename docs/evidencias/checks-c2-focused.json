@@ -1,0 +1,57 @@
+{
+  "executed_at": "2026-09-15T03:59:58.534Z",
+  "branch": "hvb-sistema-dev",
+  "scope": "prontuário e clínica",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 4486,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 141,
+      "output": "Checked 88 files in 40ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 122,
+      "output": "Checked 91 files in 25ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 215,
+      "output": "✔ quantidades de estoque usam aritmética inteira e conversão sem arredondamento (1.0764ms)\n✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (6.2885ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (0.8554ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.2248ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (5.3332ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 156.7713",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 225,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 6099,
+      "output": "✔ execução confirmada sem lote preserva saldo e abre pendência; confirmação não é inferida (1403.0297ms)\n✔ programação só conclui uma vez sob concorrência e evento real deduplica chaves diferentes (241.0457ms)\n✔ parciais e conclusão ficam distintas; retificação preserva o original (126.5643ms)\n✔ ordem versionada exige versão esperada e mantém programação anterior para revisão (59.0816ms)\n✔ sobreposição gera revisão e não exclui ordem; material previsto não cria execução nem consumo (58.7578ms)\n✔ consumo identificado baixa uma vez, preserva custódia do tutor e resolve a pendência (78.8023ms)\n✔ falha em um item desfaz o lote inteiro sem apagar execução; decimais aninhados são exatos (63.0563ms)\n✔ consumos concorrentes e reserva não excedem saldo disponível (69.657ms)\n✔ material de outro tutor, episódio ou unidade não pode ser alocado ao paciente (222.293ms)\n✔ estorno agregado reabre pendência, compensa todos os itens e permite retificar (95.4731ms)\n✔ registro tardio compara horário ocorrido com alta; programação não executada não vira fato (98.1865ms)\n✔ permissões clínicas, contexto de unidade e SQL imutável não admitem atalhos (82.134ms)\n✔ consumo em dois lotes preserva custo exato e estorno integral; validade e custo desconhecido ficam pendentes (84.9528ms)\n✔ retirada transfere e o consumo debita somente o destino identificado (64.7913ms)\n✔ alta preserva programações futuras e fatos anteriores com pendência de revisão (51.4687ms)\n✔ SQL não pode adicionar lançamento usando comando já confirmado (41.3516ms)\n✔ listas clínicas paginadas respeitam filtros e mapa exige período limitado (72.0596ms)\n✔ evolução guarda texto exato, autor, hash e instante sem alterar estoque (1364.4934ms)\n✔ retificação concorrente tem um sucessor e invalidação preserva conteúdo anterior (119.4569ms)\n✔ criação e retry deduplicam referência sem duplicar versões (104.6139ms)\n✔ paciente/episódio, tempo futuro e conteúdo inválido são recusados (98.9649ms)\n✔ linha do tempo preserva planejamento e IDs de execução/consumo/estorno (90.8923ms)\n✔ fontes selecionadas exigem suas permissões e metadados não liberam texto (56.1134ms)\n✔ período, fontes e cursor compostos têm limites explícitos (44.5532ms)\n✔ paginação desempata instantes idênticos sem perder ou repetir fatos (71.2259ms)\n✔ fontes documentais e agenda mostram versões sem copiar conteúdo (163.977ms)\n✔ exames e aplicações externas preservam ID, estado e natureza (204.2676ms)\n✔ saída retroativa preserva relato e sinaliza revisão temporal até retificação (59.087ms)\n✔ unidade e RLS isolam relato, e SQL preserva o histórico (77.8059ms)\nℹ tests 29\nℹ suites 0\nℹ pass 29\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 6039.0249",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 1394,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

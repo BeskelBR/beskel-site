@@ -231,3 +231,20 @@ Compras e recebimento físico integrados em simulação. Pendências anteriores 
 | Volume e verificação geral | ADIADO conforme orientação; recorte pontual aprovado | Medir até 50 itens por pedido/20 entradas por lote, concorrência entre pedidos e executar suíte geral/instalação vazia posteriormente |
 
 Nenhum envio ao fornecedor, pagamento, nota fiscal real, migração ou serviço externo foi acionado.
+
+## Consolidação C2 — 15/09/2026
+
+Pendências anteriores preservadas. A implementação segue antes da discussão conjunta e da verificação geral, conforme o usuário.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Narrativa e responsabilidade profissional | PROPOSTO DEV; tipos simples, autor autenticado e texto completo versionado | Homologar campos, coautoria, profissão habilitada, supervisão e segregação de funções |
+| Retificação, invalidação e reativação | PROPOSTO DEV; sucessão explícita sem apagar conteúdo | Definir justificativas, poderes, revisão e política de visibilidade do histórico |
+| Datas e registro tardio | PROPOSTO DEV; admissão até saída física, ou alta na ausência de saída, com limites inclusivos | Validar retrospectividade, relato após alta e correção; divergência posterior é sinalizada sem apagar fatos |
+| Assinatura e auditoria de leitura | PENDENTE; hash de conteúdo e auditoria dos comandos não equivalem a assinatura válida ou trilha de todas as leituras | Homologar assinatura, retenção, acesso ao texto e auditoria de consulta antes de uso assistencial |
+| Linha do tempo e vínculos | PARCIAL; metadados e IDs originais, sem duplicar execução interna | Completar jornadas, vínculos explícitos com episódio e cobertura das transições; não inferir vínculo por proximidade temporal |
+| Busca, anexos e modelos clínicos | A IMPLEMENTAR/VALIDAR em recortes próprios | Definir formatos, privacidade, pesquisa e modelos sem transformar proposta em regra |
+| Portal e múltiplas unidades | NÃO LIBERADO pelo prontuário; somente permissões da equipe por unidade | Homologar escopos e finalidade antes de qualquer exposição |
+| Carga e verificação geral | ADIADO; 34 testes pontuais passaram | Verificar histórico longo, planos de consulta, paginação sob novas inserções, instalação vazia e suíte geral depois da consolidação |
+
+Nenhuma assinatura profissional, execução clínica real, mensagem externa ou configuração Vercel/Cloudflare foi realizada.
