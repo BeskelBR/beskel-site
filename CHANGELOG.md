@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.12.1 — 2026-09-15
+
+- C3: jornada sintética reutiliza paciente e episódio entre clínica, diária, custo, cobrança, prontuário, documento e portal.
+- Seed integrado e retomada idempotente, sem entrega externa. Cenários aceitam contexto clínico existente.
+- Matriz de cobertura por capacidade explicita faltas funcionais e decisões humanas; próximos recortes C4 aquisição/despesas e C5 terminal simulado em SISTEMA.
+- Nove testes pontuais aprovados; nenhuma nova rota, dependência ou migration. Verificação geral e pendências seguem para depois.
+
 ## 0.12.0 — 2026-09-15
 
 - C2: evolução clínica com autoria, texto exato, hash, retificação e invalidação versionadas.

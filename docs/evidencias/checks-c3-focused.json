@@ -1,0 +1,57 @@
+{
+  "executed_at": "2026-09-15T09:31:33.081Z",
+  "branch": "hvb-sistema-dev",
+  "scope": "jornadas integradas do núcleo",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 1378,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 133,
+      "output": "Checked 91 files in 55ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 103,
+      "output": "Checked 94 files in 25ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 195,
+      "output": "✔ quantidades de estoque usam aritmética inteira e conversão sem arredondamento (0.7367ms)\n✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (6.5446ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (0.8237ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.2166ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (8.9261ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 145.5097",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 194,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 2857,
+      "output": "✔ jornada conserva episódio único, custo físico e cobrança incluída sem dívida (1619.8652ms)\n✔ retomada da jornada repete comandos sem duplicar consumo, cobertura ou documento (319.7299ms)\n✔ falha de consumo adicional desfaz efeitos e estorno não apaga cobertura ou documento (295.1995ms)\n✔ entrega simulada libera só documento autorizado; revogação preserva fatos internos (269.8222ms)\nℹ tests 4\nℹ suites 0\nℹ pass 4\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2809.2534",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 1327,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

@@ -7,8 +7,16 @@ export async function portalScenario(
   unit: string,
   prefix: string = randomUUID(),
   audience = "responsavel",
+  supplied?: Parameters<typeof documentScenario>[5],
 ) {
-  const s = await documentScenario(app, token, unit, prefix, audience);
+  const s = await documentScenario(
+    app,
+    token,
+    unit,
+    prefix,
+    audience,
+    supplied,
+  );
   async function create(
     name: string,
     path: string,

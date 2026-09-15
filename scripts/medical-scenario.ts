@@ -6,8 +6,9 @@ export async function medicalScenario(
   token: string,
   unit: string,
   prefix: string = randomUUID(),
+  supplied?: Awaited<ReturnType<typeof clinicalScenario>>,
 ) {
-  const s = await clinicalScenario(app, token, unit, prefix),
+  const s = supplied ?? (await clinicalScenario(app, token, unit, prefix)),
     common = {
       unidade_id: unit,
       motivo: "Evolução fictícia DEV",

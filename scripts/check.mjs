@@ -1,10 +1,11 @@
 import { spawnSync } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
+const journeys = process.argv.includes("--journeys");
 const medical = process.argv.includes("--medical");
 const purchases = process.argv.includes("--purchases");
-if (medical && purchases)
+if ([journeys, medical, purchases].filter(Boolean).length > 1)
   throw new Error("Escolha um único recorte de verificação.");
-const focused = medical || purchases;
+const focused = journeys || medical || purchases;
 const envFile = process.env.CHECK_ENV_FILE ?? ".env";
 const branch = spawnSync(
   "git",
@@ -46,24 +47,27 @@ const steps = [
       `--env-file=${envFile}`,
       "--test",
       "--test-concurrency=1",
-      ...(medical
-        ? ["tests/clinical.test.ts", "tests/medical-record.test.ts"]
-        : purchases
-          ? ["tests/inventory.test.ts", "tests/purchases.test.ts"]
-          : [
-              "tests/integration.test.ts",
-              "tests/inventory.test.ts",
-              "tests/clinical.test.ts",
-              "tests/daily.test.ts",
-              "tests/financial.test.ts",
-              "tests/exams.test.ts",
-              "tests/preventive.test.ts",
-              "tests/documents.test.ts",
-              "tests/schedule.test.ts",
-              "tests/portal.test.ts",
-              "tests/purchases.test.ts",
-              "tests/medical-record.test.ts",
-            ]),
+      ...(journeys
+        ? ["tests/core-journeys.test.ts"]
+        : medical
+          ? ["tests/clinical.test.ts", "tests/medical-record.test.ts"]
+          : purchases
+            ? ["tests/inventory.test.ts", "tests/purchases.test.ts"]
+            : [
+                "tests/integration.test.ts",
+                "tests/inventory.test.ts",
+                "tests/clinical.test.ts",
+                "tests/daily.test.ts",
+                "tests/financial.test.ts",
+                "tests/exams.test.ts",
+                "tests/preventive.test.ts",
+                "tests/documents.test.ts",
+                "tests/schedule.test.ts",
+                "tests/portal.test.ts",
+                "tests/purchases.test.ts",
+                "tests/medical-record.test.ts",
+                "tests/core-journeys.test.ts",
+              ]),
     ],
   ],
   ["openapi", ["scripts/openapi.ts"]],
@@ -89,12 +93,14 @@ for (const [name, args] of steps) {
 }
 await mkdir("docs/evidencias", { recursive: true });
 await writeFile(
-  medical
-    ? "docs/evidencias/checks-c2-focused.json"
-    : purchases
-      ? "docs/evidencias/checks-c1-focused.json"
-      : "docs/evidencias/checks-c2-full.json",
-  `${JSON.stringify({ executed_at: new Date().toISOString(), branch: branch.stdout.trim(), scope: focused ? (medical ? "prontuário e clínica" : "compras e estoque") : "completo", node: process.version, results }, null, 2)}\n`,
+  journeys
+    ? "docs/evidencias/checks-c3-focused.json"
+    : medical
+      ? "docs/evidencias/checks-c2-focused.json"
+      : purchases
+        ? "docs/evidencias/checks-c1-focused.json"
+        : "docs/evidencias/checks-c3-full.json",
+  `${JSON.stringify({ executed_at: new Date().toISOString(), branch: branch.stdout.trim(), scope: focused ? (journeys ? "jornadas integradas do núcleo" : medical ? "prontuário e clínica" : "compras e estoque") : "completo", node: process.version, results }, null, 2)}\n`,
 );
 if (results.length !== steps.length || results.some((r) => r.status !== 0))
   process.exitCode = 1;

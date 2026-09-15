@@ -7,6 +7,7 @@ export async function financialScenario(
   unit: string,
   prefix: string = randomUUID(),
   supplied?: Awaited<ReturnType<typeof clinicalScenario>>,
+  material: "pendente" | "nao_utilizado" = "nao_utilizado",
 ) {
   const clinical =
     supplied ?? (await clinicalScenario(app, token, unit, prefix));
@@ -68,7 +69,7 @@ export async function financialScenario(
     quantidade_aplicada: "1",
     unidade_medida_id: clinical.measure,
     resultado: "integral",
-    situacao_material: "nao_utilizado",
+    situacao_material: material,
     confirmacao_humana: true,
     motivo: "Execução fictícia para teste comercial",
   });

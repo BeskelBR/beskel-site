@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "HVB Sistema — Clínica, Financeiro e Exames",
-    "version": "0.12.0"
+    "version": "0.12.1"
   },
   "components": {
     "securitySchemes": {

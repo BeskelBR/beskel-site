@@ -35,6 +35,7 @@ Set-Location 'C:\Users\Admin\OneDrive\BESKEL\PARCEIROS\HVB\SISTEMA'
 .\scripts\pnpm.ps1 db:seed:portal
 .\scripts\pnpm.ps1 db:seed:purchases
 .\scripts\pnpm.ps1 db:seed:medical
+.\scripts\pnpm.ps1 db:seed:core
 .\scripts\pnpm.ps1 check
 .\scripts\pnpm.ps1 dev
 ```
@@ -229,3 +230,9 @@ Evoluções com versões preservadas e linha do tempo de metadados, sem duplicar
 Verificação pontual: pnpm check:medical, com 34 testes aprovados. A linha do tempo exige paciente/unidade e intervalo de registro; usa cursor composto em vez do cursor UUID das listas gerais. Texto integral exige permissão própria. Alta/saída retroativa preserva o relato e sinaliza divergência temporal. Ver [relatório C2](docs/RELATORIO-C2.md).
 
 A consolidação segue pelo [roteiro do núcleo](docs/NUCLEO-FUNCIONAL.md). Revisão geral e pendências hospitalares ficam para depois, conforme orientação atual.
+
+### Jornada integrada C3
+
+pnpm db:seed:core compõe um cenário fictício com o mesmo paciente/episódio: execução, consumo hospitalar com custo, cobertura da execução, item comercial zero, evolução, documento e mensagem apenas preparada. Referências em .local/core-journey-demo.json. Repetir preserva os IDs; cada comando é atômico, e a jornada inteira não é uma única transação.
+
+pnpm check:journeys executa a verificação pontual (nove testes aprovados). Consulte o [relatório C3](docs/RELATORIO-C3.md) e a [matriz de cobertura do núcleo](docs/COBERTURA-NUCLEO.md). Ainda faltam capacidades funcionais; assinatura, operação real, pendências humanas e verificação geral continuam etapas próprias.

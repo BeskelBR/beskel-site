@@ -248,3 +248,18 @@ Pendências anteriores preservadas. A implementação segue antes da discussão 
 | Carga e verificação geral | ADIADO; 34 testes pontuais passaram | Verificar histórico longo, planos de consulta, paginação sob novas inserções, instalação vazia e suíte geral depois da consolidação |
 
 Nenhuma assinatura profissional, execução clínica real, mensagem externa ou configuração Vercel/Cloudflare foi realizada.
+
+## Consolidação C3 — 15/09/2026
+
+Pendências anteriores preservadas. A [matriz de cobertura](COBERTURA-NUCLEO.md) distingue falta funcional de decisão humana, evitando considerar uma capacidade concluída apenas por existir uma entidade.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Retomada de jornadas | PROPOSTO DEV; comandos idempotentes com referência estável | Definir interface de progresso, falha parcial e retomada operacional; não compensar atos clínicos automaticamente |
+| Cobertura da execução e material | SEPARADO; custo físico persiste e a cobertura testada é da execução | Homologar o que cada regra inclui; cobertura de serviço não autoriza presumir cobertura de todo insumo |
+| Correção clínica e documento já entregue | HISTÓRICO preservado; revisão comercial sinalizada | Definir revisão humana, documento substituto e comunicação autorizada; não alterar nem reenviar por inferência |
+| Aquisição/despesas | FALTA FUNCIONAL explícita para C4 | Construir obrigação/pagamento simulado com valores informados; processo real, fiscal e alçadas seguem pendentes |
+| Terminal/NFC | FALTA FUNCIONAL em SISTEMA para C5 | Consolidar contrato/simulação de leitura e confirmação; não editar Terminal ou assumir leitor/rede reais |
+| Verificação global | ADIADA; nove testes pontuais C3 aprovados | Executar suíte geral, carga, instalação vazia e homologação quando chegar a etapa acordada |
+
+Nenhuma mensagem externa ou assinatura válida foi emitida; Vercel/Cloudflare continuam com o usuário.

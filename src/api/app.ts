@@ -121,7 +121,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     openapi: {
       info: {
         title: "HVB Sistema — Clínica, Financeiro e Exames",
-        version: "0.12.0",
+        version: "0.12.1",
       },
       servers: [{ url: "http://127.0.0.1:3100" }],
       components: {
