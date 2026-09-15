@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.13.0 — 2026-09-15
+
+- C4: obrigações de fornecedor/despesa, pagamentos declarados, liquidações parciais e reversões em simulação.
+- Correção documental após reversão preserva origem e admite uma sucessora; concorrência respeita os saldos dos dois lados.
+- Estoque/pedido não geram nem compensam dívida por inferência. Cancelamento sinaliza revisão.
+- Migrations 044–046; quatro tabelas, três views, cinco permissões e oito operações novas. Total: 304 operações em 184 caminhos.
+- 24 testes pontuais aprovados; seed de obrigação 100/pagamento 60/saldo 40, sem operação bancária. Próximo C5: terminal simulado em SISTEMA.
+
 ## 0.12.1 — 2026-09-15
 
 - C3: jornada sintética reutiliza paciente e episódio entre clínica, diária, custo, cobrança, prontuário, documento e portal.

@@ -263,3 +263,19 @@ Pendências anteriores preservadas. A [matriz de cobertura](COBERTURA-NUCLEO.md)
 | Verificação global | ADIADA; nove testes pontuais C3 aprovados | Executar suíte geral, carga, instalação vazia e homologação quando chegar a etapa acordada |
 
 Nenhuma mensagem externa ou assinatura válida foi emitida; Vercel/Cloudflare continuam com o usuário.
+
+## Consolidação C4 — 15/09/2026
+
+Pendências anteriores preservadas; a existência de comandos financeiros simulados não aprova operação, política fiscal ou valores reais.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Documento e correção de obrigação | PROPOSTO DEV; origem textual exata, sucessão após reversão | Homologar identificação fiscal, duplicidade documental, anexos e alteração de fornecedor/origem |
+| Reconhecimento de dívida e pedido cancelado | PROPOSTO DEV; dívida explícita, cancelamento sinaliza revisão | Definir poderes e revisão do documento; cancelamento não comprova ausência de obrigação |
+| Pagamento e adiantamento | SIMULADO; conta interna e evidência declarada, aplicação separada | Homologar conta/canal real, segregação, disponibilidade, autorização e conciliação bancária |
+| Reversões | PROPOSTO DEV; desfazer liquidações antes dos documentos | Distinguir correção de registro, devolução real de dinheiro e cancelamento comercial |
+| Preço, fiscal e custo contábil | A IMPLEMENTAR/VALIDAR; valor da obrigação é explícito | Completar preço negociado por item, frete/tributos/desconto/rateio sem inferir custo do lote |
+| Parcelas e crédito de fornecedor | A IMPLEMENTAR/VALIDAR; pagamentos parciais existem, sem plano de parcelas ou crédito comercial | Definir cronograma, juros, devolução parcial e compensações |
+| Desempenho e operação | ADIADO; 24 testes pontuais passaram | Verificar carga concorrente por unidade, suíte geral, instalação vazia e homologação posteriormente |
+
+Nenhum pagamento real, débito bancário, nota fiscal ou envio ao fornecedor foi executado.

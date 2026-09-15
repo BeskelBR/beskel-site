@@ -1,0 +1,57 @@
+{
+  "executed_at": "2026-09-15T10:13:30.555Z",
+  "branch": "hvb-sistema-dev",
+  "scope": "contas a pagar e compras",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 1450,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 122,
+      "output": "Checked 96 files in 43ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 103,
+      "output": "Checked 99 files in 24ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 193,
+      "output": "✔ quantidades de estoque usam aritmética inteira e conversão sem arredondamento (0.75ms)\n✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (6.6522ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (0.804ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.2242ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (4.9571ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 142.8724",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 168,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 5595,
+      "output": "✔ obrigação explícita não recebe estoque nem cria pagamento e documento não duplica (1478.7653ms)\n✔ pagamento deduplica retry e referência sem liquidar automaticamente (111.2988ms)\n✔ liquidações concorrentes não excedem obrigação nem pagamento (173.5509ms)\n✔ reversão encadeada recompõe saldos e não apaga fatos (93.1573ms)\n✔ fornecedor, pedido, unidade e organização devem coincidir (135.9137ms)\n✔ centavos, datas, confirmação e alvo único são exigidos (85.2176ms)\n✔ cancelamento e recebimento físicos não compensam dívida por inferência (80.9236ms)\n✔ listas paginadas exigem permissão própria e filtros de unidade (78.0713ms)\n✔ SQL preserva histórico e rejeita efeito anexado ao comando concluído (124.1104ms)\n✔ correção documental exige reversão prévia e aceita um único sucessor (107.0801ms)\n✔ pedido e aprovação não geram estoque, pagamento ou compra externa (1519.4683ms)\n✔ recebimento parcial usa a mesma transação física, fator e retry (238.8113ms)\n✔ concorrência não ultrapassa quantidade solicitada (137.7019ms)\n✔ falha posterior desfaz o lote inteiro de entradas e permite correção (82.3086ms)\n✔ compra não aceita outra apresentação, custódia de tutor ou item de outro pedido (135.1526ms)\n✔ cancelamento preserva recebimento parcial e impede novas entradas (71.4927ms)\n✔ reversão física preserva recibo e libera quantidade do pedido sem crédito fictício (79.6297ms)\n✔ escopo, permissão de estoque e SQL imutável impedem atalhos (102.7083ms)\n✔ contratos paginados e datas/quantidades inválidas não alteram saldo (107.6815ms)\nℹ tests 19\nℹ suites 0\nℹ pass 19\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 5541.2807",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 1392,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

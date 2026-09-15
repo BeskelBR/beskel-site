@@ -1,6 +1,6 @@
 {
   "name": "hvb-sistema",
-  "version": "0.12.1",
+  "version": "0.13.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.19.0",
@@ -22,7 +22,7 @@
     "format": "biome format --write src scripts tests package.json tsconfig.json biome.json",
     "format:check": "biome format src scripts tests package.json tsconfig.json biome.json",
     "test": "node --test tests/unit.test.ts",
-    "test:integration": "node --env-file=.env --test --test-concurrency=1 tests/integration.test.ts tests/inventory.test.ts tests/clinical.test.ts tests/daily.test.ts tests/financial.test.ts tests/exams.test.ts tests/preventive.test.ts tests/documents.test.ts tests/schedule.test.ts tests/portal.test.ts tests/purchases.test.ts tests/medical-record.test.ts tests/core-journeys.test.ts",
+    "test:integration": "node --env-file=.env --test --test-concurrency=1 tests/integration.test.ts tests/inventory.test.ts tests/clinical.test.ts tests/daily.test.ts tests/financial.test.ts tests/exams.test.ts tests/preventive.test.ts tests/documents.test.ts tests/schedule.test.ts tests/portal.test.ts tests/purchases.test.ts tests/medical-record.test.ts tests/core-journeys.test.ts tests/payables.test.ts",
     "benchmark:daily": "node --env-file=.env scripts/benchmark-daily.ts",
     "benchmark:clinical": "node --env-file=.env scripts/benchmark-clinical.ts",
     "benchmark:inventory": "node --env-file=.env scripts/benchmark-inventory.ts",
@@ -46,7 +46,9 @@
     "db:seed:medical": "node --env-file=.env scripts/seed-medical.ts",
     "check:medical": "node scripts/check.mjs --medical",
     "db:seed:core": "node --env-file=.env scripts/seed-core.ts",
-    "check:journeys": "node scripts/check.mjs --journeys"
+    "check:journeys": "node scripts/check.mjs --journeys",
+    "check:payables": "node scripts/check.mjs --payables",
+    "db:seed:payables": "node --env-file=.env scripts/seed-payables.ts"
   },
   "dependencies": {
     "@fastify/swagger": "9.8.1",

@@ -99,6 +99,11 @@ export const inputs = {
   }),
 };
 export const permissions = [
+  "pagar:ler",
+  "pagar:registrar",
+  "pagar:pagar",
+  "pagar:liquidar",
+  "pagar:reverter",
   "prontuario:ler",
   "prontuario:conteudo",
   "prontuario:escrever",

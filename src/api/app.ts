@@ -1,3 +1,5 @@
+import { payableActions, payableLists } from "../domain/payables/service.ts";
+import { payableInputs } from "../domain/payables/schemas.ts";
 import {
   medicalActions,
   medicalLists,
@@ -121,7 +123,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     openapi: {
       info: {
         title: "HVB Sistema — Clínica, Financeiro e Exames",
-        version: "0.12.1",
+        version: "0.13.0",
       },
       servers: [{ url: "http://127.0.0.1:3100" }],
       components: {
@@ -252,7 +254,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     async () => {
       try {
         const r = await db.query(
-          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='043_medical_record_temporal_review.sql') AS ready, current_user AS role",
+          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='046_payables_corrections.sql') AS ready, current_user AS role",
         );
         if (!r.rows[0].ready || r.rows[0].role !== "hvb_app")
           throw new Error("not ready");
@@ -309,6 +311,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...scheduleInputs,
     ...portalInputs,
     ...purchaseInputs,
+    ...payableInputs,
     ...medicalInputs,
   };
   for (const action of [
@@ -323,6 +326,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...scheduleActions,
     ...portalActions,
     ...purchaseActions,
+    ...payableActions,
     ...medicalActions,
   ]) {
     app.post(
@@ -410,6 +414,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...scheduleLists,
     ...portalLists,
     ...purchaseLists,
+    ...payableLists,
     ...medicalLists,
   ]) {
     const stockPosition = list.table === "posicao_estoque";
@@ -424,6 +429,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
       list.path.startsWith("/agenda/") ||
       list.path.startsWith("/comunicacao/") ||
       list.path.startsWith("/compras/") ||
+      list.path.startsWith("/a-pagar/") ||
       list.path.startsWith("/prontuario/");
     const agendaMap = list.table === "agenda_mapa_consulta";
     const schedule = list.table === "programacao_consulta" || agendaMap;
@@ -487,6 +493,14 @@ export async function buildApp(db: pg.Pool, logging = false) {
           "tentativa_id",
           "pedido_id",
           "fornecedor_id",
+          ...(list.path.startsWith("/a-pagar/")
+            ? [
+                "obrigacao_id",
+                "correcao_de_id",
+                "pagamento_id",
+                "liquidacao_id",
+              ]
+            : []),
           "apresentacao_id",
           "item_pedido_id",
           "evolucao_id",
