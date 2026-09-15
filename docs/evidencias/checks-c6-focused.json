@@ -1,0 +1,57 @@
+{
+  "executed_at": "2026-09-15T15:55:42.729Z",
+  "branch": "hvb-sistema-dev",
+  "scope": "preços de compra e contas a pagar",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 1669,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 141,
+      "output": "Checked 107 files in 44ms. No fixes applied.\nFound 1 info.",
+      "error": "scripts\\seed-pricing.ts:44:5 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n  i Template literals are preferred over string concatenation.\n  \n    42 │   await writeFile(\n    43 │     \".local/pricing-demo.json\",\n  > 44 │     JSON.stringify(\n       │     ^^^^^^^^^^^^^^^\n  > 45 │       {\n        ...\n  > 53 │       2,\n  > 54 │     ) + \"\\n\",\n       │     ^^^^^^^^\n    55 │     { mode: 0o600 },\n    56 │   );\n  \n  i Unsafe fix: Use a template literal.\n  \n    42 42 │     await writeFile(\n    43 43 │       \".local/pricing-demo.json\",\n    44    │ - ····JSON.stringify(\n       44 │ + ····`${JSON.stringify(\n    45 45 │         {\n    46 46 │           supplier: s.supplier,\n    ····· │ \n    52 52 │         null,\n    53 53 │         2,\n    54    │ - ····)·+·\"\\n\",\n       54 │ + ····)}\\n`,\n    55 55 │       { mode: 0o600 },\n    56 56 │     );"
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 119,
+      "output": "Checked 110 files in 29ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 221,
+      "output": "✔ quantidades de estoque usam aritmética inteira e conversão sem arredondamento (0.7834ms)\n✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (6.6378ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (0.9924ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.2916ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (9.7798ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 164.2682",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 315,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 6329,
+      "output": "✔ obrigação explícita não recebe estoque nem cria pagamento e documento não duplica (1726.8203ms)\n✔ pagamento deduplica retry e referência sem liquidar automaticamente (126.8709ms)\n✔ liquidações concorrentes não excedem obrigação nem pagamento (209.1432ms)\n✔ reversão encadeada recompõe saldos e não apaga fatos (123.1015ms)\n✔ fornecedor, pedido, unidade e organização devem coincidir (173.9197ms)\n✔ centavos, datas, confirmação e alvo único são exigidos (91.6322ms)\n✔ cancelamento e recebimento físicos não compensam dívida por inferência (91.9591ms)\n✔ listas paginadas exigem permissão própria e filtros de unidade (93.1191ms)\n✔ SQL preserva histórico e rejeita efeito anexado ao comando concluído (125.832ms)\n✔ correção documental exige reversão prévia e aceita um único sucessor (122.2155ms)\n✔ preço por apresentação e componentes fecham total sem reescrever dívida ou custo (1677.4232ms)\n✔ precificação cobre todos os itens uma vez e falha não deixa versão parcial (105.562ms)\n✔ centavos exatos rejeitam arredondamento, números JSON e desconto excessivo (91.8732ms)\n✔ versões concorrentes têm uma sucessora e preço anterior permanece consultável (145.3815ms)\n✔ retry e vínculos concorrentes respeitam orçamento e obrigação sem criar pagamento (179.7152ms)\n✔ limite do pedido agrega versões e baixa de total exige rever conciliação (117.258ms)\n✔ reversão de vínculo libera conciliação e reversão de dívida preserva vínculo histórico inativo (109.184ms)\n✔ contexto, RLS e permissões de conciliação impedem associações cruzadas (233.0116ms)\nℹ tests 18\nℹ suites 0\nℹ pass 18\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 6273.2273",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 1665,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

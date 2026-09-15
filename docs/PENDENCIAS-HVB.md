@@ -296,3 +296,19 @@ Pendências anteriores preservadas. Terminal físico, hardware e sua branch cont
 | Equipamento e verificação geral | NÃO EXERCITADOS; 28 testes pontuais de API/banco passaram | Homologar leitor, rede, energia, cliente visual e carga quando chegar a etapa acordada |
 
 Nenhuma etiqueta física gravada, segredo salvo no terminal ou serviço externo acionado.
+
+
+## Consolidação C6 — 15/09/2026
+
+Pendências anteriores preservadas. Valores comerciais DEV não aprovam política fiscal ou operação hospitalar.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Preço e aprovação | DEV versionado, com autoria e centavos exatos | Definir alçadas, aceite do fornecedor e arredondamento; hoje frações de centavo são rejeitadas |
+| Documento divergente | Obrigação preserva valor declarado; vínculo explícito limitado | Homologar revisão de divergência, excedente e documento complementar sem corrigir dívida por inferência |
+| Fiscal e rateio | Componentes comerciais informados; sem regra tributária/rateio de aquisição | Próximo recorte técnico de composição de custo; política fiscal e método real exigem decisão posterior |
+| Versões e reversões | Agregado ativo entre versões; reversão da dívida inativa vínculos | Homologar correção e reconciliação com documento sucessor; sem transferência automática |
+| Leitura de saldos | Saldo histórico pode ser negativo; despesas sem pedido não elegíveis | Interface deve distinguir orçamento atual, saldo comercial, dívida e despesa sem vínculo |
+| Operação e verificação geral | ADIADAS; 23 testes pontuais passaram | Retomar carga, suíte geral, instalação vazia e homologação após consolidação |
+
+Nenhum pagamento real, alteração fiscal, contato com fornecedor ou serviço externo foi executado.

@@ -38,6 +38,7 @@ Set-Location 'C:\Users\Admin\OneDrive\BESKEL\PARCEIROS\HVB\SISTEMA'
 .\scripts\pnpm.ps1 db:seed:core
 .\scripts\pnpm.ps1 db:seed:payables
 .\scripts\pnpm.ps1 db:seed:terminal
+.\scripts\pnpm.ps1 db:seed:pricing
 .\scripts\pnpm.ps1 check
 .\scripts\pnpm.ps1 dev
 ```
@@ -252,3 +253,10 @@ Rotas sob /v1/terminal permitem configurar etiquetas fictícias, registrar leitu
 pnpm db:seed:terminal gera a demonstração (origem 18/destino 2 após retirar duas unidades). Referências em .local/terminal-demo.json, sem credenciais. pnpm check:terminal executa o recorte de 28 testes aprovados. O código permanece dentro de SISTEMA; nenhuma edição ou execução do projeto Terminal.
 
 Em resposta perdida, consultar/repetir a mesma chave e corpo; não criar uma nova intenção automaticamente. Ver [contrato e limites](docs/adr/0015-terminal-simulado.md), [dicionário](docs/DADOS-C5.md) e [relatório C5](docs/RELATORIO-C5.md).
+
+
+### Preços e conciliação de compras C6
+
+Preços por apresentação versionados, componentes explícitos e conciliação parcial com obrigações de fornecedor. O vínculo respeita o orçamento do pedido entre versões e o valor da obrigação; não cria pagamento nem altera custo físico. Reversões preservam o histórico.
+
+pnpm db:seed:pricing demonstra preço 105, obrigação 100 e vínculo 100, com saldo comercial 5. pnpm check:pricing executa o recorte de 23 testes. Ver [relatório C6](docs/RELATORIO-C6.md), [dicionário](docs/DADOS-C6.md) e [decisões/limites](docs/adr/0016-precos-conciliacao-compras.md). Rateio de aquisição permanece próximo; pendências e verificação geral serão tratadas depois.

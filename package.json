@@ -1,6 +1,6 @@
 {
   "name": "hvb-sistema",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.19.0",
@@ -22,7 +22,7 @@
     "format": "biome format --write src scripts tests package.json tsconfig.json biome.json",
     "format:check": "biome format src scripts tests package.json tsconfig.json biome.json",
     "test": "node --test tests/unit.test.ts",
-    "test:integration": "node --env-file=.env --test --test-concurrency=1 tests/integration.test.ts tests/inventory.test.ts tests/clinical.test.ts tests/daily.test.ts tests/financial.test.ts tests/exams.test.ts tests/preventive.test.ts tests/documents.test.ts tests/schedule.test.ts tests/portal.test.ts tests/purchases.test.ts tests/medical-record.test.ts tests/core-journeys.test.ts tests/payables.test.ts tests/terminal.test.ts",
+    "test:integration": "node --env-file=.env --test --test-concurrency=1 tests/integration.test.ts tests/inventory.test.ts tests/clinical.test.ts tests/daily.test.ts tests/financial.test.ts tests/exams.test.ts tests/preventive.test.ts tests/documents.test.ts tests/schedule.test.ts tests/portal.test.ts tests/purchases.test.ts tests/medical-record.test.ts tests/core-journeys.test.ts tests/payables.test.ts tests/terminal.test.ts tests/purchase-pricing.test.ts",
     "benchmark:daily": "node --env-file=.env scripts/benchmark-daily.ts",
     "benchmark:clinical": "node --env-file=.env scripts/benchmark-clinical.ts",
     "benchmark:inventory": "node --env-file=.env scripts/benchmark-inventory.ts",
@@ -50,7 +50,9 @@
     "check:payables": "node scripts/check.mjs --payables",
     "db:seed:payables": "node --env-file=.env scripts/seed-payables.ts",
     "check:terminal": "node scripts/check.mjs --terminal",
-    "db:seed:terminal": "node --env-file=.env scripts/seed-terminal.ts"
+    "db:seed:terminal": "node --env-file=.env scripts/seed-terminal.ts",
+    "check:pricing": "node scripts/check.mjs --pricing",
+    "db:seed:pricing": "node --env-file=.env scripts/seed-pricing.ts"
   },
   "dependencies": {
     "@fastify/swagger": "9.8.1",

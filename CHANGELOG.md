@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.15.0 — 2026-09-15
+
+- C6: preços negociados versionados por item, frete/acréscimo/desconto explícitos e centavos exatos.
+- Conciliação parcial/reversível entre pedido e obrigação existente, com limites agregados entre versões; dívida, pagamento e custo físico separados.
+- Migrations 049–050; quatro tabelas, três views, duas permissões e oito operações; total 321 operações em 194 caminhos.
+- 23 testes pontuais aprovados e seed repetível. Fiscal, rateio de aquisição e demais pendências preservados.
+
 ## 0.14.0 — 2026-09-15
 
 - C5: etiquetas fictícias, leitura com contexto explícito, revogação, retirada confirmada e consulta do próprio comando por chave.
