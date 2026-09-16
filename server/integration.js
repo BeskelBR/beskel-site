@@ -4,17 +4,23 @@ const store = require("./store");
 
 class IntegrationAdapter {
   identifyCredential() { throw new Error("NOT_IMPLEMENTED"); }
+  createBiometricEvidence() { throw new Error("NOT_IMPLEMENTED"); }
   verifyIdentity() { throw new Error("NOT_IMPLEMENTED"); }
   getPendingOrders() { throw new Error("NOT_IMPLEMENTED"); }
   startAccessSession() { throw new Error("NOT_IMPLEMENTED"); }
   registerAccessEvent() { throw new Error("NOT_IMPLEMENTED"); }
   getAccessSession() { throw new Error("NOT_IMPLEMENTED"); }
+  getTerminalDescriptor() { throw new Error("NOT_IMPLEMENTED"); }
   listAudit() { throw new Error("NOT_IMPLEMENTED"); }
 }
 
 class MockAdapter extends IntegrationAdapter {
   identifyCredential(token, terminalId) {
     return store.identifyCredential(token, terminalId);
+  }
+
+  createBiometricEvidence(payload) {
+    return store.createBiometricEvidence(payload);
   }
 
   verifyIdentity(payload) {
@@ -35,6 +41,10 @@ class MockAdapter extends IntegrationAdapter {
 
   getAccessSession(accessSessionId) {
     return store.getAccessSessionDetail(accessSessionId);
+  }
+
+  getTerminalDescriptor(terminalId) {
+    return store.terminalDescriptor(terminalId);
   }
 
   listAudit() {
