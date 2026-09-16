@@ -2,155 +2,165 @@
 
 const crypto = require("crypto");
 
+const TERMINAL_ID = "HVB-T01";
 const employees = [
-  { employee_id: "emp_001", name: "Rafael Teste", role: "Direção", active: true },
-  { employee_id: "emp_002", name: "Marina Teste", role: "Médica Veterinária", active: true },
-  { employee_id: "emp_003", name: "Carlos Teste", role: "Enfermagem", active: true }
+  { employee_id:"emp_001", name:"Rafael Teste", role:"Direção", active:true, permissions:["stock.access","stock.sensitive.access"] },
+  { employee_id:"emp_002", name:"Marina Teste", role:"Médica Veterinária", active:true, permissions:["stock.access","stock.sensitive.access"] },
+  { employee_id:"emp_003", name:"Carlos Teste", role:"Enfermagem", active:true, permissions:["stock.access"] }
 ];
-
 const credentials = [
-  { credential_id: "cred_001", token: "hvb_demo_Q7m4xP9nK2", employee_id: "emp_001", status: "active" },
-  { credential_id: "cred_002", token: "hvb_demo_T8r2vL6pW5", employee_id: "emp_002", status: "active" },
-  { credential_id: "cred_003", token: "hvb_demo_H3n9cM4yR7", employee_id: "emp_003", status: "active" },
-  { credential_id: "cred_004", token: "hvb_demo_revoked_K4u8sP2", employee_id: "emp_003", status: "revoked" }
+  { credential_id:"cred_001", token:"demo-rafael", employee_id:"emp_001", status:"active" },
+  { credential_id:"cred_002", token:"demo-marina", employee_id:"emp_002", status:"active" },
+  { credential_id:"cred_003", token:"demo-carlos", employee_id:"emp_003", status:"active" }
 ];
-
 const patients = [
-  { patient_id: "pat_001", name: "Thor", species: "Cão", tutor: "João Teste" },
-  { patient_id: "pat_002", name: "Luna", species: "Gato", tutor: "Maria Teste" },
-  { patient_id: "pat_003", name: "Mel", species: "Cão", tutor: "Ana Teste" },
-  { patient_id: "pat_004", name: "Nino", species: "Gato", tutor: "Paulo Teste" }
+  { patient_id:"pat_001", name:"Thor", species:"Cão" },
+  { patient_id:"pat_002", name:"Luna", species:"Gato" }
+];
+const episodes = [
+  { episode_id:"ATD-001842", patient_id:"pat_001", status:"active" },
+  { episode_id:"ATD-001845", patient_id:"pat_002", status:"active" }
+];
+const withdrawalOrders = [
+  { order_id:"OR-2026-001842-01", episode_id:"ATD-001842", requester_employee_id:"emp_002", status:"AGUARDANDO_RETIRADA", items:[
+    { description:"Cateter 22G", quantity:1, sensitive:false },
+    { description:"Soro 500 mL", quantity:1, sensitive:false },
+    { description:"Equipo", quantity:1, sensitive:false },
+    { description:"Seringa 5 mL", quantity:2, sensitive:false },
+    { description:"Medicamento X", quantity:1, sensitive:true }
+  ]},
+  { order_id:"OR-2026-001845-01", episode_id:"ATD-001845", requester_employee_id:"emp_002", status:"AGUARDANDO_RETIRADA", items:[
+    { description:"Gaze estéril", quantity:2, sensitive:false },
+    { description:"Luva cirúrgica", quantity:1, sensitive:false }
+  ]}
 ];
 
-const attendances = [
-  { attendance_id: "1842", patient_id: "pat_001", status: "active", opened_at: "2026-09-11T10:10:00-03:00" },
-  { attendance_id: "1845", patient_id: "pat_002", status: "active", opened_at: "2026-09-11T10:44:00-03:00" },
-  { attendance_id: "1851", patient_id: "pat_003", status: "active", opened_at: "2026-09-11T11:28:00-03:00" },
-  { attendance_id: "1853", patient_id: "pat_004", status: "active", opened_at: "2026-09-11T12:04:00-03:00" }
-];
+const challenges = new Map();
+const authSessions = new Map();
+const accessSessions = new Map();
+const events = [];
 
-const items = [
-  { item_id: "itm_001", sku: "MAT-CAT22", description: "Cateter 22G", initial_stock: 47, unit: "un.", unit_price: 18.90, category: "Acesso vascular" },
-  { item_id: "itm_002", sku: "MAT-SER05", description: "Seringa 5 mL", initial_stock: 120, unit: "un.", unit_price: 3.40, category: "Insumos" },
-  { item_id: "itm_003", sku: "MAT-EQP01", description: "Equipo macrogotas", initial_stock: 65, unit: "un.", unit_price: 9.80, category: "Infusão" },
-  { item_id: "itm_004", sku: "MAT-GAZ01", description: "Gaze estéril", initial_stock: 210, unit: "pct.", unit_price: 4.25, category: "Curativos" },
-  { item_id: "itm_005", sku: "MAT-LUV01", description: "Luva cirúrgica", initial_stock: 84, unit: "par", unit_price: 6.90, category: "Cirúrgico" },
-  { item_id: "itm_006", sku: "MAT-SOR500", description: "Soro fisiológico 500 mL", initial_stock: 33, unit: "fr.", unit_price: 12.50, category: "Fluidoterapia" },
-  { item_id: "itm_007", sku: "MAT-AGU25", description: "Agulha 25 x 7", initial_stock: 180, unit: "un.", unit_price: 1.35, category: "Insumos" },
-  { item_id: "itm_008", sku: "MAT-CUR10", description: "Curativo adesivo 10 cm", initial_stock: 52, unit: "un.", unit_price: 7.60, category: "Curativos" },
-  { item_id: "itm_009", sku: "MAT-CAT24", description: "Cateter 24G", initial_stock: 39, unit: "un.", unit_price: 18.90, category: "Acesso vascular" }
-];
+const id = prefix => `${prefix}_${crypto.randomBytes(8).toString("hex")}`;
+const now = () => new Date().toISOString();
+const employee = employeeId => employees.find(x => x.employee_id === employeeId) || null;
+const order = orderId => withdrawalOrders.find(x => x.order_id === orderId) || null;
+const hasPermission = (person, permission) => Boolean(person?.permissions?.includes(permission));
+const hasSensitive = value => Boolean(value?.items?.some(item => item.sensitive));
 
-const transactions = [];
-const sessions = new Map();
-
-function findEmployee(id) { return employees.find(e => e.employee_id === id); }
-function findCredentialByToken(token) { return credentials.find(c => c.token === token); }
-function findPatient(id) { return patients.find(p => p.patient_id === id); }
-function findAttendance(id) { return attendances.find(a => a.attendance_id === String(id)); }
-function findItem(id) { return items.find(i => i.item_id === id); }
-
-function getStock(itemId) {
-  const item = findItem(itemId);
-  if (!item) return 0;
-  const consumed = transactions
-    .filter(t => t.item_id === itemId && t.status === "confirmed")
-    .reduce((sum, t) => sum + t.quantity, 0);
-  return item.initial_stock - consumed;
+function publicEmployee(value) {
+  return value ? { employee_id:value.employee_id, name:value.name, role:value.role } : null;
 }
-
-function createSession(credential) {
-  const id = `sess_${crypto.randomBytes(16).toString("hex")}`;
-  const expiresAt = Date.now() + 15 * 60 * 1000;
-  sessions.set(id, { session_id: id, employee_id: credential.employee_id, credential_id: credential.credential_id, expires_at: expiresAt });
-  return sessions.get(id);
-}
-
-function getSession(id) {
-  const session = sessions.get(id);
-  if (!session) return null;
-  if (session.expires_at < Date.now()) {
-    sessions.delete(id);
-    return null;
-  }
-  return session;
-}
-
-function listActiveAttendances() {
-  return attendances.filter(a => a.status === "active").map(a => ({
-    ...a,
-    patient: findPatient(a.patient_id)
-  }));
-}
-
-function getAttendanceDetail(id) {
-  const attendance = findAttendance(id);
-  if (!attendance) return null;
+function orderSummary(value) {
+  const episode = episodes.find(x => x.episode_id === value.episode_id);
+  const patient = patients.find(x => x.patient_id === episode?.patient_id) || null;
   return {
-    ...attendance,
-    patient: findPatient(attendance.patient_id),
-    transactions: transactions.filter(t => t.attendance_id === attendance.attendance_id && t.status === "confirmed")
+    order_id:value.order_id,
+    episode_id:value.episode_id,
+    status:value.status,
+    item_count:value.items.length,
+    total_units:value.items.reduce((sum,item) => sum + Number(item.quantity || 0), 0),
+    has_sensitive_items:hasSensitive(value),
+    patient,
+    requester:publicEmployee(employee(value.requester_employee_id))
   };
 }
-
-function listItems() {
-  return items.map(item => ({ ...item, current_stock: getStock(item.item_id) }));
-}
-
-function registerConsumption({ session, attendanceId, itemId, quantity, device }) {
-  const attendance = findAttendance(attendanceId);
-  const item = findItem(itemId);
-  if (!attendance || attendance.status !== "active") throw new Error("ATTENDANCE_NOT_FOUND");
-  if (!item) throw new Error("ITEM_NOT_FOUND");
-  const qty = Number(quantity);
-  if (!Number.isInteger(qty) || qty < 1) throw new Error("INVALID_QUANTITY");
-  const previous = getStock(itemId);
-  if (qty > previous) throw new Error("INSUFFICIENT_STOCK");
-
-  const transaction = {
-    transaction_id: `txn_${crypto.randomBytes(8).toString("hex")}`,
-    timestamp: new Date().toISOString(),
-    employee_id: session.employee_id,
-    credential_id: session.credential_id,
-    patient_id: attendance.patient_id,
-    attendance_id: attendance.attendance_id,
-    item_id: item.item_id,
-    quantity: qty,
-    unit_price: item.unit_price,
-    total: Number((item.unit_price * qty).toFixed(2)),
-    previous_stock: previous,
-    resulting_stock: previous - qty,
-    device_session: device || "web-terminal",
-    status: "confirmed"
+function log(accessSession, eventType, metadata = {}) {
+  const event = {
+    event_id:id("evt"), occurred_at:now(), event_type:eventType,
+    access_session_id:accessSession?.access_session_id || null,
+    auth_session_id:accessSession?.auth_session_id || metadata.auth_session_id || null,
+    employee_id:accessSession?.employee_id || metadata.employee_id || null,
+    terminal_id:accessSession?.terminal_id || metadata.terminal_id || TERMINAL_ID,
+    metadata
   };
-  transactions.unshift(transaction);
-  return transaction;
+  events.unshift(event);
+  return event;
 }
 
+function identifyCredential(token, terminalId = TERMINAL_ID) {
+  const credential = credentials.find(x => x.token === String(token || "") && x.status === "active");
+  const person = employee(credential?.employee_id);
+  if (!credential || !person?.active) throw new Error("CREDENTIAL_NOT_RECOGNIZED");
+  if (!hasPermission(person,"stock.access")) throw new Error("ACCESS_NOT_PERMITTED");
+  const challenge = { challenge_id:id("chl"), credential_id:credential.credential_id, employee_id:person.employee_id, terminal_id:terminalId, expires_at:Date.now()+120000, consumed:false };
+  challenges.set(challenge.challenge_id, challenge);
+  log(null,"CREDENTIAL_IDENTIFIED",{ employee_id:person.employee_id, terminal_id:terminalId, credential_id:credential.credential_id });
+  return { credential_id:credential.credential_id, technology:"DESFire EV3 (simulado)", employee:publicEmployee(person), challenge_id:challenge.challenge_id, challenge_expires_at:challenge.expires_at };
+}
+
+function verifyIdentity({ challengeId, faceMatch, liveness, terminalId = TERMINAL_ID }) {
+  const challenge = challenges.get(String(challengeId || ""));
+  if (!challenge || challenge.consumed || challenge.expires_at < Date.now()) throw new Error("AUTH_CHALLENGE_EXPIRED");
+  if (challenge.terminal_id !== terminalId) throw new Error("TERMINAL_MISMATCH");
+  if (faceMatch !== true || liveness !== true) throw new Error("BIOMETRIC_VERIFICATION_FAILED");
+  challenge.consumed = true;
+  const person = employee(challenge.employee_id);
+  const auth = { auth_session_id:id("auth"), employee_id:person.employee_id, credential_id:challenge.credential_id, terminal_id:terminalId, auth_level:"STANDARD", factors:["DESFIRE","FACE_1_TO_1","PAD_LIVENESS"], expires_at:Date.now()+300000 };
+  authSessions.set(auth.auth_session_id, auth);
+  log(null,"IDENTITY_VERIFIED",{ auth_session_id:auth.auth_session_id, employee_id:person.employee_id, terminal_id:terminalId, factors:auth.factors });
+  return { ...auth, employee:publicEmployee(person) };
+}
+
+function getAuth(authSessionId) {
+  const auth = authSessions.get(String(authSessionId || ""));
+  return auth && auth.expires_at >= Date.now() ? auth : null;
+}
+function listPendingOrders(authSessionId) {
+  if (!getAuth(authSessionId)) throw new Error("AUTH_SESSION_EXPIRED");
+  return withdrawalOrders.filter(x => x.status === "AGUARDANDO_RETIRADA").map(orderSummary);
+}
+function startAccessSession({ authSessionId, orderIds, terminalId = TERMINAL_ID }) {
+  const auth = getAuth(authSessionId);
+  if (!auth) throw new Error("AUTH_SESSION_EXPIRED");
+  if (auth.terminal_id !== terminalId) throw new Error("TERMINAL_MISMATCH");
+  const ids = [...new Set((orderIds || []).map(String).filter(Boolean))];
+  if (!ids.length) throw new Error("ORDER_REQUIRED");
+  const orders = ids.map(order);
+  if (orders.some(x => !x || x.status !== "AGUARDANDO_RETIRADA")) throw new Error("ORDER_NOT_AVAILABLE");
+  const sensitive = orders.some(hasSensitive);
+  const person = employee(auth.employee_id);
+  if (sensitive && !hasPermission(person,"stock.sensitive.access")) throw new Error("SENSITIVE_ACCESS_DENIED");
+  const access = { access_session_id:id("acc"), auth_session_id:auth.auth_session_id, employee_id:auth.employee_id, credential_id:auth.credential_id, terminal_id:terminalId, order_ids:ids, sensitive_access:sensitive, state:"DOOR_AUTHORIZED", expires_at:Date.now()+1200000 };
+  accessSessions.set(access.access_session_id, access);
+  log(access,"ACCESS_SESSION_CREATED",{ order_ids:ids, sensitive_access:sensitive });
+  log(access,"DOOR_AUTHORIZED",{ barrier_id:"STOCK_ROOM_DOOR" });
+  return getAccessSessionDetail(access.access_session_id);
+}
+function rawAccess(accessSessionId) {
+  const access = accessSessions.get(String(accessSessionId || ""));
+  if (access && access.expires_at < Date.now() && !["CLOSED","EXPIRED"].includes(access.state)) {
+    access.state = "EXPIRED";
+    log(access,"ACCESS_SESSION_EXPIRED");
+  }
+  return access || null;
+}
+function getAccessSessionDetail(accessSessionId) {
+  const access = rawAccess(accessSessionId);
+  if (!access) return null;
+  return { ...access, employee:publicEmployee(employee(access.employee_id)), orders:access.order_ids.map(order).filter(Boolean).map(orderSummary), events:events.filter(x => x.access_session_id === access.access_session_id).slice().reverse() };
+}
+function registerAccessEvent({ accessSessionId, eventType, metadata = {} }) {
+  const access = rawAccess(accessSessionId);
+  if (!access) throw new Error("ACCESS_SESSION_NOT_FOUND");
+  if (["CLOSED","EXPIRED"].includes(access.state)) throw new Error("ACCESS_SESSION_INACTIVE");
+  const transitions = {
+    DOOR_OPENED:["DOOR_AUTHORIZED","DOOR_OPEN"],
+    ENTRY_CONFIRMED:["DOOR_OPEN","ENTRY_CONFIRMED"],
+    DOOR_CLOSED:["ENTRY_CONFIRMED",access.sensitive_access?"SENSITIVE_CABINET_AUTHORIZED":"ACCESS_ACTIVE"],
+    SENSITIVE_CABINET_OPENED:["SENSITIVE_CABINET_AUTHORIZED","SENSITIVE_CABINET_OPEN"],
+    SENSITIVE_CABINET_CLOSED:["SENSITIVE_CABINET_OPEN","ACCESS_ACTIVE"],
+    ACCESS_CLOSED:["ACCESS_ACTIVE","CLOSED"]
+  };
+  const transition = transitions[eventType];
+  if (!transition || access.state !== transition[0]) throw new Error("INVALID_ACCESS_SEQUENCE");
+  access.state = transition[1];
+  if (eventType === "ENTRY_CONFIRMED") access.order_ids.map(order).filter(Boolean).forEach(x => { if (x.status === "AGUARDANDO_RETIRADA") x.status = "EM_SEPARACAO"; });
+  if (eventType === "ACCESS_CLOSED") access.closed_at = now();
+  log(access,eventType,metadata);
+  return getAccessSessionDetail(access.access_session_id);
+}
 function listAudit() {
-  return transactions.map(t => ({
-    ...t,
-    employee: findEmployee(t.employee_id),
-    patient: findPatient(t.patient_id),
-    item: findItem(t.item_id)
-  }));
+  return events.map(x => ({ ...x, employee:publicEmployee(employee(x.employee_id)) }));
 }
 
-module.exports = {
-  employees,
-  credentials,
-  patients,
-  attendances,
-  items,
-  transactions,
-  findEmployee,
-  findCredentialByToken,
-  createSession,
-  getSession,
-  listActiveAttendances,
-  getAttendanceDetail,
-  listItems,
-  findItem,
-  registerConsumption,
-  listAudit
-};
+module.exports = { TERMINAL_ID, identifyCredential, verifyIdentity, listPendingOrders, startAccessSession, registerAccessEvent, getAccessSessionDetail, listAudit };
