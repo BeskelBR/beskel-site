@@ -26,23 +26,53 @@ function render(html){ app.innerHTML=html; window.scrollTo({top:0,behavior:"inst
 function updateClock(){ const el=document.getElementById("clock"); if(el)el.textContent=nowLabel(); }
 setInterval(updateClock,30000);
 
-async function apiGet(params){
-  const res=await fetch(`${API}?${new URLSearchParams(params)}`,{cache:"no-store"});
-  const body=await res.json();
+async function parseResponse(res){
+  let body;
+  try{ body=await res.json(); }catch{ throw new Error("INVALID_API_RESPONSE"); }
   if(!res.ok||!body.ok)throw new Error(body.error||"REQUEST_FAILED");
   return body.data;
 }
+async function apiGet(params){
+  let res;
+  try{ res=await fetch(`${API}?${new URLSearchParams(params)}`,{cache:"no-store"}); }
+  catch{ throw new Error("API_UNREACHABLE"); }
+  return parseResponse(res);
+}
 async function apiPost(payload){
-  const res=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-  const body=await res.json();
-  if(!res.ok||!body.ok)throw new Error(body.error||"REQUEST_FAILED");
-  return body.data;
+  let res;
+  try{ res=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}); }
+  catch{ throw new Error("API_UNREACHABLE"); }
+  return parseResponse(res);
+}
+function isConnectivityError(error){ return ["API_UNREACHABLE","INVALID_API_RESPONSE"].includes(error?.message); }
+function failClosed(message="A API HVB não está disponível. Nenhum novo acesso será autorizado por este Terminal."){
+  clearLocal();
+  showError("Terminal indisponível",message,"/");
 }
 
 function idleScreen(){
   clearLocal();
-  render(`<section class="hero-idle"><div class="idle-card"><img class="logo-main" src="/hvb/assets/logo-principal.webp" alt="Hospital Veterinário Brasília"><div class="module-label">Terminal de Acesso HVB</div><h1 class="idle-title" style="color:#fff">Aproxime seu crachá</h1><div class="nfc-mark" aria-hidden="true">◉</div><p style="font-size:18px;margin:0 0 10px">DESFire EV3 + confirmação facial</p><div class="status-pill"><span class="status-dot"></span>Pronto para autenticação</div><div class="idle-clock">${nowLabel()}</div><button class="dev-action" id="simulateBadge">Simular credencial de teste</button></div></section>`);
-  document.getElementById("simulateBadge").addEventListener("click",()=>go(`/auth/${DEMO_TOKEN}`));
+  render(`<section class="hero-idle"><div class="idle-card"><img class="logo-main" src="/hvb/assets/logo-principal.webp" alt="Hospital Veterinário Brasília"><div class="module-label">Terminal de Acesso HVB</div><h1 class="idle-title" style="color:#fff">Aproxime seu crachá</h1><div class="nfc-mark" aria-hidden="true">◉</div><p style="font-size:18px;margin:0 0 10px">DESFire EV3 + confirmação facial</p><div class="status-pill" id="terminalStatus"><span class="status-dot"></span><span id="terminalStatusText">Verificando serviço…</span></div><div class="idle-clock">${nowLabel()}</div><button class="dev-action" id="simulateBadge" disabled>Verificando Terminal…</button></div></section>`);
+  checkTerminalAvailability();
+}
+
+async function checkTerminalAvailability(){
+  const btn=document.getElementById("simulateBadge");
+  const status=document.getElementById("terminalStatus");
+  const text=document.getElementById("terminalStatusText");
+  if(!btn||!status||!text)return;
+  try{
+    await apiGet({action:"terminal",terminal_id:TERMINAL_ID});
+    text.textContent="Serviço disponível • pronto para autenticação";
+    btn.disabled=false;
+    btn.textContent="Simular credencial de teste";
+    btn.addEventListener("click",()=>go(`/auth/${DEMO_TOKEN}`),{once:true});
+  }catch{
+    text.textContent="API indisponível • acesso bloqueado";
+    status.classList.add("offline");
+    btn.disabled=true;
+    btn.textContent="Fail-closed ativo";
+  }
 }
 
 async function credentialScreen(token){
@@ -53,7 +83,10 @@ async function credentialScreen(token){
     render(shell(`<div class="card"><div class="big-check">✓</div><div class="eyebrow">Credencial identificada</div><h1>${esc(p.name)}</h1><div class="person"><span class="role">${esc(p.role)}</span></div><div class="factor-list"><div class="factor ok"><b>✓</b><span>DESFire identificado</span></div><div class="factor pending"><b>2</b><span>Face 1:1 + liveness pendentes</span></div></div><div class="actions"><button class="btn" id="verify">Confirmar identidade</button><button class="btn ghost" id="cancel">Cancelar</button></div><p class="footer-note">DEV: câmera, PAD e attestation do dispositivo ainda são simulados.</p></div>`,"Autenticação"));
     document.getElementById("verify").addEventListener("click",verifyIdentity);
     document.getElementById("cancel").addEventListener("click",()=>go("/"));
-  }catch{ showError("Credencial não reconhecida","Não foi possível iniciar a autenticação."); }
+  }catch(error){
+    if(isConnectivityError(error))return failClosed();
+    showError("Credencial não reconhecida","Não foi possível iniciar a autenticação.");
+  }
 }
 
 async function verifyIdentity(){
@@ -77,7 +110,10 @@ async function verifyIdentity(){
     writeJson(AUTH_KEY,state.auth);
     render(shell(`<div class="card"><div class="big-check">✓</div><div class="eyebrow">Identidade confirmada</div><h1>${esc(state.auth.employee.name)}</h1><div class="factor-list"><div class="factor ok"><b>✓</b><span>DESFire EV3</span></div><div class="factor ok"><b>✓</b><span>Face 1:1</span></div><div class="factor ok"><b>✓</b><span>Liveness/PAD</span></div><div class="factor ok"><b>✓</b><span>Evidência vinculada ao dispositivo DEV</span></div></div><div class="actions"><button class="btn" id="orders">Consultar ordens pendentes</button></div><p class="footer-note">A API recebeu uma evidência referenciada; a UI não enviou apenas um booleano de autenticação.</p></div>`,"Autenticação concluída"));
     document.getElementById("orders").addEventListener("click",()=>go("/ordens"));
-  }catch{ showError("Identidade não confirmada","Acesso não autorizado. Tente novamente."); }
+  }catch(error){
+    if(isConnectivityError(error))return failClosed();
+    showError("Identidade não confirmada","Acesso não autorizado. Tente novamente.");
+  }
 }
 
 async function ordersScreen(){
@@ -90,7 +126,10 @@ async function ordersScreen(){
     render(shell(`<div class="eyebrow">Usuário autenticado</div><h1>${esc(auth.employee.name)}</h1><p class="lead">Selecione a ordem que motivará este acesso. O picking será feito no HVB Mobile.</p><div class="section-title">Ordens aguardando retirada</div><div class="list">${cards}</div><div class="actions"><button class="btn ghost" id="cancel">Encerrar autenticação</button></div>`,"Ordens pendentes"));
     document.querySelectorAll("[data-order]").forEach(btn=>btn.addEventListener("click",()=>authorizeAccess(btn.dataset.order)));
     document.getElementById("cancel").addEventListener("click",()=>go("/"));
-  }catch{ go("/"); }
+  }catch(error){
+    if(isConnectivityError(error))return failClosed();
+    go("/");
+  }
 }
 
 async function authorizeAccess(orderId){
@@ -106,6 +145,7 @@ async function authorizeAccess(orderId){
     });
     go(`/acesso/${encodeURIComponent(state.access.access_session_id)}`);
   }catch(error){
+    if(isConnectivityError(error))return failClosed();
     const msg=error.message==="SENSITIVE_ACCESS_DENIED"?"Seu perfil não possui autorização para os itens sensíveis desta ordem.":"Não foi possível criar a sessão de acesso.";
     showError("Acesso não autorizado",msg,"/ordens");
   }
@@ -131,7 +171,10 @@ async function accessScreen(accessSessionId){
     const sensitive=access.sensitive_access?`<div class="notice sensitive-notice"><b>Estoque sensível</b><span>O armário só será autorizado depois da entrada confirmada e da porta fechada.</span></div>`:"";
     render(shell(`<div class="access-banner"><div class="big-check">✓</div><div><div class="eyebrow">Acesso autorizado</div><h1>${esc(access.employee?.name||"Funcionário")}</h1></div></div><div class="card"><div class="summary"><div class="summary-row"><span>Ordem</span><strong>${esc(o?.order_id||"—")}</strong></div><div class="summary-row"><span>Paciente</span><strong>${esc(o?.patient?.name||"—")}</strong></div><div class="summary-row"><span>Itens</span><strong>${o?.item_count??0}</strong></div><div class="summary-row"><span>Status físico</span><strong>${esc(stateLabel(access.state))}</strong></div></div></div>${sensitive}<div class="notice"><b>Picking no HVB Mobile</b><span>O Terminal não confirma materiais ou quantidades. Continue no dispositivo móvel autorizado.</span></div>${devControls(access)}<p class="footer-note">DEV: controladores, sensores, câmera e DESFire estão simulados. Nenhum movimento de estoque é realizado.</p>`,"Sessão de acesso"));
     bindDev(access);
-  }catch{ go("/"); }
+  }catch(error){
+    if(isConnectivityError(error))return failClosed("A API HVB ficou indisponível. O Terminal não emitirá novas autorizações ou transições de barreira enquanto estiver desconectado.");
+    go("/");
+  }
 }
 
 function devControls(access){
@@ -160,7 +203,8 @@ function bindDev(access){
         metadata:{source:"dev-ui"}
       });
       accessScreen(access.access_session_id);
-    }catch{
+    }catch(error){
+      if(isConnectivityError(error))return failClosed("Conectividade perdida durante a sessão. O protótipo interrompe novas transições e mantém fail-closed.");
       btn.disabled=false;
       alert("A sequência física simulada não permitiu este evento.");
     }
@@ -175,7 +219,10 @@ async function auditScreen(){
     const rows=audit.length?audit.map(e=>`<div class="audit-row"><div class="time">${new Date(e.occurred_at).toLocaleString("pt-BR")}</div><strong>${esc(e.event_type)}</strong><div>${esc(e.employee?.name||"Sistema")} • ${esc(e.terminal_id||"—")}</div><div class="meta">${esc(e.access_session_id||e.auth_session_id||"sem sessão")}</div></div>`).join(""):`<div class="card"><p class="lead">Nenhum evento registrado nesta execução.</p></div>`;
     render(shell(`<div class="eyebrow">Somente leitura</div><h1>Auditoria do Terminal</h1><p class="lead">Eventos simulados de identidade, evidência e acesso físico.</p><div class="stack">${rows}</div><div class="actions"><button class="btn ghost" id="back">Voltar</button></div>`,"Auditoria"));
     document.getElementById("back").addEventListener("click",()=>go("/"));
-  }catch{ go("/"); }
+  }catch(error){
+    if(isConnectivityError(error))return failClosed();
+    go("/");
+  }
 }
 
 function deprecatedScreen(){
