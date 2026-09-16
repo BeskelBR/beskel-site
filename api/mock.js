@@ -12,6 +12,11 @@ function send(res, status, payload) {
   res.end(JSON.stringify(payload));
 }
 
+function normalizeDemoToken(token) {
+  if (token === "hvb_demo_Q7m4xP9nK2") return "demo-rafael";
+  return token;
+}
+
 module.exports = async function handler(req, res) {
   if (req.method === "OPTIONS") {
     res.statusCode = 204;
@@ -34,7 +39,8 @@ module.exports = async function handler(req, res) {
       const action = String(body.action || "");
 
       if (action === "identifyCredential") {
-        return send(res, 200, { ok:true, data:adapter.identifyCredential(String(body.token || ""), String(body.terminal_id || store.TERMINAL_ID)) });
+        const token = normalizeDemoToken(String(body.token || ""));
+        return send(res, 200, { ok:true, data:adapter.identifyCredential(token, String(body.terminal_id || store.TERMINAL_ID)) });
       }
       if (action === "verifyIdentity") {
         return send(res, 200, { ok:true, data:adapter.verifyIdentity({
