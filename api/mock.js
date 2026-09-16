@@ -30,7 +30,7 @@ module.exports = async function handler(req, res) {
       if (action === "pendingOrders") return send(res, 200, { ok:true, data:adapter.getPendingOrders(String(req.query?.auth_session_id || "")) });
       if (action === "accessSession") return send(res, 200, { ok:true, data:adapter.getAccessSession(String(req.query?.id || "")) });
       if (action === "audit") return send(res, 200, { ok:true, data:adapter.listAudit() });
-      if (action === "terminal") return send(res, 200, { ok:true, data:{ terminal_id:store.TERMINAL_ID, mode:"ACCESS_TERMINAL_V2", simulated_hardware:true } });
+      if (action === "terminal") return send(res, 200, { ok:true, data:adapter.getTerminalDescriptor(String(req.query?.terminal_id || store.TERMINAL_ID)) });
       return send(res, 400, { ok:false, error:"INVALID_ACTION" });
     }
 
@@ -42,28 +42,45 @@ module.exports = async function handler(req, res) {
         const token = normalizeDemoToken(String(body.token || ""));
         return send(res, 200, { ok:true, data:adapter.identifyCredential(token, String(body.terminal_id || store.TERMINAL_ID)) });
       }
-      if (action === "verifyIdentity") {
-        return send(res, 200, { ok:true, data:adapter.verifyIdentity({
+
+      if (action === "createBiometricEvidence") {
+        return send(res, 200, { ok:true, data:adapter.createBiometricEvidence({
           challengeId:String(body.challenge_id || ""),
           faceMatch:body.face_match === true,
           liveness:body.liveness === true,
+          terminalId:String(body.terminal_id || store.TERMINAL_ID),
+          deviceId:String(body.device_id || store.BIOMETRIC_DEVICE_ID)
+        }) });
+      }
+
+      if (action === "verifyIdentity") {
+        return send(res, 200, { ok:true, data:adapter.verifyIdentity({
+          challengeId:String(body.challenge_id || ""),
+          evidenceId:String(body.evidence_id || ""),
           terminalId:String(body.terminal_id || store.TERMINAL_ID)
         }) });
       }
+
       if (action === "startAccessSession") {
         return send(res, 200, { ok:true, data:adapter.startAccessSession({
           authSessionId:String(body.auth_session_id || ""),
           orderIds:Array.isArray(body.order_ids) ? body.order_ids : [],
-          terminalId:String(body.terminal_id || store.TERMINAL_ID)
+          terminalId:String(body.terminal_id || store.TERMINAL_ID),
+          commandId:String(body.command_id || "")
         }) });
       }
+
       if (action === "registerAccessEvent") {
         return send(res, 200, { ok:true, data:adapter.registerAccessEvent({
           accessSessionId:String(body.access_session_id || ""),
           eventType:String(body.event_type || ""),
-          metadata:body.metadata && typeof body.metadata === "object" ? body.metadata : {}
+          metadata:body.metadata && typeof body.metadata === "object" ? body.metadata : {},
+          commandId:String(body.command_id || ""),
+          sourceOccurredAt:String(body.source_occurred_at || ""),
+          sourceDeviceId:String(body.source_device_id || "")
         }) });
       }
+
       return send(res, 400, { ok:false, error:"INVALID_ACTION" });
     }
 
@@ -71,7 +88,9 @@ module.exports = async function handler(req, res) {
   } catch (error) {
     const known = [
       "CREDENTIAL_NOT_RECOGNIZED","ACCESS_NOT_PERMITTED","AUTH_CHALLENGE_EXPIRED",
+      "AUTH_EVIDENCE_EXPIRED","AUTH_EVIDENCE_MISMATCH","AUTH_EVIDENCE_UNTRUSTED",
       "BIOMETRIC_VERIFICATION_FAILED","AUTH_SESSION_EXPIRED","TERMINAL_MISMATCH",
+      "UNTRUSTED_TERMINAL","UNTRUSTED_DEVICE","COMMAND_ID_REQUIRED","IDEMPOTENCY_CONFLICT",
       "ORDER_REQUIRED","ORDER_NOT_AVAILABLE","SENSITIVE_ACCESS_DENIED",
       "ACCESS_SESSION_NOT_FOUND","ACCESS_SESSION_INACTIVE","INVALID_ACCESS_SEQUENCE"
     ];
