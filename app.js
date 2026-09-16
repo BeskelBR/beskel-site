@@ -6,12 +6,19 @@ const DEMO_TOKEN = "demo-rafael";
 const TERMINAL_ID = "HVB-T01";
 const BIOMETRIC_DEVICE_ID = "HVB-T01-BIO-DEV";
 const AUTH_KEY = "hvb_access_auth";
+const WHATSAPP_KEY = "hvb_dev_whatsapp";
 
-const state = { identity:null, evidence:null, auth:readJson(AUTH_KEY), access:null };
+const state = {
+  identity:null,
+  evidence:null,
+  auth:readJson(AUTH_KEY),
+  access:null,
+  selectedOrders:new Set()
+};
 
 function readJson(key){ try{return JSON.parse(sessionStorage.getItem(key)||"null");}catch{return null;} }
 function writeJson(key,value){ sessionStorage.setItem(key,JSON.stringify(value)); }
-function clearLocal(){ sessionStorage.removeItem(AUTH_KEY); state.identity=null; state.evidence=null; state.auth=null; state.access=null; }
+function clearLocal(){ sessionStorage.removeItem(AUTH_KEY); state.identity=null; state.evidence=null; state.auth=null; state.access=null; state.selectedOrders.clear(); }
 function esc(value){ return String(value??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c])); }
 function go(path){ history.pushState({},"",path); router(); }
 function nowLabel(){ return new Date().toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}); }
@@ -25,6 +32,68 @@ function shell(content,title="Terminal de Acesso"){
 function render(html){ app.innerHTML=html; window.scrollTo({top:0,behavior:"instant"}); updateClock(); }
 function updateClock(){ const el=document.getElementById("clock"); if(el)el.textContent=nowLabel(); }
 setInterval(updateClock,30000);
+
+function normalizeWhatsapp(value){
+  const digits=String(value||"").replace(/\D/g,"");
+  if(!digits)return "";
+  if(digits.length===11)return `55${digits}`;
+  if(digits.length===13&&digits.startsWith("55"))return digits;
+  return digits.length>=10&&digits.length<=15?digits:"";
+}
+function configuredWhatsapp(){ return normalizeWhatsapp(localStorage.getItem(WHATSAPP_KEY)||""); }
+function saveWhatsapp(value){
+  const normalized=normalizeWhatsapp(value);
+  if(!normalized)throw new Error("INVALID_WHATSAPP_NUMBER");
+  localStorage.setItem(WHATSAPP_KEY,normalized);
+  return normalized;
+}
+function maskWhatsapp(value){
+  const digits=normalizeWhatsapp(value);
+  if(!digits)return "não configurado";
+  const local=digits.startsWith("55")?digits.slice(2):digits;
+  return `(${local.slice(0,2)}) *****-${local.slice(-4)}`;
+}
+function captureWhatsappFromUrl(){
+  const url=new URL(location.href);
+  const incoming=url.searchParams.get("whatsapp");
+  if(!incoming)return;
+  const normalized=normalizeWhatsapp(incoming);
+  if(normalized)localStorage.setItem(WHATSAPP_KEY,normalized);
+  url.searchParams.delete("whatsapp");
+  history.replaceState({},"",`${url.pathname}${url.search}${url.hash}`);
+}
+function withdrawalMessage(orders){
+  const lines=["HVB — Lista de retirada","",`${orders.length} ordem(ns) selecionada(s)`];
+  orders.forEach(order=>{
+    lines.push("",order.order_id);
+    (order.items||[]).forEach(item=>lines.push(`- ${item.description} — ${item.quantity}${item.sensitive?" [SENSÍVEL]":""}`));
+  });
+  lines.push("","Mensagem de apoio operacional. A escrituração oficial ocorre na API HVB.");
+  return lines.join("\n");
+}
+function openWhatsapp(orders){
+  const phone=configuredWhatsapp();
+  if(!phone){ alert("Configure primeiro o WhatsApp de teste neste dispositivo."); return; }
+  const url=`https://wa.me/${encodeURIComponent(phone)}?text=${encodeURIComponent(withdrawalMessage(orders))}`;
+  window.open(url,"_blank","noopener,noreferrer");
+}
+function whatsappPanel(orders){
+  const phone=configuredWhatsapp();
+  return `<div class="dev-panel whatsapp-panel"><div class="eyebrow">WhatsApp • DEV</div><p>Notificação complementar. O botão apenas abre o WhatsApp com a lista pré-preenchida; o envio continua sob confirmação humana.</p><div class="whatsapp-config"><input id="whatsappNumber" inputmode="tel" autocomplete="tel" placeholder="(61) 99999-9999" value="${phone?esc(phone):""}"><button class="btn ghost" id="saveWhatsapp">Salvar neste dispositivo</button></div><div class="order-meta"><span>Destino: ${esc(maskWhatsapp(phone))}</span><span>${orders.length} ordem(ns)</span></div><div class="actions"><button class="btn secondary" id="openWhatsapp" ${orders.length?"":"disabled"}>Abrir WhatsApp com a lista</button></div></div>`;
+}
+function bindWhatsapp(orders){
+  const input=document.getElementById("whatsappNumber");
+  const save=document.getElementById("saveWhatsapp");
+  const open=document.getElementById("openWhatsapp");
+  if(save&&input)save.addEventListener("click",()=>{
+    try{
+      const value=saveWhatsapp(input.value);
+      input.value=value;
+      alert(`WhatsApp de teste salvo: ${maskWhatsapp(value)}`);
+    }catch{ alert("Número inválido. Informe DDD + número."); }
+  });
+  if(open)open.addEventListener("click",()=>openWhatsapp(orders));
+}
 
 async function parseResponse(res){
   let body;
@@ -108,7 +177,7 @@ async function verifyIdentity(){
       terminal_id:TERMINAL_ID
     });
     writeJson(AUTH_KEY,state.auth);
-    render(shell(`<div class="card"><div class="big-check">✓</div><div class="eyebrow">Identidade confirmada</div><h1>${esc(state.auth.employee.name)}</h1><div class="factor-list"><div class="factor ok"><b>✓</b><span>DESFire EV3</span></div><div class="factor ok"><b>✓</b><span>Face 1:1</span></div><div class="factor ok"><b>✓</b><span>Liveness/PAD</span></div><div class="factor ok"><b>✓</b><span>Evidência vinculada ao dispositivo DEV</span></div></div><div class="actions"><button class="btn" id="orders">Consultar ordens pendentes</button></div><p class="footer-note">A API recebeu uma evidência referenciada; a UI não enviou apenas um booleano de autenticação.</p></div>`,"Autenticação concluída"));
+    render(shell(`<div class="card"><div class="big-check">✓</div><div class="eyebrow">Identidade confirmada</div><h1>${esc(state.auth.employee.name)}</h1><div class="factor-list"><div class="factor ok"><b>✓</b><span>DESFire EV3</span></div><div class="factor ok"><b>✓</b><span>Face 1:1</span></div><div class="factor ok"><b>✓</b><span>Liveness/PAD</span></div><div class="factor ok"><b>✓</b><span>Evidência vinculada ao dispositivo DEV</span></div></div><div class="actions"><button class="btn" id="orders">Ver ordens e materiais</button></div><p class="footer-note">A API recebeu uma evidência referenciada; a UI não enviou apenas um booleano de autenticação.</p></div>`,"Autenticação concluída"));
     document.getElementById("orders").addEventListener("click",()=>go("/ordens"));
   }catch(error){
     if(isConnectivityError(error))return failClosed();
@@ -116,37 +185,79 @@ async function verifyIdentity(){
   }
 }
 
+function materialsList(order){
+  return `<div class="materials-list">${(order.items||[]).map(item=>`<div class="material-row"><span>${esc(item.description)}</span><strong>${esc(item.quantity)}</strong>${item.sensitive?`<span class="chip sensitive">Sensível</span>`:""}</div>`).join("")}</div>`;
+}
+function orderCard(order){
+  return `<label class="order-card selectable" data-order-card="${esc(order.order_id)}"><div class="order-select"><input type="checkbox" class="order-checkbox" value="${esc(order.order_id)}"><span class="check-ui" aria-hidden="true"></span></div><div class="order-main"><div class="row"><div><div class="eyebrow">${esc(order.order_id)}</div><strong>${esc(order.patient?.name||"Paciente")}</strong></div>${order.has_sensitive_items?`<span class="chip sensitive">Sensível</span>`:`<span class="chip">Comum</span>`}</div><div class="order-meta"><span>${esc(order.episode_id)}</span><span>${order.item_count} itens</span><span>${order.total_units} unidades</span></div>${materialsList(order)}</div></label>`;
+}
+function selectedOrdersFrom(orders){ return orders.filter(order=>state.selectedOrders.has(order.order_id)); }
+function updateOrderSelection(orders){
+  const selected=selectedOrdersFrom(orders);
+  const count=document.getElementById("selectedCount");
+  const authorize=document.getElementById("authorizeSelected");
+  const whats=document.getElementById("whatsappSelected");
+  if(count)count.textContent=`${selected.length} ordem(ns) selecionada(s)`;
+  if(authorize){ authorize.disabled=selected.length===0; authorize.textContent=selected.length?`Confirmar ${selected.length} ordem(ns) e autorizar acesso`:"Selecione ao menos uma ordem"; }
+  if(whats)whats.disabled=selected.length===0;
+}
+
 async function ordersScreen(){
   const auth=readJson(AUTH_KEY);
   if(!auth?.auth_session_id||auth.expires_at<Date.now())return go("/");
   state.auth=auth;
+  state.selectedOrders.clear();
   try{
     const orders=await apiGet({action:"pendingOrders",auth_session_id:auth.auth_session_id});
-    const cards=orders.length?orders.map(o=>`<button class="order-card" data-order="${esc(o.order_id)}"><div class="row"><div><div class="eyebrow">${esc(o.order_id)}</div><strong>${esc(o.patient?.name||"Paciente")}</strong></div>${o.has_sensitive_items?`<span class="chip sensitive">Sensível</span>`:`<span class="chip">Comum</span>`}</div><div class="order-meta"><span>${esc(o.episode_id)}</span><span>${o.item_count} itens</span><span>${o.total_units} unidades</span></div><div class="order-cta">Autorizar acesso para esta ordem →</div></button>`).join(""):`<div class="card"><h2>Nenhuma ordem pendente</h2><p class="lead">Não há ordens aguardando retirada.</p></div>`;
-    render(shell(`<div class="eyebrow">Usuário autenticado</div><h1>${esc(auth.employee.name)}</h1><p class="lead">Selecione a ordem que motivará este acesso. O picking será feito no HVB Mobile.</p><div class="section-title">Ordens aguardando retirada</div><div class="list">${cards}</div><div class="actions"><button class="btn ghost" id="cancel">Encerrar autenticação</button></div>`,"Ordens pendentes"));
-    document.querySelectorAll("[data-order]").forEach(btn=>btn.addEventListener("click",()=>authorizeAccess(btn.dataset.order)));
+    const cards=orders.length?orders.map(orderCard).join(""):`<div class="card"><h2>Nenhuma ordem pendente</h2><p class="lead">Não há ordens aguardando retirada.</p></div>`;
+    render(shell(`<div class="eyebrow">Usuário autenticado</div><h1>${esc(auth.employee.name)}</h1><p class="lead">Confira os materiais e selecione uma ou mais Ordens de Retirada. O Terminal confirma o contexto do acesso; o picking detalhado continua no HVB Mobile.</p><div class="selection-toolbar"><div><div class="section-title">Ordens aguardando retirada</div><strong id="selectedCount">0 ordem(ns) selecionada(s)</strong></div><div class="selection-actions"><button class="btn ghost" id="selectAll" ${orders.length?"":"disabled"}>Selecionar todas</button><button class="btn ghost" id="clearAll" disabled>Limpar</button></div></div><div class="list">${cards}</div><div class="sticky-actions"><button class="btn" id="authorizeSelected" disabled>Selecione ao menos uma ordem</button><button class="btn secondary" id="whatsappSelected" disabled>WhatsApp com selecionadas</button><button class="btn ghost" id="cancel">Encerrar autenticação</button></div>${whatsappPanel([])}`,"Ordens e materiais"));
+
+    document.querySelectorAll(".order-checkbox").forEach(input=>input.addEventListener("change",()=>{
+      if(input.checked)state.selectedOrders.add(input.value);else state.selectedOrders.delete(input.value);
+      const card=input.closest("[data-order-card]");
+      if(card)card.classList.toggle("selected",input.checked);
+      const clear=document.getElementById("clearAll");
+      if(clear)clear.disabled=state.selectedOrders.size===0;
+      updateOrderSelection(orders);
+    }));
+    document.getElementById("selectAll")?.addEventListener("click",()=>{
+      document.querySelectorAll(".order-checkbox").forEach(input=>{ input.checked=true; state.selectedOrders.add(input.value); input.closest("[data-order-card]")?.classList.add("selected"); });
+      document.getElementById("clearAll").disabled=false;
+      updateOrderSelection(orders);
+    });
+    document.getElementById("clearAll")?.addEventListener("click",()=>{
+      document.querySelectorAll(".order-checkbox").forEach(input=>{ input.checked=false; input.closest("[data-order-card]")?.classList.remove("selected"); });
+      state.selectedOrders.clear();
+      document.getElementById("clearAll").disabled=true;
+      updateOrderSelection(orders);
+    });
+    document.getElementById("authorizeSelected")?.addEventListener("click",()=>authorizeAccess([...state.selectedOrders]));
+    document.getElementById("whatsappSelected")?.addEventListener("click",()=>openWhatsapp(selectedOrdersFrom(orders)));
     document.getElementById("cancel").addEventListener("click",()=>go("/"));
+    bindWhatsapp([]);
   }catch(error){
     if(isConnectivityError(error))return failClosed();
     go("/");
   }
 }
 
-async function authorizeAccess(orderId){
+async function authorizeAccess(orderIds){
   if(!state.auth?.auth_session_id)return go("/");
-  render(shell(`<div class="card"><div class="eyebrow">Autorização</div><h1>Validando acesso…</h1><p class="lead">A API está verificando ordem, permissões e sensibilidade.</p></div>`,"Controle de acesso"));
+  const ids=[...new Set((orderIds||[]).filter(Boolean))];
+  if(!ids.length)return;
+  render(shell(`<div class="card"><div class="eyebrow">Autorização</div><h1>Validando ${ids.length} ordem(ns)…</h1><p class="lead">A API está verificando ordens, permissões e sensibilidade do conjunto selecionado.</p></div>`,"Controle de acesso"));
   try{
     state.access=await apiPost({
       action:"startAccessSession",
       auth_session_id:state.auth.auth_session_id,
-      order_ids:[orderId],
+      order_ids:ids,
       terminal_id:TERMINAL_ID,
       command_id:commandId("access")
     });
     go(`/acesso/${encodeURIComponent(state.access.access_session_id)}`);
   }catch(error){
     if(isConnectivityError(error))return failClosed();
-    const msg=error.message==="SENSITIVE_ACCESS_DENIED"?"Seu perfil não possui autorização para os itens sensíveis desta ordem.":"Não foi possível criar a sessão de acesso.";
+    const msg=error.message==="SENSITIVE_ACCESS_DENIED"?"Seu perfil não possui autorização para os itens sensíveis presentes nas ordens selecionadas.":"Não foi possível criar a sessão de acesso.";
     showError("Acesso não autorizado",msg,"/ordens");
   }
 }
@@ -162,14 +273,19 @@ const stateLabel=value=>({
   EXPIRED:"Sessão expirada"
 }[value]||value);
 
+function accessOrders(access){
+  return (access.orders||[]).map(order=>`<div class="access-order"><div class="row"><div><div class="eyebrow">${esc(order.order_id)}</div><strong>${esc(order.patient?.name||"Paciente")}</strong></div>${order.has_sensitive_items?`<span class="chip sensitive">Sensível</span>`:`<span class="chip">Comum</span>`}</div><div class="order-meta"><span>${esc(order.episode_id)}</span><span>${order.item_count} itens</span></div>${materialsList(order)}</div>`).join("");
+}
+
 async function accessScreen(accessSessionId){
   try{
     const access=await apiGet({action:"accessSession",id:accessSessionId});
     if(!access)return go("/");
     state.access=access;
-    const o=access.orders?.[0];
+    const totalItems=(access.orders||[]).reduce((sum,order)=>sum+(order.item_count||0),0);
     const sensitive=access.sensitive_access?`<div class="notice sensitive-notice"><b>Estoque sensível</b><span>O armário só será autorizado depois da entrada confirmada e da porta fechada.</span></div>`:"";
-    render(shell(`<div class="access-banner"><div class="big-check">✓</div><div><div class="eyebrow">Acesso autorizado</div><h1>${esc(access.employee?.name||"Funcionário")}</h1></div></div><div class="card"><div class="summary"><div class="summary-row"><span>Ordem</span><strong>${esc(o?.order_id||"—")}</strong></div><div class="summary-row"><span>Paciente</span><strong>${esc(o?.patient?.name||"—")}</strong></div><div class="summary-row"><span>Itens</span><strong>${o?.item_count??0}</strong></div><div class="summary-row"><span>Status físico</span><strong>${esc(stateLabel(access.state))}</strong></div></div></div>${sensitive}<div class="notice"><b>Picking no HVB Mobile</b><span>O Terminal não confirma materiais ou quantidades. Continue no dispositivo móvel autorizado.</span></div>${devControls(access)}<p class="footer-note">DEV: controladores, sensores, câmera e DESFire estão simulados. Nenhum movimento de estoque é realizado.</p>`,"Sessão de acesso"));
+    render(shell(`<div class="access-banner"><div class="big-check">✓</div><div><div class="eyebrow">Acesso autorizado</div><h1>${esc(access.employee?.name||"Funcionário")}</h1></div></div><div class="card"><div class="summary"><div class="summary-row"><span>Ordens</span><strong>${access.orders?.length||0}</strong></div><div class="summary-row"><span>Itens listados</span><strong>${totalItems}</strong></div><div class="summary-row"><span>Status físico</span><strong>${esc(stateLabel(access.state))}</strong></div></div></div>${sensitive}<div class="section-title">Materiais vinculados a esta sessão</div><div class="access-orders">${accessOrders(access)}</div><div class="notice"><b>Conferência no Terminal</b><span>A lista acima confirma o contexto das ordens selecionadas. A conferência item a item, ajustes e confirmação final continuam no HVB Mobile.</span></div>${whatsappPanel(access.orders||[])}${devControls(access)}<p class="footer-note">DEV: controladores, sensores, câmera e DESFire estão simulados. Nenhum movimento de estoque é realizado.</p>`,"Sessão de acesso"));
+    bindWhatsapp(access.orders||[]);
     bindDev(access);
   }catch(error){
     if(isConnectivityError(error))return failClosed("A API HVB ficou indisponível. O Terminal não emitirá novas autorizações ou transições de barreira enquanto estiver desconectado.");
@@ -226,7 +342,7 @@ async function auditScreen(){
 }
 
 function deprecatedScreen(){
-  render(shell(`<div class="card"><div class="eyebrow">Fluxo legado</div><h1>Esta função mudou de lugar</h1><p class="lead">Seleção de atendimento, materiais e confirmação de retirada não são mais responsabilidades do Terminal. O picking será realizado pelo HVB Mobile e escriturado pela API HVB.</p><div class="actions"><button class="btn" id="home">Ir para o Terminal de Acesso</button></div></div>`,"Arquitetura v2"));
+  render(shell(`<div class="card"><div class="eyebrow">Fluxo legado</div><h1>Esta função mudou de lugar</h1><p class="lead">O Terminal agora exibe as Ordens de Retirada e seus materiais para confirmação de contexto, mas picking item a item e escrituração permanecem no HVB Mobile/API.</p><div class="actions"><button class="btn" id="home">Ir para o Terminal de Acesso</button></div></div>`,"Arquitetura v2"));
   document.getElementById("home").addEventListener("click",()=>go("/"));
 }
 
@@ -248,5 +364,6 @@ function router(){
   return go("/");
 }
 
+captureWhatsappFromUrl();
 window.addEventListener("popstate",router);
 router();
