@@ -3,21 +3,43 @@
 const store = require("./store");
 
 class IntegrationAdapter {
-  getPatients() { throw new Error("NOT_IMPLEMENTED"); }
-  getActiveAttendances() { throw new Error("NOT_IMPLEMENTED"); }
-  getAttendance(id) { throw new Error("NOT_IMPLEMENTED"); }
-  getProducts() { throw new Error("NOT_IMPLEMENTED"); }
-  getProduct(id) { throw new Error("NOT_IMPLEMENTED"); }
-  registerConsumption(payload) { throw new Error("NOT_IMPLEMENTED"); }
+  identifyCredential() { throw new Error("NOT_IMPLEMENTED"); }
+  verifyIdentity() { throw new Error("NOT_IMPLEMENTED"); }
+  getPendingOrders() { throw new Error("NOT_IMPLEMENTED"); }
+  startAccessSession() { throw new Error("NOT_IMPLEMENTED"); }
+  registerAccessEvent() { throw new Error("NOT_IMPLEMENTED"); }
+  getAccessSession() { throw new Error("NOT_IMPLEMENTED"); }
+  listAudit() { throw new Error("NOT_IMPLEMENTED"); }
 }
 
 class MockAdapter extends IntegrationAdapter {
-  getPatients() { return store.patients; }
-  getActiveAttendances() { return store.listActiveAttendances(); }
-  getAttendance(id) { return store.getAttendanceDetail(id); }
-  getProducts() { return store.listItems(); }
-  getProduct(id) { return store.listItems().find(item => item.item_id === id) || null; }
-  registerConsumption(payload) { return store.registerConsumption(payload); }
+  identifyCredential(token, terminalId) {
+    return store.identifyCredential(token, terminalId);
+  }
+
+  verifyIdentity(payload) {
+    return store.verifyIdentity(payload);
+  }
+
+  getPendingOrders(authSessionId) {
+    return store.listPendingOrders(authSessionId);
+  }
+
+  startAccessSession(payload) {
+    return store.startAccessSession(payload);
+  }
+
+  registerAccessEvent(payload) {
+    return store.registerAccessEvent(payload);
+  }
+
+  getAccessSession(accessSessionId) {
+    return store.getAccessSessionDetail(accessSessionId);
+  }
+
+  listAudit() {
+    return store.listAudit();
+  }
 }
 
 module.exports = { IntegrationAdapter, MockAdapter };
