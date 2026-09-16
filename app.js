@@ -2,222 +2,145 @@
 
 const app = document.getElementById("app");
 const API = "/api/mock";
-const DEMO_TOKEN = "hvb_demo_Q7m4xP9nK2";
-const SESSION_KEY = "hvb_dev_session";
-const CREDENTIAL_KEY = "hvb_dev_credential_token";
-const LAST_TX_KEY = "hvb_dev_last_transaction";
+const DEMO_TOKEN = "demo-rafael";
+const TERMINAL_ID = "HVB-T01";
+const AUTH_KEY = "hvb_access_auth";
 
-const state = {
-  session: readJson(SESSION_KEY),
-  attendance: null,
-  item: null,
-  quantity: 1
-};
+const state = { identity:null, auth:readJson(AUTH_KEY), access:null };
 
-function readJson(key) {
-  try { return JSON.parse(sessionStorage.getItem(key) || "null"); } catch { return null; }
+function readJson(key){ try{return JSON.parse(sessionStorage.getItem(key)||"null");}catch{return null;} }
+function writeJson(key,value){ sessionStorage.setItem(key,JSON.stringify(value)); }
+function clearLocal(){ sessionStorage.removeItem(AUTH_KEY); state.identity=null; state.auth=null; state.access=null; }
+function esc(value){ return String(value??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c])); }
+function go(path){ history.pushState({},"",path); router(); }
+function nowLabel(){ return new Date().toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}); }
+function shell(content,title="Terminal de Acesso"){
+  return `<div class="screen"><div class="dev-banner">Ambiente de desenvolvimento • Hardware e dados simulados</div><header class="topbar"><div class="brand-inline"><img src="/hvb/assets/logo-lateral.webp" alt="Hospital Veterinário Brasília"><div class="topbar-title">${esc(title)}</div></div><div class="clock" id="clock">${nowLabel()}</div></header><main class="content">${content}</main></div>`;
 }
-function writeJson(key, value) { sessionStorage.setItem(key, JSON.stringify(value)); }
-function money(value) { return Number(value || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }); }
-function escapeHtml(value) { return String(value ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c])); }
-function go(path) { history.pushState({}, "", path); router(); }
-function nowLabel() { return new Date().toLocaleString("pt-BR", { weekday:"short", day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit" }); }
-function shell(content, title="Controle de Materiais") {
-  return `<div class="screen"><div class="dev-banner">Ambiente de desenvolvimento • Dados fictícios</div><header class="topbar"><div class="brand-inline"><img src="/hvb/assets/logo-lateral.webp" alt="Hospital Veterinário Brasília"><div class="topbar-title">${escapeHtml(title)}</div></div><div class="clock" id="clock">${nowLabel()}</div></header><main class="content">${content}</main></div>`;
-}
-function render(html) {
-  app.innerHTML = html;
-  window.scrollTo({ top: 0, behavior: "instant" });
-  updateClock();
-}
-function updateClock() {
-  const el = document.getElementById("clock");
-  if (el) el.textContent = nowLabel();
-}
-setInterval(updateClock, 30000);
+function render(html){ app.innerHTML=html; window.scrollTo({top:0,behavior:"instant"}); updateClock(); }
+function updateClock(){ const el=document.getElementById("clock"); if(el)el.textContent=nowLabel(); }
+setInterval(updateClock,30000);
 
-async function apiGet(params) {
-  const res = await fetch(`${API}?${new URLSearchParams(params)}`, { cache: "no-store" });
-  const body = await res.json();
-  if (!res.ok || !body.ok) throw new Error(body.error || "REQUEST_FAILED");
-  return body.data;
+async function apiGet(params){
+  const res=await fetch(`${API}?${new URLSearchParams(params)}`,{cache:"no-store"});
+  const body=await res.json(); if(!res.ok||!body.ok)throw new Error(body.error||"REQUEST_FAILED"); return body.data;
 }
-async function apiPost(payload) {
-  const res = await fetch(API, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(payload) });
-  const body = await res.json();
-  if (!res.ok || !body.ok) throw new Error(body.error || "REQUEST_FAILED");
-  return body.data;
+async function apiPost(payload){
+  const res=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  const body=await res.json(); if(!res.ok||!body.ok)throw new Error(body.error||"REQUEST_FAILED"); return body.data;
 }
 
-function getSession() {
-  const session = readJson(SESSION_KEY);
-  if (!session || !session.expires_at || session.expires_at < Date.now()) {
-    sessionStorage.removeItem(SESSION_KEY);
-    return null;
-  }
-  state.session = session;
-  return session;
+function idleScreen(){
+  clearLocal();
+  render(`<section class="hero-idle"><div class="idle-card"><img class="logo-main" src="/hvb/assets/logo-principal.webp" alt="Hospital Veterinário Brasília"><div class="module-label">Terminal de Acesso HVB</div><h1 class="idle-title" style="color:#fff">Aproxime seu crachá</h1><div class="nfc-mark" aria-hidden="true">◉</div><p style="font-size:18px;margin:0 0 10px">DESFire EV3 + confirmação facial</p><div class="status-pill"><span class="status-dot"></span>Pronto para autenticação</div><div class="idle-clock">${nowLabel()}</div><button class="dev-action" id="simulateBadge">Simular credencial de teste</button></div></section>`);
+  document.getElementById("simulateBadge").addEventListener("click",()=>go(`/auth/${DEMO_TOKEN}`));
 }
 
-async function ensureSession() {
-  let session = getSession();
-  if (session) return session;
-  const token = sessionStorage.getItem(CREDENTIAL_KEY);
-  if (!token) return null;
-  try {
-    session = await apiPost({ action:"auth", token });
-    writeJson(SESSION_KEY, session);
-    state.session = session;
-    return session;
-  } catch {
-    sessionStorage.removeItem(CREDENTIAL_KEY);
-    return null;
-  }
+async function credentialScreen(token){
+  render(shell(`<div class="card"><div class="eyebrow">Etapa 1 de 2</div><h1>Identificando credencial…</h1><p class="lead">Validando a identidade alegada pela credencial.</p></div>`,"Autenticação"));
+  try{
+    state.identity=await apiPost({action:"identifyCredential",token,terminal_id:TERMINAL_ID});
+    const p=state.identity.employee;
+    render(shell(`<div class="card"><div class="big-check">✓</div><div class="eyebrow">Credencial identificada</div><h1>${esc(p.name)}</h1><div class="person"><span class="role">${esc(p.role)}</span></div><div class="factor-list"><div class="factor ok"><b>✓</b><span>DESFire identificado</span></div><div class="factor pending"><b>2</b><span>Face 1:1 + liveness pendentes</span></div></div><div class="actions"><button class="btn" id="verify">Confirmar identidade</button><button class="btn ghost" id="cancel">Cancelar</button></div><p class="footer-note">DEV: câmera e biometria ainda estão simuladas.</p></div>`,"Autenticação"));
+    document.getElementById("verify").addEventListener("click",verifyIdentity);
+    document.getElementById("cancel").addEventListener("click",()=>go("/"));
+  }catch{ showError("Credencial não reconhecida","Não foi possível iniciar a autenticação."); }
 }
 
-function idleScreen() {
-  render(`<section class="hero-idle"><div class="idle-card"><img class="logo-main" src="/hvb/assets/logo-principal.webp" alt="Hospital Veterinário Brasília"><div class="module-label">Controle de Materiais</div><h1 class="idle-title" style="color:#fff">Terminal disponível</h1><div class="nfc-mark" aria-hidden="true">◉</div><p style="font-size:18px;margin:0 0 10px">Aproxime seu crachá NFC</p><div class="status-pill"><span class="status-dot"></span>Pronto para autenticação</div><div class="idle-clock">${nowLabel()}</div><button class="dev-action" id="simulateBadge">Simular crachá de teste</button></div></section>`);
-  document.getElementById("simulateBadge").addEventListener("click", () => go(`/auth/${DEMO_TOKEN}`));
+async function verifyIdentity(){
+  if(!state.identity)return go("/");
+  render(shell(`<div class="card"><div class="eyebrow">Etapa 2 de 2</div><h1>Verificando rosto e presença…</h1><p class="lead">Comparação 1:1 com liveness/PAD.</p><div class="scan-frame"><div class="scan-face">◎</div><span>Simulação local</span></div></div>`,"Autenticação biométrica"));
+  try{
+    state.auth=await apiPost({action:"verifyIdentity",challenge_id:state.identity.challenge_id,face_match:true,liveness:true,terminal_id:TERMINAL_ID});
+    writeJson(AUTH_KEY,state.auth);
+    render(shell(`<div class="card"><div class="big-check">✓</div><div class="eyebrow">Identidade confirmada</div><h1>${esc(state.auth.employee.name)}</h1><div class="factor-list"><div class="factor ok"><b>✓</b><span>DESFire EV3</span></div><div class="factor ok"><b>✓</b><span>Face 1:1</span></div><div class="factor ok"><b>✓</b><span>Liveness/PAD</span></div></div><div class="actions"><button class="btn" id="orders">Consultar ordens pendentes</button></div><p class="footer-note">Nenhuma retirada foi registrada.</p></div>`,"Autenticação concluída"));
+    document.getElementById("orders").addEventListener("click",()=>go("/ordens"));
+  }catch{ showError("Identidade não confirmada","Acesso não autorizado. Tente novamente."); }
 }
 
-async function authScreen(token) {
-  render(shell(`<div class="card"><div class="eyebrow">Autenticação</div><h1>Identificando crachá…</h1><p class="lead">Aguarde um instante.</p></div>`, "Autenticação"));
-  try {
-    const session = await apiPost({ action:"auth", token });
-    sessionStorage.setItem(CREDENTIAL_KEY, token);
-    writeJson(SESSION_KEY, session);
-    state.session = session;
-    render(shell(`<div class="card"><div class="big-check">✓</div><div class="eyebrow">Crachá identificado</div><h1>Autenticação realizada</h1><div class="person"><strong>${escapeHtml(session.employee.name)}</strong><span class="role">${escapeHtml(session.employee.role)}</span></div><div class="actions"><button class="btn" id="continue">Localizar atendimento</button></div><p class="footer-note">Sessão temporária ativa por 15 minutos.</p></div>`, "Autenticação"));
-    document.getElementById("continue").addEventListener("click", () => go("/atendimentos"));
-  } catch {
-    render(shell(`<div class="card"><div class="big-error">!</div><div class="eyebrow">Autenticação</div><h1>Credencial não reconhecida</h1><p class="lead">Não foi possível iniciar uma sessão com esta credencial.</p><div class="actions"><button class="btn ghost" id="back">Voltar ao terminal</button></div></div>`, "Autenticação"));
-    document.getElementById("back").addEventListener("click", () => go("/"));
+async function ordersScreen(){
+  const auth=readJson(AUTH_KEY); if(!auth?.auth_session_id||auth.expires_at<Date.now())return go("/"); state.auth=auth;
+  try{
+    const orders=await apiGet({action:"pendingOrders",auth_session_id:auth.auth_session_id});
+    const cards=orders.length?orders.map(o=>`<button class="order-card" data-order="${esc(o.order_id)}"><div class="row"><div><div class="eyebrow">${esc(o.order_id)}</div><strong>${esc(o.patient?.name||"Paciente")}</strong></div>${o.has_sensitive_items?`<span class="chip sensitive">Sensível</span>`:`<span class="chip">Comum</span>`}</div><div class="order-meta"><span>${esc(o.episode_id)}</span><span>${o.item_count} itens</span><span>${o.total_units} unidades</span></div><div class="order-cta">Autorizar acesso para esta ordem →</div></button>`).join(""):`<div class="card"><h2>Nenhuma ordem pendente</h2><p class="lead">Não há ordens aguardando retirada.</p></div>`;
+    render(shell(`<div class="eyebrow">Usuário autenticado</div><h1>${esc(auth.employee.name)}</h1><p class="lead">Selecione a ordem que motivará este acesso. O picking será feito no HVB Mobile.</p><div class="section-title">Ordens aguardando retirada</div><div class="list">${cards}</div><div class="actions"><button class="btn ghost" id="cancel">Encerrar autenticação</button></div>`,"Ordens pendentes"));
+    document.querySelectorAll("[data-order]").forEach(btn=>btn.addEventListener("click",()=>authorizeAccess(btn.dataset.order)));
+    document.getElementById("cancel").addEventListener("click",()=>go("/"));
+  }catch{ go("/"); }
+}
+
+async function authorizeAccess(orderId){
+  if(!state.auth?.auth_session_id)return go("/");
+  render(shell(`<div class="card"><div class="eyebrow">Autorização</div><h1>Validando acesso…</h1><p class="lead">A API está verificando ordem, permissões e sensibilidade.</p></div>`,"Controle de acesso"));
+  try{
+    state.access=await apiPost({action:"startAccessSession",auth_session_id:state.auth.auth_session_id,order_ids:[orderId],terminal_id:TERMINAL_ID});
+    go(`/acesso/${encodeURIComponent(state.access.access_session_id)}`);
+  }catch(error){
+    const msg=error.message==="SENSITIVE_ACCESS_DENIED"?"Seu perfil não possui autorização para os itens sensíveis desta ordem.":"Não foi possível criar a sessão de acesso.";
+    showError("Acesso não autorizado",msg,"/ordens");
   }
 }
 
-async function attendancesScreen() {
-  const session = await ensureSession();
-  if (!session) return go("/");
-  const attendances = await apiGet({ action:"attendances" });
-  const content = `<div class="eyebrow">Funcionário</div><h1>${escapeHtml(session.employee.name)}</h1><p class="lead">Selecione um atendimento ativo.</p><div class="search-wrap"><input class="search" id="search" placeholder="Pesquisar PET, tutor ou atendimento" autocomplete="off" aria-label="Pesquisar atendimento"></div><div class="section-title">Atendimentos ativos</div><div class="list" id="attendanceList"></div><p class="footer-note">Somente dados fictícios neste protótipo.</p>`;
-  render(shell(content, "Selecionar atendimento"));
-  const list = document.getElementById("attendanceList");
-  const search = document.getElementById("search");
-  function paint(query="") {
-    const q = query.trim().toLowerCase();
-    const filtered = attendances.filter(a => {
-      const p = a.patient || {};
-      return !q || [p.name,p.tutor,a.attendance_id].some(v => String(v||"").toLowerCase().includes(q));
-    });
-    list.innerHTML = filtered.length ? filtered.map(a => `<button class="list-card" data-id="${escapeHtml(a.attendance_id)}"><strong>${escapeHtml(a.patient.name)}</strong><div class="line"><span>${escapeHtml(a.patient.species)}</span><span>Atendimento #${escapeHtml(a.attendance_id)}</span></div><div class="meta">Tutor: ${escapeHtml(a.patient.tutor)}</div></button>`).join("") : `<div class="card"><p>Nenhum atendimento encontrado.</p></div>`;
-    list.querySelectorAll("[data-id]").forEach(btn => btn.addEventListener("click", () => go(`/atendimento/${btn.dataset.id}`)));
-  }
-  paint();
-  search.addEventListener("input", e => paint(e.target.value));
+const stateLabel=value=>({DOOR_AUTHORIZED:"Porta autorizada",DOOR_OPEN:"Porta aberta",ENTRY_CONFIRMED:"Entrada confirmada",SENSITIVE_CABINET_AUTHORIZED:"Armário sensível autorizado",SENSITIVE_CABINET_OPEN:"Armário sensível aberto",ACCESS_ACTIVE:"Acesso ativo",CLOSED:"Sessão encerrada",EXPIRED:"Sessão expirada"}[value]||value);
+
+async function accessScreen(accessSessionId){
+  try{
+    const access=await apiGet({action:"accessSession",id:accessSessionId}); if(!access)return go("/"); state.access=access;
+    const o=access.orders?.[0];
+    const sensitive=access.sensitive_access?`<div class="notice sensitive-notice"><b>Estoque sensível</b><span>O armário só será autorizado depois da entrada confirmada e da porta fechada.</span></div>`:"";
+    render(shell(`<div class="access-banner"><div class="big-check">✓</div><div><div class="eyebrow">Acesso autorizado</div><h1>${esc(access.employee?.name||"Funcionário")}</h1></div></div><div class="card"><div class="summary"><div class="summary-row"><span>Ordem</span><strong>${esc(o?.order_id||"—")}</strong></div><div class="summary-row"><span>Paciente</span><strong>${esc(o?.patient?.name||"—")}</strong></div><div class="summary-row"><span>Itens</span><strong>${o?.item_count??0}</strong></div><div class="summary-row"><span>Status físico</span><strong>${esc(stateLabel(access.state))}</strong></div></div></div>${sensitive}<div class="notice"><b>Picking no HVB Mobile</b><span>O Terminal não confirma materiais ou quantidades. Continue no dispositivo móvel autorizado.</span></div>${devControls(access)}<p class="footer-note">DEV: controladores, sensores, câmera e DESFire estão simulados. Nenhum movimento de estoque é realizado.</p>`,"Sessão de acesso"));
+    bindDev(access);
+  }catch{ go("/"); }
 }
 
-async function attendanceScreen(id) {
-  const session = await ensureSession();
-  if (!session) return go("/");
-  const attendance = await apiGet({ action:"attendance", id });
-  if (!attendance) return render(shell(`<div class="card"><h1>Atendimento não encontrado</h1><button class="btn ghost" id="back">Voltar</button></div>`));
-  state.attendance = attendance;
-  const txs = attendance.transactions || [];
-  const rows = txs.length ? txs.map(t => `<div class="audit-row"><div class="time">${new Date(t.timestamp).toLocaleTimeString("pt-BR")}</div><strong>${escapeHtml(t.item_id)}</strong><div>${t.quantity} item(ns) • ${money(t.total)}</div></div>`).join("") : `<div class="card"><p class="lead" style="margin:0">Nenhum material registrado nesta demonstração.</p></div>`;
-  render(shell(`<div class="eyebrow">Atendimento selecionado</div><h1>${escapeHtml(attendance.patient.name)}</h1><div class="info-strip"><div class="info-box"><span>Espécie</span><strong>${escapeHtml(attendance.patient.species)}</strong></div><div class="info-box"><span>Atendimento</span><strong>#${escapeHtml(attendance.attendance_id)}</strong></div></div><div class="card"><div class="summary"><div class="summary-row"><span>Tutor</span><strong>${escapeHtml(attendance.patient.tutor)}</strong></div><div class="summary-row"><span>Funcionário</span><strong>${escapeHtml(session.employee.name)}</strong></div></div></div><div class="actions"><button class="btn" id="material">+ Registrar material</button><button class="btn ghost" id="change">Trocar atendimento</button></div><div class="section-title">Materiais registrados</div><div class="stack">${rows}</div>`, "Atendimento"));
-  document.getElementById("material").addEventListener("click", () => go(`/materiais?attendance=${encodeURIComponent(id)}`));
-  document.getElementById("change").addEventListener("click", () => go("/atendimentos"));
+function devControls(access){
+  let button="";
+  if(access.state==="DOOR_AUTHORIZED")button=`<button class="btn secondary" data-event="DOOR_OPENED">Simular porta aberta</button>`;
+  else if(access.state==="DOOR_OPEN")button=`<button class="btn secondary" data-event="ENTRY_CONFIRMED">Simular sensor de entrada</button>`;
+  else if(access.state==="ENTRY_CONFIRMED")button=`<button class="btn secondary" data-event="DOOR_CLOSED">Simular porta fechada</button>`;
+  else if(access.state==="SENSITIVE_CABINET_AUTHORIZED")button=`<button class="btn secondary" data-event="SENSITIVE_CABINET_OPENED">Simular armário aberto</button>`;
+  else if(access.state==="SENSITIVE_CABINET_OPEN")button=`<button class="btn secondary" data-event="SENSITIVE_CABINET_CLOSED">Simular armário fechado</button>`;
+  else if(access.state==="ACCESS_ACTIVE")button=`<button class="btn secondary" data-event="ACCESS_CLOSED">Encerrar sessão de acesso</button>`;
+  else button=`<button class="btn ghost" id="finish">Voltar ao terminal</button>`;
+  return `<div class="dev-panel"><div class="eyebrow">Controles DEV</div><p>Simulação da sequência física. Estes botões serão substituídos pelos eventos do controlador/sensores.</p><div class="actions">${button}</div></div>`;
+}
+function bindDev(access){
+  document.querySelectorAll("[data-event]").forEach(btn=>btn.addEventListener("click",async()=>{
+    btn.disabled=true;
+    try{ await apiPost({action:"registerAccessEvent",access_session_id:access.access_session_id,event_type:btn.dataset.event,metadata:{source:"dev-ui"}}); accessScreen(access.access_session_id); }
+    catch{ btn.disabled=false; alert("A sequência física simulada não permitiu este evento."); }
+  }));
+  const finish=document.getElementById("finish"); if(finish)finish.addEventListener("click",()=>go("/"));
 }
 
-async function materialsScreen(attendanceId) {
-  const session = await ensureSession();
-  if (!session) return go("/");
-  const items = await apiGet({ action:"items" });
-  const content = `<div class="eyebrow">Material</div><h1>Selecione o produto</h1><p class="lead">Pesquise pelo nome ou SKU.</p><div class="search-wrap"><input class="search" id="search" placeholder="Nome ou código do material" autocomplete="off"></div><div class="list" id="itemList"></div>`;
-  render(shell(content, "Selecionar material"));
-  const list = document.getElementById("itemList");
-  const search = document.getElementById("search");
-  function paint(query="") {
-    const q = query.trim().toLowerCase();
-    const filtered = items.filter(i => !q || i.description.toLowerCase().includes(q) || i.sku.toLowerCase().includes(q));
-    list.innerHTML = filtered.map(i => `<button class="list-card" data-item="${escapeHtml(i.item_id)}"><div class="row"><strong>${escapeHtml(i.description)}</strong><span class="chip">${escapeHtml(i.current_stock)} ${escapeHtml(i.unit)}</span></div><div class="line"><span>${escapeHtml(i.sku)}</span><span>${escapeHtml(i.category)}</span><span>${money(i.unit_price)}</span></div></button>`).join("");
-    list.querySelectorAll("[data-item]").forEach(btn => btn.addEventListener("click", () => go(`/retirada?attendance=${encodeURIComponent(attendanceId)}&item=${encodeURIComponent(btn.dataset.item)}`)));
-  }
-  paint();
-  search.addEventListener("input", e => paint(e.target.value));
+async function auditScreen(){
+  try{
+    const audit=await apiGet({action:"audit"});
+    const rows=audit.length?audit.map(e=>`<div class="audit-row"><div class="time">${new Date(e.occurred_at).toLocaleString("pt-BR")}</div><strong>${esc(e.event_type)}</strong><div>${esc(e.employee?.name||"Sistema")} • ${esc(e.terminal_id||"—")}</div><div class="meta">${esc(e.access_session_id||e.auth_session_id||"sem sessão")}</div></div>`).join(""):`<div class="card"><p class="lead">Nenhum evento registrado nesta execução.</p></div>`;
+    render(shell(`<div class="eyebrow">Somente leitura</div><h1>Auditoria do Terminal</h1><p class="lead">Eventos simulados de identidade e acesso físico.</p><div class="stack">${rows}</div><div class="actions"><button class="btn ghost" id="back">Voltar</button></div>`,"Auditoria"));
+    document.getElementById("back").addEventListener("click",()=>go("/"));
+  }catch{ go("/"); }
 }
 
-async function withdrawalScreen(attendanceId, itemId) {
-  const session = await ensureSession();
-  if (!session) return go("/");
-  const [attendance,item] = await Promise.all([apiGet({action:"attendance",id:attendanceId}), apiGet({action:"item",id:itemId})]);
-  if (!attendance || !item) return go("/atendimentos");
-  state.attendance = attendance; state.item = item; state.quantity = 1;
-  const paint = () => {
-    const total = state.quantity * item.unit_price;
-    render(shell(`<div class="eyebrow">Confirme a retirada</div><h1>${escapeHtml(item.description)}</h1><div class="info-strip"><div class="info-box"><span>Estoque atual</span><strong>${item.current_stock} ${escapeHtml(item.unit)}</strong></div><div class="info-box"><span>Valor unitário</span><strong>${money(item.unit_price)}</strong></div></div><div class="section-title">Quantidade</div><div class="qty-control"><button id="minus" aria-label="Diminuir quantidade">−</button><div class="qty-value">${state.quantity}</div><button id="plus" aria-label="Aumentar quantidade">+</button></div><div class="card"><div class="summary"><div class="summary-row"><span>Funcionário</span><strong>${escapeHtml(session.employee.name)}</strong></div><div class="summary-row"><span>PET</span><strong>${escapeHtml(attendance.patient.name)}</strong></div><div class="summary-row"><span>Atendimento</span><strong>#${escapeHtml(attendance.attendance_id)}</strong></div><div class="summary-row"><span>Produto</span><strong>${escapeHtml(item.description)}</strong></div><div class="summary-row"><span>Quantidade</span><strong>${state.quantity}</strong></div><div class="summary-row"><span>Valor</span><strong>${money(total)}</strong></div></div></div><div class="actions"><button class="btn" id="confirm">CONFIRMAR RETIRADA</button><button class="btn ghost" id="cancel">Cancelar</button></div><p class="footer-note">Simulação interna do protótipo. Nenhuma integração externa é executada.</p>`, "Revisar retirada"));
-    document.getElementById("minus").addEventListener("click", () => { state.quantity=Math.max(1,state.quantity-1); paint(); });
-    document.getElementById("plus").addEventListener("click", () => { state.quantity=Math.min(item.current_stock,state.quantity+1); paint(); });
-    document.getElementById("cancel").addEventListener("click", () => go(`/atendimento/${attendance.attendance_id}`));
-    document.getElementById("confirm").addEventListener("click", confirmWithdrawal);
-  };
-  async function confirmWithdrawal() {
-    const btn = document.getElementById("confirm");
-    btn.disabled = true; btn.textContent = "Registrando…";
-    try {
-      const tx = await apiPost({ action:"registerConsumption", session_id:session.session_id, attendance_id:attendance.attendance_id, item_id:item.item_id, quantity:state.quantity, device:`web-${navigator.userAgent.includes("iPhone")?"iphone":"demo"}` });
-      const enriched = { ...tx, employee:session.employee, patient:attendance.patient, item };
-      writeJson(LAST_TX_KEY, enriched);
-      go("/sucesso");
-    } catch (err) {
-      if (err.message === "SESSION_EXPIRED") {
-        sessionStorage.removeItem(SESSION_KEY);
-        const renewed = await ensureSession();
-        if (renewed) return paint();
-      }
-      btn.disabled = false; btn.textContent = "CONFIRMAR RETIRADA";
-      alert("Não foi possível registrar a retirada. Revise os dados e tente novamente.");
-    }
-  }
-  paint();
+function deprecatedScreen(){
+  render(shell(`<div class="card"><div class="eyebrow">Fluxo legado</div><h1>Esta função mudou de lugar</h1><p class="lead">Seleção de atendimento, materiais e confirmação de retirada não são mais responsabilidades do Terminal. O picking será realizado pelo HVB Mobile e escriturado pela API HVB.</p><div class="actions"><button class="btn" id="home">Ir para o Terminal de Acesso</button></div></div>`,"Arquitetura v2"));
+  document.getElementById("home").addEventListener("click",()=>go("/"));
+}
+function showError(title,message,back="/"){
+  render(shell(`<div class="card"><div class="big-error">!</div><div class="eyebrow">Operação interrompida</div><h1>${esc(title)}</h1><p class="lead">${esc(message)}</p><div class="actions"><button class="btn ghost" id="back">Voltar</button></div></div>`,"Terminal de Acesso"));
+  document.getElementById("back").addEventListener("click",()=>go(back));
 }
 
-function successScreen() {
-  const tx = readJson(LAST_TX_KEY);
-  if (!tx) return go("/atendimentos");
-  render(shell(`<div class="card"><div class="big-check">✓</div><div class="eyebrow">Operação concluída</div><h1>Retirada registrada</h1><h2>${escapeHtml(tx.item.description)}</h2><p class="lead">Quantidade: ${tx.quantity}</p><div class="success-list"><div class="success-item"><b>✓</b><span>Estoque atualizado: ${tx.previous_stock} → ${tx.resulting_stock}</span></div><div class="success-item"><b>✓</b><span>Vinculado ao atendimento #${escapeHtml(tx.attendance_id)}</span></div><div class="success-item"><b>✓</b><span>${money(tx.total)} incluído na simulação financeira do atendimento</span></div><div class="success-item"><b>✓</b><span>Operação registrada na auditoria do protótipo</span></div></div><div class="actions"><button class="btn" id="same">Registrar outro material</button><button class="btn ghost" id="finish">Encerrar sessão</button></div><p class="footer-note">Não existe integração real com sistema externo nesta versão.</p></div>`, "Retirada registrada"));
-  document.getElementById("same").addEventListener("click", () => go(`/atendimento/${tx.attendance_id}`));
-  document.getElementById("finish").addEventListener("click", () => { sessionStorage.clear(); go("/"); });
+function router(){
+  const path=location.pathname;
+  const auth=path.match(/^\/auth\/([^/]+)$/); const access=path.match(/^\/acesso\/([^/]+)$/);
+  if(path==="/")return idleScreen();
+  if(auth)return credentialScreen(decodeURIComponent(auth[1]));
+  if(path==="/ordens")return ordersScreen();
+  if(access)return accessScreen(decodeURIComponent(access[1]));
+  if(path==="/admin/auditoria")return auditScreen();
+  if(["/atendimentos","/materiais","/retirada","/sucesso"].includes(path)||/^\/atendimento\//.test(path))return deprecatedScreen();
+  go("/");
 }
-
-async function auditScreen() {
-  const rows = await apiGet({ action:"audit" });
-  const html = rows.length ? rows.map(t => `<div class="audit-row"><div class="time">${new Date(t.timestamp).toLocaleString("pt-BR")}</div><strong>${escapeHtml(t.employee?.name || t.employee_id)}</strong><div>${escapeHtml(t.patient?.name || t.patient_id)} • #${escapeHtml(t.attendance_id)}</div><div>${escapeHtml(t.item?.description || t.item_id)} • −${t.quantity}</div><div class="meta">Estoque: ${t.previous_stock} → ${t.resulting_stock} • ${money(t.total)}</div></div>`).join("") : `<div class="card"><p class="lead" style="margin:0">Nenhuma transação registrada desde o último reinício do ambiente mock.</p></div>`;
-  render(shell(`<div class="eyebrow">Auditoria</div><h1>Transações do protótipo</h1><p class="lead">Histórico somente leitura. Correções futuras devem gerar novas transações.</p><div class="stack">${html}</div><div class="actions"><button class="btn ghost" id="home">Voltar ao terminal</button></div>`, "Auditoria"));
-  document.getElementById("home").addEventListener("click", () => go("/"));
-}
-
-async function router() {
-  const path = location.pathname.replace(/\/$/, "") || "/";
-  try {
-    if (path === "/") return idleScreen();
-    if (path.startsWith("/auth/")) return authScreen(decodeURIComponent(path.split("/").pop()));
-    if (path === "/atendimentos") return attendancesScreen();
-    if (path.startsWith("/atendimento/")) return attendanceScreen(decodeURIComponent(path.split("/").pop()));
-    if (path === "/materiais") return materialsScreen(new URLSearchParams(location.search).get("attendance"));
-    if (path === "/retirada") {
-      const q = new URLSearchParams(location.search);
-      return withdrawalScreen(q.get("attendance"), q.get("item"));
-    }
-    if (path === "/sucesso") return successScreen();
-    if (path === "/admin/auditoria") return auditScreen();
-    return go("/");
-  } catch (error) {
-    console.error(error);
-    render(shell(`<div class="card"><div class="big-error">!</div><h1>Não foi possível carregar esta etapa</h1><p class="lead">O ambiente de demonstração encontrou um erro temporário.</p><div class="actions"><button class="btn ghost" id="retry">Voltar ao terminal</button></div></div>`));
-    document.getElementById("retry").addEventListener("click", () => go("/"));
-  }
-}
-
-addEventListener("popstate", router);
+window.addEventListener("popstate",router);
 router();
