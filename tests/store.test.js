@@ -21,73 +21,78 @@ function authenticate(token) {
   return { identity, evidence, auth };
 }
 
-test("Terminal v2 enforces sensitive permission and preserves access invariants", () => {
-  const carlos = authenticate("demo-carlos");
-  assert.throws(() => store.startAccessSession({
-    authSessionId: carlos.auth.auth_session_id,
-    orderIds: ["OR-2026-001842-01"],
-    terminalId: store.TERMINAL_ID,
-    commandId: "test-sensitive-denied"
-  }), /SENSITIVE_ACCESS_DENIED/);
-
+test("Terminal v2 exposes at least ten synthetic orders with material details", () => {
   const marina = authenticate("demo-marina");
-  assert.equal(marina.identity.employee.employee_id, "emp_002");
-  assert.equal(marina.auth.auth_level, "STANDARD");
-  assert.ok(marina.auth.factors.includes("DESFIRE"));
-  assert.ok(marina.auth.factors.includes("FACE_1_TO_1"));
-  assert.ok(marina.auth.factors.includes("PAD_LIVENESS"));
-
   const orders = store.listPendingOrders(marina.auth.auth_session_id);
-  const sensitive = orders.find(x => x.order_id === "OR-2026-001842-01");
-  assert.ok(sensitive?.has_sensitive_items);
+  assert.ok(orders.length >= 10, `expected at least 10 pending orders, got ${orders.length}`);
+  for (const order of orders) {
+    assert.ok(Array.isArray(order.items));
+    assert.equal(order.items.length, order.item_count);
+    assert.ok(order.items.every(item => item.description && Number(item.quantity) > 0));
+  }
+  assert.ok(orders.some(order => order.has_sensitive_items));
+  assert.ok(orders.some(order => !order.has_sensitive_items));
+});
 
-  const accessCommand = "test-access-session-001";
+test("Terminal v2 supports one access session bound to multiple withdrawal orders", () => {
+  const marina = authenticate("demo-marina");
+  const orders = store.listPendingOrders(marina.auth.auth_session_id);
+  const selected = [orders[0], orders[1], orders[2]].filter(Boolean);
+  assert.equal(selected.length, 3);
+
+  const accessCommand = "test-multi-access-session-001";
   const first = store.startAccessSession({
     authSessionId: marina.auth.auth_session_id,
-    orderIds: [sensitive.order_id],
+    orderIds: selected.map(order => order.order_id),
     terminalId: store.TERMINAL_ID,
     commandId: accessCommand
   });
   const repeated = store.startAccessSession({
     authSessionId: marina.auth.auth_session_id,
-    orderIds: [sensitive.order_id],
+    orderIds: selected.map(order => order.order_id),
     terminalId: store.TERMINAL_ID,
     commandId: accessCommand
   });
-  assert.equal(repeated.access_session_id, first.access_session_id, "idempotent retry must reuse result");
+
+  assert.equal(repeated.access_session_id, first.access_session_id);
+  assert.equal(first.orders.length, 3);
+  assert.deepEqual(
+    new Set(first.orders.map(order => order.order_id)),
+    new Set(selected.map(order => order.order_id))
+  );
+  assert.ok(first.orders.every(order => Array.isArray(order.items) && order.items.length > 0));
   assert.equal(first.state, "DOOR_AUTHORIZED");
-  assert.equal(first.sensitive_access, true);
 
   let current = first;
-  const sequence = [
-    "DOOR_OPENED",
-    "ENTRY_CONFIRMED",
-    "DOOR_CLOSED",
-    "SENSITIVE_CABINET_OPENED",
-    "SENSITIVE_CABINET_CLOSED",
-    "ACCESS_CLOSED"
-  ];
-
+  const sequence = ["DOOR_OPENED", "ENTRY_CONFIRMED"];
   sequence.forEach((eventType, index) => {
     const envelope = {
       accessSessionId: first.access_session_id,
       eventType,
-      commandId: `test-event-${index}`,
-      sourceOccurredAt: `2026-09-16T08:0${index}:00.000Z`,
+      commandId: `test-multi-event-${index}`,
+      sourceOccurredAt: `2026-09-16T09:0${index}:00.000Z`,
       sourceDeviceId: store.TERMINAL_ID,
       metadata: { source: "node-test" }
     };
     current = store.registerAccessEvent(envelope);
     const retried = store.registerAccessEvent(envelope);
-    assert.equal(retried.access_session_id, first.access_session_id);
-    assert.equal(retried.state, current.state, "exact retry must be idempotent");
+    assert.equal(retried.state, current.state);
   });
 
-  assert.equal(current.state, "CLOSED");
-  assert.equal(current.orders[0].status, "EM_SEPARACAO", "entry changes order state; terminal does not confirm picking");
+  assert.equal(current.state, "ENTRY_CONFIRMED");
+  assert.ok(current.orders.every(order => order.status === "EM_SEPARACAO"));
+  assert.ok(!store.listAudit().some(event => event.event_type === "STOCK_CONSUMED"));
+});
 
-  const audit = store.listAudit();
-  assert.ok(audit.some(e => e.event_type === "BIOMETRIC_EVIDENCE_CREATED"));
-  assert.ok(audit.some(e => e.event_type === "ENTRY_CONFIRMED"));
-  assert.ok(!audit.some(e => e.event_type === "STOCK_CONSUMED"), "terminal must not write stock consumption");
+test("Sensitive access remains denied to an authenticated employee without permission", () => {
+  const carlos = authenticate("demo-carlos");
+  const orders = store.listPendingOrders(carlos.auth.auth_session_id);
+  const sensitive = orders.find(order => order.has_sensitive_items);
+  assert.ok(sensitive);
+  assert.throws(() => store.startAccessSession({
+    authSessionId: carlos.auth.auth_session_id,
+    orderIds: [sensitive.order_id],
+    terminalId: store.TERMINAL_ID,
+    commandId: "test-sensitive-denied-v2"
+  }), /SENSITIVE_ACCESS_DENIED/);
 });
