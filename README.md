@@ -2,50 +2,48 @@
 
 Protótipo de desenvolvimento do Terminal físico do Hospital Veterinário Brasília.
 
-> **Arquitetura funcional vigente:** o Terminal é um **Terminal de Acesso**. Seu papel é identidade, autenticação, autorização e participação no controle de acesso físico. O picking será realizado pelo **HVB Mobile** e a escrituração será responsabilidade da **API do HVB Sistema**.
+> **Arquitetura funcional vigente:** o Terminal é um **Terminal de Acesso**. Seu papel é identidade, autenticação, autorização, confirmação de contexto da retirada e participação no controle de acesso físico. O picking item a item continua no **HVB Mobile** e a escrituração continua sendo responsabilidade da **API do HVB Sistema**.
 
 ## Status atual
 
-A migração funcional para a arquitetura v2 **foi iniciada em 16/09/2026** em modo exclusivamente DEV/mock.
+A migração funcional para a arquitetura v2 foi iniciada em 16/09/2026 em modo exclusivamente DEV/mock.
 
-Já foram migrados no protótipo:
+Já estão representados no protótipo:
 
-- papel da UI: `Controle de Materiais` → `Terminal de Acesso`;
-- autenticação em duas etapas: credencial DESFire simulada + face 1:1/PAD simulados;
-- challenge curto e de uso único para autenticação;
+- `Controle de Materiais` → `Terminal de Acesso`;
+- credencial DESFire simulada + face 1:1/PAD simulados;
+- challenge curto e de uso único;
 - evidência biométrica/PAD referenciada por `evidence_id`;
 - vínculo da evidência a terminal/dispositivo DEV confiável;
 - consulta de Ordens de Retirada pendentes;
-- criação de `AccessSession` temporária;
+- **lista de materiais visível no próprio Terminal após autenticação**;
+- **seleção simultânea de uma ou várias Ordens de Retirada**;
+- confirmação do conjunto de ordens antes da criação da `AccessSession`;
+- `AccessSession` N:N com ordens no contrato do protótipo;
 - diferenciação de ordem comum e ordem com item sensível;
 - sequência simulada de porta/entrada/armário sensível;
-- comandos de sessão/eventos com `command_id` para idempotência;
-- registro separado de `source_occurred_at` e horário recebido pelo servidor;
-- auditoria append-only de eventos de identidade e acesso;
+- comandos com `command_id` para idempotência;
+- `source_occurred_at` separado do instante recebido no servidor;
+- auditoria append-only de identidade e acesso;
+- dataset sintético com pelo menos dez Ordens de Retirada simultâneas;
+- preparação de mensagem WhatsApp com lista de materiais em modo DEV, sem envio automático;
 - depreciação das telas legadas de picking;
-- remoção da escrita de consumo/estoque do contrato funcional do Terminal.
+- ausência de escrita de consumo/estoque pelo Terminal.
 
-Ainda **não** estão implementados neste protótipo:
+Ainda não estão implementados de forma real:
 
 - DESFire físico;
 - câmera/biometria/liveness reais;
-- assinatura/attestation criptográfica real da evidência biométrica;
+- assinatura/attestation criptográfica real;
 - controlador de porta/armário e sensores reais;
-- HVB Mobile;
+- HVB Mobile real;
 - API real do HVB Sistema;
-- PostgreSQL real;
+- PostgreSQL real neste protótipo;
 - contingência offline/edge;
-- WhatsApp;
+- provedor/API oficial de WhatsApp;
 - movimentação real de estoque, custo ou faturamento.
 
 Nenhum dado ou sistema real do HVB é acessado.
-
-## Documentação vigente
-
-- `docs/TERMINAL-ARQUITETURA-V2.md` — protocolo funcional aprovado;
-- `docs/DELTA-IMPLEMENTACAO-V2.md` — impacto sobre o MVP anterior e plano de migração;
-- `docs/AUTH-EVIDENCE-CONTRACT-V1.md` — contrato conceitual de evidência de autenticação;
-- `docs/TERMINAL-CORE-CONTRACT-V1.md` — fronteira funcional Terminal ↔ HVB Sistema.
 
 ## Separação de responsabilidades
 
@@ -55,8 +53,9 @@ HVB SISTEMA / CONSULTÓRIO
 
 TERMINAL DE ACESSO HVB
 → identifica/autentica
-→ consulta ordens
-→ cria sessão de acesso
+→ mostra ordens e materiais
+→ permite selecionar uma ou várias ordens
+→ confirma contexto da sessão
 → participa do controle físico
 
 HVB MOBILE
@@ -76,11 +75,14 @@ Princípio operacional:
 
 ```text
 CONSULTÓRIO SOLICITA
-→ TERMINAL AUTENTICA
+→ TERMINAL AUTENTICA E MOSTRA A LISTA
+→ PROFISSIONAL CONFIRMA AS ORDENS
 → SALA LIBERA
-→ MOBILE GUIA
+→ MOBILE GUIA O PICKING
 → API ESCRITURA
 ```
+
+A presença da lista no Terminal **não devolve o picking detalhado ao Terminal**. O equipamento confirma visualmente o contexto e o conjunto de ordens que motivam o acesso.
 
 ## Fluxo DEV atual
 
@@ -89,32 +91,31 @@ repouso
 → credencial simulada
 → challenge
 → face 1:1 + PAD simulados
-→ evidence_id vinculado ao dispositivo DEV
 → AuthSession
-→ ordens pendentes
-→ seleção da ordem
+→ 10+ ordens pendentes com materiais visíveis
+→ seleção de 1..N ordens
+→ confirmação do conjunto
 → AccessSession idempotente
 → porta autorizada
 → porta aberta [DEV]
 → entrada confirmada [DEV]
+→ todas as ordens da sessão → EM_SEPARACAO
 → porta fechada [DEV]
 → armário sensível [se aplicável, DEV]
 → acesso ativo
 ```
 
-A transição da ordem para `EM_SEPARACAO` ocorre apenas em `ENTRY_CONFIRMED`, não na mera autorização da porta.
+`DOOR_AUTHORIZED` não altera o estado das ordens. A transição para `EM_SEPARACAO` ocorre apenas em `ENTRY_CONFIRMED`.
 
 ## Rotas v2
 
 - `/` — repouso/credencial;
-- `/auth/:token` — identificação da credencial e autenticação simulada;
-- `/ordens` — consulta de ordens pendentes;
-- `/acesso/:id` — sessão de acesso e simulação de eventos físicos;
+- `/auth/:token` — identificação/autenticação simulada;
+- `/ordens` — consulta, lista de materiais e seleção múltipla;
+- `/acesso/:id` — sessão, materiais vinculados e eventos físicos simulados;
 - `/admin/auditoria` — auditoria somente leitura.
 
-### Rotas legadas
-
-As rotas abaixo continuam roteadas temporariamente apenas para informar que o fluxo mudou de lugar:
+Rotas legadas continuam apenas como aviso de migração:
 
 - `/atendimentos`;
 - `/atendimento/:id`;
@@ -122,7 +123,28 @@ As rotas abaixo continuam roteadas temporariamente apenas para informar que o fl
 - `/retirada`;
 - `/sucesso`.
 
-Elas não devem voltar a concentrar picking ou escrituração de estoque.
+## WhatsApp em DEV
+
+O WhatsApp continua complementar:
+
+```text
+WHATSAPP NOTIFICA
+HVB MOBILE OPERA
+API ESCRITURA
+```
+
+O protótipo **não envia mensagens automaticamente** e não possui provedor oficial configurado. Ele apenas abre `wa.me` com a lista pré-preenchida para que o operador confirme manualmente o envio.
+
+O número de teste é armazenado apenas no `localStorage` do navegador. Não deve ser hardcoded no repositório.
+
+Há duas formas de configurar:
+
+1. campo `WhatsApp • DEV` na interface; ou
+2. abrir uma vez o Terminal com `?whatsapp=<numero_em_formato_internacional>`.
+
+O parâmetro é removido da URL após ser salvo localmente.
+
+A mensagem contém ordem e materiais/quantidades. Evitar dados clínicos desnecessários.
 
 ## Arquitetura técnica do protótipo
 
@@ -138,19 +160,7 @@ MockAdapter
 store mock em memória
 ```
 
-O `IntegrationAdapter` abstrai operações de identidade e acesso:
-
-- `identifyCredential`;
-- `createBiometricEvidence`;
-- `verifyIdentity`;
-- `getPendingOrders`;
-- `startAccessSession`;
-- `registerAccessEvent`;
-- `getAccessSession`;
-- `getTerminalDescriptor`;
-- `listAudit`.
-
-O mock **não é fonte de verdade** e não deve evoluir para banco definitivo. A persistência real pertence ao HVB Sistema/PostgreSQL e será acessada apenas pela API.
+O `IntegrationAdapter` permanece como fronteira para substituição posterior pelo HVB Sistema.
 
 ## Autenticação alvo
 
@@ -163,24 +173,9 @@ DESFire EV3
 → AuthSession
 ```
 
-O processamento biométrico deve preferencialmente ocorrer localmente. A UI não deve ser raiz de confiança.
-
-No DEV, `createBiometricEvidence()` representa um componente local confiável **simulado**. Em produção, o marcador DEV deverá ser substituído por mecanismo real de attestation/assinatura e proteção anti-replay.
-
-## Idempotência e rede instável
-
-Comandos de efeito usam `command_id`:
-
-- criação de `AccessSession`;
-- registro de evento físico.
-
-Repetição exata do mesmo comando deve devolver o resultado original sem duplicar sessão/evento. Reutilização do mesmo `command_id` com payload diferente deve ser rejeitada.
-
-O cliente deve persistir o envelope original ao fazer retry; recriar timestamps/metadados com o mesmo `command_id` é conflito de idempotência.
+A UI não é raiz de confiança. Em DEV, a evidência é simulada; em produção deverá haver attestation/assinatura e proteção anti-replay.
 
 ## Estoque sensível
-
-Fluxo alvo:
 
 ```text
 autenticação
@@ -193,57 +188,49 @@ autenticação
 → acesso ativo
 ```
 
-Porta e armário não devem ser liberados simultaneamente sem necessidade.
+Selecionar várias ordens cria uma única sessão de acesso. Se **qualquer** uma das ordens contiver item sensível, toda a sessão exige permissão de acesso sensível.
 
-Offline + estoque sensível permanece `FAIL_CLOSED` por padrão até existir procedimento formal de contingência aprovado pelo HVB.
+Offline + estoque sensível permanece `FAIL_CLOSED` por padrão.
 
-## Teste do núcleo DEV
-
-Há cobertura sem dependências externas usando o runner nativo do Node:
+## Testes do núcleo DEV
 
 ```bash
 node --test tests/store.test.js
 ```
 
-O teste verifica:
+A suíte cobre:
 
-- autenticação credencial → evidence → AuthSession;
-- bloqueio de acesso sensível sem permissão;
-- idempotência de criação de sessão;
-- sequência física;
-- mudança da ordem para `EM_SEPARACAO` apenas após entrada;
-- ausência de escrituração de consumo no Terminal.
+- pelo menos dez ordens sintéticas pendentes;
+- presença da lista de materiais no contrato das ordens;
+- sessão vinculada a múltiplas ordens;
+- idempotência;
+- `ENTRY_CONFIRMED → EM_SEPARACAO` para todas as ordens da sessão;
+- bloqueio de item sensível sem permissão;
+- ausência de `STOCK_CONSUMED` no Terminal.
 
 ## Segurança do DEV
 
 - dados 100% fictícios;
 - nenhum segredo real;
+- nenhum número pessoal hardcoded no repositório;
 - nenhum banco real no frontend;
-- nenhum acesso ao SimplesVet ou sistemas do hospital;
+- nenhum acesso ao SimplesVet;
 - `noindex`, `nofollow`, `noarchive`;
 - challenges e sessões temporárias;
 - eventos append-only no mock;
 - nenhum movimento real de estoque.
 
-## Identidade visual
+## Documentação vigente
 
-- Azul HVB: `#0A3983`;
-- Ciano HVB: `#25B0E6`;
-- Branco: `#FFFFFF`;
-- Tipografia operacional: Nunito.
+- `docs/TERMINAL-ARQUITETURA-V2.md`
+- `docs/DELTA-IMPLEMENTACAO-V2.md`
+- `docs/AUTH-EVIDENCE-CONTRACT-V1.md`
+- `docs/TERMINAL-CORE-CONTRACT-V1.md`
+- `docs/OFFLINE-EDGE-V1.md`
+- `docs/INTEGRACAO-HVB-SISTEMA-DELTA-V2.md`
+- `docs/HANDOFF-HVB-SISTEMA-TERMINAL-V2.md`
+- `docs/TESTE-MULTI-ORDEM-WHATSAPP-DEV.md`
 
-Legibilidade e segurança operacional prevalecem sobre ornamentação.
+## Limites
 
-## Próximo marco
-
-O P0 técnico do Terminal já contém a abstração de autenticação/evidência, sessões, eventos físicos e idempotência em modo DEV.
-
-A próxima mudança estrutural relevante depende da estabilização dos contratos do **HVB Sistema** para substituir o `MockAdapter` por integração real. Até lá, ainda podem evoluir nesta branch, sem autorização externa adicional:
-
-- testes locais do contrato mock;
-- tratamento explícito de falha de conectividade/fail-closed;
-- documentação de offline/edge;
-- ergonomia do fluxo DEV;
-- validações que não dependam de hardware ou dados reais.
-
-Não avançar sem autorização específica para hardware real, dados reais, deploy de produção, domínio/DNS ou integração com sistemas externos.
+Não avançar sem autorização específica para hardware real, dados reais, deploy de produção, domínio/DNS, provedor de WhatsApp ou integração com sistemas externos.
