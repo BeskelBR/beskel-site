@@ -1,7 +1,7 @@
 "use strict";
 
-const store = require("../server/store");
 const { MockAdapter } = require("../server/integration");
+const store = require("../server/store");
 const adapter = new MockAdapter();
 
 function send(res, status, payload) {
@@ -22,61 +22,55 @@ module.exports = async function handler(req, res) {
   try {
     if (req.method === "GET") {
       const action = String(req.query?.action || "");
-      if (action === "attendances") return send(res, 200, { ok: true, data: adapter.getActiveAttendances() });
-      if (action === "attendance") return send(res, 200, { ok: true, data: adapter.getAttendance(req.query?.id) });
-      if (action === "items") return send(res, 200, { ok: true, data: adapter.getProducts() });
-      if (action === "item") return send(res, 200, { ok: true, data: adapter.getProduct(req.query?.id) });
-      if (action === "audit") return send(res, 200, { ok: true, data: store.listAudit() });
-      return send(res, 400, { ok: false, error: "INVALID_ACTION" });
+      if (action === "pendingOrders") return send(res, 200, { ok:true, data:adapter.getPendingOrders(String(req.query?.auth_session_id || "")) });
+      if (action === "accessSession") return send(res, 200, { ok:true, data:adapter.getAccessSession(String(req.query?.id || "")) });
+      if (action === "audit") return send(res, 200, { ok:true, data:adapter.listAudit() });
+      if (action === "terminal") return send(res, 200, { ok:true, data:{ terminal_id:store.TERMINAL_ID, mode:"ACCESS_TERMINAL_V2", simulated_hardware:true } });
+      return send(res, 400, { ok:false, error:"INVALID_ACTION" });
     }
 
     if (req.method === "POST") {
       const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
       const action = String(body.action || "");
 
-      if (action === "auth") {
-        const token = String(body.token || "");
-        const credential = store.findCredentialByToken(token);
-        if (!credential || credential.status !== "active") {
-          return send(res, 401, { ok: false, error: "CREDENTIAL_NOT_RECOGNIZED" });
-        }
-        const employee = store.findEmployee(credential.employee_id);
-        if (!employee || !employee.active) {
-          return send(res, 401, { ok: false, error: "CREDENTIAL_NOT_RECOGNIZED" });
-        }
-        const session = store.createSession(credential);
-        return send(res, 200, {
-          ok: true,
-          data: {
-            session_id: session.session_id,
-            expires_at: session.expires_at,
-            credential_id: credential.credential_id,
-            employee
-          }
-        });
+      if (action === "identifyCredential") {
+        return send(res, 200, { ok:true, data:adapter.identifyCredential(String(body.token || ""), String(body.terminal_id || store.TERMINAL_ID)) });
       }
-
-      if (action === "registerConsumption") {
-        const session = store.getSession(String(body.session_id || ""));
-        if (!session) return send(res, 401, { ok: false, error: "SESSION_EXPIRED" });
-        const transaction = adapter.registerConsumption({
-          session,
-          attendanceId: body.attendance_id,
-          itemId: body.item_id,
-          quantity: Number(body.quantity),
-          device: String(body.device || "iphone-demo")
-        });
-        return send(res, 200, { ok: true, data: transaction });
+      if (action === "verifyIdentity") {
+        return send(res, 200, { ok:true, data:adapter.verifyIdentity({
+          challengeId:String(body.challenge_id || ""),
+          faceMatch:body.face_match === true,
+          liveness:body.liveness === true,
+          terminalId:String(body.terminal_id || store.TERMINAL_ID)
+        }) });
       }
-
-      return send(res, 400, { ok: false, error: "INVALID_ACTION" });
+      if (action === "startAccessSession") {
+        return send(res, 200, { ok:true, data:adapter.startAccessSession({
+          authSessionId:String(body.auth_session_id || ""),
+          orderIds:Array.isArray(body.order_ids) ? body.order_ids : [],
+          terminalId:String(body.terminal_id || store.TERMINAL_ID)
+        }) });
+      }
+      if (action === "registerAccessEvent") {
+        return send(res, 200, { ok:true, data:adapter.registerAccessEvent({
+          accessSessionId:String(body.access_session_id || ""),
+          eventType:String(body.event_type || ""),
+          metadata:body.metadata && typeof body.metadata === "object" ? body.metadata : {}
+        }) });
+      }
+      return send(res, 400, { ok:false, error:"INVALID_ACTION" });
     }
 
-    return send(res, 405, { ok: false, error: "METHOD_NOT_ALLOWED" });
+    return send(res, 405, { ok:false, error:"METHOD_NOT_ALLOWED" });
   } catch (error) {
-    const known = ["ATTENDANCE_NOT_FOUND", "ITEM_NOT_FOUND", "INVALID_QUANTITY", "INSUFFICIENT_STOCK"];
-    if (known.includes(error.message)) return send(res, 400, { ok: false, error: error.message });
+    const known = [
+      "CREDENTIAL_NOT_RECOGNIZED","ACCESS_NOT_PERMITTED","AUTH_CHALLENGE_EXPIRED",
+      "BIOMETRIC_VERIFICATION_FAILED","AUTH_SESSION_EXPIRED","TERMINAL_MISMATCH",
+      "ORDER_REQUIRED","ORDER_NOT_AVAILABLE","SENSITIVE_ACCESS_DENIED",
+      "ACCESS_SESSION_NOT_FOUND","ACCESS_SESSION_INACTIVE","INVALID_ACCESS_SEQUENCE"
+    ];
+    if (known.includes(error.message)) return send(res, 400, { ok:false, error:error.message });
     console.error(error);
-    return send(res, 500, { ok: false, error: "INTERNAL_ERROR" });
+    return send(res, 500, { ok:false, error:"INTERNAL_ERROR" });
   }
 };
