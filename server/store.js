@@ -28,12 +28,32 @@ const credentials = [
 
 const patients = [
   { patient_id:"pat_001", name:"Thor", species:"Cão" },
-  { patient_id:"pat_002", name:"Luna", species:"Gato" }
+  { patient_id:"pat_002", name:"Luna", species:"Gato" },
+  { patient_id:"pat_003", name:"Mel", species:"Cão" },
+  { patient_id:"pat_004", name:"Bob", species:"Cão" },
+  { patient_id:"pat_005", name:"Nina", species:"Gato" },
+  { patient_id:"pat_006", name:"Zeus", species:"Cão" },
+  { patient_id:"pat_007", name:"Amora", species:"Gato" },
+  { patient_id:"pat_008", name:"Fred", species:"Cão" },
+  { patient_id:"pat_009", name:"Maya", species:"Gato" },
+  { patient_id:"pat_010", name:"Chico", species:"Cão" },
+  { patient_id:"pat_011", name:"Bel", species:"Gato" },
+  { patient_id:"pat_012", name:"Kira", species:"Cão" }
 ];
 
 const episodes = [
   { episode_id:"ATD-001842", patient_id:"pat_001", status:"active" },
-  { episode_id:"ATD-001845", patient_id:"pat_002", status:"active" }
+  { episode_id:"ATD-001845", patient_id:"pat_002", status:"active" },
+  { episode_id:"ATD-001848", patient_id:"pat_003", status:"active" },
+  { episode_id:"ATD-001850", patient_id:"pat_004", status:"active" },
+  { episode_id:"ATD-001853", patient_id:"pat_005", status:"active" },
+  { episode_id:"ATD-001855", patient_id:"pat_006", status:"active" },
+  { episode_id:"ATD-001858", patient_id:"pat_007", status:"active" },
+  { episode_id:"ATD-001860", patient_id:"pat_008", status:"active" },
+  { episode_id:"ATD-001862", patient_id:"pat_009", status:"active" },
+  { episode_id:"ATD-001865", patient_id:"pat_010", status:"active" },
+  { episode_id:"ATD-001868", patient_id:"pat_011", status:"active" },
+  { episode_id:"ATD-001871", patient_id:"pat_012", status:"active" }
 ];
 
 const withdrawalOrders = [
@@ -46,7 +66,61 @@ const withdrawalOrders = [
   ]},
   { order_id:"OR-2026-001845-01", episode_id:"ATD-001845", requester_employee_id:"emp_002", status:"AGUARDANDO_RETIRADA", items:[
     { description:"Gaze estéril", quantity:2, sensitive:false },
-    { description:"Luva cirúrgica", quantity:1, sensitive:false }
+    { description:"Luva cirúrgica", quantity:1, sensitive:false },
+    { description:"Seringa 10 mL", quantity:2, sensitive:false }
+  ]},
+  { order_id:"OR-2026-001848-01", episode_id:"ATD-001848", requester_employee_id:"emp_002", status:"AGUARDANDO_RETIRADA", items:[
+    { description:"Cateter 24G", quantity:1, sensitive:false },
+    { description:"Esparadrapo", quantity:1, sensitive:false },
+    { description:"Soro 250 mL", quantity:1, sensitive:false }
+  ]},
+  { order_id:"OR-2026-001850-01", episode_id:"ATD-001850", requester_employee_id:"emp_002", status:"AGUARDANDO_RETIRADA", items:[
+    { description:"Agulha 25 x 7", quantity:3, sensitive:false },
+    { description:"Seringa 3 mL", quantity:3, sensitive:false },
+    { description:"Algodão", quantity:1, sensitive:false }
+  ]},
+  { order_id:"OR-2026-001853-01", episode_id:"ATD-001853", requester_employee_id:"emp_002", status:"AGUARDANDO_RETIRADA", items:[
+    { description:"Cateter 22G", quantity:1, sensitive:false },
+    { description:"Medicamento Y", quantity:2, sensitive:true },
+    { description:"Seringa 5 mL", quantity:2, sensitive:false },
+    { description:"Álcool 70%", quantity:1, sensitive:false }
+  ]},
+  { order_id:"OR-2026-001855-01", episode_id:"ATD-001855", requester_employee_id:"emp_002", status:"AGUARDANDO_RETIRADA", items:[
+    { description:"Equipo macrogotas", quantity:1, sensitive:false },
+    { description:"Soro 1000 mL", quantity:1, sensitive:false },
+    { description:"Extensor", quantity:1, sensitive:false }
+  ]},
+  { order_id:"OR-2026-001858-01", episode_id:"ATD-001858", requester_employee_id:"emp_002", status:"AGUARDANDO_RETIRADA", items:[
+    { description:"Gaze estéril", quantity:4, sensitive:false },
+    { description:"Atadura 10 cm", quantity:2, sensitive:false },
+    { description:"Luva procedimento", quantity:2, sensitive:false }
+  ]},
+  { order_id:"OR-2026-001860-01", episode_id:"ATD-001860", requester_employee_id:"emp_002", status:"AGUARDANDO_RETIRADA", items:[
+    { description:"Medicamento Z", quantity:1, sensitive:true },
+    { description:"Seringa 1 mL", quantity:2, sensitive:false },
+    { description:"Agulha 13 x 4,5", quantity:2, sensitive:false }
+  ]},
+  { order_id:"OR-2026-001862-01", episode_id:"ATD-001862", requester_employee_id:"emp_002", status:"AGUARDANDO_RETIRADA", items:[
+    { description:"Cateter 20G", quantity:1, sensitive:false },
+    { description:"Soro 500 mL", quantity:2, sensitive:false },
+    { description:"Equipo", quantity:2, sensitive:false },
+    { description:"Torneira 3 vias", quantity:1, sensitive:false }
+  ]},
+  { order_id:"OR-2026-001865-01", episode_id:"ATD-001865", requester_employee_id:"emp_002", status:"AGUARDANDO_RETIRADA", items:[
+    { description:"Compressa estéril", quantity:2, sensitive:false },
+    { description:"Clorexidina", quantity:1, sensitive:false },
+    { description:"Lâmina de bisturi", quantity:1, sensitive:false }
+  ]},
+  { order_id:"OR-2026-001868-01", episode_id:"ATD-001868", requester_employee_id:"emp_002", status:"AGUARDANDO_RETIRADA", items:[
+    { description:"Seringa 20 mL", quantity:1, sensitive:false },
+    { description:"Sonda", quantity:1, sensitive:false },
+    { description:"Gel lubrificante", quantity:1, sensitive:false }
+  ]},
+  { order_id:"OR-2026-001871-01", episode_id:"ATD-001871", requester_employee_id:"emp_002", status:"AGUARDANDO_RETIRADA", items:[
+    { description:"Medicamento Controlado A", quantity:1, sensitive:true },
+    { description:"Seringa 3 mL", quantity:1, sensitive:false },
+    { description:"Agulha 25 x 7", quantity:1, sensitive:false },
+    { description:"Gaze estéril", quantity:2, sensitive:false }
   ]}
 ];
 
@@ -79,6 +153,11 @@ function orderSummary(value) {
     item_count:value.items.length,
     total_units:value.items.reduce((sum,item) => sum + Number(item.quantity || 0), 0),
     has_sensitive_items:hasSensitive(value),
+    items:value.items.map(item => ({
+      description:item.description,
+      quantity:item.quantity,
+      sensitive:item.sensitive === true
+    })),
     patient,
     requester:publicEmployee(employee(value.requester_employee_id))
   };
@@ -156,8 +235,6 @@ function identifyCredential(token, terminalId = TERMINAL_ID) {
   };
 }
 
-// DEV only: represents a trusted local biometric/PAD component. In production this
-// evidence must come from a device-bound component and be cryptographically attested.
 function createBiometricEvidence({ challengeId, terminalId = TERMINAL_ID, deviceId = BIOMETRIC_DEVICE_ID, faceMatch, liveness }) {
   const trustedTerminal = requireTrustedTerminal(terminalId);
   if (!trustedTerminal.trusted_device_ids.includes(deviceId)) throw new Error("UNTRUSTED_DEVICE");
