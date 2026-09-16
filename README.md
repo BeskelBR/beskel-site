@@ -2,16 +2,43 @@
 
 Protótipo de desenvolvimento do Terminal físico do Hospital Veterinário Brasília.
 
-> **Arquitetura funcional vigente:** o Terminal não é mais concebido como estação completa de picking/estoque. Seu papel aprovado é **identidade, autenticação, autorização e controle de acesso físico**. O picking será realizado pelo **HVB Mobile** e a escrituração será responsabilidade da **API do HVB Sistema**.
+> **Arquitetura funcional vigente:** o Terminal é um **Terminal de Acesso**. Seu papel é identidade, autenticação, autorização e participação no controle de acesso físico. O picking será realizado pelo **HVB Mobile** e a escrituração será responsabilidade da **API do HVB Sistema**.
 
-A implementação atual ainda representa o protótipo anterior de controle de materiais e permanece preservada, sem reescrita, até que os contratos mínimos do HVB Sistema estejam estáveis.
+## Status atual
+
+A migração funcional para a arquitetura v2 **foi iniciada em 16/09/2026** em modo exclusivamente DEV/mock.
+
+Já foram migrados no protótipo:
+
+- papel da UI: `Controle de Materiais` → `Terminal de Acesso`;
+- autenticação em duas etapas: credencial DESFire simulada + face 1:1/PAD simulados;
+- consulta de Ordens de Retirada pendentes;
+- criação de `AccessSession` temporária;
+- diferenciação de ordem comum e ordem com item sensível;
+- sequência simulada de porta/entrada/armário sensível;
+- auditoria append-only de eventos de identidade e acesso;
+- depreciação das telas legadas de picking;
+- remoção da escrita de consumo/estoque do contrato funcional do Terminal.
+
+Ainda **não** estão implementados neste protótipo:
+
+- DESFire físico;
+- câmera/biometria/liveness reais;
+- assinatura/attestation de evidência biométrica;
+- controlador de porta/armário e sensores reais;
+- HVB Mobile;
+- API real do HVB Sistema;
+- PostgreSQL real;
+- contingência offline/edge;
+- WhatsApp;
+- movimentação real de estoque, custo ou faturamento.
+
+Nenhum dado ou sistema real do HVB é acessado.
 
 ## Documentação vigente
 
-- `docs/TERMINAL-ARQUITETURA-V2.md` — protocolo funcional aprovado do Terminal de Acesso;
-- `docs/DELTA-IMPLEMENTACAO-V2.md` — impacto sobre a implementação atual e plano de migração.
-
-Em caso de divergência funcional entre este README, o código legado do MVP e a documentação v2, **a arquitetura v2 prevalece como direção de projeto**, embora ainda não esteja implementada.
+- `docs/TERMINAL-ARQUITETURA-V2.md` — protocolo funcional aprovado;
+- `docs/DELTA-IMPLEMENTACAO-V2.md` — impacto sobre o MVP anterior e plano de migração.
 
 ## Separação de responsabilidades
 
@@ -21,7 +48,8 @@ HVB SISTEMA / CONSULTÓRIO
 
 TERMINAL DE ACESSO HVB
 → identifica/autentica
-→ autoriza sessão
+→ consulta ordens
+→ cria sessão de acesso
 → participa do controle físico
 
 HVB MOBILE
@@ -47,57 +75,46 @@ CONSULTÓRIO SOLICITA
 → API ESCRITURA
 ```
 
-## Autenticação prevista
-
-Fluxo alvo:
+## Fluxo DEV atual
 
 ```text
-DESFire EV3
-→ reconhecimento facial 1:1
-→ PAD/liveness
-→ validação da API
+repouso
+→ credencial simulada
+→ face 1:1 + PAD simulados
+→ ordens pendentes
+→ seleção da ordem
 → AccessSession
-```
-
-O processamento biométrico deve preferencialmente ocorrer localmente. A API não deve confiar em uma simples flag enviada pelo cliente; evidências precisam ser vinculadas ao terminal/dispositivo e protegidas contra replay.
-
-## Estoque sensível
-
-O controle físico deve liberar barreiras em sequência apropriada:
-
-```text
-autenticação
 → porta autorizada
-→ entrada confirmada
-→ porta fechada
-→ armário sensível autorizado [se necessário]
-→ armário fechado
-→ saída
-→ sessão encerrada
+→ porta aberta [DEV]
+→ entrada confirmada [DEV]
+→ porta fechada [DEV]
+→ armário sensível [se aplicável, DEV]
+→ acesso ativo
 ```
 
-Não liberar porta e armário simultaneamente sem necessidade.
+A transição da ordem para `EM_SEPARACAO` ocorre apenas em `ENTRY_CONFIRMED`, não na mera autorização da porta.
 
-Offline + estoque sensível deve permanecer `FAIL_CLOSED` por padrão, salvo procedimento formal de contingência posteriormente aprovado pelo HVB.
+## Rotas v2
 
-## Estado atual do código
-
-O código desta branch ainda implementa o **MVP anterior**, criado para validar o fluxo operacional de materiais com dados fictícios.
-
-### Rotas legadas atuais
-
-- `/` — repouso/NFC;
-- `/auth/[token]` — autenticação de demonstração;
-- `/atendimentos` — seleção de PET/atendimento;
-- `/atendimento/[id]` — atendimento selecionado;
-- `/materiais` — catálogo de materiais;
-- `/retirada` — quantidade e revisão;
-- `/sucesso` — retirada simulada concluída;
+- `/` — repouso/credencial;
+- `/auth/:token` — identificação da credencial e autenticação simulada;
+- `/ordens` — consulta de ordens pendentes;
+- `/acesso/:id` — sessão de acesso e simulação de eventos físicos;
 - `/admin/auditoria` — auditoria somente leitura.
 
-As rotas de atendimento/material/retirada estão **depreciadas conceitualmente** para a arquitetura v2, mas ainda não foram removidas.
+### Rotas legadas
 
-## Arquitetura técnica atual do protótipo
+As rotas abaixo continuam roteadas temporariamente apenas para informar que o fluxo mudou de lugar:
+
+- `/atendimentos`;
+- `/atendimento/:id`;
+- `/materiais`;
+- `/retirada`;
+- `/sucesso`.
+
+Elas não devem voltar a concentrar picking ou escrituração de estoque.
+
+## Arquitetura técnica do protótipo
 
 ```text
 UI
@@ -111,61 +128,70 @@ MockAdapter
 store mock em memória
 ```
 
-Esse desacoplamento continua válido e deve ser preservado. O contrato do adapter é que será migrado futuramente de operações de picking/consumo para operações de identidade, ordens pendentes, AccessSession e eventos de acesso.
+O `IntegrationAdapter` agora abstrai operações de identidade e acesso:
 
-Nenhuma integração com SimplesVet existe nesta versão.
+- `identifyCredential`;
+- `verifyIdentity`;
+- `getPendingOrders`;
+- `startAccessSession`;
+- `registerAccessEvent`;
+- `getAccessSession`;
+- `listAudit`.
 
-## Persistência atual
+O mock **não é fonte de verdade** e não deve evoluir para banco definitivo. A persistência real pertence ao HVB Sistema/PostgreSQL e será acessada apenas pela API.
 
-O MVP usa armazenamento em memória no backend serverless. O objetivo é apenas demonstração.
+## Autenticação alvo
 
-O estado pode reiniciar após cold start/deploy. O `store` atual **não deve evoluir para banco definitivo** nem ser considerado fonte oficial de estoque.
+```text
+DESFire EV3
+→ face 1:1
+→ PAD/liveness
+→ evidência autenticada do dispositivo
+→ validação da API
+→ AccessSession
+```
 
-A persistência real pertence ao HVB Sistema/PostgreSQL, acessada somente pela API.
+O processamento biométrico deve preferencialmente ocorrer localmente. A implementação real não poderá confiar em uma simples flag `face_match=true`; o mock usa flags apenas para demonstrar o fluxo de estados.
 
-## Segurança do MVP
+## Estoque sensível
 
-- `noindex`, `nofollow`, `noarchive` no ambiente DEV;
-- tokens de demonstração não sequenciais e sem dados pessoais reais;
-- sessão temporária;
-- nenhum segredo real no repositório;
-- nenhum banco real exposto ao frontend;
-- nenhum acesso a sistemas do HVB;
-- dados 100% fictícios.
+Fluxo alvo:
+
+```text
+autenticação
+→ porta autorizada
+→ porta abre
+→ sensor confirma entrada
+→ porta fecha
+→ armário sensível autorizado [se necessário]
+→ armário abre/fecha
+→ acesso ativo
+```
+
+Porta e armário não devem ser liberados simultaneamente sem necessidade.
+
+Offline + estoque sensível permanece `FAIL_CLOSED` por padrão até existir procedimento formal de contingência aprovado pelo HVB.
+
+## Segurança do DEV
+
+- dados 100% fictícios;
+- nenhum segredo real;
+- nenhum banco real no frontend;
+- nenhum acesso ao SimplesVet ou sistemas do hospital;
+- `noindex`, `nofollow`, `noarchive`;
+- sessões temporárias;
+- eventos append-only no mock;
+- nenhum movimento real de estoque.
 
 ## Identidade visual
-
-A implementação utiliza os assets oficiais fornecidos pelo projeto HVB e os tokens institucionais:
 
 - Azul HVB: `#0A3983`;
 - Ciano HVB: `#25B0E6`;
 - Branco: `#FFFFFF`;
 - Tipografia operacional: Nunito.
 
-Cores de sucesso/alerta/erro permanecem funcionais. Legibilidade e segurança operacional prevalecem sobre ornamentação.
+Legibilidade e segurança operacional prevalecem sobre ornamentação.
 
-## Ambiente
+## Próximo marco
 
-Planejado para `hvb-dev.beskel.com.br` após validação do preview e autorização específica de configuração de domínio.
-
-O site institucional da BESKEL na branch `main` não deve ser alterado por este projeto.
-
-## Regra de congelamento da implementação
-
-O Terminal permanece **congelado para reescrita funcional** até que o HVB Sistema entregue contratos suficientemente estáveis para:
-
-- identidade/credencial/dispositivo;
-- Ordens de Retirada pendentes;
-- autenticação/evidências;
-- `AccessSession`;
-- autorização/eventos de acesso;
-- auditoria;
-- regras mínimas de contingência.
-
-Até então, preservar o protótipo atual e evoluir apenas documentação/contratos quando necessário.
-
-## Migração futura
-
-Quando os contratos do HVB Sistema estiverem estáveis, o frontend será migrado para o papel de Terminal de Acesso sem reutilizar o mock atual como fonte de verdade.
-
-A BESKEL é o ambiente de desenvolvimento/demonstração; a arquitetura funcional definitiva deve poder migrar integralmente para infraestrutura própria do HVB.
+A próxima etapa do Terminal depende da estabilização dos contratos do HVB Sistema para substituir o `MockAdapter` por uma integração real. Até lá, o desenvolvimento permitido nesta branch deve permanecer limitado ao **protótipo v2 isolado**, sem hardware real, dados reais ou escrita em sistemas externos.
