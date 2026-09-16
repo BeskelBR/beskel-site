@@ -12,10 +12,15 @@ Já foram migrados no protótipo:
 
 - papel da UI: `Controle de Materiais` → `Terminal de Acesso`;
 - autenticação em duas etapas: credencial DESFire simulada + face 1:1/PAD simulados;
+- challenge curto e de uso único para autenticação;
+- evidência biométrica/PAD referenciada por `evidence_id`;
+- vínculo da evidência a terminal/dispositivo DEV confiável;
 - consulta de Ordens de Retirada pendentes;
 - criação de `AccessSession` temporária;
 - diferenciação de ordem comum e ordem com item sensível;
 - sequência simulada de porta/entrada/armário sensível;
+- comandos de sessão/eventos com `command_id` para idempotência;
+- registro separado de `source_occurred_at` e horário recebido pelo servidor;
 - auditoria append-only de eventos de identidade e acesso;
 - depreciação das telas legadas de picking;
 - remoção da escrita de consumo/estoque do contrato funcional do Terminal.
@@ -24,7 +29,7 @@ Ainda **não** estão implementados neste protótipo:
 
 - DESFire físico;
 - câmera/biometria/liveness reais;
-- assinatura/attestation de evidência biométrica;
+- assinatura/attestation criptográfica real da evidência biométrica;
 - controlador de porta/armário e sensores reais;
 - HVB Mobile;
 - API real do HVB Sistema;
@@ -38,7 +43,9 @@ Nenhum dado ou sistema real do HVB é acessado.
 ## Documentação vigente
 
 - `docs/TERMINAL-ARQUITETURA-V2.md` — protocolo funcional aprovado;
-- `docs/DELTA-IMPLEMENTACAO-V2.md` — impacto sobre o MVP anterior e plano de migração.
+- `docs/DELTA-IMPLEMENTACAO-V2.md` — impacto sobre o MVP anterior e plano de migração;
+- `docs/AUTH-EVIDENCE-CONTRACT-V1.md` — contrato conceitual de evidência de autenticação;
+- `docs/TERMINAL-CORE-CONTRACT-V1.md` — fronteira funcional Terminal ↔ HVB Sistema.
 
 ## Separação de responsabilidades
 
@@ -80,10 +87,13 @@ CONSULTÓRIO SOLICITA
 ```text
 repouso
 → credencial simulada
+→ challenge
 → face 1:1 + PAD simulados
+→ evidence_id vinculado ao dispositivo DEV
+→ AuthSession
 → ordens pendentes
 → seleção da ordem
-→ AccessSession
+→ AccessSession idempotente
 → porta autorizada
 → porta aberta [DEV]
 → entrada confirmada [DEV]
@@ -128,14 +138,16 @@ MockAdapter
 store mock em memória
 ```
 
-O `IntegrationAdapter` agora abstrai operações de identidade e acesso:
+O `IntegrationAdapter` abstrai operações de identidade e acesso:
 
 - `identifyCredential`;
+- `createBiometricEvidence`;
 - `verifyIdentity`;
 - `getPendingOrders`;
 - `startAccessSession`;
 - `registerAccessEvent`;
 - `getAccessSession`;
+- `getTerminalDescriptor`;
 - `listAudit`.
 
 O mock **não é fonte de verdade** e não deve evoluir para banco definitivo. A persistência real pertence ao HVB Sistema/PostgreSQL e será acessada apenas pela API.
@@ -148,10 +160,23 @@ DESFire EV3
 → PAD/liveness
 → evidência autenticada do dispositivo
 → validação da API
-→ AccessSession
+→ AuthSession
 ```
 
-O processamento biométrico deve preferencialmente ocorrer localmente. A implementação real não poderá confiar em uma simples flag `face_match=true`; o mock usa flags apenas para demonstrar o fluxo de estados.
+O processamento biométrico deve preferencialmente ocorrer localmente. A UI não deve ser raiz de confiança.
+
+No DEV, `createBiometricEvidence()` representa um componente local confiável **simulado**. Em produção, o marcador DEV deverá ser substituído por mecanismo real de attestation/assinatura e proteção anti-replay.
+
+## Idempotência e rede instável
+
+Comandos de efeito usam `command_id`:
+
+- criação de `AccessSession`;
+- registro de evento físico.
+
+Repetição exata do mesmo comando deve devolver o resultado original sem duplicar sessão/evento. Reutilização do mesmo `command_id` com payload diferente deve ser rejeitada.
+
+O cliente deve persistir o envelope original ao fazer retry; recriar timestamps/metadados com o mesmo `command_id` é conflito de idempotência.
 
 ## Estoque sensível
 
@@ -172,6 +197,23 @@ Porta e armário não devem ser liberados simultaneamente sem necessidade.
 
 Offline + estoque sensível permanece `FAIL_CLOSED` por padrão até existir procedimento formal de contingência aprovado pelo HVB.
 
+## Teste do núcleo DEV
+
+Há cobertura sem dependências externas usando o runner nativo do Node:
+
+```bash
+node --test tests/store.test.js
+```
+
+O teste verifica:
+
+- autenticação credencial → evidence → AuthSession;
+- bloqueio de acesso sensível sem permissão;
+- idempotência de criação de sessão;
+- sequência física;
+- mudança da ordem para `EM_SEPARACAO` apenas após entrada;
+- ausência de escrituração de consumo no Terminal.
+
 ## Segurança do DEV
 
 - dados 100% fictícios;
@@ -179,7 +221,7 @@ Offline + estoque sensível permanece `FAIL_CLOSED` por padrão até existir pro
 - nenhum banco real no frontend;
 - nenhum acesso ao SimplesVet ou sistemas do hospital;
 - `noindex`, `nofollow`, `noarchive`;
-- sessões temporárias;
+- challenges e sessões temporárias;
 - eventos append-only no mock;
 - nenhum movimento real de estoque.
 
@@ -194,4 +236,14 @@ Legibilidade e segurança operacional prevalecem sobre ornamentação.
 
 ## Próximo marco
 
-A próxima etapa do Terminal depende da estabilização dos contratos do HVB Sistema para substituir o `MockAdapter` por uma integração real. Até lá, o desenvolvimento permitido nesta branch deve permanecer limitado ao **protótipo v2 isolado**, sem hardware real, dados reais ou escrita em sistemas externos.
+O P0 técnico do Terminal já contém a abstração de autenticação/evidência, sessões, eventos físicos e idempotência em modo DEV.
+
+A próxima mudança estrutural relevante depende da estabilização dos contratos do **HVB Sistema** para substituir o `MockAdapter` por integração real. Até lá, ainda podem evoluir nesta branch, sem autorização externa adicional:
+
+- testes locais do contrato mock;
+- tratamento explícito de falha de conectividade/fail-closed;
+- documentação de offline/edge;
+- ergonomia do fluxo DEV;
+- validações que não dependam de hardware ou dados reais.
+
+Não avançar sem autorização específica para hardware real, dados reais, deploy de produção, domínio/DNS ou integração com sistemas externos.
