@@ -11,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/system.css">
   <link rel="stylesheet" href="assets/system-v2.css">
+  <link rel="stylesheet" href="assets/system-v3.css">
 </head>
 <body>
   <a class="skip-link" href="#main">Pular para o conteúdo</a>
@@ -123,8 +124,22 @@
             <article class="status-card"><span>API</span><strong id="health-card">Verificando</strong><small>Disponibilidade do serviço</small></article>
             <article class="status-card"><span>Banco</span><strong id="ready-card">Verificando</strong><small>Schema e conexão</small></article>
             <article class="status-card"><span>Ambiente</span><strong>DEV</strong><small>Sem operação assistencial real</small></article>
-            <article class="status-card"><span>Frontend</span><strong>MVP 2</strong><small>Consultas organizadas por módulo</small></article>
+            <article class="status-card"><span>Frontend</span><strong>MVP 3</strong><small>Jornada clínica contextual</small></article>
           </div>
+
+          <div class="section-head clinical-launch-head">
+            <div><span class="eyebrow">Jornada clínica</span><h3>Localizar paciente</h3><p>Abra o contexto longitudinal antes de navegar pelas rotinas relacionadas.</p></div>
+            <button class="secondary-btn" id="refresh-patient-hub" type="button">Atualizar pacientes</button>
+          </div>
+          <section class="patient-hub" aria-labelledby="patient-hub-title">
+            <div class="patient-hub-toolbar">
+              <label for="patient-hub-search"><span id="patient-hub-title">Busca rápida</span><input id="patient-hub-search" type="search" placeholder="Nome, espécie ou identificador"></label>
+              <span id="patient-hub-count">Aguardando sessão</span>
+            </div>
+            <div id="patient-hub-results" class="patient-hub-results" aria-live="polite">
+              <div class="patient-hub-empty">Entre no sistema para consultar pacientes disponíveis à sua credencial.</div>
+            </div>
+          </section>
 
           <div class="section-head">
             <div><span class="eyebrow">Atalhos</span><h3>Rotinas principais</h3></div>
@@ -167,6 +182,25 @@
     </div>
   </div>
 
+  <div class="clinical-backdrop" id="clinical-backdrop" hidden></div>
+  <aside class="clinical-drawer" id="clinical-drawer" aria-hidden="true" aria-labelledby="clinical-patient-name">
+    <div class="clinical-drawer-head">
+      <div><span class="eyebrow">Contexto do paciente</span><h2 id="clinical-patient-name">Paciente</h2><p id="clinical-patient-meta">Carregando contexto clínico</p></div>
+      <button class="drawer-close" id="clinical-drawer-close" type="button" aria-label="Fechar contexto">×</button>
+    </div>
+    <div class="clinical-drawer-body">
+      <div class="clinical-summary" id="clinical-summary"></div>
+      <section class="clinical-section"><div class="clinical-section-head"><h3>Episódios</h3><span id="clinical-episode-count">0</span></div><div id="clinical-episodes" class="clinical-stack"></div></section>
+      <section class="clinical-section"><div class="clinical-section-head"><h3>Prontuário</h3><span id="clinical-record-count">0</span></div><div id="clinical-records" class="clinical-stack"></div></section>
+      <section class="clinical-section"><div class="clinical-section-head"><h3>Preventivo e documentos</h3></div><div id="clinical-support" class="clinical-support-grid"></div></section>
+      <section class="episode-context" id="episode-context" hidden>
+        <div class="clinical-section-head"><div><span class="eyebrow">Episódio selecionado</span><h3 id="episode-context-title">Contexto operacional</h3></div><button class="secondary-btn" id="episode-context-close" type="button">Fechar episódio</button></div>
+        <div id="episode-context-body" class="episode-context-grid"></div>
+      </section>
+    </div>
+  </aside>
+
   <script src="assets/system-v2.js" defer></script>
+  <script src="assets/system-v3.js" defer></script>
 </body>
 </html>
