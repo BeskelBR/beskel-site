@@ -30,7 +30,7 @@ document.querySelectorAll(".brand img").forEach(image => {
 // Mantém a navegação alinhada ao posicionamento atual da BESKEL.
 document.querySelectorAll(".main-nav a").forEach(link => {
   const href = link.getAttribute("href") || "";
-  if (/processo\.html|produtos\.html/.test(href)) {
+  if (/processo\.html|produtos\.html|projeto-atlas/i.test(href)) {
     link.remove();
     return;
   }
@@ -38,7 +38,7 @@ document.querySelectorAll(".main-nav a").forEach(link => {
   if (/portfolio\.html|\/portfolio\/?$/.test(href)) link.textContent = "Projetos";
 });
 
-// Padroniza o rodapé sem reintroduzir o antigo catálogo de produtos.
+// Padroniza o rodapé sem reintroduzir páginas ou catálogos descontinuados.
 document.querySelectorAll(".site-footer .footer-grid").forEach(footer => {
   footer.innerHTML = `
     <div>
@@ -50,7 +50,6 @@ document.querySelectorAll(".site-footer .footer-grid").forEach(footer => {
       <b>Navegação</b>
       <a href="/servicos/">Soluções</a>
       <a href="/portfolio/">Projetos</a>
-      <a href="/projeto-atlas/">Projeto Atlas</a>
       <a href="/sobre/">Sobre</a>
     </div>
     <div>
@@ -177,13 +176,23 @@ document.querySelectorAll("[data-beskel-whatsapp]").forEach(link => link.href = 
 document.querySelectorAll("[data-beskel-instagram]").forEach(link => { link.href = INSTAGRAM_URL; if (!link.querySelector("span")) link.textContent = `Instagram @${INSTAGRAM_USER}`; });
 document.querySelectorAll("[data-beskel-email]").forEach(link => { link.href = `mailto:${CONTACT_EMAIL}`; if (!link.querySelector("span")) link.textContent = CONTACT_EMAIL; });
 
-if (!document.querySelector(".whatsapp-float")) {
-  const shortcut = document.createElement("a");
+const WHATSAPP_ICON = `<svg viewBox="0 0 32 32" aria-hidden="true" focusable="false" style="width:28px;height:28px;display:block;fill:currentColor"><path d="M19.11 17.29c-.29-.15-1.72-.85-1.99-.95-.27-.1-.47-.15-.67.15-.2.29-.77.95-.95 1.14-.17.2-.35.22-.64.07-.29-.15-1.24-.46-2.36-1.47-.87-.78-1.46-1.74-1.63-2.03-.17-.29-.02-.44.13-.59.13-.13.29-.35.44-.52.15-.17.2-.29.29-.49.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51l-.57-.01c-.2 0-.52.07-.79.37-.27.29-1.04 1.02-1.04 2.48s1.07 2.86 1.22 3.06c.15.2 2.1 3.2 5.08 4.49.71.31 1.27.49 1.7.63.71.22 1.36.19 1.87.11.57-.09 1.72-.7 1.96-1.38.24-.68.24-1.27.17-1.38-.07-.12-.27-.2-.57-.35Z"></path><path d="M27.27 4.72A15.86 15.86 0 0 0 16.01 0C7.19 0 .02 7.16.02 15.97c0 2.82.74 5.57 2.14 8L0 32l8.24-2.12a15.9 15.9 0 0 0 7.76 1.99h.01c8.81 0 15.98-7.17 15.99-15.98a15.87 15.87 0 0 0-4.73-11.17Zm-11.26 24.5h-.01a13.2 13.2 0 0 1-6.73-1.84l-.48-.28-4.89 1.26 1.31-4.77-.31-.49a13.16 13.16 0 0 1-2.02-7.08c0-7.29 5.93-13.22 13.23-13.22 3.53 0 6.84 1.37 9.33 3.87a13.1 13.1 0 0 1 3.86 9.35c0 7.29-5.94 13.22-13.29 13.22Z"></path></svg>`;
+
+let shortcut = document.querySelector(".whatsapp-float");
+if (!shortcut) {
+  shortcut = document.createElement("a");
   shortcut.className = "whatsapp-float";
-  shortcut.href = `https://wa.me/${WHATSAPP_NUMBER}`;
-  shortcut.target = "_blank";
-  shortcut.rel = "noopener noreferrer";
-  shortcut.setAttribute("aria-label", "Falar com a BESKEL pelo WhatsApp");
-  shortcut.textContent = "Falar sobre meu projeto";
   document.body.appendChild(shortcut);
 }
+shortcut.href = `https://wa.me/${WHATSAPP_NUMBER}`;
+shortcut.target = "_blank";
+shortcut.rel = "noopener noreferrer";
+shortcut.setAttribute("aria-label", "Falar com a BESKEL pelo WhatsApp");
+shortcut.innerHTML = WHATSAPP_ICON;
+[
+  ["position","fixed"],["left","auto"],["right","clamp(16px, 2vw, 28px)"],["bottom","clamp(16px, 2vw, 28px)"],
+  ["width","clamp(52px, 4vw, 58px)"],["height","clamp(52px, 4vw, 58px)"],["min-width","0"],["padding","0"],
+  ["border","0"],["border-radius","999px"],["background","#25D366"],["color","#FFFFFF"],
+  ["display","flex"],["align-items","center"],["justify-content","center"],["text-align","center"],
+  ["box-shadow","0 12px 30px rgba(0,0,0,.22)"],["z-index","9999"]
+].forEach(([property,value]) => shortcut.style.setProperty(property,value,"important"));
