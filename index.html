@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="assets/system.css">
   <link rel="stylesheet" href="assets/system-v2.css">
   <link rel="stylesheet" href="assets/system-v3.css">
+  <link rel="stylesheet" href="assets/system-v4.css">
 </head>
 <body>
   <a class="skip-link" href="#main">Pular para o conteúdo</a>
@@ -124,8 +125,34 @@
             <article class="status-card"><span>API</span><strong id="health-card">Verificando</strong><small>Disponibilidade do serviço</small></article>
             <article class="status-card"><span>Banco</span><strong id="ready-card">Verificando</strong><small>Schema e conexão</small></article>
             <article class="status-card"><span>Ambiente</span><strong>DEV</strong><small>Sem operação assistencial real</small></article>
-            <article class="status-card"><span>Frontend</span><strong>MVP 3</strong><small>Jornada clínica contextual</small></article>
+            <article class="status-card"><span>Frontend</span><strong>MVP 4</strong><small>Jornadas e painel operacional</small></article>
           </div>
+
+          <div class="section-head operations-head">
+            <div><span class="eyebrow">Painel operacional</span><h3>O que precisa de atenção agora</h3><p>Leitura consolidada das rotinas já suportadas pelo backend, limitada ao perfil autenticado.</p></div>
+            <button class="secondary-btn" id="refresh-operations" type="button">Atualizar painel</button>
+          </div>
+          <section class="operations-board" aria-label="Painel operacional do HVB">
+            <div class="operations-metrics">
+              <article class="ops-metric"><span>Agenda de hoje</span><strong id="ops-agenda-count">—</strong><small id="ops-agenda-state">Aguardando sessão</small></article>
+              <article class="ops-metric"><span>Episódios ativos</span><strong id="ops-episode-count">—</strong><small id="ops-episode-state">Aguardando sessão</small></article>
+              <article class="ops-metric"><span>Pendências clínicas</span><strong id="ops-pending-count">—</strong><small id="ops-pending-state">Aguardando sessão</small></article>
+            </div>
+            <div class="operations-columns">
+              <article class="ops-panel">
+                <div class="ops-panel-head"><div><span class="eyebrow">Hoje</span><h4>Agenda</h4></div><button type="button" class="ops-link" data-go="agenda">Abrir módulo</button></div>
+                <div id="ops-agenda-list" class="ops-list"><div class="ops-empty">Aguardando sessão autenticada.</div></div>
+              </article>
+              <article class="ops-panel">
+                <div class="ops-panel-head"><div><span class="eyebrow">Internação</span><h4>Episódios em andamento</h4></div><button type="button" class="ops-link" data-go="internacao">Abrir módulo</button></div>
+                <div id="ops-episode-list" class="ops-list"><div class="ops-empty">Aguardando sessão autenticada.</div></div>
+              </article>
+              <article class="ops-panel">
+                <div class="ops-panel-head"><div><span class="eyebrow">Atenção</span><h4>Pendências clínicas</h4></div><button type="button" class="ops-link" data-go="internacao">Abrir módulo</button></div>
+                <div id="ops-pending-list" class="ops-list"><div class="ops-empty">Aguardando sessão autenticada.</div></div>
+              </article>
+            </div>
+          </section>
 
           <div class="section-head clinical-launch-head">
             <div><span class="eyebrow">Jornada clínica</span><h3>Localizar paciente</h3><p>Abra o contexto longitudinal antes de navegar pelas rotinas relacionadas.</p></div>
@@ -202,5 +229,6 @@
 
   <script src="assets/system-v2.js" defer></script>
   <script src="assets/system-v3.js" defer></script>
+  <script src="assets/system-v4.js" defer></script>
 </body>
 </html>
