@@ -5,6 +5,21 @@
       "source": "/hvb",
       "destination": "https://www.instagram.com/hospitalveterinariobrasiliahvb/",
       "permanent": false
+    },
+    {
+      "source": "/produtos",
+      "destination": "/portfolio/",
+      "permanent": true
+    },
+    {
+      "source": "/produtos/",
+      "destination": "/portfolio/",
+      "permanent": true
+    },
+    {
+      "source": "/pages/produtos.html",
+      "destination": "/portfolio/",
+      "permanent": true
     }
   ]
 }
