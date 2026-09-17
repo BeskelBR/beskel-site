@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/system-v2.css">
 </head>
 <body>
   <a class="skip-link" href="#main">Pular para o conteúdo</a>
@@ -49,10 +50,12 @@
           <button class="primary-btn" type="submit">Acessar ambiente</button>
         </form>
         <details class="dev-settings">
-          <summary>Configuração técnica</summary>
+          <summary>Configuração técnica DEV</summary>
           <label for="api-base">Endereço da API</label>
-          <input id="api-base" name="api-base" type="url" placeholder="http://127.0.0.1:3100">
-          <small>Em produção, a interface deverá consumir a API do domínio operacional do HVB.</small>
+          <input id="api-base" name="api-base" type="url" placeholder="http://127.0.0.1:3200">
+          <label for="unit-id">Unidade hospitalar (opcional)</label>
+          <input id="unit-id" name="unit-id" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="UUID da unidade DEV">
+          <small>O UUID só é necessário enquanto o contexto de unidade ainda não é resolvido automaticamente para todos os perfis. Em produção esta configuração não ficará exposta ao colaborador.</small>
         </details>
         <div class="auth-feedback" id="auth-feedback" role="status" aria-live="polite"></div>
         <a class="back-link" href="https://hvb-site-dev.beskel.com.br/colaborador">← Voltar à página do colaborador</a>
@@ -97,7 +100,7 @@
           <span class="api-status" id="api-status">API verificando</span>
           <div class="session-chip">
             <span id="org-name">HVB</span>
-            <small>Sessão autenticada</small>
+            <small id="unit-label">Sessão autenticada</small>
           </div>
         </div>
       </header>
@@ -108,7 +111,7 @@
             <div>
               <span class="eyebrow">Operação integrada</span>
               <h1>Bom trabalho.</h1>
-              <p>Use o menu para acessar as rotinas do hospital. O frontend está sendo conectado progressivamente aos contratos já implementados no backend.</p>
+              <p>Use o menu para acessar as rotinas do hospital. Esta camada prioriza consulta segura e organização dos módulos já suportados pelo backend, sem antecipar regras que ainda dependem de validação do HVB.</p>
             </div>
             <div class="welcome-meta">
               <span id="system-state">Sistema em validação DEV</span>
@@ -120,7 +123,7 @@
             <article class="status-card"><span>API</span><strong id="health-card">Verificando</strong><small>Disponibilidade do serviço</small></article>
             <article class="status-card"><span>Banco</span><strong id="ready-card">Verificando</strong><small>Schema e conexão</small></article>
             <article class="status-card"><span>Ambiente</span><strong>DEV</strong><small>Sem operação assistencial real</small></article>
-            <article class="status-card"><span>Frontend</span><strong>MVP 1</strong><small>Base de navegação integrada</small></article>
+            <article class="status-card"><span>Frontend</span><strong>MVP 2</strong><small>Consultas organizadas por módulo</small></article>
           </div>
 
           <div class="section-head">
@@ -140,17 +143,23 @@
         <section class="module-view" data-module-view="detail" hidden>
           <div class="detail-head">
             <div><span class="eyebrow" id="detail-eyebrow">Módulo</span><h1 id="detail-title">Módulo</h1><p id="detail-description"></p></div>
-            <span class="module-state" id="detail-state">Integração progressiva</span>
+            <span class="module-state" id="detail-state">Consulta DEV</span>
           </div>
           <div class="detail-layout">
             <article class="panel">
               <div class="panel-head"><h3>Visão operacional</h3><button class="secondary-btn" id="refresh-module">Atualizar</button></div>
+              <div class="module-toolbar" aria-label="Controles de consulta">
+                <div class="module-tabs" id="module-tabs" role="tablist" aria-label="Visões do módulo"></div>
+                <label class="table-search" for="module-search"><span>Filtrar resultados</span><input id="module-search" type="search" placeholder="Buscar nesta lista"></label>
+              </div>
+              <div class="module-meta"><span id="module-count">0 registros</span><span id="module-context">Consulta autenticada</span></div>
               <div id="module-content" class="module-content"></div>
+              <div class="module-pagination"><button class="secondary-btn" id="load-more" hidden>Carregar mais</button></div>
             </article>
             <aside class="panel side-panel">
               <h3>Próxima camada</h3>
               <p id="detail-next"></p>
-              <div class="notice">A interface não deve antecipar regras hospitalares ainda não validadas. Campos e ações serão liberados conforme o contrato funcional de cada módulo.</div>
+              <div class="notice">A interface não deve antecipar regras hospitalares ainda não validadas. Ações de escrita serão liberadas por fluxo e por cargo após validação funcional.</div>
             </aside>
           </div>
         </section>
@@ -158,6 +167,6 @@
     </div>
   </div>
 
-  <script src="assets/system.js" defer></script>
+  <script src="assets/system-v2.js" defer></script>
 </body>
 </html>
