@@ -41,10 +41,14 @@ if (yearNode) yearNode.textContent = String(new Date().getFullYear());
 
 const config = window.HVB_SITE_CONFIG;
 
-if (config?.urls?.collaborator && config?.urls?.systemDev) {
-  document.querySelectorAll(`a[href="${config.urls.systemDev}"]`).forEach((link) => {
-    link.href = config.urls.collaborator;
-    link.removeAttribute('target');
+if (config?.urls?.collaborator) {
+  document.querySelectorAll('a').forEach((link) => {
+    const label = link.textContent?.trim().toLocaleLowerCase('pt-BR') || '';
+    if (label.includes('área do colaborador')) {
+      link.href = config.urls.collaborator;
+      link.removeAttribute('target');
+      link.removeAttribute('rel');
+    }
   });
 }
 
