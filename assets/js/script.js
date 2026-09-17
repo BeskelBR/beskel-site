@@ -2,28 +2,14 @@
 
 const CONFIG = window.BESKEL_CONFIG || {};
 const WHATSAPP_NUMBER = CONFIG.whatsapp || "5561991668921";
+const PHONE_DISPLAY = CONFIG.phoneDisplay || "(61) 99166-8921";
+const PHONE_HREF = CONFIG.phoneHref || "tel:61991668921";
 const CONTACT_EMAIL = CONFIG.email || "contato@beskel.com.br";
 const INSTAGRAM_USER = CONFIG.instagramUser || "beskelbr";
 const INSTAGRAM_URL = CONFIG.instagramUrl || "https://instagram.com/beskelbr";
+const BRAND_SYMBOL = "/assets/img/beskel-symbol-master-dark.svg";
+const BRAND_LOGO = "/assets/img/beskel-logo-master-dark.svg";
 
-const currentScript = document.currentScript;
-
-function ensureStylesheet(filename) {
-  if (!currentScript || document.querySelector(`link[href*="${filename}"]`)) return;
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = new URL(`../css/${filename}`, currentScript.src).href;
-  document.head.appendChild(link);
-}
-
-// Garante a mesma camada visual em todas as páginas, inclusive páginas legadas.
-ensureStylesheet("site-polish.css");
-ensureStylesheet("revision-v10.css");
-
-const BRAND_LOGO = "/assets/img/logo-beskel-transparent.svg";
-const BRAND_FAVICON = "/assets/img/favicon-beskel-v2.svg";
-
-// Padroniza o ícone exibido na aba do navegador em todo o site.
 let favicon = document.querySelector('link[rel="icon"]');
 if (!favicon) {
   favicon = document.createElement("link");
@@ -31,85 +17,71 @@ if (!favicon) {
   document.head.appendChild(favicon);
 }
 favicon.type = "image/svg+xml";
-favicon.href = BRAND_FAVICON;
-document.querySelectorAll('link[rel="shortcut icon"]').forEach(link => link.remove());
+favicon.href = BRAND_SYMBOL;
 
-// Padroniza a marca no cabeçalho com a mesma logo utilizada na página inicial.
 document.querySelectorAll(".brand img").forEach(image => {
-  image.src = BRAND_LOGO;
-  image.alt = "Símbolo BESKEL";
-  image.width = 512;
-  image.height = 512;
-  image.removeAttribute("loading");
+  image.src = BRAND_SYMBOL;
+  image.alt = "";
+  image.width = 493;
+  image.height = 552;
 });
 
-// Mantém a arquitetura de navegação idêntica em todas as páginas.
+// Mantém a navegação alinhada ao posicionamento atual da BESKEL.
 document.querySelectorAll(".main-nav a").forEach(link => {
   const href = link.getAttribute("href") || "";
-  if (/processo\.html/.test(href)) {
+  if (/processo\.html|produtos\.html/.test(href)) {
     link.remove();
     return;
   }
-  if (/servicos\.html/.test(href)) link.textContent = "Soluções";
+  if (/servicos\.html|\/servicos\/?$/.test(href)) link.textContent = "Soluções";
+  if (/portfolio\.html|\/portfolio\/?$/.test(href)) link.textContent = "Projetos";
 });
 
-// Padroniza o rodapé de todas as páginas em uma única estrutura visual e editorial.
+// Padroniza o rodapé das páginas legadas sem reintroduzir o antigo catálogo de produtos.
 document.querySelectorAll(".site-footer .footer-grid").forEach(footer => {
   footer.innerHTML = `
     <div>
-      <div class="footer-brand">
-        <img src="${BRAND_LOGO}" alt="Símbolo BESKEL" width="512" height="512" loading="lazy">
-        <strong>BESKEL</strong>
-      </div>
+      <div class="footer-brand footer-brand-master"><img src="${BRAND_LOGO}" alt="BESKEL" width="770" height="728" loading="lazy"></div>
       <p>Conhecimento Transformado em Criação.</p>
-      <span>Engenharia criativa, design e fabricação digital.</span>
+      <span>Soluções físicas, digitais e híbridas para situações reais.</span>
     </div>
     <div>
       <b>Navegação</b>
-      <a href="/pages/servicos.html">Soluções</a>
-      <a href="/pages/portfolio.html">Portfólio</a>
-      <a href="/pages/produtos.html">Produtos</a>
-      <a href="/pages/projeto-atlas.html">Projeto Atlas</a>
+      <a href="/servicos/">Soluções</a>
+      <a href="/portfolio/">Projetos</a>
+      <a href="/projeto-atlas/">Projeto Atlas</a>
+      <a href="/sobre/">Sobre</a>
     </div>
     <div>
       <b>Contato</b>
       <span>Brasília • Distrito Federal</span>
-      <a href="/pages/contato.html">Solicitar orçamento</a>
-      <a href="${INSTAGRAM_URL}" data-beskel-instagram data-label="full" target="_blank" rel="noopener noreferrer">Instagram @${INSTAGRAM_USER}</a>
+      <a href="${PHONE_HREF}" data-beskel-phone>${PHONE_DISPLAY}</a>
+      <a href="https://wa.me/${WHATSAPP_NUMBER}" data-beskel-whatsapp target="_blank" rel="noopener noreferrer">WhatsApp</a>
+      <a href="${INSTAGRAM_URL}" data-beskel-instagram target="_blank" rel="noopener noreferrer">Instagram @${INSTAGRAM_USER}</a>
       <a href="mailto:${CONTACT_EMAIL}" data-beskel-email>${CONTACT_EMAIL}</a>
-      <a href="/pages/privacidade.html">Política de Privacidade</a>
+      <a href="/privacidade/">Política de Privacidade</a>
     </div>`;
 });
 
 const menuButton = document.querySelector(".menu-toggle");
 const mainNav = document.querySelector(".main-nav");
-
-function closeMenu({ returnFocus = false } = {}) {
+function closeMenu(){
   if (!menuButton || !mainNav) return;
   mainNav.classList.remove("open");
-  menuButton.setAttribute("aria-expanded", "false");
-  menuButton.setAttribute("aria-label", "Abrir menu");
-  if (returnFocus) menuButton.focus();
+  menuButton.setAttribute("aria-expanded","false");
+  menuButton.setAttribute("aria-label","Abrir menu");
 }
-
 if (menuButton && mainNav) {
   menuButton.addEventListener("click", () => {
-    const isOpen = mainNav.classList.toggle("open");
-    menuButton.setAttribute("aria-expanded", String(isOpen));
-    menuButton.setAttribute("aria-label", isOpen ? "Fechar menu" : "Abrir menu");
+    const open = mainNav.classList.toggle("open");
+    menuButton.setAttribute("aria-expanded", String(open));
+    menuButton.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
   });
-  mainNav.querySelectorAll("a").forEach(link => link.addEventListener("click", () => closeMenu()));
-  document.addEventListener("keydown", event => {
-    if (event.key === "Escape" && mainNav.classList.contains("open")) closeMenu({ returnFocus: true });
-  });
-  document.addEventListener("click", event => {
-    if (mainNav.classList.contains("open") && !mainNav.contains(event.target) && !menuButton.contains(event.target)) closeMenu();
-  });
+  mainNav.querySelectorAll("a").forEach(link => link.addEventListener("click", closeMenu));
+  document.addEventListener("keydown", event => { if (event.key === "Escape") closeMenu(); });
 }
 
-document.querySelectorAll("#year").forEach(el => {
-  el.textContent = new Date().getFullYear();
-});
+document.querySelectorAll("#year").forEach(el => el.textContent = new Date().getFullYear());
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const reveals = document.querySelectorAll(".reveal");
@@ -123,210 +95,59 @@ if (reduceMotion || !("IntersectionObserver" in window)) {
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.1, rootMargin: "0px 0px -35px" });
+  }, { threshold: .08, rootMargin: "0px 0px -24px" });
   reveals.forEach(el => observer.observe(el));
 }
 
-const filterButtons = document.querySelectorAll(".filter-btn");
-const portfolioCards = document.querySelectorAll("[data-category]");
-filterButtons.forEach(button => {
-  button.setAttribute("aria-pressed", button.classList.contains("active") ? "true" : "false");
-  button.addEventListener("click", () => {
-    const filter = button.dataset.filter;
-    filterButtons.forEach(item => {
-      const selected = item === button;
-      item.classList.toggle("active", selected);
-      item.setAttribute("aria-pressed", String(selected));
-    });
-    portfolioCards.forEach(card => {
-      const categories = (card.dataset.category || "").split(" ");
-      const show = filter === "all" || categories.includes(filter);
-      card.classList.toggle("is-hidden", !show);
-      card.setAttribute("aria-hidden", String(!show));
-    });
-  });
-});
-
-function onlyDigits(value) {
-  return value.replace(/\D/g, "");
+function onlyDigits(value){ return String(value || "").replace(/\D/g, ""); }
+function formatPhone(value){
+  const d = onlyDigits(value).slice(0,11);
+  if (d.length <= 2) return d;
+  if (d.length <= 6) return `(${d.slice(0,2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+  return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
 }
-
-function formatPhone(value) {
-  const digits = onlyDigits(value).slice(0, 11);
-  if (digits.length <= 2) return digits;
-  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-}
-
 document.querySelectorAll('input[name="telefone"]').forEach(input => {
-  input.setAttribute("inputmode", "tel");
-  input.setAttribute("autocomplete", "tel");
-  input.addEventListener("input", () => {
-    input.value = formatPhone(input.value);
-  });
+  input.inputMode = "tel";
+  input.autocomplete = "tel";
+  input.addEventListener("input", () => input.value = formatPhone(input.value));
 });
-document.querySelectorAll('input[name="nome"]').forEach(input => input.setAttribute("autocomplete", "name"));
+document.querySelectorAll('input[name="nome"]').forEach(input => input.autocomplete = "name");
 
-const intent = new URLSearchParams(window.location.search).get("tipo");
-const intentMap = {
-  producao: "Impressão 3D",
-  desenvolvimento: "Modelagem 3D",
-  validacao: "Protótipo",
-  personalizacao: "Produto personalizado"
-};
-if (intent && intentMap[intent]) {
-  document.querySelectorAll('select[name="tipo"]').forEach(select => {
-    const option = Array.from(select.options).find(item => item.textContent.trim() === intentMap[intent]);
-    if (option) select.value = option.value;
-  });
-}
-
-function buildQuoteMessage(form) {
+function buildQuoteMessage(form){
   const data = new FormData(form);
-  const fields = [
-    ["Nome", data.get("nome")],
-    ["Telefone", data.get("telefone")],
-    ["Tipo de projeto", data.get("tipo")],
-    ["Quantidade", data.get("quantidade")],
-    ["Descrição", data.get("descricao")]
-  ];
-
-  const details = fields
-    .filter(([, value]) => String(value || "").trim())
-    .map(([label, value]) => `${label}: ${String(value).trim()}`);
-
-  return [
-    "Olá, BESKEL! Gostaria de solicitar um orçamento.",
+  const lines = [
+    "Olá, BESKEL! Gostaria de conversar sobre uma necessidade/projeto.",
     "",
-    ...details
-  ].join("\n");
+    data.get("nome") ? `Nome: ${data.get("nome")}` : "",
+    data.get("telefone") ? `Telefone: ${data.get("telefone")}` : "",
+    data.get("descricao") ? `Descrição: ${data.get("descricao")}` : ""
+  ].filter(Boolean);
+  return lines.join("\n");
 }
 
 document.querySelectorAll("#quoteForm").forEach(form => {
   let status = form.querySelector(".form-status");
   if (!status) {
     status = document.createElement("p");
-    status.className = "form-status";
-    status.setAttribute("role", "status");
-    status.setAttribute("aria-live", "polite");
+    status.className = "form-status full";
+    status.setAttribute("role","status");
+    status.setAttribute("aria-live","polite");
     form.appendChild(status);
   }
-
   form.addEventListener("submit", event => {
     event.preventDefault();
-    if (!form.reportValidity()) {
-      status.textContent = "Revise os campos obrigatórios antes de continuar.";
-      status.className = "form-status error";
-      return;
-    }
-
+    if (!form.reportValidity()) return;
     status.textContent = "Abrindo o WhatsApp...";
-    status.className = "form-status success";
+    status.className = "form-status full success";
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildQuoteMessage(form))}`, "_blank", "noopener,noreferrer");
   });
 });
 
-document.querySelectorAll('a[href*="instagram.com"], [data-beskel-instagram]').forEach(link => {
-  link.href = INSTAGRAM_URL;
-  const value = link.querySelector("span");
-  if (value) {
-    value.textContent = `@${INSTAGRAM_USER}`;
-  } else {
-    const full = link.dataset.label === "full" || /Instagram/i.test(link.textContent);
-    link.textContent = full ? `Instagram @${INSTAGRAM_USER}` : `@${INSTAGRAM_USER}`;
-  }
-});
-
-document.querySelectorAll("[data-beskel-email]").forEach(link => {
-  link.href = `mailto:${CONTACT_EMAIL}`;
-  const value = link.querySelector("span");
-  if (value) value.textContent = CONTACT_EMAIL;
-  else link.textContent = CONTACT_EMAIL;
-});
-
-document.querySelectorAll("[data-beskel-whatsapp]").forEach(link => {
-  link.href = `https://wa.me/${WHATSAPP_NUMBER}`;
-});
-
-document.querySelectorAll(".contact-list div").forEach(row => {
-  if (/WhatsApp/i.test(row.textContent)) {
-    row.innerHTML = `<b>WhatsApp</b><span><a href="https://wa.me/${WHATSAPP_NUMBER}" target="_blank" rel="noopener noreferrer">Falar com a BESKEL</a></span>`;
-  }
-});
-
-document.querySelectorAll(".form-note").forEach(note => {
-  if (/configur/i.test(note.textContent)) {
-    note.textContent = "Você será direcionado ao WhatsApp para continuar o atendimento.";
-  }
-});
-
-const portfolioImages = document.querySelectorAll(".portfolio-products .portfolio-card > img");
-if (portfolioImages.length) {
-  const lightbox = document.createElement("div");
-  lightbox.className = "portfolio-lightbox";
-  lightbox.setAttribute("aria-hidden", "true");
-  lightbox.innerHTML = `
-    <figure class="portfolio-lightbox__dialog" role="dialog" aria-modal="true" aria-label="Imagem ampliada do portfólio">
-      <button class="portfolio-lightbox__close" type="button" aria-label="Fechar imagem ampliada">×</button>
-      <img class="portfolio-lightbox__image" alt="">
-      <figcaption class="portfolio-lightbox__caption"></figcaption>
-    </figure>`;
-  document.body.appendChild(lightbox);
-
-  const lightboxImage = lightbox.querySelector(".portfolio-lightbox__image");
-  const lightboxCaption = lightbox.querySelector(".portfolio-lightbox__caption");
-  const closeButton = lightbox.querySelector(".portfolio-lightbox__close");
-  let lastTrigger = null;
-
-  function getPortfolioTitle(image) {
-    return image.closest(".portfolio-card")?.querySelector("figcaption b")?.textContent.trim() || image.alt;
-  }
-
-  function openLightbox(image) {
-    lastTrigger = image;
-    const title = getPortfolioTitle(image);
-    lightboxImage.src = image.currentSrc || image.src;
-    lightboxImage.alt = image.alt;
-    lightboxCaption.textContent = title;
-    lightbox.classList.add("is-open");
-    lightbox.setAttribute("aria-hidden", "false");
-    document.body.classList.add("lightbox-open");
-    requestAnimationFrame(() => closeButton.focus());
-  }
-
-  function closeLightbox() {
-    if (!lightbox.classList.contains("is-open")) return;
-    lightbox.classList.remove("is-open");
-    lightbox.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("lightbox-open");
-    lightboxImage.removeAttribute("src");
-    if (lastTrigger) lastTrigger.focus();
-  }
-
-  portfolioImages.forEach(image => {
-    const title = getPortfolioTitle(image);
-    image.tabIndex = 0;
-    image.setAttribute("role", "button");
-    image.setAttribute("aria-haspopup", "dialog");
-    image.setAttribute("aria-label", `Ampliar imagem: ${title}`);
-    image.addEventListener("click", () => openLightbox(image));
-    image.addEventListener("keydown", event => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        openLightbox(image);
-      }
-    });
-  });
-
-  closeButton.addEventListener("click", closeLightbox);
-  lightbox.addEventListener("click", event => {
-    if (event.target === lightbox) closeLightbox();
-  });
-  document.addEventListener("keydown", event => {
-    if (event.key === "Escape" && lightbox.classList.contains("is-open")) closeLightbox();
-  });
-}
+document.querySelectorAll("[data-beskel-phone]").forEach(link => { link.href = PHONE_HREF; link.textContent = PHONE_DISPLAY; });
+document.querySelectorAll("[data-beskel-whatsapp]").forEach(link => link.href = `https://wa.me/${WHATSAPP_NUMBER}`);
+document.querySelectorAll("[data-beskel-instagram]").forEach(link => { link.href = INSTAGRAM_URL; if (!link.querySelector("span")) link.textContent = `Instagram @${INSTAGRAM_USER}`; });
+document.querySelectorAll("[data-beskel-email]").forEach(link => { link.href = `mailto:${CONTACT_EMAIL}`; if (!link.querySelector("span")) link.textContent = CONTACT_EMAIL; });
 
 if (!document.querySelector(".whatsapp-float")) {
   const shortcut = document.createElement("a");
