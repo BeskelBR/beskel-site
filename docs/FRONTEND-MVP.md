@@ -2,13 +2,15 @@
 
 ## Objetivo
 
-Criar a primeira camada visual do **HVB Sistema** sem antecipar regras operacionais ainda pendentes de validação hospitalar.
+Criar a camada visual do **HVB Sistema** sem antecipar regras operacionais ainda pendentes de validação hospitalar.
 
 O acesso institucional parte da página pública **Área do colaborador** (`/colaborador`) no branch `hvb-site-dev`, que encaminha o colaborador autorizado para o ambiente operacional do sistema em `hvb-sistema-dev.beskel.com.br` durante a implantação.
 
 O endereço `hvb-dev.beskel.com.br` permanece reservado ao **Terminal HVB** e não deve ser usado como destino do sistema interno.
 
-## Escopo entregue — MVP 2
+## Escopo entregue — MVP 3
+
+### Base do sistema
 
 - tela de acesso restrito;
 - uso da credencial opaca já existente no backend DEV;
@@ -18,12 +20,35 @@ O endereço `hvb-dev.beskel.com.br` permanece reservado ao **Terminal HVB** e n�
 - status de `/health` e `/ready`;
 - contexto de `/v1/me`, organização e unidade disponível;
 - configuração manual de unidade apenas como contingência DEV;
+- bloqueio de indexação do ambiente DEV.
+
+### Consultas por módulo
+
 - abas de consulta por módulo;
 - filtro local de resultados;
 - paginação por `next_cursor`;
 - estados explícitos de permissão, ausência de registros, sessão inválida e falha de integração;
-- primeiras visões conectadas para Pacientes, Agenda, Internação, Prontuário, Estoque, Exames, Financeiro, Compras, Documentos, Preventivo e Administração;
-- bloqueio de indexação do ambiente DEV.
+- primeiras visões conectadas para Pacientes, Agenda, Internação, Prontuário, Estoque, Exames, Financeiro, Compras, Documentos, Preventivo e Administração.
+
+### Jornada clínica contextual
+
+O MVP 3 inicia a transição de uma interface orientada por tabelas para uma interface orientada por **jornadas de trabalho**.
+
+A Visão geral agora permite:
+
+- localizar paciente por nome, espécie ou identificador;
+- abrir um contexto longitudinal sem abandonar o dashboard;
+- visualizar dados básicos e estado do paciente;
+- consultar episódios da unidade ativa;
+- consultar evoluções de prontuário disponíveis à credencial;
+- resumir adesões preventivas e solicitações documentais;
+- selecionar um episódio e consultar, no mesmo contexto:
+  - programações clínicas;
+  - execuções clínicas;
+  - solicitações de exames;
+  - contas associadas ao episódio.
+
+O painel clínico respeita as permissões do backend. Um `403` é apresentado como área não liberada, sem transformar ausência de permissão em falha genérica.
 
 A autenticação operacional definitiva ainda **não** foi criada. O formulário atual representa somente a credencial opaca já suportada pelo backend.
 
@@ -35,6 +60,8 @@ A autenticação operacional definitiva ainda **não** foi criada. O formulário
 4. Manter ações de escrita fora do MVP até que o fluxo e a matriz de cargos sejam validados.
 5. Separar claramente o **Sistema HVB** do **Terminal HVB**.
 6. Resolver contexto de unidade e permissões no backend antes da produção; o campo manual atual é apenas suporte DEV.
+7. Priorizar jornadas operacionais sobre simples exposição de tabelas.
+8. Manter o paciente e o episódio como contexto quando uma rotina depender deles.
 
 ## Executar localmente
 
@@ -80,14 +107,15 @@ Antes de produção ainda serão necessários, entre outros:
 
 ## Próxima fase sugerida
 
-A próxima camada deve priorizar **jornadas**, e não apenas novas tabelas:
+A próxima camada deve aprofundar as jornadas já iniciadas:
 
-- localizar paciente e abrir seu contexto;
-- visualizar episódio/internação em andamento;
-- agenda diária por recurso;
-- visão de estoque por produto/local;
+- agenda diária por recurso e profissional;
+- contexto de internação com ocupação e passagem de plantão;
 - fila operacional de exames;
-- títulos e recebimentos do financeiro;
-- pedidos e recebimentos de compras.
+- estoque por produto/local com contexto do Terminal HVB;
+- financeiro orientado a títulos, recebimentos e conciliação;
+- compras orientadas a pedido, decisão e recebimento;
+- filtros contextuais por paciente/episódio dentro dos módulos;
+- ações de escrita condicionadas à matriz de cargos validada.
 
-As ações de criação, alteração, aprovação e baixa devem ser adicionadas somente após a validação da matriz de cargos e dos fluxos executivos com o HVB.
+As ações de criação, alteração, aprovação, baixa e reversão devem ser adicionadas somente após a validação da matriz de cargos e dos fluxos executivos com o HVB.
