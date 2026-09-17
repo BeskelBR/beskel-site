@@ -7,8 +7,9 @@ const PHONE_HREF = CONFIG.phoneHref || "tel:61991668921";
 const CONTACT_EMAIL = CONFIG.email || "contato@beskel.com.br";
 const INSTAGRAM_USER = CONFIG.instagramUser || "beskelbr";
 const INSTAGRAM_URL = CONFIG.instagramUrl || "https://instagram.com/beskelbr";
-const BRAND_SYMBOL = "/assets/img/beskel-symbol-master-dark.svg";
-const BRAND_LOGO = "/assets/img/beskel-logo-master-dark.svg";
+const IS_LIGHT_HOME = document.body.classList.contains("home-light");
+const BRAND_SYMBOL = IS_LIGHT_HOME ? "/assets/img/beskel-symbol-master-light.svg" : "/assets/img/beskel-symbol-master-dark.svg";
+const BRAND_LOGO = IS_LIGHT_HOME ? "/assets/img/beskel-logo-master-light.svg" : "/assets/img/beskel-logo-master-dark.svg";
 
 let favicon = document.querySelector('link[rel="icon"]');
 if (!favicon) {
@@ -37,7 +38,7 @@ document.querySelectorAll(".main-nav a").forEach(link => {
   if (/portfolio\.html|\/portfolio\/?$/.test(href)) link.textContent = "Projetos";
 });
 
-// Padroniza o rodapé das páginas legadas sem reintroduzir o antigo catálogo de produtos.
+// Padroniza o rodapé sem reintroduzir o antigo catálogo de produtos.
 document.querySelectorAll(".site-footer .footer-grid").forEach(footer => {
   footer.innerHTML = `
     <div>
@@ -79,6 +80,33 @@ if (menuButton && mainNav) {
   });
   mainNav.querySelectorAll("a").forEach(link => link.addEventListener("click", closeMenu));
   document.addEventListener("keydown", event => { if (event.key === "Escape") closeMenu(); });
+}
+
+// Progressive disclosure da Home: uma única área muda conforme a frente escolhida.
+const capabilityTabs = [...document.querySelectorAll("[data-capability]")];
+if (capabilityTabs.length) {
+  const capabilityPanels = [...document.querySelectorAll(".capability-panel")];
+  const activateCapability = tab => {
+    const key = tab.dataset.capability;
+    capabilityTabs.forEach(item => item.setAttribute("aria-selected", String(item === tab)));
+    capabilityPanels.forEach(panel => {
+      panel.hidden = panel.id !== `painel-${key}`;
+    });
+  };
+  capabilityTabs.forEach((tab, index) => {
+    tab.addEventListener("click", () => activateCapability(tab));
+    tab.addEventListener("keydown", event => {
+      if (!['ArrowRight','ArrowLeft','ArrowDown','ArrowUp','Home','End'].includes(event.key)) return;
+      event.preventDefault();
+      let nextIndex = index;
+      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') nextIndex = (index + 1) % capabilityTabs.length;
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') nextIndex = (index - 1 + capabilityTabs.length) % capabilityTabs.length;
+      if (event.key === 'Home') nextIndex = 0;
+      if (event.key === 'End') nextIndex = capabilityTabs.length - 1;
+      capabilityTabs[nextIndex].focus();
+      activateCapability(capabilityTabs[nextIndex]);
+    });
+  });
 }
 
 document.querySelectorAll("#year").forEach(el => el.textContent = new Date().getFullYear());
