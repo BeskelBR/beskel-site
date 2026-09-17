@@ -64,6 +64,38 @@ O painel mostra contagens e uma prévia dos registros mais relevantes. Quando a 
 
 As três leituras continuam condicionadas às permissões do perfil autenticado. Ausência de autorização aparece como restrição do perfil, e não como erro do sistema.
 
+### Jornada de Agenda
+
+O módulo **Agenda** agora possui uma camada contextual acima da consulta tabular.
+
+A jornada reúne:
+
+- mapa do dia corrente;
+- horários de início e término;
+- tipo e situação do agendamento;
+- paciente associado por identificador;
+- alocações de recursos já registradas;
+- nomes dos recursos quando a credencial possui acesso à consulta correspondente;
+- sinalização de registros que já chegam do backend com `necessita_revisao`.
+
+A interface cruza `/v1/agenda/mapa`, `/v1/agenda/alocacoes` e `/v1/agenda/recursos` apenas para composição visual. Nenhuma regra de agenda é inferida no cliente e nenhum estado é alterado.
+
+### Jornada de Internação
+
+O módulo **Internação** passa a consolidar contexto operacional da unidade ativa.
+
+A jornada reúne:
+
+- episódios ativos;
+- ocupações ainda abertas;
+- local físico e vaga quando disponíveis;
+- programações clínicas relacionadas ao episódio;
+- pendências clínicas vinculadas ao episódio quando essa referência estiver disponível na resposta do backend.
+
+A composição utiliza `/v1/episodios`, `/v1/ocupacoes`, `/v1/locais`, `/v1/clinica/programacoes` e `/v1/clinica/pendencias`.
+
+A ausência de vínculo entre uma pendência e um episódio não é preenchida por inferência. O frontend só apresenta relações explicitamente existentes nos dados retornados.
+
 A autenticação operacional definitiva ainda **não** foi criada. O formulário atual representa somente a credencial opaca já suportada pelo backend.
 
 ## Princípios do frontend
@@ -77,6 +109,7 @@ A autenticação operacional definitiva ainda **não** foi criada. O formulário
 7. Priorizar jornadas operacionais sobre simples exposição de tabelas.
 8. Manter o paciente e o episódio como contexto quando uma rotina depender deles.
 9. Não apresentar métricas agregadas como totais globais quando o contrato da API fornecer apenas páginas de resultados.
+10. Não criar relações, estados clínicos ou decisões no frontend por inferência quando o backend não os fornecer explicitamente.
 
 ## Executar localmente
 
@@ -122,15 +155,14 @@ Antes de produção ainda serão necessários, entre outros:
 
 ## Próxima fase sugerida
 
-A próxima camada deve aprofundar as jornadas já iniciadas:
+A próxima camada deve aprofundar as demais jornadas:
 
-- agenda diária por recurso e profissional;
-- contexto de internação com ocupação e passagem de plantão;
 - fila operacional de exames;
 - estoque por produto/local com contexto do Terminal HVB;
 - financeiro orientado a títulos, recebimentos e conciliação;
 - compras orientadas a pedido, decisão e recebimento;
 - filtros contextuais por paciente/episódio dentro dos módulos;
+- passagem de plantão e demais rotinas de internação somente após validação do fluxo real do hospital;
 - ações de escrita condicionadas à matriz de cargos validada.
 
 As ações de criação, alteração, aprovação, baixa e reversão devem ser adicionadas somente após a validação da matriz de cargos e dos fluxos executivos com o HVB.
