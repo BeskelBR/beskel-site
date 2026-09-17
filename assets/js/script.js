@@ -199,7 +199,7 @@ shortcut.innerHTML = WHATSAPP_ICON;
 [
   ["position","fixed"],["left","auto"],["right","clamp(16px, 2vw, 28px)"],["bottom","clamp(16px, 2vw, 28px)"],
   ["width","clamp(52px, 4vw, 58px)"],["height","clamp(52px, 4vw, 58px)"],["min-width","0"],["padding","0"],
-  ["border","0"],["border-radius","999px"],["background","#25D366"],["color","#FFFFFF"],
+  ["border","0"],["border-radius","999px"],["background","#FF7A00"],["color","#0D1117"],
   ["display","flex"],["align-items","center"],["justify-content","center"],["text-align","center"],
   ["box-shadow","0 12px 30px rgba(0,0,0,.22)"],["z-index","9999"]
 ].forEach(([property,value]) => shortcut.style.setProperty(property,value,"important"));
