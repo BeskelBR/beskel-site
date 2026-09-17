@@ -3,7 +3,7 @@ import { readFile, stat } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = normalize(join(fileURLToPath(new URL("..", import.meta.url)), ".."));
+const root = normalize(fileURLToPath(new URL("../", import.meta.url)));
 const port = Number(process.env.HVB_FRONTEND_PORT || 3200);
 const apiBase = (process.env.HVB_API_URL || "http://127.0.0.1:3100").replace(/\/$/, "");
 
