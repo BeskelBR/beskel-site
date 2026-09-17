@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="493" height="552" viewBox="138 0 493 552">
+  <title>BESKEL Simbolo Oficial — fundo claro</title>
+  <desc>Símbolo oficial BESKEL adaptado para aplicação sobre fundo claro.</desc>
+  <path d="M 385.00,0.00 L 631.00,137.00 L 631.00,415.00 L 383.00,552.00 L 138.00,415.00 L 138.00,136.00 Z M 386.00,55.00 L 584.00,167.00 L 584.00,388.00 L 383.00,500.00 L 185.00,389.00 L 185.00,166.00 Z" fill="#000000" fill-rule="evenodd" />
+  <path d="M 385.00,95.00 L 546.00,185.00 L 546.00,372.00 L 384.00,462.00 L 222.00,371.00 L 222.00,185.00 Z M 384.00,145.00 L 503.00,211.00 L 502.00,347.00 L 385.00,413.00 L 266.00,347.00 L 266.00,211.00 Z" fill="#000000" fill-rule="evenodd" />
+  <polygon points="385.00,180.00 297.00,229.00 384.00,279.00 472.00,229.00" fill="#FF7A00" />
+  <polygon points="297.00,229.00 384.00,279.00 384.00,379.00 297.00,330.00" fill="#FF5B00" />
+  <polygon points="384.00,279.00 472.00,229.00 472.00,329.00 384.00,379.00" fill="#DC4D00" />
+</svg>
