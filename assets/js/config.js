@@ -12,3 +12,10 @@ window.BESKEL_CONFIG = Object.freeze({
   city: "Brasília",
   state: "DF"
 });
+
+if (!document.querySelector('link[href*="master-v52.css"]')) {
+  const masterStyles = document.createElement("link");
+  masterStyles.rel = "stylesheet";
+  masterStyles.href = "/assets/css/master-v52.css?v=1";
+  document.head.appendChild(masterStyles);
+}
