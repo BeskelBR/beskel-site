@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#0A3983">
+  <title>HVB Sistema | Área do colaborador</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/system.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Pular para o conteúdo</a>
+
+  <section class="auth-view" data-view="auth">
+    <div class="auth-brand">
+      <a href="https://hvb-site-dev.beskel.com.br" class="brand-link" aria-label="Voltar ao site do HVB">
+        <img src="https://hvb-site-dev.beskel.com.br/assets/hvb/brand/logo-hvb-horizontal.webp" alt="Hospital Veterinário Brasília — HVB">
+      </a>
+      <div class="auth-message">
+        <span class="eyebrow">Área do colaborador</span>
+        <h1>Operação hospitalar em um só ambiente.</h1>
+        <p>O HVB Sistema reúne as rotinas clínicas, administrativas e operacionais em uma interface única, com acesso controlado por perfil.</p>
+        <ul class="auth-benefits">
+          <li>Pacientes, episódios e prontuário longitudinal</li>
+          <li>Agenda, internação, exames e documentos</li>
+          <li>Estoque, compras, financeiro e rastreabilidade</li>
+        </ul>
+      </div>
+      <small>Ambiente DEV • dados reais não devem ser inseridos nesta etapa.</small>
+    </div>
+
+    <div class="auth-panel-wrap">
+      <div class="auth-panel">
+        <div class="auth-panel-head">
+          <span class="status-dot" aria-hidden="true"></span>
+          <div>
+            <strong>HVB Sistema</strong>
+            <span>Acesso restrito</span>
+          </div>
+        </div>
+        <h2>Entrar no sistema</h2>
+        <p class="muted">Nesta fase, o backend utiliza credencial opaca temporária. A autenticação operacional definitiva será integrada posteriormente.</p>
+        <form id="login-form">
+          <label for="access-token">Credencial de acesso</label>
+          <input id="access-token" name="access-token" type="password" inputmode="text" autocomplete="off" spellcheck="false" minlength="64" maxlength="64" placeholder="Credencial DEV de 64 caracteres" required>
+          <button class="primary-btn" type="submit">Acessar ambiente</button>
+        </form>
+        <details class="dev-settings">
+          <summary>Configuração técnica</summary>
+          <label for="api-base">Endereço da API</label>
+          <input id="api-base" name="api-base" type="url" placeholder="http://127.0.0.1:3100">
+          <small>Em produção, a interface deverá consumir a API do domínio operacional do HVB.</small>
+        </details>
+        <div class="auth-feedback" id="auth-feedback" role="status" aria-live="polite"></div>
+        <a class="back-link" href="https://hvb-site-dev.beskel.com.br/colaborador">← Voltar à página do colaborador</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="app-shell" data-view="app" hidden>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <img src="https://hvb-site-dev.beskel.com.br/assets/hvb/brand/logo-hvb-horizontal.webp" alt="Hospital Veterinário Brasília — HVB">
+        <span>Sistema</span>
+      </div>
+      <nav class="side-nav" aria-label="Módulos do sistema">
+        <button class="nav-item active" data-module="dashboard">Visão geral</button>
+        <button class="nav-item" data-module="pacientes">Pacientes</button>
+        <button class="nav-item" data-module="agenda">Agenda</button>
+        <button class="nav-item" data-module="internacao">Internação</button>
+        <button class="nav-item" data-module="prontuario">Prontuário</button>
+        <button class="nav-item" data-module="estoque">Estoque</button>
+        <button class="nav-item" data-module="exames">Exames</button>
+        <button class="nav-item" data-module="financeiro">Financeiro</button>
+        <button class="nav-item" data-module="compras">Compras</button>
+        <button class="nav-item" data-module="documentos">Documentos</button>
+        <button class="nav-item" data-module="preventivo">Preventivo</button>
+        <button class="nav-item" data-module="administracao">Administração</button>
+      </nav>
+      <div class="sidebar-foot">
+        <span class="environment-badge">DEV</span>
+        <button class="logout-btn" id="logout-btn">Encerrar sessão</button>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="topbar">
+        <button class="menu-btn" id="menu-btn" aria-label="Abrir menu" aria-controls="sidebar" aria-expanded="false">☰</button>
+        <div>
+          <span class="topbar-kicker">Hospital Veterinário Brasília</span>
+          <h2 id="page-title">Visão geral</h2>
+        </div>
+        <div class="topbar-status">
+          <span class="api-status" id="api-status">API verificando</span>
+          <div class="session-chip">
+            <span id="org-name">HVB</span>
+            <small>Sessão autenticada</small>
+          </div>
+        </div>
+      </header>
+
+      <main id="main" class="workspace" tabindex="-1">
+        <section class="module-view" data-module-view="dashboard">
+          <div class="welcome-card">
+            <div>
+              <span class="eyebrow">Operação integrada</span>
+              <h1>Bom trabalho.</h1>
+              <p>Use o menu para acessar as rotinas do hospital. O frontend está sendo conectado progressivamente aos contratos já implementados no backend.</p>
+            </div>
+            <div class="welcome-meta">
+              <span id="system-state">Sistema em validação DEV</span>
+              <small id="actor-id">Sessão não identificada</small>
+            </div>
+          </div>
+
+          <div class="status-grid">
+            <article class="status-card"><span>API</span><strong id="health-card">Verificando</strong><small>Disponibilidade do serviço</small></article>
+            <article class="status-card"><span>Banco</span><strong id="ready-card">Verificando</strong><small>Schema e conexão</small></article>
+            <article class="status-card"><span>Ambiente</span><strong>DEV</strong><small>Sem operação assistencial real</small></article>
+            <article class="status-card"><span>Frontend</span><strong>MVP 1</strong><small>Base de navegação integrada</small></article>
+          </div>
+
+          <div class="section-head">
+            <div><span class="eyebrow">Atalhos</span><h3>Rotinas principais</h3></div>
+          </div>
+          <div class="shortcut-grid">
+            <button data-go="pacientes"><strong>Pacientes</strong><span>Cadastro, vínculos e episódios</span></button>
+            <button data-go="agenda"><strong>Agenda</strong><span>Recursos, horários e agendamentos</span></button>
+            <button data-go="estoque"><strong>Estoque</strong><span>Posições, lotes e movimentações</span></button>
+            <button data-go="internacao"><strong>Internação</strong><span>Ocupação, acompanhamento e diárias</span></button>
+          </div>
+
+          <div class="section-head"><div><span class="eyebrow">Arquitetura funcional</span><h3>Módulos do ecossistema</h3></div></div>
+          <div class="module-grid" id="module-grid"></div>
+        </section>
+
+        <section class="module-view" data-module-view="detail" hidden>
+          <div class="detail-head">
+            <div><span class="eyebrow" id="detail-eyebrow">Módulo</span><h1 id="detail-title">Módulo</h1><p id="detail-description"></p></div>
+            <span class="module-state" id="detail-state">Integração progressiva</span>
+          </div>
+          <div class="detail-layout">
+            <article class="panel">
+              <div class="panel-head"><h3>Visão operacional</h3><button class="secondary-btn" id="refresh-module">Atualizar</button></div>
+              <div id="module-content" class="module-content"></div>
+            </article>
+            <aside class="panel side-panel">
+              <h3>Próxima camada</h3>
+              <p id="detail-next"></p>
+              <div class="notice">A interface não deve antecipar regras hospitalares ainda não validadas. Campos e ações serão liberados conforme o contrato funcional de cada módulo.</div>
+            </aside>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="assets/system.js" defer></script>
+</body>
+</html>
