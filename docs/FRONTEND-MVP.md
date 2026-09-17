@@ -8,7 +8,7 @@ O acesso institucional parte da página pública **Área do colaborador** (`/col
 
 O endereço `hvb-dev.beskel.com.br` permanece reservado ao **Terminal HVB** e não deve ser usado como destino do sistema interno.
 
-## Escopo entregue — MVP 3
+## Escopo entregue — MVP 4
 
 ### Base do sistema
 
@@ -32,9 +32,9 @@ O endereço `hvb-dev.beskel.com.br` permanece reservado ao **Terminal HVB** e n�
 
 ### Jornada clínica contextual
 
-O MVP 3 inicia a transição de uma interface orientada por tabelas para uma interface orientada por **jornadas de trabalho**.
+O MVP 3 iniciou a transição de uma interface orientada por tabelas para uma interface orientada por **jornadas de trabalho**.
 
-A Visão geral agora permite:
+A Visão geral permite:
 
 - localizar paciente por nome, espécie ou identificador;
 - abrir um contexto longitudinal sem abandonar o dashboard;
@@ -50,6 +50,20 @@ A Visão geral agora permite:
 
 O painel clínico respeita as permissões do backend. Um `403` é apresentado como área não liberada, sem transformar ausência de permissão em falha genérica.
 
+### Painel operacional
+
+O MVP 4 adiciona ao dashboard uma leitura consolidada do que já exige atenção na unidade ativa, sem criar regras clínicas novas.
+
+A Visão geral passa a consultar e apresentar:
+
+- **agenda do dia**, por meio de `/v1/agenda/mapa`, limitada ao intervalo do dia corrente;
+- **episódios ativos**, por meio de `/v1/episodios?ativos=true`;
+- **pendências clínicas abertas**, por meio de `/v1/clinica/pendencias?situacao=aberta`.
+
+O painel mostra contagens e uma prévia dos registros mais relevantes. Quando a consulta retorna `next_cursor`, a contagem é apresentada como limite mínimo (por exemplo, `100+`) para não sugerir totalização que o backend não forneceu.
+
+As três leituras continuam condicionadas às permissões do perfil autenticado. Ausência de autorização aparece como restrição do perfil, e não como erro do sistema.
+
 A autenticação operacional definitiva ainda **não** foi criada. O formulário atual representa somente a credencial opaca já suportada pelo backend.
 
 ## Princípios do frontend
@@ -62,6 +76,7 @@ A autenticação operacional definitiva ainda **não** foi criada. O formulário
 6. Resolver contexto de unidade e permissões no backend antes da produção; o campo manual atual é apenas suporte DEV.
 7. Priorizar jornadas operacionais sobre simples exposição de tabelas.
 8. Manter o paciente e o episódio como contexto quando uma rotina depender deles.
+9. Não apresentar métricas agregadas como totais globais quando o contrato da API fornecer apenas páginas de resultados.
 
 ## Executar localmente
 
