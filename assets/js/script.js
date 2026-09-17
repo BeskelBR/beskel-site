@@ -63,6 +63,13 @@ document.querySelectorAll(".site-footer .footer-grid").forEach(footer => {
     </div>`;
 });
 
+// No case HVB, o símbolo BESKEL usa a versão para fundo escuro sem moldura externa.
+document.querySelectorAll(".proof-mark").forEach(mark => {
+  mark.style.setProperty("background", "transparent", "important");
+  mark.style.setProperty("border", "0", "important");
+  mark.style.setProperty("box-shadow", "none", "important");
+});
+
 const menuButton = document.querySelector(".menu-toggle");
 const mainNav = document.querySelector(".main-nav");
 function closeMenu(){
