@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620" role="img" aria-labelledby="title desc">
+<title id="title">Visão técnica do insert da Caixa HVB</title>
+<desc id="desc">Insert com cavidade longa superior para termômetro, cavidade ampla inferior esquerda para calculadora, cavidade vertical inferior direita para garrote e círculo de retirada na região superior direita.</desc>
+<rect width="1000" height="620" fill="#f5f6f8"/>
+<g transform="translate(70 55)" fill="none" stroke="#0D1117">
+  <rect x="0" y="0" width="860" height="510" rx="44" fill="#ffffff" stroke-width="8"/>
+  <rect x="28" y="28" width="804" height="454" rx="30" fill="#f9fafb" stroke="#2A2F36" stroke-width="4"/>
+  <rect x="72" y="66" width="616" height="124" rx="30" fill="#e7ebef" stroke-width="4"/>
+  <circle cx="758" cy="128" r="42" fill="#ffffff" stroke-width="4"/>
+  <rect x="72" y="242" width="550" height="178" rx="34" fill="#e7ebef" stroke-width="4"/>
+  <rect x="664" y="236" width="124" height="190" rx="30" fill="#e7ebef" stroke-width="4"/>
+  <path d="M72 206 H622" stroke="#FF7A00" stroke-width="8" stroke-linecap="round"/>
+  <path d="M622 206 C650 206 668 190 688 174" stroke="#FF7A00" stroke-width="8" stroke-linecap="round"/>
+</g>
+<g font-family="IBM Plex Mono, monospace" fill="#0D1117">
+  <text x="175" y="146" font-size="34">TERMÔMETRO</text>
+  <text x="175" y="408" font-size="34">CALCULADORA</text>
+  <text x="750" y="390" font-size="30" transform="rotate(-90 750 390)">GARROTE</text>
+  <text x="820" y="170" font-size="22" text-anchor="middle">PEGA</text>
+</g>
+<g font-family="IBM Plex Mono, monospace" font-size="20" fill="#737A82">
+  <text x="70" y="600">VISÃO TÉCNICA · PROPORÇÕES BASEADAS NO INSERT FINAL</text>
+</g>
+</svg>
