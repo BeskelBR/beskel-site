@@ -21,5 +21,15 @@
       "destination": "/portfolio/",
       "permanent": true
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/case-hvb",
+      "destination": "/pages/case-hvb.html"
+    },
+    {
+      "source": "/case-hvb/",
+      "destination": "/pages/case-hvb.html"
+    }
   ]
 }
