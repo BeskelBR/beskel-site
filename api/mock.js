@@ -65,6 +65,7 @@ module.exports = async function handler(req, res) {
         return send(res, 200, { ok:true, data:adapter.startAccessSession({
           authSessionId:String(body.auth_session_id || ""),
           orderIds:Array.isArray(body.order_ids) ? body.order_ids : [],
+          liveItems:Array.isArray(body.live_items) ? body.live_items : [],
           terminalId:String(body.terminal_id || store.TERMINAL_ID),
           commandId:String(body.command_id || "")
         }) });
@@ -81,6 +82,25 @@ module.exports = async function handler(req, res) {
         }) });
       }
 
+      if (action === "registerPickingEvent") {
+        return send(res, 200, { ok:true, data:adapter.registerPickingEvent({
+          accessSessionId:String(body.access_session_id || ""),
+          eventType:String(body.event_type || ""),
+          metadata:body.metadata && typeof body.metadata === "object" ? body.metadata : {},
+          commandId:String(body.command_id || ""),
+          sourceDeviceId:String(body.source_device_id || store.PICKING_DISPLAY_ID)
+        }) });
+      }
+
+      if (action === "confirmWithdrawal") {
+        return send(res, 200, { ok:true, data:adapter.confirmWithdrawal({
+          accessSessionId:String(body.access_session_id || ""),
+          results:Array.isArray(body.results) ? body.results : [],
+          commandId:String(body.command_id || ""),
+          sourceDeviceId:String(body.source_device_id || store.PICKING_DISPLAY_ID)
+        }) });
+      }
+
       return send(res, 400, { ok:false, error:"INVALID_ACTION" });
     }
 
@@ -91,8 +111,9 @@ module.exports = async function handler(req, res) {
       "AUTH_EVIDENCE_EXPIRED","AUTH_EVIDENCE_MISMATCH","AUTH_EVIDENCE_UNTRUSTED",
       "BIOMETRIC_VERIFICATION_FAILED","AUTH_SESSION_EXPIRED","TERMINAL_MISMATCH",
       "UNTRUSTED_TERMINAL","UNTRUSTED_DEVICE","COMMAND_ID_REQUIRED","IDEMPOTENCY_CONFLICT",
-      "ORDER_REQUIRED","ORDER_NOT_AVAILABLE","SENSITIVE_ACCESS_DENIED",
-      "ACCESS_SESSION_NOT_FOUND","ACCESS_SESSION_INACTIVE","INVALID_ACCESS_SEQUENCE"
+      "ORDER_REQUIRED","ORDER_NOT_AVAILABLE","LIVE_ITEM_INVALID","SENSITIVE_ACCESS_DENIED",
+      "ACCESS_SESSION_NOT_FOUND","ACCESS_SESSION_INACTIVE","INVALID_ACCESS_SEQUENCE",
+      "INVALID_PICKING_EVENT","PICKING_NOT_ACTIVE","WITHDRAWAL_NOT_READY","WITHDRAWAL_RESULTS_INCOMPLETE"
     ];
     if (known.includes(error.message)) return send(res, 400, { ok:false, error:error.message });
     console.error(error);
