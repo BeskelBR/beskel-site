@@ -96,3 +96,87 @@ test("Sensitive access remains denied to an authenticated employee without permi
     commandId: "test-sensitive-denied-v2"
   }), /SENSITIVE_ACCESS_DENIED/);
 });
+
+test("Terminal v4 exposes physical coordinates and supports the approved NFC/biometric picking sequence", () => {
+  const rafael = authenticate("demo-rafael");
+  const pending = store.listPendingOrders(rafael.auth.auth_session_id);
+  assert.ok(pending.length > 0);
+  assert.ok(pending.some(order => order.items.some(item => item.location_code)));
+  assert.ok(pending.every(order => order.items.every(item => Array.isArray(item.alternate_locations))));
+
+  const access = store.startAccessSession({
+    authSessionId: rafael.auth.auth_session_id,
+    orderIds: [],
+    liveItems: [{
+      live_item_id: "live-test-v4",
+      description: "Material DEV avulso",
+      quantity: 2,
+      sensitive: false,
+      location_code: "T1"
+    }],
+    terminalId: store.TERMINAL_ID,
+    commandId: "test-v4-live-access-001"
+  });
+
+  assert.equal(access.state, "DOOR_AUTHORIZED");
+  assert.equal(access.live_items.length, 1);
+
+  let current = store.registerAccessEvent({
+    accessSessionId: access.access_session_id,
+    eventType: "DOOR_OPENED",
+    commandId: "test-v4-door-open",
+    sourceOccurredAt: "2026-09-20T19:00:00.000Z",
+    sourceDeviceId: store.TERMINAL_ID,
+    metadata: { source: "node-test" }
+  });
+  assert.equal(current.state, "DOOR_OPEN");
+
+  current = store.registerAccessEvent({
+    accessSessionId: access.access_session_id,
+    eventType: "PRESENCE_CONFIRMED",
+    commandId: "test-v4-presence",
+    sourceOccurredAt: "2026-09-20T19:00:01.000Z",
+    sourceDeviceId: store.TERMINAL_ID,
+    metadata: { source: "node-test" }
+  });
+  assert.equal(current.state, "ENTRY_CONFIRMED");
+
+  current = store.registerPickingEvent({
+    accessSessionId: access.access_session_id,
+    eventType: "STOCK_LOCATION_DISCREPANCY",
+    commandId: "test-v4-discrepancy",
+    sourceDeviceId: store.PICKING_DISPLAY_ID,
+    metadata: { description: "Material DEV avulso", location_code: "T1" }
+  });
+  assert.equal(current.state, "ENTRY_CONFIRMED");
+
+  current = store.registerAccessEvent({
+    accessSessionId: access.access_session_id,
+    eventType: "DOOR_CLOSED",
+    commandId: "test-v4-door-closed",
+    sourceOccurredAt: "2026-09-20T19:00:02.000Z",
+    sourceDeviceId: store.TERMINAL_ID,
+    metadata: { source: "node-test" }
+  });
+  assert.equal(current.state, "READY_TO_CONFIRM");
+
+  current = store.confirmWithdrawal({
+    accessSessionId: access.access_session_id,
+    results: [{
+      key: "T1|Material DEV avulso|0",
+      description: "Material DEV avulso",
+      expected_quantity: 2,
+      actual_quantity: 2,
+      location_code: "T1",
+      status: "CONFIRMED"
+    }],
+    commandId: "test-v4-confirm",
+    sourceDeviceId: store.PICKING_DISPLAY_ID
+  });
+  assert.equal(current.state, "WITHDRAWAL_CONFIRMED");
+  assert.ok(current.withdrawal_confirmation);
+  assert.ok(store.listAudit().some(event => event.event_type === "NFC_VALIDATED"));
+  assert.ok(store.listAudit().some(event => event.event_type === "BIOMETRIC_VALIDATED"));
+  assert.ok(store.listAudit().some(event => event.event_type === "WITHDRAWAL_CONFIRMED"));
+  assert.ok(!store.listAudit().some(event => event.event_type === "STOCK_CONSUMED"));
+});
