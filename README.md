@@ -1,5 +1,7 @@
 # HVB Terminal — Terminal de Acesso
 
+> **ATUALIZAÇÃO VIGENTE — v4 / N1:** o fluxo físico aprovado pelo HVB em 20/09/2026 está documentado em `docs/TERMINAL-FLUXO-FISICO-N1-V4.md`. Ele substitui, para a implementação atual, as referências anteriores a HVB Mobile/WhatsApp como parte necessária do picking. O Terminal de Retirada interno é a interface operacional da separação.
+
 Protótipo de desenvolvimento do Terminal físico do Hospital Veterinário Brasília.
 
 > **Arquitetura funcional vigente:** o Terminal é um **Terminal de Acesso**. Seu papel é identidade, autenticação, autorização, confirmação de contexto da retirada e participação no controle de acesso físico. O picking item a item continua no **HVB Mobile** e a escrituração continua sendo responsabilidade da **API do HVB Sistema**.
