@@ -4,13 +4,14 @@ const crypto = require("crypto");
 
 const TERMINAL_ID = "HVB-T01";
 const BIOMETRIC_DEVICE_ID = "HVB-T01-BIO-DEV";
+const PICKING_DISPLAY_ID = "HVB-PICKING-01";
 
 const terminals = [
   {
     terminal_id: TERMINAL_ID,
     active: true,
     trusted_device_ids: [BIOMETRIC_DEVICE_ID],
-    mode: "ACCESS_TERMINAL_V2"
+    mode: "ACCESS_TERMINAL_V4"
   }
 ];
 
@@ -21,9 +22,9 @@ const employees = [
 ];
 
 const credentials = [
-  { credential_id:"cred_001", token:"demo-rafael", employee_id:"emp_001", status:"active", technology:"DESFire EV3 (simulado)" },
-  { credential_id:"cred_002", token:"demo-marina", employee_id:"emp_002", status:"active", technology:"DESFire EV3 (simulado)" },
-  { credential_id:"cred_003", token:"demo-carlos", employee_id:"emp_003", status:"active", technology:"DESFire EV3 (simulado)" }
+  { credential_id:"cred_001", token:"demo-rafael", employee_id:"emp_001", status:"active", technology:"NFC TAG simples (simulado)" },
+  { credential_id:"cred_002", token:"demo-marina", employee_id:"emp_002", status:"active", technology:"NFC TAG simples (simulado)" },
+  { credential_id:"cred_003", token:"demo-carlos", employee_id:"emp_003", status:"active", technology:"NFC TAG simples (simulado)" }
 ];
 
 const patients = [
@@ -139,6 +140,58 @@ const terminal = terminalId => terminals.find(x => x.terminal_id === terminalId 
 const hasPermission = (person, permission) => Boolean(person?.permissions?.includes(permission));
 const hasSensitive = value => Boolean(value?.items?.some(item => item.sensitive));
 
+const STOCK_ADDRESS_RULES = [
+  [/agulha 25 x 7/i,{primary:"A2",alternatives:["A5"]}],
+  [/agulha 13 x 4,5/i,{primary:"A3",alternatives:["A6"]}],
+  [/agulha/i,{primary:"A4",alternatives:["A7"]}],
+  [/gaze/i,{primary:"G4",alternatives:["G6"]}],
+  [/compressa/i,{primary:"G3",alternatives:["G7"]}],
+  [/atadura/i,{primary:"G2",alternatives:[]}],
+  [/algod/i,{primary:"G1",alternatives:[]}],
+  [/medicamento x/i,{primary:"E1",alternatives:["E5"],sensitive_area:true}],
+  [/medicamento y/i,{primary:"E2",alternatives:["E5"],sensitive_area:true}],
+  [/medicamento z/i,{primary:"E3",alternatives:["E6"],sensitive_area:true}],
+  [/controlado/i,{primary:"E4",alternatives:["E6"],sensitive_area:true}],
+  [/cateter 20/i,{primary:"C1",alternatives:["C5"]}],
+  [/cateter 22/i,{primary:"C2",alternatives:["C5"]}],
+  [/cateter 24/i,{primary:"C3",alternatives:["C6"]}],
+  [/cateter/i,{primary:"C4",alternatives:[]}],
+  [/seringa 1/i,{primary:"S1",alternatives:["S7"]}],
+  [/seringa 3/i,{primary:"S2",alternatives:["S7"]}],
+  [/seringa 5/i,{primary:"S3",alternatives:["S8"]}],
+  [/seringa 10/i,{primary:"S4",alternatives:["S8"]}],
+  [/seringa 20/i,{primary:"S5",alternatives:["S9"]}],
+  [/seringa/i,{primary:"S6",alternatives:[]}],
+  [/soro 250/i,{primary:"H1",alternatives:["H5"]}],
+  [/soro 500/i,{primary:"H2",alternatives:["H5"]}],
+  [/soro 1000/i,{primary:"H3",alternatives:["H6"]}],
+  [/soro/i,{primary:"H4",alternatives:[]}],
+  [/equipo/i,{primary:"B1",alternatives:["B5"]}],
+  [/extensor/i,{primary:"B2",alternatives:[]}],
+  [/torneira/i,{primary:"B3",alternatives:[]}],
+  [/sonda/i,{primary:"B4",alternatives:[]}],
+  [/luva/i,{primary:"L1",alternatives:["L7"]}],
+  [/esparadrapo/i,{primary:"L2",alternatives:[]}],
+  [/álcool/i,{primary:"L3",alternatives:[]}],
+  [/clorexidina/i,{primary:"L4",alternatives:[]}],
+  [/lâmina/i,{primary:"L5",alternatives:[]}],
+  [/gel/i,{primary:"L6",alternatives:[]}]
+];
+
+function stockAddressFor(item) {
+  const hit = STOCK_ADDRESS_RULES.find(([re]) => re.test(item?.description || ""));
+  const cfg = hit?.[1] || { primary:"Z9", alternatives:[] };
+  const sensitiveArea = item?.sensitive === true || cfg.sensitive_area === true;
+  return {
+    location_code:cfg.primary,
+    alternate_locations:(cfg.alternatives || []).map((code,index)=>({
+      location_code:code,
+      available_units:Math.max(Number(item?.quantity || 1) * (index + 2), 2),
+      sensitive_area:sensitiveArea
+    }))
+  };
+}
+
 function publicEmployee(value) {
   return value ? { employee_id:value.employee_id, name:value.name, role:value.role } : null;
 }
@@ -153,11 +206,16 @@ function orderSummary(value) {
     item_count:value.items.length,
     total_units:value.items.reduce((sum,item) => sum + Number(item.quantity || 0), 0),
     has_sensitive_items:hasSensitive(value),
-    items:value.items.map(item => ({
-      description:item.description,
-      quantity:item.quantity,
-      sensitive:item.sensitive === true
-    })),
+    items:value.items.map(item => {
+      const address = stockAddressFor(item);
+      return {
+        description:item.description,
+        quantity:item.quantity,
+        sensitive:item.sensitive === true,
+        location_code:address.location_code,
+        alternate_locations:address.alternate_locations
+      };
+    }),
     patient,
     requester:publicEmployee(employee(value.requester_employee_id))
   };
@@ -220,7 +278,7 @@ function identifyCredential(token, terminalId = TERMINAL_ID) {
     consumed:false
   };
   challenges.set(challenge.challenge_id, challenge);
-  log(null,"CREDENTIAL_IDENTIFIED",{
+  log(null,"NFC_VALIDATED",{
     employee_id:person.employee_id,
     terminal_id:terminalId,
     credential_id:credential.credential_id
@@ -307,11 +365,11 @@ function verifyIdentity({ challengeId, evidenceId, terminalId = TERMINAL_ID }) {
     terminal_id:terminalId,
     evidence_id:evidence.evidence_id,
     auth_level:"STANDARD",
-    factors:["DESFIRE","FACE_1_TO_1","PAD_LIVENESS","DEVICE_ATTESTATION_SIMULATED"],
+    factors:["NFC_BASIC","FACE_1_TO_1","PAD_LIVENESS","DEVICE_ATTESTATION_SIMULATED"],
     expires_at:Date.now()+300000
   };
   authSessions.set(auth.auth_session_id, auth);
-  log(null,"IDENTITY_VERIFIED",{
+  log(null,"BIOMETRIC_VALIDATED",{
     auth_session_id:auth.auth_session_id,
     employee_id:person.employee_id,
     terminal_id:terminalId,
@@ -332,17 +390,31 @@ function listPendingOrders(authSessionId) {
   return withdrawalOrders.filter(x => x.status === "AGUARDANDO_RETIRADA").map(orderSummary);
 }
 
-function startAccessSession({ authSessionId, orderIds, terminalId = TERMINAL_ID, commandId }) {
-  const payload = { authSessionId:String(authSessionId || ""), orderIds:[...(orderIds || [])].map(String).sort(), terminalId:String(terminalId || "") };
+function startAccessSession({ authSessionId, orderIds, liveItems = [], terminalId = TERMINAL_ID, commandId }) {
+  const normalizedLiveItems = (Array.isArray(liveItems) ? liveItems : []).map((item,index)=>({
+    live_item_id:String(item?.live_item_id || `live_${index+1}`),
+    description:String(item?.description || "").trim(),
+    quantity:Number(item?.quantity || 0),
+    sensitive:item?.sensitive === true,
+    location_code:String(item?.location_code || "MANUAL").trim().toUpperCase(),
+    alternate_locations:Array.isArray(item?.alternate_locations) ? item.alternate_locations : []
+  }));
+  const payload = {
+    authSessionId:String(authSessionId || ""),
+    orderIds:[...(orderIds || [])].map(String).sort(),
+    liveItems:normalizedLiveItems,
+    terminalId:String(terminalId || "")
+  };
   return idempotent("startAccessSession", commandId, payload, () => {
     const auth = getAuth(authSessionId);
     if (!auth) throw new Error("AUTH_SESSION_EXPIRED");
     if (auth.terminal_id !== terminalId) throw new Error("TERMINAL_MISMATCH");
     const ids = [...new Set((orderIds || []).map(String).filter(Boolean))];
-    if (!ids.length) throw new Error("ORDER_REQUIRED");
+    if (!ids.length && !normalizedLiveItems.length) throw new Error("ORDER_REQUIRED");
+    if (normalizedLiveItems.some(item => !item.description || !Number.isFinite(item.quantity) || item.quantity <= 0)) throw new Error("LIVE_ITEM_INVALID");
     const orders = ids.map(order);
     if (orders.some(x => !x || x.status !== "AGUARDANDO_RETIRADA")) throw new Error("ORDER_NOT_AVAILABLE");
-    const sensitive = orders.some(hasSensitive);
+    const sensitive = orders.some(hasSensitive) || normalizedLiveItems.some(item => item.sensitive);
     const person = employee(auth.employee_id);
     if (sensitive && !hasPermission(person,"stock.sensitive.access")) throw new Error("SENSITIVE_ACCESS_DENIED");
 
@@ -353,14 +425,18 @@ function startAccessSession({ authSessionId, orderIds, terminalId = TERMINAL_ID,
       credential_id:auth.credential_id,
       terminal_id:terminalId,
       order_ids:ids,
+      live_items:normalizedLiveItems,
       sensitive_access:sensitive,
+      sensitive_access_granted:sensitive,
       state:"DOOR_AUTHORIZED",
       created_at:now(),
       expires_at:Date.now()+1200000
     };
     accessSessions.set(access.access_session_id, access);
-    log(access,"ACCESS_SESSION_CREATED",{ order_ids:ids, sensitive_access:sensitive, command_id:commandId });
-    log(access,"DOOR_AUTHORIZED",{ barrier_id:"STOCK_ROOM_DOOR" });
+    log(access,"ACCESS_SESSION_CREATED",{ order_ids:ids, live_item_count:normalizedLiveItems.length, sensitive_access:sensitive, command_id:commandId });
+    log(access,"WITHDRAWAL_CONTEXT_CONFIRMED",{ order_ids:ids, live_items:normalizedLiveItems, command_id:commandId });
+    log(access,"ACCESS_GRANTED",{ barrier_id:"STOCK_ROOM_DOOR", sensitive_access:sensitive });
+    if (sensitive) log(access,"SENSITIVE_ACCESS_GRANTED",{ barrier_id:"SENSITIVE_STORAGE", permission:"stock.sensitive.access" });
 
     return {
       value:getAccessSessionDetail(access.access_session_id),
@@ -407,20 +483,23 @@ function registerAccessEvent({ accessSessionId, eventType, metadata = {}, comman
     const transitions = {
       DOOR_OPENED:["DOOR_AUTHORIZED","DOOR_OPEN"],
       ENTRY_CONFIRMED:["DOOR_OPEN","ENTRY_CONFIRMED"],
-      DOOR_CLOSED:["ENTRY_CONFIRMED",access.sensitive_access?"SENSITIVE_CABINET_AUTHORIZED":"ACCESS_ACTIVE"],
-      SENSITIVE_CABINET_OPENED:["SENSITIVE_CABINET_AUTHORIZED","SENSITIVE_CABINET_OPEN"],
-      SENSITIVE_CABINET_CLOSED:["SENSITIVE_CABINET_OPEN","ACCESS_ACTIVE"],
-      ACCESS_CLOSED:["ACCESS_ACTIVE","CLOSED"]
+      PRESENCE_CONFIRMED:["DOOR_OPEN","ENTRY_CONFIRMED"],
+      DOOR_CLOSED:["ENTRY_CONFIRMED","READY_TO_CONFIRM"],
+      ACCESS_CLOSED:["WITHDRAWAL_CONFIRMED","CLOSED"]
     };
     const transition = transitions[eventType];
     if (!transition || access.state !== transition[0]) throw new Error("INVALID_ACCESS_SEQUENCE");
 
     access.state = transition[1];
-    if (eventType === "ENTRY_CONFIRMED") {
+    if (eventType === "DOOR_OPENED" && access.sensitive_access_granted) {
+      log(access,"SENSITIVE_DOOR_OPENED",{ barrier_id:"SENSITIVE_STORAGE", simulated:true });
+    }
+    if (eventType === "ENTRY_CONFIRMED" || eventType === "PRESENCE_CONFIRMED") {
       access.order_ids.map(order).filter(Boolean).forEach(x => {
         if (x.status === "AGUARDANDO_RETIRADA") x.status = "EM_SEPARACAO";
       });
     }
+    if (eventType === "DOOR_CLOSED") access.door_closed_at = now();
     if (eventType === "ACCESS_CLOSED") access.closed_at = now();
 
     log(access,eventType,{
@@ -428,6 +507,63 @@ function registerAccessEvent({ accessSessionId, eventType, metadata = {}, comman
       command_id:commandId,
       source_occurred_at:sourceOccurredAt || null,
       source_device_id:sourceDeviceId || null
+    });
+
+    return {
+      value:getAccessSessionDetail(access.access_session_id),
+      result:() => getAccessSessionDetail(access.access_session_id)
+    };
+  });
+}
+
+function registerPickingEvent({ accessSessionId, eventType, metadata = {}, commandId, sourceDeviceId = PICKING_DISPLAY_ID }) {
+  const allowed = new Set([
+    "PICKING_ITEM_CONFIRMED","PICKING_ITEM_UNDONE","STOCK_LOCATION_DISCREPANCY",
+    "PICKING_LOCATION_REROUTED","PICKING_PARTIAL","PICKING_UNAVAILABLE"
+  ]);
+  if (!allowed.has(String(eventType || ""))) throw new Error("INVALID_PICKING_EVENT");
+  const payload = { accessSessionId:String(accessSessionId || ""), eventType:String(eventType || ""), metadata, sourceDeviceId:String(sourceDeviceId || "") };
+  return idempotent("registerPickingEvent", commandId, payload, () => {
+    const access = rawAccess(accessSessionId);
+    if (!access) throw new Error("ACCESS_SESSION_NOT_FOUND");
+    if (!["ENTRY_CONFIRMED","READY_TO_CONFIRM"].includes(access.state)) throw new Error("PICKING_NOT_ACTIVE");
+    if (sourceDeviceId !== PICKING_DISPLAY_ID) throw new Error("UNTRUSTED_DEVICE");
+    log(access,eventType,{ ...metadata, command_id:commandId, source_device_id:sourceDeviceId });
+    return {
+      value:getAccessSessionDetail(access.access_session_id),
+      result:() => getAccessSessionDetail(access.access_session_id)
+    };
+  });
+}
+
+function confirmWithdrawal({ accessSessionId, results = [], commandId, sourceDeviceId = PICKING_DISPLAY_ID }) {
+  const normalized = (Array.isArray(results) ? results : []).map(item=>({
+    key:String(item?.key || ""),
+    description:String(item?.description || ""),
+    expected_quantity:Number(item?.expected_quantity || 0),
+    actual_quantity:Number(item?.actual_quantity ?? 0),
+    location_code:String(item?.location_code || ""),
+    status:String(item?.status || "")
+  }));
+  const payload = { accessSessionId:String(accessSessionId || ""), results:normalized, sourceDeviceId:String(sourceDeviceId || "") };
+  return idempotent("confirmWithdrawal", commandId, payload, () => {
+    const access = rawAccess(accessSessionId);
+    if (!access) throw new Error("ACCESS_SESSION_NOT_FOUND");
+    if (access.state !== "READY_TO_CONFIRM") throw new Error("WITHDRAWAL_NOT_READY");
+    if (sourceDeviceId !== PICKING_DISPLAY_ID) throw new Error("UNTRUSTED_DEVICE");
+    if (!normalized.length || normalized.some(item => !["CONFIRMED","PARTIAL","UNAVAILABLE"].includes(item.status))) throw new Error("WITHDRAWAL_RESULTS_INCOMPLETE");
+
+    const confirmedAt = now();
+    access.withdrawal_confirmation = { confirmed_at:confirmedAt, results:normalized };
+    access.state = "WITHDRAWAL_CONFIRMED";
+    access.order_ids.map(order).filter(Boolean).forEach(x => {
+      if (x.status === "EM_SEPARACAO") x.status = "RETIRADA_CONFIRMADA";
+    });
+    log(access,"WITHDRAWAL_CONFIRMED",{
+      results:normalized,
+      command_id:commandId,
+      source_device_id:sourceDeviceId,
+      dev_no_stock_movement:true
     });
 
     return {
@@ -448,20 +584,24 @@ function terminalDescriptor(terminalId = TERMINAL_ID) {
     mode:value.mode,
     simulated_hardware:true,
     biometric_device_id:BIOMETRIC_DEVICE_ID,
-    auth_contract_version:"1",
-    access_contract_version:"1"
+    picking_display_id:PICKING_DISPLAY_ID,
+    auth_contract_version:"4",
+    access_contract_version:"4"
   };
 }
 
 module.exports = {
   TERMINAL_ID,
   BIOMETRIC_DEVICE_ID,
+  PICKING_DISPLAY_ID,
   identifyCredential,
   createBiometricEvidence,
   verifyIdentity,
   listPendingOrders,
   startAccessSession,
   registerAccessEvent,
+  registerPickingEvent,
+  confirmWithdrawal,
   getAccessSessionDetail,
   listAudit,
   terminalDescriptor
