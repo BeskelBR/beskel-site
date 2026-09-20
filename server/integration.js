@@ -9,6 +9,8 @@ class IntegrationAdapter {
   getPendingOrders() { throw new Error("NOT_IMPLEMENTED"); }
   startAccessSession() { throw new Error("NOT_IMPLEMENTED"); }
   registerAccessEvent() { throw new Error("NOT_IMPLEMENTED"); }
+  registerPickingEvent() { throw new Error("NOT_IMPLEMENTED"); }
+  confirmWithdrawal() { throw new Error("NOT_IMPLEMENTED"); }
   getAccessSession() { throw new Error("NOT_IMPLEMENTED"); }
   getTerminalDescriptor() { throw new Error("NOT_IMPLEMENTED"); }
   listAudit() { throw new Error("NOT_IMPLEMENTED"); }
@@ -37,6 +39,14 @@ class MockAdapter extends IntegrationAdapter {
 
   registerAccessEvent(payload) {
     return store.registerAccessEvent(payload);
+  }
+
+  registerPickingEvent(payload) {
+    return store.registerPickingEvent(payload);
+  }
+
+  confirmWithdrawal(payload) {
+    return store.confirmWithdrawal(payload);
   }
 
   getAccessSession(accessSessionId) {
