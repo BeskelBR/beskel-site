@@ -7,9 +7,9 @@ const PHONE_HREF = CONFIG.phoneHref || "tel:61991668921";
 const CONTACT_EMAIL = CONFIG.email || "contato@beskel.com.br";
 const INSTAGRAM_USER = CONFIG.instagramUser || "beskelbr";
 const INSTAGRAM_URL = CONFIG.instagramUrl || "https://instagram.com/beskelbr";
-const IS_LIGHT_HOME = document.body.classList.contains("home-light");
-const BRAND_SYMBOL = IS_LIGHT_HOME ? "/assets/img/beskel-symbol-master-light.svg" : "/assets/img/beskel-symbol-master-dark.svg";
-const BRAND_LOGO = IS_LIGHT_HOME ? "/assets/img/beskel-logo-master-light.svg" : "/assets/img/beskel-logo-master-dark.svg";
+const IS_LIGHT_SURFACE = document.body.classList.contains("home-light") || document.body.classList.contains("lab-light");
+const BRAND_SYMBOL = IS_LIGHT_SURFACE ? "/assets/img/beskel-symbol-master-light.svg" : "/assets/img/beskel-symbol-master-dark.svg";
+const BRAND_LOGO = IS_LIGHT_SURFACE ? "/assets/img/beskel-logo-master-light.svg" : "/assets/img/beskel-logo-master-dark.svg";
 
 let favicon = document.querySelector('link[rel="icon"]');
 if (!favicon) {
@@ -38,6 +38,25 @@ document.querySelectorAll(".main-nav a").forEach(link => {
   if (/portfolio\.html|\/portfolio\/?$/.test(href)) link.textContent = "Projetos";
 });
 
+// Mantém a linha LAB visível na navegação sem duplicar links existentes.
+document.querySelectorAll(".main-nav").forEach(nav => {
+  let labLink = nav.querySelector('a[href="/lab/"]');
+  if (!labLink) {
+    labLink = document.createElement("a");
+    labLink.href = "/lab/";
+    labLink.textContent = "LAB";
+    const projectsLink = nav.querySelector('a[href="/portfolio/"], a[href$="portfolio.html"]');
+    const cta = nav.querySelector(".btn");
+    nav.insertBefore(labLink, projectsLink || cta || null);
+  }
+  const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (currentPath === "/lab") {
+    nav.querySelectorAll("a").forEach(a => { a.classList.remove("active"); a.removeAttribute("aria-current"); });
+    labLink.classList.add("active");
+    labLink.setAttribute("aria-current", "page");
+  }
+});
+
 // Padroniza o rodapé sem reintroduzir páginas ou catálogos descontinuados.
 document.querySelectorAll(".site-footer .footer-grid").forEach(footer => {
   footer.innerHTML = `
@@ -49,6 +68,7 @@ document.querySelectorAll(".site-footer .footer-grid").forEach(footer => {
     <div>
       <b>Navegação</b>
       <a href="/servicos/">Soluções</a>
+      <a href="/lab/">LAB</a>
       <a href="/portfolio/">Projetos</a>
       <a href="/sobre/">Sobre</a>
     </div>
