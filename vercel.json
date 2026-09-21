@@ -38,6 +38,14 @@
     {
       "source": "/lab/",
       "destination": "/pages/lab.html"
+    },
+    {
+      "source": "/lab/rack-parametrico-ampolas-cubeta",
+      "destination": "/pages/lab-rack-parametrico.html"
+    },
+    {
+      "source": "/lab/rack-parametrico-ampolas-cubeta/",
+      "destination": "/pages/lab-rack-parametrico.html"
     }
   ]
 }
