@@ -30,6 +30,14 @@
     {
       "source": "/case-hvb/",
       "destination": "/pages/case-hvb.html"
+    },
+    {
+      "source": "/lab",
+      "destination": "/pages/lab.html"
+    },
+    {
+      "source": "/lab/",
+      "destination": "/pages/lab.html"
     }
   ]
 }
