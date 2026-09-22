@@ -845,6 +845,41 @@ function registerAccessEvent({ accessSessionId, sessionToken, eventType, metadat
   });
 }
 
+function allPickingResolved(access) {
+  const expected = expectedPickingGroups(access);
+  if (!expected.length) return false;
+  return expected.every(group => ["CONFIRMED","PARTIAL","UNAVAILABLE"].includes(access.picking_state[group.key]?.status));
+}
+
+function maybeAutoMarkPickingReady(access,{ triggerEvent, sourceDeviceId, commandId } = {}) {
+  if (!access || access.state !== "ENTRY_CONFIRMED") return false;
+  if (!allPickingResolved(access)) return false;
+  if (access.sensitive_access && access.sensitive_state !== "COMPLETED") return false;
+
+  access.state = "PICKING_READY";
+  access.picking_ready_at = now();
+  log(access,"PICKING_READY",{
+    automatic:true,
+    trigger:triggerEvent || "PICKING_RESOLVED",
+    command_id:commandId || null,
+    source_device_id:sourceDeviceId || null
+  });
+  return true;
+}
+
+function fallbackRemainingCapacity(access,group,fallback,expected) {
+  const claimedByReroutes = expected.reduce((sum,otherGroup)=>{
+    if (otherGroup.key === group.key) return sum;
+    const otherState = access.picking_state[otherGroup.key];
+    if (!otherState) return sum;
+    const activeLot = String(otherState.active_stock_lot_id || otherGroup.stock_lot_id);
+    if (activeLot !== fallback.stock_lot_id) return sum;
+    if (otherGroup.stock_lot_id === fallback.stock_lot_id) return sum;
+    return sum + Number(otherGroup.quantity || 0);
+  },0);
+  return Math.max(Number(fallback.available_units || 0)-claimedByReroutes,0);
+}
+
 function registerPickingEvent({ accessSessionId, sessionToken, eventType, metadata = {}, commandId, sourceDeviceId }) {
   const allowed = new Set([
     "PICKING_ITEM_CONFIRMED","PICKING_ITEM_UNDONE","STOCK_LOCATION_DISCREPANCY",
@@ -856,7 +891,8 @@ function registerPickingEvent({ accessSessionId, sessionToken, eventType, metada
     const access = rawAccess(accessSessionId);
     if (!access) throw new Error("ACCESS_SESSION_NOT_FOUND");
     requireSessionToken(access,sessionToken);
-    if (access.state !== "ENTRY_CONFIRMED") throw new Error("PICKING_NOT_ACTIVE");
+    const reopeningReadyState = access.state === "PICKING_READY" && eventType === "PICKING_ITEM_UNDONE";
+    if (access.state !== "ENTRY_CONFIRMED" && !reopeningReadyState) throw new Error("PICKING_NOT_ACTIVE");
     if (sourceDeviceId !== PICKING_DISPLAY_ID) throw new Error("UNTRUSTED_DEVICE");
 
     const expected = expectedPickingGroups(access);
@@ -883,9 +919,68 @@ function registerPickingEvent({ accessSessionId, sessionToken, eventType, metada
       next.status = "PENDING";
       next.actual_quantity = null;
     } else if (eventType === "STOCK_LOCATION_DISCREPANCY") {
-      next.status = "EXCEPTION";
-      next.discrepancy_location = current.active_location || group.primary_location;
+      const failedLotId = String(current.active_stock_lot_id || group.stock_lot_id);
+      const failedLocation = String(current.active_location || group.primary_location).toUpperCase();
+      const failed = new Set(Array.isArray(current.failed_stock_lot_ids) ? current.failed_stock_lot_ids : []);
+      failed.add(failedLotId);
+
+      next.failed_stock_lot_ids = [...failed];
+      next.discrepancy_location = failedLocation;
+      next.discrepancies = [
+        ...(Array.isArray(current.discrepancies) ? current.discrepancies : []),
+        { stock_lot_id:failedLotId, location_code:failedLocation, detected_at:now() }
+      ];
       next.actual_quantity = null;
+
+      const automaticFallback = (group.fallback_lots || [])
+        .filter(fallback =>
+          !failed.has(String(fallback.stock_lot_id)) &&
+          fallback.location_code !== failedLocation &&
+          (!group.sensitive || fallback.sensitive_area === true)
+        )
+        .map(fallback => ({
+          ...fallback,
+          effective_available_units:fallbackRemainingCapacity(access,group,fallback,expected)
+        }))
+        .find(fallback => fallback.effective_available_units >= Number(group.quantity || 0));
+
+      if (automaticFallback) {
+        next.status = "PENDING";
+        next.active_location = automaticFallback.location_code;
+        next.active_stock_lot_id = automaticFallback.stock_lot_id;
+        next.active_lot_code = automaticFallback.lot_code;
+        next.reallocated_from_stock_lot_id = failedLotId;
+        next.auto_reallocated = true;
+        next.reallocation_strategy = "FEFO_FIFO";
+        next.reallocation_history = [
+          ...(Array.isArray(current.reallocation_history) ? current.reallocation_history : []),
+          {
+            from_stock_lot_id:failedLotId,
+            from_location:failedLocation,
+            to_stock_lot_id:automaticFallback.stock_lot_id,
+            to_location:automaticFallback.location_code,
+            automatic:true,
+            strategy:"FEFO_FIFO",
+            reallocated_at:now()
+          }
+        ];
+        log(access,"PICKING_LOT_REALLOCATED",{
+          group_key:group.key,
+          from_stock_lot_id:failedLotId,
+          from_location:failedLocation,
+          to_stock_lot_id:automaticFallback.stock_lot_id,
+          to_location:automaticFallback.location_code,
+          available_units:automaticFallback.effective_available_units,
+          automatic:true,
+          strategy:"FEFO_FIFO",
+          trigger:"STOCK_LOCATION_DISCREPANCY",
+          command_id:commandId,
+          source_device_id:sourceDeviceId
+        });
+      } else {
+        next.status = "EXCEPTION";
+        next.auto_reallocated = false;
+      }
     } else if (eventType === "PICKING_LOCATION_REROUTED" || eventType === "PICKING_LOT_REALLOCATED") {
       const to = String(metadata?.to_location || "").trim().toUpperCase();
       const targetLotId = String(metadata?.to_stock_lot_id || "");
@@ -901,6 +996,20 @@ function registerPickingEvent({ accessSessionId, sessionToken, eventType, metada
       next.active_stock_lot_id = fallback.stock_lot_id;
       next.active_lot_code = fallback.lot_code;
       next.reallocated_from_stock_lot_id = current.active_stock_lot_id || group.stock_lot_id;
+      next.auto_reallocated = false;
+      next.reallocation_strategy = "MANUAL_RECOVERY";
+      next.reallocation_history = [
+        ...(Array.isArray(current.reallocation_history) ? current.reallocation_history : []),
+        {
+          from_stock_lot_id:current.active_stock_lot_id || group.stock_lot_id,
+          from_location:current.active_location || group.primary_location,
+          to_stock_lot_id:fallback.stock_lot_id,
+          to_location:fallback.location_code,
+          automatic:false,
+          strategy:"MANUAL_RECOVERY",
+          reallocated_at:now()
+        }
+      ];
       next.actual_quantity = null;
     } else if (eventType === "PICKING_PARTIAL") {
       const actual = Number(metadata?.actual_quantity);
@@ -914,6 +1023,24 @@ function registerPickingEvent({ accessSessionId, sessionToken, eventType, metada
 
     access.picking_state[group.key] = next;
     log(access,eventType,{ ...metadata, group_key:group.key, command_id:commandId, source_device_id:sourceDeviceId });
+
+    if (reopeningReadyState) {
+      access.state = "ENTRY_CONFIRMED";
+      access.picking_ready_at = null;
+      log(access,"PICKING_REOPENED",{
+        group_key:group.key,
+        automatic:false,
+        trigger:"PICKING_ITEM_UNDONE",
+        command_id:commandId,
+        source_device_id:sourceDeviceId
+      });
+    } else {
+      maybeAutoMarkPickingReady(access,{
+        triggerEvent:eventType,
+        sourceDeviceId,
+        commandId
+      });
+    }
 
     return {
       value:accessDetail(access,false),
@@ -1036,6 +1163,11 @@ function registerSensitiveEvent({
       if (!pending) log(access,"SENSITIVE_ACCESS_COMPLETED",{
         barrier_id:"SENSITIVE_STORAGE",
         opening_count:access.sensitive_open_count
+      });
+      maybeAutoMarkPickingReady(access,{
+        triggerEvent:"SENSITIVE_LOCK_CONFIRMED",
+        sourceDeviceId,
+        commandId
       });
     }
 
@@ -1208,9 +1340,11 @@ function terminalDescriptor(terminalId = TERMINAL_ID) {
     biometric_device_id:BIOMETRIC_DEVICE_ID,
     picking_display_id:PICKING_DISPLAY_ID,
     auth_contract_version:"4",
-    access_contract_version:"6",
+    access_contract_version:"7",
     sensitive_access_contract_version:"1",
     picking_auto_assignment:true,
+    picking_auto_ready:true,
+    picking_auto_fefo_reallocation:true,
     withdrawal_auto_confirmation:true
   };
 }
