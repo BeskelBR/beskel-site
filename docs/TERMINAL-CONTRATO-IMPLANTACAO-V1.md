@@ -98,3 +98,52 @@ O `MockAdapter` será substituído por implementação compatível com o contrat
 - teste de material não encontrado;
 - teste de recuperação da sessão;
 - homologação presencial do fluxo completo.
+
+
+## 8. Contrato de estoque e alocação
+
+A API real deve tratar coordenada como atributo da **ocupação do lote**, nunca do cadastro do produto.
+
+Modelo mínimo:
+
+```text
+product
+→ stock_lot
+→ stock_position_occupancy
+→ stock_location
+```
+
+No recebimento:
+
+```text
+novo lote
+→ conferência de produto/lote/validade/quantidade
+→ sistema oferece posições livres compatíveis
+→ responsável do estoque confirma a coordenada usada
+→ ocupação fica vinculada ao lote
+```
+
+Na retirada:
+
+```text
+demanda de produto
+→ lotes elegíveis
+→ FEFO
+→ FIFO em empate
+→ tarefas físicas por lote/coordenada
+```
+
+A alocação pode fragmentar uma solicitação em mais de uma tarefa quando o primeiro lote não possuir saldo suficiente.
+
+Cada tarefa deve carregar no mínimo:
+
+- `picking_task_id`;
+- `product_id`;
+- `stock_lot_id`;
+- `lot_code`;
+- `expires_at`;
+- `location_code`;
+- `quantity`;
+- `sources[]` preservando OR/ajuste de origem.
+
+A implementação real deve reservar saldo transacionalmente para impedir dupla alocação concorrente. O mock atual valida a semântica FEFO/FIFO, mas não substitui a reserva PostgreSQL de produção.
