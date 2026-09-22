@@ -635,7 +635,11 @@ function startAccessSession({ authSessionId, orderIds, liveItems = [], terminalI
       live_items:normalizedLiveItems,
       picking_tasks:pickingTasks,
       sensitive_access:sensitive,
-      sensitive_access_granted:sensitive,
+      sensitive_access_eligible:sensitive,
+      sensitive_access_granted:false,
+      sensitive_state:sensitive ? "LOCKED" : "NOT_REQUIRED",
+      sensitive_unlock_expires_at:null,
+      sensitive_open_count:0,
       state:"DOOR_AUTHORIZED",
       created_at:now(),
       expires_at:Date.now()+1200000,
@@ -657,8 +661,8 @@ function startAccessSession({ authSessionId, orderIds, liveItems = [], terminalI
         expires_at:task.expires_at
       }))
     });
-    log(access,"ACCESS_GRANTED",{ barrier_id:"STOCK_ROOM_DOOR", sensitive_access:sensitive });
-    if (sensitive) log(access,"SENSITIVE_ACCESS_GRANTED",{ barrier_id:"SENSITIVE_STORAGE", permission:"stock.sensitive.access" });
+    log(access,"ACCESS_GRANTED",{ barrier_id:"STOCK_ROOM_DOOR", sensitive_required:sensitive, sensitive_unlocked:false });
+    if (sensitive) log(access,"SENSITIVE_ACCESS_ELIGIBLE",{ barrier_id:"SENSITIVE_STORAGE", permission:"stock.sensitive.access", second_authentication_required:false });
 
     return {
       value:accessDetail(access,true),
@@ -687,6 +691,17 @@ function expectedPickingGroups(access) {
 function rawAccess(accessSessionId) {
   const access = accessSessions.get(String(accessSessionId || ""));
   if (!access) return null;
+
+  if (
+    access.sensitive_state === "UNLOCK_AUTHORIZED" &&
+    access.sensitive_unlock_expires_at &&
+    access.sensitive_unlock_expires_at < Date.now()
+  ) {
+    access.sensitive_state = "LOCKED";
+    access.sensitive_access_granted = false;
+    access.sensitive_unlock_expires_at = null;
+    log(access,"SENSITIVE_UNLOCK_EXPIRED",{ barrier_id:"SENSITIVE_STORAGE" });
+  }
 
   if (access.expires_at < Date.now() && !["CLOSED","EXPIRED","WITHDRAWAL_CONFIRMED"].includes(access.state)) {
     if (access.state === "DOOR_AUTHORIZED") {
@@ -765,13 +780,11 @@ function registerAccessEvent({ accessSessionId, sessionToken, eventType, metadat
       const unresolved = expected.some(group => !["CONFIRMED","PARTIAL","UNAVAILABLE"].includes(access.picking_state[group.key]?.status));
       const openException = expected.some(group => access.picking_state[group.key]?.status === "EXCEPTION");
       if (unresolved || openException) throw new Error("PICKING_NOT_READY");
+      if (access.sensitive_access && access.sensitive_state !== "COMPLETED") throw new Error("SENSITIVE_STORAGE_NOT_SECURED");
       access.picking_ready_at = now();
     }
 
     access.state = transition[1];
-    if (eventType === "DOOR_OPENED" && access.sensitive_access_granted) {
-      log(access,"SENSITIVE_DOOR_OPENED",{ barrier_id:"SENSITIVE_STORAGE", simulated:true });
-    }
     if (eventType === "ENTRY_CONFIRMED" || eventType === "PRESENCE_CONFIRMED") {
       access.order_ids.map(order).filter(Boolean).forEach(x => {
         if (x.status === "AGUARDANDO_RETIRADA") x.status = "EM_SEPARACAO";
@@ -812,6 +825,9 @@ function registerPickingEvent({ accessSessionId, sessionToken, eventType, metada
     const groupKey = String(metadata?.group_key || "");
     const group = expected.find(x => x.key === groupKey);
     if (!group) throw new Error("PICKING_GROUP_INVALID");
+
+    if (group.sensitive && access.sensitive_state !== "OPEN") throw new Error("SENSITIVE_STORAGE_LOCKED");
+    if (!group.sensitive && access.sensitive_state === "OPEN") throw new Error("SENSITIVE_SESSION_ACTIVE");
 
     const current = access.picking_state[group.key] || {
       status:"PENDING",
@@ -860,6 +876,126 @@ function registerPickingEvent({ accessSessionId, sessionToken, eventType, metada
 
     access.picking_state[group.key] = next;
     log(access,eventType,{ ...metadata, group_key:group.key, command_id:commandId, source_device_id:sourceDeviceId });
+
+    return {
+      value:accessDetail(access,false),
+      result:() => accessDetail(access,false)
+    };
+  });
+}
+
+function unresolvedSensitiveGroups(access) {
+  return expectedPickingGroups(access).filter(group => {
+    if (!group.sensitive) return false;
+    const status = access.picking_state[group.key]?.status || "PENDING";
+    return !["CONFIRMED","PARTIAL","UNAVAILABLE"].includes(status);
+  });
+}
+
+function registerSensitiveEvent({
+  accessSessionId,
+  sessionToken,
+  eventType,
+  metadata = {},
+  commandId,
+  sourceOccurredAt,
+  sourceDeviceId
+}) {
+  const allowed = new Set([
+    "SENSITIVE_ACCESS_REQUESTED",
+    "SENSITIVE_DOOR_OPENED",
+    "SENSITIVE_DOOR_CLOSED",
+    "SENSITIVE_LOCK_CONFIRMED"
+  ]);
+  if (!allowed.has(String(eventType || ""))) throw new Error("INVALID_SENSITIVE_EVENT");
+
+  const payload = {
+    accessSessionId:String(accessSessionId || ""),
+    sessionToken:String(sessionToken || ""),
+    eventType:String(eventType || ""),
+    metadata,
+    sourceOccurredAt:String(sourceOccurredAt || ""),
+    sourceDeviceId:String(sourceDeviceId || "")
+  };
+
+  return idempotent("registerSensitiveEvent", commandId, payload, () => {
+    const access = rawAccess(accessSessionId);
+    if (!access) throw new Error("ACCESS_SESSION_NOT_FOUND");
+    requireSessionToken(access,sessionToken);
+    if (access.state !== "ENTRY_CONFIRMED") throw new Error("SENSITIVE_ACCESS_NOT_ACTIVE");
+    if (!access.sensitive_access || !access.sensitive_access_eligible) throw new Error("SENSITIVE_ACCESS_DENIED");
+
+    const unresolved = unresolvedSensitiveGroups(access);
+
+    if (eventType === "SENSITIVE_ACCESS_REQUESTED") {
+      if (sourceDeviceId !== PICKING_DISPLAY_ID) throw new Error("UNTRUSTED_DEVICE");
+      if (!["LOCKED","COMPLETED"].includes(access.sensitive_state)) throw new Error("INVALID_SENSITIVE_SEQUENCE");
+      if (!unresolved.length) throw new Error("SENSITIVE_ITEMS_ALREADY_RESOLVED");
+      access.sensitive_state = "UNLOCK_AUTHORIZED";
+      access.sensitive_access_granted = true;
+      access.sensitive_unlock_expires_at = Date.now()+15000;
+      log(access,"SENSITIVE_ACCESS_REQUESTED",{
+        barrier_id:"SENSITIVE_STORAGE",
+        pending_sensitive_items:unresolved.length,
+        command_id:commandId,
+        source_device_id:sourceDeviceId
+      });
+      log(access,"SENSITIVE_ACCESS_GRANTED",{
+        barrier_id:"SENSITIVE_STORAGE",
+        permission:"stock.sensitive.access",
+        second_authentication_required:false,
+        unlock_expires_at:new Date(access.sensitive_unlock_expires_at).toISOString()
+      });
+    } else if (eventType === "SENSITIVE_DOOR_OPENED") {
+      if (sourceDeviceId !== access.terminal_id) throw new Error("UNTRUSTED_DEVICE");
+      if (access.sensitive_state !== "UNLOCK_AUTHORIZED") throw new Error("INVALID_SENSITIVE_SEQUENCE");
+      if (!access.sensitive_unlock_expires_at || access.sensitive_unlock_expires_at < Date.now()) {
+        access.sensitive_state = "LOCKED";
+        access.sensitive_access_granted = false;
+        access.sensitive_unlock_expires_at = null;
+        throw new Error("SENSITIVE_UNLOCK_EXPIRED");
+      }
+      access.sensitive_state = "OPEN";
+      access.sensitive_open_count = Number(access.sensitive_open_count || 0)+1;
+      access.sensitive_opened_at = now();
+      access.sensitive_unlock_expires_at = null;
+      log(access,"SENSITIVE_DOOR_OPENED",{
+        barrier_id:"SENSITIVE_STORAGE",
+        opening_number:access.sensitive_open_count,
+        command_id:commandId,
+        source_device_id:sourceDeviceId
+      });
+    } else if (eventType === "SENSITIVE_DOOR_CLOSED") {
+      if (sourceDeviceId !== access.terminal_id) throw new Error("UNTRUSTED_DEVICE");
+      if (access.sensitive_state !== "OPEN") throw new Error("INVALID_SENSITIVE_SEQUENCE");
+      access.sensitive_state = "CLOSED";
+      access.sensitive_closed_at = now();
+      log(access,"SENSITIVE_DOOR_CLOSED",{
+        barrier_id:"SENSITIVE_STORAGE",
+        opening_number:access.sensitive_open_count,
+        unresolved_sensitive_items:unresolvedSensitiveGroups(access).length,
+        command_id:commandId,
+        source_device_id:sourceDeviceId
+      });
+    } else if (eventType === "SENSITIVE_LOCK_CONFIRMED") {
+      if (sourceDeviceId !== access.terminal_id) throw new Error("UNTRUSTED_DEVICE");
+      if (access.sensitive_state !== "CLOSED") throw new Error("INVALID_SENSITIVE_SEQUENCE");
+      const pending = unresolvedSensitiveGroups(access).length;
+      access.sensitive_access_granted = false;
+      access.sensitive_state = pending ? "LOCKED" : "COMPLETED";
+      access.sensitive_locked_at = now();
+      log(access,"SENSITIVE_LOCK_CONFIRMED",{
+        barrier_id:"SENSITIVE_STORAGE",
+        opening_number:access.sensitive_open_count,
+        pending_sensitive_items:pending,
+        command_id:commandId,
+        source_device_id:sourceDeviceId
+      });
+      if (!pending) log(access,"SENSITIVE_ACCESS_COMPLETED",{
+        barrier_id:"SENSITIVE_STORAGE",
+        opening_count:access.sensitive_open_count
+      });
+    }
 
     return {
       value:accessDetail(access,false),
@@ -1013,7 +1149,8 @@ function terminalDescriptor(terminalId = TERMINAL_ID) {
     biometric_device_id:BIOMETRIC_DEVICE_ID,
     picking_display_id:PICKING_DISPLAY_ID,
     auth_contract_version:"4",
-    access_contract_version:"4"
+    access_contract_version:"5",
+    sensitive_access_contract_version:"1"
   };
 }
 
@@ -1030,6 +1167,7 @@ module.exports = {
   startAccessSession,
   registerAccessEvent,
   registerPickingEvent,
+  registerSensitiveEvent,
   confirmWithdrawal,
   getAccessSessionDetail,
   listAudit,
