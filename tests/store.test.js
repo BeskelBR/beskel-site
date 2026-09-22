@@ -63,17 +63,18 @@ function resolveTask(access, task, status = "CONFIRMED", actualQuantity = task.q
     : status === "PARTIAL"
       ? "PICKING_PARTIAL"
       : "PICKING_UNAVAILABLE";
-  return store.registerPickingEvent({
-    accessSessionId: access.access_session_id,
-    sessionToken: access.session_token,
-    eventType,
-    commandId: `${prefix}-${task.picking_task_id}`,
-    sourceDeviceId: store.PICKING_DISPLAY_ID,
-    metadata: {
-      group_key: task.picking_task_id,
-      actual_quantity: actualQuantity
-    }
-  }),
+  return {
+    ...store.registerPickingEvent({
+      accessSessionId: access.access_session_id,
+      sessionToken: access.session_token,
+      eventType,
+      commandId: `${prefix}-${task.picking_task_id}`,
+      sourceDeviceId: store.PICKING_DISPLAY_ID,
+      metadata: {
+        group_key: task.picking_task_id,
+        actual_quantity: actualQuantity
+      }
+    }),
     session_token: access.session_token
   };
 }
