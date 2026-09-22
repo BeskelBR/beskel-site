@@ -179,3 +179,37 @@ Regras:
 - cada abertura deve ser auditável por AccessSession, usuário, dispositivo, instante e número da abertura.
 
 A duração definitiva da janela de destravamento será parâmetro do controlador no projeto executivo. O mock usa 15 segundos apenas como contrato DEV.
+
+
+## 10. Automação de interação do operador
+
+O contrato de implantação deve eliminar três interações que pertencem apenas ao protótipo:
+
+### Autenticação
+
+```text
+NFC_VALIDATED
+→ iniciar câmera/biometria automaticamente
+→ BIOMETRIC_VALIDATED
+→ carregar contexto de retirada
+```
+
+Não deve existir botão intermediário para iniciar biometria.
+
+### Terminal de Retirada
+
+O tablet interno deve operar como dispositivo dedicado. Após provisionamento, ele consulta a AccessSession ativa da sala e assume a sessão sem pareamento manual.
+
+A implementação de produção deve autenticar o dispositivo por mecanismo próprio do hardware/app. O segredo DEV embutido no mock **não é aceitável em produção**.
+
+### Finalização
+
+```text
+PICKING_READY
+→ PRESENCE_CLEARED
+→ DOOR_CLOSED
+→ validações server-side
+→ WITHDRAWAL_CONFIRMED
+```
+
+Nenhum botão de confirmação final deve ser apresentado ao operador. Se a finalização automática falhar, o evento físico de `DOOR_CLOSED` deve permanecer registrado e a sessão ficar em estado técnico recuperável, sem exigir que o funcionário repita a retirada.
