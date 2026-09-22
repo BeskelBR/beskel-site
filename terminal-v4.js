@@ -257,15 +257,11 @@ accessScreen = async function(accessSessionId,prefetchedAccess=null,options={}){
       <div class="section-title">Contexto confirmado da retirada</div>
       <div class="access-orders">${v4AccessOrders(access)}</div>
       <div class="notice"><b>Alocação logística</b><span>${access.picking_tasks?.length||0} tarefa(s) física(s) por lote. Regra: FEFO; FIFO como desempate. A posição pertence ao lote armazenado, não ao produto.</span></div>
-      <div class="notice"><b>Fluxo físico N1</b><span>NFC → biometria → contexto da retirada → porta principal → presença → picking comum e, quando necessário, sessão sensível sob demanda → saída → fechamento → confirmação.</span></div>
-      <div class="dev-panel"><div class="eyebrow">Terminal de Retirada</div><p>Abra a tela interna vinculada a esta mesma AccessSession para acompanhar a separação em tempo real.</p><div class="actions"><button class="btn" id="openSeparation">Abrir Terminal de Retirada</button></div></div>
+      <div class="notice"><b>Fluxo físico N1</b><span>NFC → biometria automática → contexto da retirada → porta principal → presença → picking → saída → fechamento → confirmação automática.</span></div>
+      <div class="dev-panel"><div class="eyebrow">Terminal de Retirada</div><p>A tela interna permanece em modo kiosk e assume automaticamente a AccessSession ativa da sala. Não há comando de pareamento por retirada.</p></div>
       ${devControls(access)}
       <p class="footer-note">DEV: controladores, sensores, câmera e NFC estão simulados. Nenhum movimento real de estoque é realizado.</p>
     `,"Sessão de acesso"));
-    document.getElementById("openSeparation")?.addEventListener("click",()=>{
-      const token=v4SessionToken(accessSessionId);
-      window.open(`/separacao/${encodeURIComponent(accessSessionId)}#${encodeURIComponent(token)}`,"hvb-separacao","noopener");
-    });
     bindDev(access);
     v4EnsureAccessPoll(accessSessionId);
     hvbV4AccessSignature=v4AccessSignature(access);
@@ -288,7 +284,7 @@ devControls = function(access){
   else if(access.state==="ENTRY_CONFIRMED")button=`<button class="btn secondary" disabled>Separação em andamento no Terminal de Retirada</button>`;
   else if(access.state==="PICKING_READY")button=`<button class="btn secondary" data-event="PRESENCE_CLEARED">Simular saída da sala</button>`;
   else if(access.state==="EXIT_CONFIRMED")button=`<button class="btn secondary" data-event="DOOR_CLOSED">Simular fechamento da porta</button>`;
-  else if(access.state==="READY_TO_CONFIRM")button=`<button class="btn" id="confirmWithdrawal">Confirmar retirada</button>`;
+  else if(access.state==="READY_TO_CONFIRM")button=`<button class="btn secondary" disabled>Finalização automática em andamento…</button>`;
   else if(access.state==="WITHDRAWAL_CONFIRMED")button=`<button class="btn ghost" id="finish">Finalizar demonstração</button>`;
   else button=`<button class="btn ghost" id="finish">Voltar ao terminal</button>`;
   return `<div class="dev-panel"><div class="eyebrow">Controles DEV</div><p>Simulação da sequência física aprovada. O picking deve ser concluído antes da saída e do fechamento da porta.</p><div class="actions">${button}</div></div>`;
@@ -315,24 +311,6 @@ bindDev = function(access){
       alert("A sequência física simulada não permitiu este evento.");
     }
   }));
-
-  document.getElementById("confirmWithdrawal")?.addEventListener("click",async()=>{
-    const btn=document.getElementById("confirmWithdrawal");
-    if(btn)btn.disabled=true;
-    try{
-      await apiPost({
-        action:"confirmWithdrawal",
-        access_session_id:access.access_session_id,
-        session_token:v4SessionToken(access.access_session_id),
-        command_id:commandId("confirm"),
-        source_device_id:TERMINAL_ID
-      });
-      accessScreen(access.access_session_id);
-    }catch(error){
-      if(btn)btn.disabled=false;
-      alert("A retirada ainda não pode ser confirmada: "+error.message);
-    }
-  });
 
   document.getElementById("finish")?.addEventListener("click",()=>{
     v4StopAccessPoll();
