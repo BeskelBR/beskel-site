@@ -154,3 +154,14 @@ code,.tech,.eyebrow,.solution-index,.case-badge,.system-label,.system-node small
 /* Auditoria editorial — relação entre solução e processo */
 .solution-transversal-note{margin:22px 0 0;padding:18px 20px;border-left:3px solid #FF7A00;background:#090C10;color:#B8BEC7;line-height:1.65;max-width:920px}
 .solution-transversal-note strong{color:#fff;font-weight:600}
+
+
+/* Processo BESKEL consolidado em quatro macroetapas */
+.process-four{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid #2A2F36;border-radius:16px;overflow:hidden;background:#0D1117}
+.process-four article{padding:28px;border-right:1px solid #2A2F36;min-height:190px}
+.process-four article:last-child{border-right:0}
+.process-four span{font-family:"IBM Plex Mono",monospace;color:#FF7A00;font-size:.74rem}
+.process-four h3{font-size:1.25rem;margin:22px 0 8px;color:#fff}
+.process-four p{margin:0;color:#B8BEC7;font-size:.9rem;line-height:1.55}
+@media(max-width:920px){.process-four{grid-template-columns:repeat(2,1fr)}.process-four article:nth-child(2){border-right:0}.process-four article:nth-child(-n+2){border-bottom:1px solid #2A2F36}}
+@media(max-width:620px){.process-four{grid-template-columns:1fr}.process-four article{border-right:0!important;border-bottom:1px solid #2A2F36!important;min-height:0}.process-four article:last-child{border-bottom:0!important}}
