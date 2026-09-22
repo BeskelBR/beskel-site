@@ -186,9 +186,11 @@ accessScreen = async function(accessSessionId){
       <div class="section-title">Contexto confirmado da retirada</div>
       <div class="access-orders">${v4AccessOrders(access)}</div>
       <div class="notice"><b>Fluxo físico N1</b><span>NFC → biometria → contexto da retirada → abertura → presença → separação guiada → fechamento da porta → confirmação.</span></div>
+      <div class="dev-panel"><div class="eyebrow">Terminal de Retirada</div><p>Abra a tela interna vinculada a esta mesma AccessSession para acompanhar a separação em tempo real.</p><div class="actions"><button class="btn" id="openSeparation">Abrir Terminal de Retirada</button></div></div>
       ${devControls(access)}
       <p class="footer-note">DEV: controladores, sensores, câmera e NFC estão simulados. Nenhum movimento real de estoque é realizado.</p>
     `,"Sessão de acesso"));
+    document.getElementById("openSeparation")?.addEventListener("click",()=>window.open(`/separacao/${encodeURIComponent(accessSessionId)}`,"hvb-separacao","noopener"));
     bindDev(access);
     v4EnsureAccessPoll(accessSessionId);
   }catch(error){
@@ -245,3 +247,6 @@ function v4ReplaceCredentialCopy(){
 const v4CopyObserver=new MutationObserver(v4ReplaceCredentialCopy);
 v4CopyObserver.observe(document.documentElement,{subtree:true,childList:true});
 v4ReplaceCredentialCopy();
+
+// Approved v4 is now the canonical runtime layer for the DEV terminal.
+router();
