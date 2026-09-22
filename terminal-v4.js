@@ -9,6 +9,24 @@ state.catalog = state.catalog || [];
 let hvbV4AccessPoll = null;
 let hvbV4AccessPollId = null;
 let hvbV4AccessSignature = null;
+let hvbV4AccessPollBusy = false;
+
+function v4TokenKey(accessSessionId){
+  return `hvb_access_session_token_${accessSessionId}`;
+}
+function v4StoreSessionToken(accessSessionId,token){
+  if(!accessSessionId||!token)return;
+  const key=v4TokenKey(accessSessionId);
+  sessionStorage.setItem(key,token);
+  // DEV fallback for iOS tab restoration. Production kiosk will use device-secure storage.
+  localStorage.setItem(key,token);
+}
+function v4ClearSessionToken(accessSessionId){
+  if(!accessSessionId)return;
+  const key=v4TokenKey(accessSessionId);
+  sessionStorage.removeItem(key);
+  localStorage.removeItem(key);
+}
 
 function v4AccessSignature(access){
   return JSON.stringify({
@@ -31,8 +49,11 @@ function v4EnsureAccessPoll(id){
   hvbV4AccessPollId = id;
   hvbV4AccessPoll = setInterval(async()=>{
     if(location.pathname !== `/acesso/${encodeURIComponent(id)}`) return v4StopAccessPoll();
+    if(document.hidden||hvbV4AccessPollBusy)return;
     const sessionToken=v4SessionToken(id);
     if(!sessionToken)return v4StopAccessPoll();
+
+    hvbV4AccessPollBusy=true;
     try{
       const latest=await apiGet({action:"accessSession",id,session_token:sessionToken});
       const nextSignature=v4AccessSignature(latest);
@@ -41,9 +62,11 @@ function v4EnsureAccessPoll(id){
       const scrollTop=window.scrollY||document.documentElement.scrollTop||0;
       await accessScreen(id,latest,{restoreScroll:scrollTop});
     }catch(error){
-      if(isConnectivityError(error))return;
+      // Polling is observational: a transient failure must not destroy the current screen/session.
+    }finally{
+      hvbV4AccessPollBusy=false;
     }
-  },2500);
+  },5000);
 }
 
 function v4StateLabel(value){
@@ -185,7 +208,7 @@ authorizeAccess = async function(orderIds,liveItems=[]){
     });
     state.liveItems=[];
     if(state.access?.session_token){
-      sessionStorage.setItem(`hvb_access_session_token_${state.access.access_session_id}`,state.access.session_token);
+      v4StoreSessionToken(state.access.access_session_id,state.access.session_token);
     }
     go(`/acesso/${encodeURIComponent(state.access.access_session_id)}`);
   }catch(error){
@@ -208,9 +231,11 @@ function v4AccessOrders(access){
 }
 
 function v4SessionToken(accessSessionId){
-  return state.access?.access_session_id===accessSessionId&&state.access?.session_token
-    ? state.access.session_token
-    : sessionStorage.getItem(`hvb_access_session_token_${accessSessionId}`)||"";
+  if(state.access?.access_session_id===accessSessionId&&state.access?.session_token)return state.access.session_token;
+  const key=v4TokenKey(accessSessionId);
+  const token=sessionStorage.getItem(key)||localStorage.getItem(key)||"";
+  if(token&&!sessionStorage.getItem(key))sessionStorage.setItem(key,token);
+  return token;
 }
 
 accessScreen = async function(accessSessionId,prefetchedAccess=null,options={}){
@@ -311,7 +336,7 @@ bindDev = function(access){
 
   document.getElementById("finish")?.addEventListener("click",()=>{
     v4StopAccessPoll();
-    sessionStorage.removeItem(`hvb_access_session_token_${access.access_session_id}`);
+    v4ClearSessionToken(access.access_session_id);
     go("/");
   });
 };
