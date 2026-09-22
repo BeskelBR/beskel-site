@@ -827,7 +827,7 @@ function registerPickingEvent({ accessSessionId, sessionToken, eventType, metada
     if (!group) throw new Error("PICKING_GROUP_INVALID");
 
     if (group.sensitive && access.sensitive_state !== "OPEN") throw new Error("SENSITIVE_STORAGE_LOCKED");
-    if (!group.sensitive && access.sensitive_state === "OPEN") throw new Error("SENSITIVE_SESSION_ACTIVE");
+    if (!group.sensitive && ["UNLOCK_AUTHORIZED","OPEN","CLOSED"].includes(access.sensitive_state)) throw new Error("SENSITIVE_SESSION_ACTIVE");
 
     const current = access.picking_state[group.key] || {
       status:"PENDING",
