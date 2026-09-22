@@ -230,3 +230,19 @@
   .lab-product-actions{flex-direction:column}
   .lab-product-actions .btn{width:100%;text-align:center}
 }
+
+/* Auditoria UX — galeria complementar e especificações mobile */
+.lab-product-gallery-two{grid-template-columns:1fr 1fr}
+.lab-product-gallery-two figure:first-child{grid-column:auto}
+@media(max-width:720px){
+  .lab-product-main-image img{height:380px}
+  .lab-product-gallery img{height:320px}
+  .lab-spec-table-wrap{overflow:visible;border:0;background:transparent}
+  .lab-spec-table{min-width:0;display:block}
+  .lab-spec-table thead{display:none}
+  .lab-spec-table tbody{display:grid;gap:10px}
+  .lab-spec-table tr{display:block;border:1px solid var(--lab-line);border-radius:14px;background:#fff;padding:8px 14px}
+  .lab-spec-table td{display:grid;grid-template-columns:minmax(112px,.8fr) 1.2fr;gap:14px;padding:10px 0;border-bottom:1px solid var(--lab-line);align-items:start}
+  .lab-spec-table td:last-child{border-bottom:0}
+  .lab-spec-table td::before{content:attr(data-label);font:600 .66rem/1.35 "IBM Plex Mono",monospace;letter-spacing:.04em;text-transform:uppercase;color:#737C86}
+}
