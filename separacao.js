@@ -4,18 +4,29 @@ const app=document.getElementById("separationApp");
 const API="/api/mock";
 const PICKING_DISPLAY_ID="HVB-PICKING-01";
 const TERMINAL_ID="HVB-T01";
-const ACCESS_ID=(location.pathname.match(/^\/separacao\/([^/]+)$/)||[])[1]||new URLSearchParams(location.search).get("access");
-const TOKEN_KEY=`hvb_separation_token_${ACCESS_ID||"none"}`;
-const tokenFromHash=decodeURIComponent(String(location.hash||"").replace(/^#/,""));
-if(tokenFromHash){
-  sessionStorage.setItem(TOKEN_KEY,tokenFromHash);
+const PICKING_DISPLAY_DEV_CREDENTIAL="HVB-PICKING-DEV-CREDENTIAL";
+let ACCESS_ID=(location.pathname.match(/^\/separacao\/([^/]+)$/)||[])[1]||new URLSearchParams(location.search).get("access")||"";
+function tokenKey(accessId=ACCESS_ID){return `hvb_separation_token_${accessId||"none"}`;}
+function storeAccessToken(accessId,token){
+  if(!accessId||!token)return;
+  sessionStorage.setItem(tokenKey(accessId),token);
   // DEV fallback for iOS/Safari tab restoration. Production kiosk will use secure device storage.
-  localStorage.setItem(TOKEN_KEY,tokenFromHash);
+  localStorage.setItem(tokenKey(accessId),token);
+}
+function clearAccessToken(accessId=ACCESS_ID){
+  if(!accessId)return;
+  sessionStorage.removeItem(tokenKey(accessId));
+  localStorage.removeItem(tokenKey(accessId));
+}
+const tokenFromHash=decodeURIComponent(String(location.hash||"").replace(/^#/,""));
+if(tokenFromHash&&ACCESS_ID){
+  storeAccessToken(ACCESS_ID,tokenFromHash);
   history.replaceState({},"",location.pathname+location.search);
 }
 const ACCESS_TOKEN=()=>{
-  const token=sessionStorage.getItem(TOKEN_KEY)||localStorage.getItem(TOKEN_KEY)||"";
-  if(token&&!sessionStorage.getItem(TOKEN_KEY))sessionStorage.setItem(TOKEN_KEY,token);
+  const key=tokenKey();
+  const token=sessionStorage.getItem(key)||localStorage.getItem(key)||"";
+  if(token&&!sessionStorage.getItem(key))sessionStorage.setItem(key,token);
   return token;
 };
 let access=null;
@@ -23,6 +34,7 @@ let filter="pending";
 let lastSignature="";
 let refreshBusy=false;
 let refreshFailures=0;
+let kioskResetTimer=null;
 function esc(v){return String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));}
 function nowLabel(){return new Date().toLocaleString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});}
 function cmd(prefix){return `${prefix}-${globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`}`;}
@@ -53,6 +65,35 @@ async function apiPost(payload){
   const body=await res.json();
   if(!res.ok||!body.ok)throw new Error(body.error||"REQUEST_FAILED");
   return body.data;
+}
+
+async function discoverActiveSession(){
+  const latest=await apiGet({
+    action:"activePickingSession",
+    source_device_id:PICKING_DISPLAY_ID,
+    device_credential:PICKING_DISPLAY_DEV_CREDENTIAL
+  });
+  if(!latest?.access_session_id||!latest?.session_token)return null;
+
+  ACCESS_ID=latest.access_session_id;
+  storeAccessToken(ACCESS_ID,latest.session_token);
+  history.replaceState({},"",`/separacao/${encodeURIComponent(ACCESS_ID)}`);
+  return latest;
+}
+
+function returnToKioskWaiting(){
+  if(ACCESS_ID)clearAccessToken(ACCESS_ID);
+  ACCESS_ID="";
+  access=null;
+  lastSignature="";
+  refreshFailures=0;
+  history.replaceState({},"","/separacao");
+  renderWaitingForSession();
+  refresh();
+}
+
+function renderWaitingForSession(){
+  app.innerHTML=shell(`<section class="hero"><div class="eyebrow">Terminal de Retirada • Kiosk</div><h1>Aguardando sessão de retirada</h1><p class="lead">Este tablet assume automaticamente a próxima AccessSession ativa da sala. Nenhuma ação de pareamento é necessária.</p><div class="notice"><strong>DEV:</strong> a identidade do dispositivo interno está simulada. Em produção será fornecida pelo provisionamento seguro do tablet.</div></section>`);
 }
 
 function accessSignature(value){
@@ -247,10 +288,14 @@ function render(options={}){
   if(access.state==="WITHDRAWAL_CONFIRMED"||access.withdrawal_confirmation){
     const confirmed=access.withdrawal_confirmation?.results||[];
     const totalActual=confirmed.reduce((sum,item)=>sum+Number(item.actual_quantity||0),0);
-    app.innerHTML=shell(`<section class="success"><div class="check">✓</div><div class="eyebrow">Retirada confirmada</div><h1>${confirmed.length} posição(ões) concluída(s)</h1><p class="lead">${totalActual} unidade(s) confirmadas na retirada.</p><div class="notice"><strong>DEV:</strong> o protótipo registrou o resultado e a auditoria, mas não movimentou estoque real.</div></section>`);
-    localStorage.removeItem(TOKEN_KEY);
-    sessionStorage.removeItem(TOKEN_KEY);
+    app.innerHTML=shell(`<section class="success"><div class="check">✓</div><div class="eyebrow">Retirada confirmada automaticamente</div><h1>${confirmed.length} posição(ões) concluída(s)</h1><p class="lead">${totalActual} unidade(s) confirmadas após saída e fechamento da porta.</p><div class="notice"><strong>DEV:</strong> o protótipo registrou o resultado e a auditoria, mas não movimentou estoque real.</div></section>`);
     window.scrollTo({top:0,behavior:"instant"});
+    if(!kioskResetTimer){
+      kioskResetTimer=setTimeout(()=>{
+        kioskResetTimer=null;
+        returnToKioskWaiting();
+      },4000);
+    }
     return;
   }
 
@@ -472,19 +517,31 @@ function render(options={}){
 
 async function refresh(){
   if(refreshBusy||document.hidden)return;
-  if(!ACCESS_ID){
-    app.innerHTML=shell(`<div class="empty">Sessão não informada. Abra esta tela a partir do Terminal de Acesso.</div>`);
-    return;
-  }
-
-  const token=ACCESS_TOKEN();
-  if(!token){
-    if(!access)app.innerHTML=shell(`<div class="empty">A credencial temporária desta sessão não está disponível. Reabra o Terminal de Retirada a partir do Terminal de Acesso.</div>`);
-    return;
-  }
 
   refreshBusy=true;
   try{
+    if(!ACCESS_ID){
+      const discovered=await discoverActiveSession();
+      if(!discovered){
+        renderWaitingForSession();
+        refreshFailures=0;
+        return;
+      }
+      rememberAccess(discovered);
+      render({preserveScroll:false});
+      return;
+    }
+
+    let token=ACCESS_TOKEN();
+    if(!token){
+      const discovered=await discoverActiveSession();
+      if(discovered?.access_session_id===ACCESS_ID){
+        token=ACCESS_TOKEN();
+      }else{
+        throw new Error("SESSION_TOKEN_MISSING");
+      }
+    }
+
     const latest=await apiGet({action:"accessSession",id:ACCESS_ID,session_token:token});
     if(!latest)throw new Error("SESSION_NOT_FOUND");
 
@@ -503,7 +560,7 @@ async function refresh(){
       // A polling failure is not a logout. Keep the last valid state on screen.
       showConnectionNotice();
     }else if(refreshFailures>=3){
-      app.innerHTML=shell(`<div class="empty">Não foi possível carregar a sessão após várias tentativas. Reabra esta tela pelo Terminal de Acesso.</div>`);
+      app.innerHTML=shell(`<div class="empty">Não foi possível consultar a sessão agora. O Terminal continuará tentando automaticamente.</div>`);
     }
   }finally{
     refreshBusy=false;
@@ -518,7 +575,6 @@ document.addEventListener("visibilitychange",()=>{
 window.addEventListener("pagehide",()=>{
   if(access?.state==="CLOSED"||access?.state==="EXPIRED"){
     clearInterval(separationPoll);
-    sessionStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(TOKEN_KEY);
+    clearAccessToken(ACCESS_ID);
   }
 });
