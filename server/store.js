@@ -415,7 +415,9 @@ const ACTIVE_ACCESS_STATES = new Set([
 ]);
 
 function activeAccessSessions() {
-  return [...accessSessions.values()].filter(access => ACTIVE_ACCESS_STATES.has(access.state));
+  return [...accessSessions.keys()]
+    .map(accessSessionId => rawAccess(accessSessionId))
+    .filter(access => access && ACTIVE_ACCESS_STATES.has(access.state));
 }
 
 function reservedQuantityForLot(stockLotId) {
