@@ -50,7 +50,7 @@ O responsável do estoque define a posição física de cada lote no recebimento
 
 A medicação sensível possui subfluxo próprio dentro da AccessSession já autenticada. A permissão é validada no início, porém o armário permanece travado até o funcionário tocar **Retirar medicação sensível** no Terminal de Retirada.
 
-Não ocorre nova autenticação. Abertura, fechamento e confirmação da trava são eventos físicos independentes e auditáveis. `PICKING_READY` só é aceito depois que o armário sensível estiver confirmado como travado.
+Não ocorre nova autenticação. Abertura, fechamento e confirmação da trava são eventos físicos independentes e auditáveis. Quando todos os itens estiverem resolvidos, `PICKING_READY` é gerado automaticamente; em sessões sensíveis isso só acontece após a trava do armário ser confirmada.
 
 ## Terminal de Retirada
 
@@ -60,7 +60,7 @@ O picking é guiado por coordenada e suporta:
 
 - confirmação de retirada;
 - material não encontrado;
-- redirecionamento para coordenada alternativa;
+- realocação automática para o próximo lote/coordenada elegível por FEFO/FIFO;
 - retirada parcial;
 - indisponibilidade;
 - preservação da divergência para auditoria.
@@ -148,3 +148,13 @@ Três ações intermediárias foram removidas do fluxo do operador:
 3. O Terminal de Retirada assume automaticamente a AccessSession da sala e, após saída + porta fechada, a retirada é confirmada automaticamente.
 
 Mantêm-se como ações humanas deliberadas: escolha do contexto/OR, confirmação de cada item retirado, tratamento de exceções e o botão **Retirar medicação sensível**.
+
+## Delta final de picking — automação
+
+O operador não executa mais **Concluir separação**.
+
+Quando a última tarefa fica resolvida (`CONFIRMED`, `PARTIAL` ou `UNAVAILABLE`) e o armário sensível, quando aplicável, está em `COMPLETED`, o servidor promove a sessão automaticamente para `PICKING_READY`.
+
+Enquanto `PRESENCE_CLEARED` ainda não ocorreu, o Terminal de Retirada oferece **Desfazer último item**. Essa ação reabre o picking em `ENTRY_CONFIRMED`. Depois da saída detectada, o picking não pode mais ser alterado.
+
+Para `Não encontrei`, o servidor registra `STOCK_LOCATION_DISCREPANCY` e tenta automaticamente o próximo lote elegível pela mesma ordenação FEFO/FIFO. Havendo lote único com saldo suficiente, registra `PICKING_LOT_REALLOCATED` e apresenta a nova coordenada sem escolha humana. Só permanece em exceção quando não existe alternativa suficiente, caso em que o operador decide entre retirada parcial ou indisponibilidade.
