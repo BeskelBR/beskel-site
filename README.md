@@ -31,6 +31,16 @@ O primeiro fator é **NFC TAG simples**, por decisão do HVB. A biometria perman
 - `/separacao/:id` — Terminal de Retirada;
 - `/admin/auditoria` — auditoria DEV.
 
+## Logística por lote
+
+O candidato v1 não possui coordenada fixa por produto.
+
+```text
+produto → lote → ocupação → coordenada
+```
+
+O responsável do estoque define a posição física de cada lote no recebimento. Na retirada, a API aloca por **FEFO** e usa **FIFO** como desempate. Se a quantidade solicitada atravessar dois lotes, o Terminal recebe duas tarefas físicas independentes, cada uma com lote, validade, posição e quantidade.
+
 ## Terminal de Retirada
 
 O tablet interno recebe a mesma `AccessSession` do Terminal de Acesso.
