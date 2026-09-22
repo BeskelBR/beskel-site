@@ -243,6 +243,7 @@ accessScreen = async function(accessSessionId,prefetchedAccess=null,options={}){
     });
     bindDev(access);
     v4EnsureAccessPoll(accessSessionId);
+    hvbV4AccessSignature=v4AccessSignature(access);
     if(Number.isFinite(options.restoreScroll)){
       requestAnimationFrame(()=>{
         const maxScroll=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
