@@ -9,12 +9,20 @@ const TOKEN_KEY=`hvb_separation_token_${ACCESS_ID||"none"}`;
 const tokenFromHash=decodeURIComponent(String(location.hash||"").replace(/^#/,""));
 if(tokenFromHash){
   sessionStorage.setItem(TOKEN_KEY,tokenFromHash);
+  // DEV fallback for iOS/Safari tab restoration. Production kiosk will use secure device storage.
+  localStorage.setItem(TOKEN_KEY,tokenFromHash);
   history.replaceState({},"",location.pathname+location.search);
 }
-const ACCESS_TOKEN=()=>sessionStorage.getItem(TOKEN_KEY)||"";
+const ACCESS_TOKEN=()=>{
+  const token=sessionStorage.getItem(TOKEN_KEY)||localStorage.getItem(TOKEN_KEY)||"";
+  if(token&&!sessionStorage.getItem(TOKEN_KEY))sessionStorage.setItem(TOKEN_KEY,token);
+  return token;
+};
 let access=null;
 let filter="pending";
 let lastSignature="";
+let refreshBusy=false;
+let refreshFailures=0;
 function esc(v){return String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));}
 function nowLabel(){return new Date().toLocaleString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});}
 function cmd(prefix){return `${prefix}-${globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`}`;}
@@ -45,6 +53,35 @@ async function apiPost(payload){
   const body=await res.json();
   if(!res.ok||!body.ok)throw new Error(body.error||"REQUEST_FAILED");
   return body.data;
+}
+
+function accessSignature(value){
+  return JSON.stringify({
+    state:value?.state||null,
+    sensitive_state:value?.sensitive_state||null,
+    timeout_alerted_at:value?.timeout_alerted_at||null,
+    confirmation:value?.withdrawal_confirmation?.confirmed_at||null,
+    picking_state:value?.picking_state||{}
+  });
+}
+function rememberAccess(value){
+  access=value;
+  lastSignature=accessSignature(value);
+}
+function showConnectionNotice(message="Conexão instável. Mantendo a última sessão válida e tentando reconectar…"){
+  const content=document.querySelector(".content");
+  if(!content)return;
+  let note=document.getElementById("separationConnectionNotice");
+  if(!note){
+    note=document.createElement("div");
+    note.id="separationConnectionNotice";
+    note.className="notice critical";
+    content.prepend(note);
+  }
+  note.innerHTML=`<strong>Reconectando</strong><span>${esc(message)}</span>`;
+}
+function clearConnectionNotice(){
+  document.getElementById("separationConnectionNotice")?.remove();
 }
 
 function sourceLabel(source){
@@ -200,13 +237,20 @@ function waitingScreen(){
   app.innerHTML=shell(`<section class="success"><div class="eyebrow">Sessão reconhecida</div><h1>${esc(name)}</h1><p class="lead">A tela está vinculada à sessão ${esc(access?.access_session_id||ACCESS_ID||"—")}.</p><div class="notice"><strong>${esc(stateLabel(access?.state))}</strong><br>A separação será liberada após a detecção de presença na sala.</div><p class="lead">Continue a simulação no Terminal de Acesso externo.</p></section>`);
 }
 
-function render(){
+function render(options={}){
+  const preserveScroll=options.preserveScroll!==false;
+  const previousScroll=preserveScroll?(window.scrollY||document.documentElement.scrollTop||0):0;
+  if(access)lastSignature=accessSignature(access);
+
   if(!access){app.innerHTML=shell(`<div class="empty">Carregando sessão de acesso…</div>`);return;}
 
   if(access.state==="WITHDRAWAL_CONFIRMED"||access.withdrawal_confirmation){
     const confirmed=access.withdrawal_confirmation?.results||[];
     const totalActual=confirmed.reduce((sum,item)=>sum+Number(item.actual_quantity||0),0);
     app.innerHTML=shell(`<section class="success"><div class="check">✓</div><div class="eyebrow">Retirada confirmada</div><h1>${confirmed.length} posição(ões) concluída(s)</h1><p class="lead">${totalActual} unidade(s) confirmadas na retirada.</p><div class="notice"><strong>DEV:</strong> o protótipo registrou o resultado e a auditoria, mas não movimentou estoque real.</div></section>`);
+    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
+    window.scrollTo({top:0,behavior:"instant"});
     return;
   }
 
@@ -310,6 +354,13 @@ function render(){
     <div class="footer-actions"><div class="status">${exceptions?"Há divergências para resolver":readyForFinish?(access.state==="ENTRY_CONFIRMED"?"Checklist concluído • finalize a separação":"Separação concluída • aguarde o fluxo físico"):"Confirme os itens e mantenha o armário sensível fechado fora da sessão de retirada"}</div><button class="btn primary confirm-all" id="finishPicking" ${readyForFinish&&access.state==="ENTRY_CONFIRMED"&&!closed?"":"disabled"}>CONCLUIR SEPARAÇÃO</button></div>
   `);
 
+  if(preserveScroll){
+    requestAnimationFrame(()=>{
+      const maxScroll=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
+      window.scrollTo(0,Math.min(previousScroll,maxScroll));
+    });
+  }
+
   document.querySelectorAll("[data-filter]").forEach(btn=>btn.addEventListener("click",()=>{filter=btn.dataset.filter;render();}));
 
   document.querySelectorAll("[data-confirm]").forEach(btn=>btn.addEventListener("click",async()=>{
@@ -396,19 +447,54 @@ function render(){
 }
 
 async function refresh(){
-  if(!ACCESS_ID){app.innerHTML=shell(`<div class="empty">Sessão não informada. Abra esta tela a partir do Terminal de Acesso.</div>`);return;}
+  if(refreshBusy||document.hidden)return;
+  if(!ACCESS_ID){
+    app.innerHTML=shell(`<div class="empty">Sessão não informada. Abra esta tela a partir do Terminal de Acesso.</div>`);
+    return;
+  }
+
+  const token=ACCESS_TOKEN();
+  if(!token){
+    if(!access)app.innerHTML=shell(`<div class="empty">A credencial temporária desta sessão não está disponível. Reabra o Terminal de Retirada a partir do Terminal de Acesso.</div>`);
+    return;
+  }
+
+  refreshBusy=true;
   try{
-    const token=ACCESS_TOKEN();
-    if(!token)throw new Error("SESSION_TOKEN_MISSING");
     const latest=await apiGet({action:"accessSession",id:ACCESS_ID,session_token:token});
     if(!latest)throw new Error("SESSION_NOT_FOUND");
-    const signature=JSON.stringify({state:latest.state,sensitive_state:latest.sensitive_state,confirmation:latest.withdrawal_confirmation?.confirmed_at||null,picking_state:latest.picking_state||{},events:latest.events?.length||0});
-    access=latest;
-    if(signature!==lastSignature||!app.innerHTML){lastSignature=signature;render();}
-  }catch{
-    app.innerHTML=shell(`<div class="empty">Não foi possível carregar a sessão. Verifique o Terminal de Acesso e tente novamente.</div>`);
+
+    refreshFailures=0;
+    clearConnectionNotice();
+    const signature=accessSignature(latest);
+    if(signature!==lastSignature||!app.innerHTML){
+      rememberAccess(latest);
+      render({preserveScroll:Boolean(access)});
+    }else{
+      access=latest;
+    }
+  }catch(error){
+    refreshFailures+=1;
+    if(access){
+      // A polling failure is not a logout. Keep the last valid state on screen.
+      showConnectionNotice();
+    }else if(refreshFailures>=3){
+      app.innerHTML=shell(`<div class="empty">Não foi possível carregar a sessão após várias tentativas. Reabra esta tela pelo Terminal de Acesso.</div>`);
+    }
+  }finally{
+    refreshBusy=false;
   }
 }
 
 refresh();
-setInterval(refresh,2000);
+const separationPoll=setInterval(refresh,5000);
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden)refresh();
+});
+window.addEventListener("pagehide",()=>{
+  if(access?.state==="CLOSED"||access?.state==="EXPIRED"){
+    clearInterval(separationPoll);
+    sessionStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(TOKEN_KEY);
+  }
+});
