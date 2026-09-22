@@ -81,3 +81,9 @@
 @media(max-width:720px){
   .home-light .hero-master{padding-top:96px;padding-bottom:44px}.home-light .hero h1{font-size:clamp(2.7rem,13vw,4.2rem)}.home-light .hero-copy{font-size:1rem}.home-light .hero-showcase{min-height:auto;padding:24px;border-radius:19px}.home-light .showcase-flow{grid-template-columns:1fr}.home-light .showcase-flow i{transform:rotate(90deg);text-align:center}.home-light .showcase-result{align-items:flex-start;flex-direction:column}.home-light .home-section{padding:62px 0}.home-light .capability-tabs{display:flex;overflow-x:auto;gap:8px;padding-bottom:4px;scroll-snap-type:x mandatory}.home-light .capability-tab{min-width:180px;scroll-snap-align:start;transform:none!important}.home-light .capability-panel{padding:27px 23px;min-height:0}.home-light .proof-visual,.home-light .proof-copy{padding:28px 23px}.home-light .proof-steps{grid-template-columns:1fr 1fr}.home-light .method-inline{grid-template-columns:1fr}.home-light .method-inline article{border-right:0;border-bottom:1px solid var(--home-line)!important;min-height:0}.home-light .method-inline article:last-child{border-bottom:0!important}.home-light .home-final-cta{padding:62px 0}.home-light .main-nav{background:#fff!important;border-color:var(--home-line)!important}.home-light .main-nav a:not(.btn){color:var(--home-text)!important}
 }
+
+/* Prova real no bloco de case */
+.home-light .proof-photo{padding:0!important;background:#0D1117!important;display:block!important;min-height:430px}
+.home-light .proof-photo img{width:100%;height:100%;min-height:430px;object-fit:cover;object-position:center 52%;display:block}
+@media(max-width:980px){.home-light .proof-photo,.home-light .proof-photo img{min-height:330px}}
+@media(max-width:720px){.home-light .proof-photo,.home-light .proof-photo img{min-height:280px}}
