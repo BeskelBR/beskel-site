@@ -68,7 +68,7 @@ async function apiPost(payload){
 }
 
 async function discoverActiveSession(){
-  const latest=await apiGet({
+  const latest=await apiPost({
     action:"activePickingSession",
     source_device_id:PICKING_DISPLAY_ID,
     device_credential:PICKING_DISPLAY_DEV_CREDENTIAL
