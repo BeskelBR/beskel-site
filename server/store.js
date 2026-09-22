@@ -140,59 +140,213 @@ const terminal = terminalId => terminals.find(x => x.terminal_id === terminalId 
 const hasPermission = (person, permission) => Boolean(person?.permissions?.includes(permission));
 const hasSensitive = value => Boolean(value?.items?.some(item => item.sensitive));
 
-const STOCK_ADDRESS_RULES = [
-  [/agulha 25 x 7/i,{primary:"A2",alternatives:["A5"]}],
-  [/agulha 13 x 4,5/i,{primary:"A3",alternatives:["A6"]}],
-  [/agulha/i,{primary:"A4",alternatives:["A7"]}],
-  [/gaze/i,{primary:"G4",alternatives:["G6"]}],
-  [/compressa/i,{primary:"G3",alternatives:["G7"]}],
-  [/atadura/i,{primary:"G2",alternatives:[]}],
-  [/algod/i,{primary:"G1",alternatives:[]}],
-  [/medicamento x/i,{primary:"E1",alternatives:["E5"],sensitive_area:true}],
-  [/medicamento y/i,{primary:"E2",alternatives:["E5"],sensitive_area:true}],
-  [/medicamento z/i,{primary:"E3",alternatives:["E6"],sensitive_area:true}],
-  [/controlado/i,{primary:"E4",alternatives:["E6"],sensitive_area:true}],
-  [/cateter 20/i,{primary:"C1",alternatives:["C5"]}],
-  [/cateter 22/i,{primary:"C2",alternatives:["C5"]}],
-  [/cateter 24/i,{primary:"C3",alternatives:["C6"]}],
-  [/cateter/i,{primary:"C4",alternatives:[]}],
-  [/seringa 1/i,{primary:"S1",alternatives:["S7"]}],
-  [/seringa 3/i,{primary:"S2",alternatives:["S7"]}],
-  [/seringa 5/i,{primary:"S3",alternatives:["S8"]}],
-  [/seringa 10/i,{primary:"S4",alternatives:["S8"]}],
-  [/seringa 20/i,{primary:"S5",alternatives:["S9"]}],
-  [/seringa/i,{primary:"S6",alternatives:[]}],
-  [/soro 250/i,{primary:"H1",alternatives:["H5"]}],
-  [/soro 500/i,{primary:"H2",alternatives:["H5"]}],
-  [/soro 1000/i,{primary:"H3",alternatives:["H6"]}],
-  [/soro/i,{primary:"H4",alternatives:[]}],
-  [/equipo/i,{primary:"B1",alternatives:["B5"]}],
-  [/extensor/i,{primary:"B2",alternatives:[]}],
-  [/torneira/i,{primary:"B3",alternatives:[]}],
-  [/sonda/i,{primary:"B4",alternatives:[]}],
-  [/luva/i,{primary:"L1",alternatives:["L7"]}],
-  [/esparadrapo/i,{primary:"L2",alternatives:[]}],
-  [/álcool/i,{primary:"L3",alternatives:[]}],
-  [/clorexidina/i,{primary:"L4",alternatives:[]}],
-  [/lâmina/i,{primary:"L5",alternatives:[]}],
-  [/gel/i,{primary:"L6",alternatives:[]}]
-];
-
-function stockAddressFor(item) {
-  const hit = STOCK_ADDRESS_RULES.find(([re]) => re.test(item?.description || ""));
-  const cfg = hit?.[1] || { primary:"Z9", alternatives:[] };
-  const sensitiveArea = item?.sensitive === true || cfg.sensitive_area === true;
-  return {
-    location_code:cfg.primary,
-    alternate_locations:(cfg.alternatives || []).map((code,index)=>({
-      location_code:code,
-      available_units:Math.max(Number(item?.quantity || 1) * (index + 2), 2),
-      sensitive_area:sensitiveArea
-    }))
-  };
+function catalogItems() {
+  const byDescription = new Map();
+  withdrawalOrders.forEach(orderValue => {
+    (orderValue.items || []).forEach(item => {
+      const description = String(item.description || "").trim();
+      if (!description || byDescription.has(description)) return;
+      byDescription.set(description,{
+        description,
+        sensitive:item.sensitive === true,
+        allocation_strategy:"FEFO",
+        tracks_expiration:true
+      });
+    });
+  });
+  return [...byDescription.values()]
+    .sort((a,b)=>a.description.localeCompare(b.description,"pt-BR"))
+    .map((item,index)=>({ product_id:`prod_${String(index+1).padStart(3,"0")}`, ...item }));
 }
 
-function publicEmployee(value) {
+function productForDescription(description) {
+  return catalogItems().find(item => item.description === String(description || "").trim()) || null;
+}
+
+// DEV: a coordenada pertence à ocupação física do lote, nunca ao produto.
+// Os códigos abaixo apenas simulam posições que o responsável do estoque teria
+// atribuído ao receber cada lote. Não existe mapa produto → coordenada.
+function buildStockLots() {
+  const products = catalogItems();
+  let normalIndex = 1;
+  let sensitiveIndex = 1;
+  const lots = [];
+
+  products.forEach((product,index) => {
+    const lotCount = index % 6 === 0 ? 3 : 2;
+    for (let rank=0; rank<lotCount; rank++) {
+      const locationCode = product.sensitive
+        ? `E${String(sensitiveIndex++).padStart(2,"0")}`
+        : `A${String(normalIndex++).padStart(2,"0")}`;
+      const month = rank === 0 ? 11 : rank === 1 ? 3 : 7;
+      const year = rank === 0 ? 2026 : 2027;
+      const day = 10 + (index % 15);
+      const quantity = rank === 0 ? (product.sensitive ? 1 : 3) : rank === 1 ? 20 : 12;
+
+      lots.push({
+        stock_lot_id:`lot_${product.product_id}_${rank+1}`,
+        product_id:product.product_id,
+        lot_code:`HVB-${String(index+1).padStart(3,"0")}-L${rank+1}`,
+        expires_at:`${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}T23:59:59.000Z`,
+        received_at:rank === 0 ? "2026-08-15T12:00:00.000Z" : rank === 1 ? "2026-09-10T12:00:00.000Z" : "2026-09-18T12:00:00.000Z",
+        quantity_available:quantity,
+        location_code:locationCode,
+        sensitive_area:product.sensitive === true,
+        status:"AVAILABLE",
+        quarantine:false,
+        blocked:false,
+        location_assigned_by:"stock_manager_dev"
+      });
+    }
+  });
+
+  return lots;
+}
+
+const stockLots = buildStockLots();
+
+function eligibleLots(productId) {
+  const nowMs = Date.now();
+  return stockLots
+    .filter(lot =>
+      lot.product_id === productId &&
+      lot.status === "AVAILABLE" &&
+      lot.blocked !== true &&
+      lot.quarantine !== true &&
+      Number(lot.quantity_available || 0) > 0 &&
+      (!lot.expires_at || Date.parse(lot.expires_at) >= nowMs)
+    )
+    .sort((a,b) => {
+      const aExpiry = a.expires_at ? Date.parse(a.expires_at) : Number.MAX_SAFE_INTEGER;
+      const bExpiry = b.expires_at ? Date.parse(b.expires_at) : Number.MAX_SAFE_INTEGER;
+      if (aExpiry !== bExpiry) return aExpiry - bExpiry; // FEFO
+      const aReceived = Date.parse(a.received_at || 0);
+      const bReceived = Date.parse(b.received_at || 0);
+      if (aReceived !== bReceived) return aReceived - bReceived; // FIFO desempate
+      return a.stock_lot_id.localeCompare(b.stock_lot_id);
+    });
+}
+
+function buildPickingTasks(orders, liveItems) {
+  const demands = [];
+
+  orders.forEach(orderValue => {
+    (orderValue.items || []).forEach((item,index) => {
+      const product = productForDescription(item.description);
+      if (!product) throw new Error("PRODUCT_NOT_FOUND");
+      demands.push({
+        product_id:product.product_id,
+        description:product.description,
+        sensitive:product.sensitive,
+        quantity:Number(item.quantity || 0),
+        source_type:"ORDER",
+        source_id:orderValue.order_id,
+        source_item_id:`${orderValue.order_id}:${index}`
+      });
+    });
+  });
+
+  (liveItems || []).forEach(item => {
+    demands.push({
+      product_id:item.product_id,
+      description:item.description,
+      sensitive:item.sensitive === true,
+      quantity:Number(item.quantity || 0),
+      source_type:"LIVE",
+      source_id:item.live_item_id,
+      source_item_id:item.live_item_id
+    });
+  });
+
+  const byProduct = new Map();
+  demands.forEach(demand => {
+    if (!byProduct.has(demand.product_id)) byProduct.set(demand.product_id,[]);
+    byProduct.get(demand.product_id).push({...demand,remaining:demand.quantity});
+  });
+
+  const reservations = new Map();
+  const tasks = [];
+
+  for (const [productId,sourceQueue] of byProduct.entries()) {
+    const product = catalogItems().find(item => item.product_id === productId);
+    const totalDemand = sourceQueue.reduce((sum,item)=>sum+item.quantity,0);
+    let remaining = totalDemand;
+    let allocationRank = 1;
+
+    for (const lot of eligibleLots(productId)) {
+      const alreadyReserved = Number(reservations.get(lot.stock_lot_id) || 0);
+      const available = Math.max(Number(lot.quantity_available || 0) - alreadyReserved,0);
+      if (available <= 0) continue;
+      const take = Math.min(available,remaining);
+      if (take <= 0) break;
+
+      let toDistribute = take;
+      const sources = [];
+      for (const source of sourceQueue) {
+        if (toDistribute <= 0) break;
+        if (source.remaining <= 0) continue;
+        const sourceTake = Math.min(source.remaining,toDistribute);
+        sources.push({
+          source_type:source.source_type,
+          source_id:source.source_id,
+          source_item_id:source.source_item_id,
+          quantity:sourceTake
+        });
+        source.remaining -= sourceTake;
+        toDistribute -= sourceTake;
+      }
+
+      reservations.set(lot.stock_lot_id,alreadyReserved+take);
+      tasks.push({
+        picking_task_id:id("pick"),
+        product_id:productId,
+        description:product.description,
+        sensitive:product.sensitive === true,
+        quantity:take,
+        stock_lot_id:lot.stock_lot_id,
+        lot_code:lot.lot_code,
+        expires_at:lot.expires_at,
+        received_at:lot.received_at,
+        location_code:lot.location_code,
+        sensitive_area:lot.sensitive_area === true,
+        allocation_strategy:"FEFO",
+        allocation_rank:allocationRank++,
+        sources
+      });
+      remaining -= take;
+      if (remaining <= 0) break;
+    }
+
+    if (remaining > 0) throw new Error("STOCK_INSUFFICIENT");
+  }
+
+  // Fallbacks representam OUTROS LOTES elegíveis com saldo não reservado.
+  // A contingência nunca presume que o mesmo lote esteja em outra coordenada.
+  tasks.forEach(task => {
+    task.fallback_lots = eligibleLots(task.product_id)
+      .filter(lot => lot.stock_lot_id !== task.stock_lot_id)
+      .map(lot => {
+        const reserved = Number(reservations.get(lot.stock_lot_id) || 0);
+        return {
+          stock_lot_id:lot.stock_lot_id,
+          lot_code:lot.lot_code,
+          location_code:lot.location_code,
+          available_units:Math.max(Number(lot.quantity_available || 0)-reserved,0),
+          expires_at:lot.expires_at,
+          received_at:lot.received_at,
+          sensitive_area:lot.sensitive_area === true
+        };
+      })
+      .filter(lot => lot.available_units > 0);
+  });
+
+  return tasks.sort((a,b) =>
+    a.location_code.localeCompare(b.location_code,"pt-BR",{numeric:true}) ||
+    a.allocation_rank-b.allocation_rank
+  );
+}
+
+function publicEmployee(value) {function publicEmployee(value) {
   return value ? { employee_id:value.employee_id, name:value.name, role:value.role } : null;
 }
 
@@ -207,13 +361,13 @@ function orderSummary(value) {
     total_units:value.items.reduce((sum,item) => sum + Number(item.quantity || 0), 0),
     has_sensitive_items:hasSensitive(value),
     items:value.items.map(item => {
-      const address = stockAddressFor(item);
+      const product = productForDescription(item.description);
       return {
+        product_id:product?.product_id || null,
         description:item.description,
         quantity:item.quantity,
         sensitive:item.sensitive === true,
-        location_code:address.location_code,
-        alternate_locations:address.alternate_locations
+        allocation_strategy:product?.allocation_strategy || "FEFO"
       };
     }),
     patient,
@@ -221,7 +375,7 @@ function orderSummary(value) {
   };
 }
 
-function canonicalHash(value) {
+function canonicalHash(value) {function canonicalHash(value) {
   const normalized = JSON.stringify(value, Object.keys(value || {}).sort());
   return crypto.createHash("sha256").update(normalized).digest("hex");
 }
@@ -385,26 +539,6 @@ function getAuth(authSessionId) {
   return auth && auth.expires_at >= Date.now() ? auth : null;
 }
 
-function catalogItems() {
-  const byDescription = new Map();
-  withdrawalOrders.forEach(orderValue => {
-    (orderValue.items || []).forEach(item => {
-      const description = String(item.description || "").trim();
-      if (!description || byDescription.has(description)) return;
-      const address = stockAddressFor(item);
-      byDescription.set(description,{
-        description,
-        sensitive:item.sensitive === true,
-        location_code:address.location_code,
-        alternate_locations:address.alternate_locations
-      });
-    });
-  });
-  return [...byDescription.values()]
-    .sort((a,b)=>a.description.localeCompare(b.description,"pt-BR"))
-    .map((item,index)=>({ product_id:`prod_${String(index+1).padStart(3,"0")}`, ...item }));
-}
-
 function listCatalog(authSessionId, query = "") {
   if (!getAuth(authSessionId)) throw new Error("AUTH_SESSION_EXPIRED");
   const needle = String(query || "").trim().toLocaleLowerCase("pt-BR");
@@ -427,8 +561,7 @@ function startAccessSession({ authSessionId, orderIds, liveItems = [], terminalI
       description:product.description,
       quantity:Number(item?.quantity || 0),
       sensitive:product.sensitive === true,
-      location_code:product.location_code,
-      alternate_locations:product.alternate_locations
+      allocation_strategy:product.allocation_strategy
     };
   });
   const payload = {
@@ -446,7 +579,8 @@ function startAccessSession({ authSessionId, orderIds, liveItems = [], terminalI
     if (normalizedLiveItems.some(item => !item || !item.description || !Number.isFinite(item.quantity) || item.quantity <= 0)) throw new Error("LIVE_ITEM_INVALID");
     const orders = ids.map(order);
     if (orders.some(x => !x || x.status !== "AGUARDANDO_RETIRADA")) throw new Error("ORDER_NOT_AVAILABLE");
-    const sensitive = orders.some(hasSensitive) || normalizedLiveItems.some(item => item.sensitive);
+    const pickingTasks = buildPickingTasks(orders,normalizedLiveItems);
+    const sensitive = pickingTasks.some(task => task.sensitive);
     const person = employee(auth.employee_id);
     if (sensitive && !hasPermission(person,"stock.sensitive.access")) throw new Error("SENSITIVE_ACCESS_DENIED");
 
@@ -458,6 +592,7 @@ function startAccessSession({ authSessionId, orderIds, liveItems = [], terminalI
       terminal_id:terminalId,
       order_ids:ids,
       live_items:normalizedLiveItems,
+      picking_tasks:pickingTasks,
       sensitive_access:sensitive,
       sensitive_access_granted:sensitive,
       state:"DOOR_AUTHORIZED",
@@ -468,6 +603,19 @@ function startAccessSession({ authSessionId, orderIds, liveItems = [], terminalI
     accessSessions.set(access.access_session_id, access);
     log(access,"ACCESS_SESSION_CREATED",{ order_ids:ids, live_item_count:normalizedLiveItems.length, sensitive_access:sensitive, command_id:commandId });
     log(access,"WITHDRAWAL_CONTEXT_CONFIRMED",{ order_ids:ids, live_items:normalizedLiveItems, command_id:commandId });
+    log(access,"STOCK_ALLOCATION_CREATED",{
+      strategy:"FEFO",
+      fifo_tiebreak:true,
+      tasks:pickingTasks.map(task=>({
+        picking_task_id:task.picking_task_id,
+        product_id:task.product_id,
+        stock_lot_id:task.stock_lot_id,
+        lot_code:task.lot_code,
+        location_code:task.location_code,
+        quantity:task.quantity,
+        expires_at:task.expires_at
+      }))
+    });
     log(access,"ACCESS_GRANTED",{ barrier_id:"STOCK_ROOM_DOOR", sensitive_access:sensitive });
     if (sensitive) log(access,"SENSITIVE_ACCESS_GRANTED",{ barrier_id:"SENSITIVE_STORAGE", permission:"stock.sensitive.access" });
 
@@ -479,44 +627,23 @@ function startAccessSession({ authSessionId, orderIds, liveItems = [], terminalI
 }
 
 function expectedPickingGroups(access) {
-  const map = new Map();
-  const addItem = item => {
-    const primary = String(item?.location_code || "SEM COORD.").trim().toUpperCase();
-    const description = String(item?.description || "").trim();
-    const sensitive = item?.sensitive === true;
-    const key = `${primary}|${description}|${sensitive?1:0}`;
-    if (!map.has(key)) {
-      map.set(key,{
-        key,
-        primary_location:primary,
-        description,
-        sensitive,
-        quantity:0,
-        allowed_locations:new Set([primary])
-      });
-    }
-    const group = map.get(key);
-    group.quantity += Number(item?.quantity || 0);
-    (item?.alternate_locations || []).forEach(alt => {
-      const code = String(alt?.location_code || "").trim().toUpperCase();
-      if (!code) return;
-      if (sensitive && alt?.sensitive_area !== true) return;
-      group.allowed_locations.add(code);
-    });
-  };
-
-  access.order_ids.map(order).filter(Boolean).map(orderSummary).forEach(summary => {
-    (summary.items || []).forEach(addItem);
-  });
-  (access.live_items || []).forEach(addItem);
-
-  return [...map.values()].map(group => ({
-    ...group,
-    allowed_locations:[...group.allowed_locations]
+  return (access.picking_tasks || []).map(task => ({
+    key:task.picking_task_id,
+    picking_task_id:task.picking_task_id,
+    product_id:task.product_id,
+    description:task.description,
+    sensitive:task.sensitive === true,
+    quantity:Number(task.quantity || 0),
+    primary_location:task.location_code,
+    stock_lot_id:task.stock_lot_id,
+    lot_code:task.lot_code,
+    expires_at:task.expires_at,
+    sources:task.sources || [],
+    fallback_lots:task.fallback_lots || []
   }));
 }
 
-function rawAccess(accessSessionId) {
+function rawAccess(accessSessionId) {function rawAccess(accessSessionId) {
   const access = accessSessions.get(String(accessSessionId || ""));
   if (access && access.expires_at < Date.now() && !["CLOSED","EXPIRED"].includes(access.state)) {
     access.state = "EXPIRED";
@@ -590,7 +717,7 @@ function registerAccessEvent({ accessSessionId, eventType, metadata = {}, comman
 function registerPickingEvent({ accessSessionId, eventType, metadata = {}, commandId, sourceDeviceId = PICKING_DISPLAY_ID }) {
   const allowed = new Set([
     "PICKING_ITEM_CONFIRMED","PICKING_ITEM_UNDONE","STOCK_LOCATION_DISCREPANCY",
-    "PICKING_LOCATION_REROUTED","PICKING_PARTIAL","PICKING_UNAVAILABLE"
+    "PICKING_LOCATION_REROUTED","PICKING_LOT_REALLOCATED","PICKING_PARTIAL","PICKING_UNAVAILABLE"
   ]);
   if (!allowed.has(String(eventType || ""))) throw new Error("INVALID_PICKING_EVENT");
   const payload = { accessSessionId:String(accessSessionId || ""), eventType:String(eventType || ""), metadata, sourceDeviceId:String(sourceDeviceId || "") };
@@ -608,6 +735,8 @@ function registerPickingEvent({ accessSessionId, eventType, metadata = {}, comma
     const current = access.picking_state[group.key] || {
       status:"PENDING",
       active_location:group.primary_location,
+      active_stock_lot_id:group.stock_lot_id,
+      active_lot_code:group.lot_code,
       actual_quantity:null
     };
     const next = { ...current, updated_at:now() };
@@ -622,11 +751,20 @@ function registerPickingEvent({ accessSessionId, eventType, metadata = {}, comma
       next.status = "EXCEPTION";
       next.discrepancy_location = current.active_location || group.primary_location;
       next.actual_quantity = null;
-    } else if (eventType === "PICKING_LOCATION_REROUTED") {
+    } else if (eventType === "PICKING_LOCATION_REROUTED" || eventType === "PICKING_LOT_REALLOCATED") {
       const to = String(metadata?.to_location || "").trim().toUpperCase();
-      if (!group.allowed_locations.includes(to)) throw new Error("PICKING_LOCATION_INVALID");
+      const targetLotId = String(metadata?.to_stock_lot_id || "");
+      const fallback = group.fallback_lots.find(lot =>
+        lot.location_code === to &&
+        (!targetLotId || lot.stock_lot_id === targetLotId)
+      );
+      if (!fallback) throw new Error("PICKING_LOCATION_INVALID");
+      if (group.sensitive && fallback.sensitive_area !== true) throw new Error("PICKING_LOCATION_INVALID");
       next.status = "PENDING";
-      next.active_location = to;
+      next.active_location = fallback.location_code;
+      next.active_stock_lot_id = fallback.stock_lot_id;
+      next.active_lot_code = fallback.lot_code;
+      next.reallocated_from_stock_lot_id = current.active_stock_lot_id || group.stock_lot_id;
       next.actual_quantity = null;
     } else if (eventType === "PICKING_PARTIAL") {
       const actual = Number(metadata?.actual_quantity);
@@ -655,6 +793,8 @@ function confirmWithdrawal({ accessSessionId, results = [], commandId, sourceDev
     expected_quantity:Number(item?.expected_quantity || 0),
     actual_quantity:Number(item?.actual_quantity ?? 0),
     location_code:String(item?.location_code || "").trim().toUpperCase(),
+    stock_lot_id:String(item?.stock_lot_id || ""),
+    lot_code:String(item?.lot_code || ""),
     status:String(item?.status || "")
   }));
   const payload = { accessSessionId:String(accessSessionId || ""), results:normalized, sourceDeviceId:String(sourceDeviceId || "") };
@@ -674,9 +814,17 @@ function confirmWithdrawal({ accessSessionId, results = [], commandId, sourceDev
       if (!result || !state) throw new Error("WITHDRAWAL_RESULTS_INCOMPLETE");
       if (!["CONFIRMED","PARTIAL","UNAVAILABLE"].includes(result.status)) throw new Error("WITHDRAWAL_RESULTS_INCOMPLETE");
       if (result.description !== group.description || result.expected_quantity !== group.quantity) throw new Error("WITHDRAWAL_RESULTS_MISMATCH");
-      if (!group.allowed_locations.includes(result.location_code)) throw new Error("PICKING_LOCATION_INVALID");
+      const allowedPairs = [
+        { stock_lot_id:group.stock_lot_id, lot_code:group.lot_code, location_code:group.primary_location },
+        ...(group.fallback_lots || [])
+      ];
+      if (!allowedPairs.some(x =>
+        x.stock_lot_id === result.stock_lot_id &&
+        x.location_code === result.location_code
+      )) throw new Error("PICKING_LOCATION_INVALID");
       if (state.status !== result.status) throw new Error("WITHDRAWAL_RESULTS_MISMATCH");
       if (String(state.active_location || group.primary_location).toUpperCase() !== result.location_code) throw new Error("WITHDRAWAL_RESULTS_MISMATCH");
+      if (String(state.active_stock_lot_id || group.stock_lot_id) !== result.stock_lot_id) throw new Error("WITHDRAWAL_RESULTS_MISMATCH");
       if (result.status === "CONFIRMED" && result.actual_quantity !== group.quantity) throw new Error("PICKING_QUANTITY_INVALID");
       if (result.status === "PARTIAL" && !(result.actual_quantity > 0 && result.actual_quantity < group.quantity)) throw new Error("PICKING_QUANTITY_INVALID");
       if (result.status === "UNAVAILABLE" && result.actual_quantity !== 0) throw new Error("PICKING_QUANTITY_INVALID");
@@ -728,6 +876,7 @@ module.exports = {
   verifyIdentity,
   listPendingOrders,
   listCatalog,
+  listStockLots:() => stockLots.map(lot=>({...lot})),
   startAccessSession,
   registerAccessEvent,
   registerPickingEvent,
