@@ -149,3 +149,8 @@ code,.tech,.eyebrow,.solution-index,.case-badge,.system-label,.system-node small
   .footer-brand-master img{width:155px!important}
   .case-process-panel{padding:24px}
 }
+
+
+/* Auditoria editorial — relação entre solução e processo */
+.solution-transversal-note{margin:22px 0 0;padding:18px 20px;border-left:3px solid #FF7A00;background:#090C10;color:#B8BEC7;line-height:1.65;max-width:920px}
+.solution-transversal-note strong{color:#fff;font-weight:600}
