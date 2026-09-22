@@ -385,20 +385,52 @@ function getAuth(authSessionId) {
   return auth && auth.expires_at >= Date.now() ? auth : null;
 }
 
+function catalogItems() {
+  const byDescription = new Map();
+  withdrawalOrders.forEach(orderValue => {
+    (orderValue.items || []).forEach(item => {
+      const description = String(item.description || "").trim();
+      if (!description || byDescription.has(description)) return;
+      const address = stockAddressFor(item);
+      byDescription.set(description,{
+        description,
+        sensitive:item.sensitive === true,
+        location_code:address.location_code,
+        alternate_locations:address.alternate_locations
+      });
+    });
+  });
+  return [...byDescription.values()]
+    .sort((a,b)=>a.description.localeCompare(b.description,"pt-BR"))
+    .map((item,index)=>({ product_id:`prod_${String(index+1).padStart(3,"0")}`, ...item }));
+}
+
+function listCatalog(authSessionId, query = "") {
+  if (!getAuth(authSessionId)) throw new Error("AUTH_SESSION_EXPIRED");
+  const needle = String(query || "").trim().toLocaleLowerCase("pt-BR");
+  return catalogItems().filter(item => !needle || item.description.toLocaleLowerCase("pt-BR").includes(needle));
+}
+
 function listPendingOrders(authSessionId) {
   if (!getAuth(authSessionId)) throw new Error("AUTH_SESSION_EXPIRED");
   return withdrawalOrders.filter(x => x.status === "AGUARDANDO_RETIRADA").map(orderSummary);
 }
 
 function startAccessSession({ authSessionId, orderIds, liveItems = [], terminalId = TERMINAL_ID, commandId }) {
-  const normalizedLiveItems = (Array.isArray(liveItems) ? liveItems : []).map((item,index)=>({
-    live_item_id:String(item?.live_item_id || `live_${index+1}`),
-    description:String(item?.description || "").trim(),
-    quantity:Number(item?.quantity || 0),
-    sensitive:item?.sensitive === true,
-    location_code:String(item?.location_code || "MANUAL").trim().toUpperCase(),
-    alternate_locations:Array.isArray(item?.alternate_locations) ? item.alternate_locations : []
-  }));
+  const catalog = catalogItems();
+  const normalizedLiveItems = (Array.isArray(liveItems) ? liveItems : []).map((item,index)=>{
+    const product = catalog.find(x => x.product_id === String(item?.product_id || ""));
+    if (!product) return null;
+    return {
+      live_item_id:String(item?.live_item_id || `live_${index+1}`),
+      product_id:product.product_id,
+      description:product.description,
+      quantity:Number(item?.quantity || 0),
+      sensitive:product.sensitive === true,
+      location_code:product.location_code,
+      alternate_locations:product.alternate_locations
+    };
+  });
   const payload = {
     authSessionId:String(authSessionId || ""),
     orderIds:[...(orderIds || [])].map(String).sort(),
@@ -411,7 +443,7 @@ function startAccessSession({ authSessionId, orderIds, liveItems = [], terminalI
     if (auth.terminal_id !== terminalId) throw new Error("TERMINAL_MISMATCH");
     const ids = [...new Set((orderIds || []).map(String).filter(Boolean))];
     if (!ids.length && !normalizedLiveItems.length) throw new Error("ORDER_REQUIRED");
-    if (normalizedLiveItems.some(item => !item.description || !Number.isFinite(item.quantity) || item.quantity <= 0)) throw new Error("LIVE_ITEM_INVALID");
+    if (normalizedLiveItems.some(item => !item || !item.description || !Number.isFinite(item.quantity) || item.quantity <= 0)) throw new Error("LIVE_ITEM_INVALID");
     const orders = ids.map(order);
     if (orders.some(x => !x || x.status !== "AGUARDANDO_RETIRADA")) throw new Error("ORDER_NOT_AVAILABLE");
     const sensitive = orders.some(hasSensitive) || normalizedLiveItems.some(item => item.sensitive);
@@ -695,6 +727,7 @@ module.exports = {
   createBiometricEvidence,
   verifyIdentity,
   listPendingOrders,
+  listCatalog,
   startAccessSession,
   registerAccessEvent,
   registerPickingEvent,
