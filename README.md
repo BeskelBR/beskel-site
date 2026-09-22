@@ -1,238 +1,118 @@
-# HVB Terminal — Terminal de Acesso
+# HVB Terminal — Candidato de Aplicação v1
 
-> **ATUALIZAÇÃO VIGENTE — v4 / N1:** o fluxo físico aprovado pelo HVB em 20/09/2026 está documentado em `docs/TERMINAL-FLUXO-FISICO-N1-V4.md`. Ele substitui, para a implementação atual, as referências anteriores a HVB Mobile/WhatsApp como parte necessária do picking. O Terminal de Retirada interno é a interface operacional da separação.
+Status: **FECHAMENTO DE SOFTWARE / PRÉ-IMPLANTAÇÃO**  
+Branch: `hvb-terminal-dev`  
+Subprojeto: `05_TERMINAL_E_INFRAESTRUTURA`
 
-Protótipo de desenvolvimento do Terminal físico do Hospital Veterinário Brasília.
+A referência funcional vigente é `docs/TERMINAL-FLUXO-FISICO-N1-V4.md`.
 
-> **Arquitetura funcional vigente:** o Terminal é um **Terminal de Acesso**. Seu papel é identidade, autenticação, autorização, confirmação de contexto da retirada e participação no controle de acesso físico. O picking item a item continua no **HVB Mobile** e a escrituração continua sendo responsabilidade da **API do HVB Sistema**.
-
-## Status atual
-
-A migração funcional para a arquitetura v2 foi iniciada em 16/09/2026 em modo exclusivamente DEV/mock.
-
-Já estão representados no protótipo:
-
-- `Controle de Materiais` → `Terminal de Acesso`;
-- credencial DESFire simulada + face 1:1/PAD simulados;
-- challenge curto e de uso único;
-- evidência biométrica/PAD referenciada por `evidence_id`;
-- vínculo da evidência a terminal/dispositivo DEV confiável;
-- consulta de Ordens de Retirada pendentes;
-- **lista de materiais visível no próprio Terminal após autenticação**;
-- **seleção simultânea de uma ou várias Ordens de Retirada**;
-- confirmação do conjunto de ordens antes da criação da `AccessSession`;
-- `AccessSession` N:N com ordens no contrato do protótipo;
-- diferenciação de ordem comum e ordem com item sensível;
-- sequência simulada de porta/entrada/armário sensível;
-- comandos com `command_id` para idempotência;
-- `source_occurred_at` separado do instante recebido no servidor;
-- auditoria append-only de identidade e acesso;
-- dataset sintético com pelo menos dez Ordens de Retirada simultâneas;
-- preparação de mensagem WhatsApp com lista de materiais em modo DEV, sem envio automático;
-- depreciação das telas legadas de picking;
-- ausência de escrita de consumo/estoque pelo Terminal.
-
-Ainda não estão implementados de forma real:
-
-- DESFire físico;
-- câmera/biometria/liveness reais;
-- assinatura/attestation criptográfica real;
-- controlador de porta/armário e sensores reais;
-- HVB Mobile real;
-- API real do HVB Sistema;
-- PostgreSQL real neste protótipo;
-- contingência offline/edge;
-- provedor/API oficial de WhatsApp;
-- movimentação real de estoque, custo ou faturamento.
-
-Nenhum dado ou sistema real do HVB é acessado.
-
-## Separação de responsabilidades
+## Fluxo N1 congelado
 
 ```text
-HVB SISTEMA / CONSULTÓRIO
-→ cria Ordem de Retirada
-
-TERMINAL DE ACESSO HVB
-→ identifica/autentica
-→ mostra ordens e materiais
-→ permite selecionar uma ou várias ordens
-→ confirma contexto da sessão
-→ participa do controle físico
-
-HVB MOBILE
-→ guia picking
-→ captura exceções
-→ confirma resultado
-
-API HVB
-→ valida regras
-→ escritura estoque/custo/auditoria
-
-POSTGRESQL
-→ fonte oficial dos dados
+NFC_VALIDATED
+→ BIOMETRIC_VALIDATED
+→ WITHDRAWAL_CONTEXT_CONFIRMED
+→ ACCESS_GRANTED
+→ DOOR_OPENED
+→ PRESENCE_CONFIRMED
+→ PICKING GUIADO
+→ DOOR_CLOSED
+→ WITHDRAWAL_CONFIRMED
 ```
 
-Princípio operacional:
+O primeiro fator é **NFC TAG simples**, por decisão do HVB. A biometria permanece como segundo fator.
 
-```text
-CONSULTÓRIO SOLICITA
-→ TERMINAL AUTENTICA E MOSTRA A LISTA
-→ PROFISSIONAL CONFIRMA AS ORDENS
-→ SALA LIBERA
-→ MOBILE GUIA O PICKING
-→ API ESCRITURA
-```
+## Interfaces
 
-A presença da lista no Terminal **não devolve o picking detalhado ao Terminal**. O equipamento confirma visualmente o contexto e o conjunto de ordens que motivam o acesso.
+- `/` — Terminal de Acesso;
+- `/auth/:token` — autenticação DEV;
+- `/ordens` — seleção de ORs e ajuste ao vivo DEV;
+- `/acesso/:id` — AccessSession e eventos físicos;
+- `/separacao/:id` — Terminal de Retirada;
+- `/admin/auditoria` — auditoria DEV.
 
-## Fluxo DEV atual
+## Terminal de Retirada
 
-```text
-repouso
-→ credencial simulada
-→ challenge
-→ face 1:1 + PAD simulados
-→ AuthSession
-→ 10+ ordens pendentes com materiais visíveis
-→ seleção de 1..N ordens
-→ confirmação do conjunto
-→ AccessSession idempotente
-→ porta autorizada
-→ porta aberta [DEV]
-→ entrada confirmada [DEV]
-→ todas as ordens da sessão → EM_SEPARACAO
-→ porta fechada [DEV]
-→ armário sensível [se aplicável, DEV]
-→ acesso ativo
-```
+O tablet interno recebe a mesma `AccessSession` do Terminal de Acesso.
 
-`DOOR_AUTHORIZED` não altera o estado das ordens. A transição para `EM_SEPARACAO` ocorre apenas em `ENTRY_CONFIRMED`.
+O picking é guiado por coordenada e suporta:
 
-## Rotas v2
+- confirmação de retirada;
+- material não encontrado;
+- redirecionamento para coordenada alternativa;
+- retirada parcial;
+- indisponibilidade;
+- preservação da divergência para auditoria.
 
-- `/` — repouso/credencial;
-- `/auth/:token` — identificação/autenticação simulada;
-- `/ordens` — consulta, lista de materiais e seleção múltipla;
-- `/acesso/:id` — sessão, materiais vinculados e eventos físicos simulados;
-- `/admin/auditoria` — auditoria somente leitura.
+O **estado do picking é autoridade do servidor** no contrato v1. O navegador não é mais a fonte oficial do checklist.
 
-Rotas legadas continuam apenas como aviso de migração:
+A confirmação final só é aceita após `DOOR_CLOSED` e somente se todos os grupos esperados estiverem resolvidos. A API valida o conjunto de itens, quantidades e coordenadas antes de aceitar `WITHDRAWAL_CONFIRMED`.
 
-- `/atendimentos`;
-- `/atendimento/:id`;
-- `/materiais`;
-- `/retirada`;
-- `/sucesso`.
+## Limite do ambiente atual
 
-## WhatsApp em DEV
-
-O WhatsApp continua complementar:
-
-```text
-WHATSAPP NOTIFICA
-HVB MOBILE OPERA
-API ESCRITURA
-```
-
-O protótipo **não envia mensagens automaticamente** e não possui provedor oficial configurado. Ele apenas abre `wa.me` com a lista pré-preenchida para que o operador confirme manualmente o envio.
-
-O número de teste é armazenado apenas no `localStorage` do navegador. Não deve ser hardcoded no repositório.
-
-Há duas formas de configurar:
-
-1. campo `WhatsApp • DEV` na interface; ou
-2. abrir uma vez o Terminal com `?whatsapp=<numero_em_formato_internacional>`.
-
-O parâmetro é removido da URL após ser salvo localmente.
-
-A mensagem contém ordem e materiais/quantidades. Evitar dados clínicos desnecessários.
-
-## Arquitetura técnica do protótipo
+O branch continua em **DEV**:
 
 ```text
 UI
-↓
-API /api/mock
-↓
-IntegrationAdapter
-↓
-MockAdapter
-↓
-store mock em memória
+→ /api/mock
+→ IntegrationAdapter
+→ MockAdapter
+→ store em memória
 ```
 
-O `IntegrationAdapter` permanece como fronteira para substituição posterior pelo HVB Sistema.
+Portanto, o mock valida o contrato e o fluxo, mas **não é infraestrutura de produção**.
 
-## Autenticação alvo
+Para aplicação real ainda são dependências externas ao mock:
+
+1. API real do HVB Sistema + PostgreSQL;
+2. catálogo e posições reais de estoque;
+3. NFC Android real;
+4. biometria real / face 1:1 + liveness;
+5. controlador físico da porta e sensores;
+6. política de contingência local diante de perda de rede/energia;
+7. configuração Android Dedicated Device / Kiosk;
+8. comissionamento e homologação no hospital.
+
+## Regra para implantação
+
+Nenhuma barreira física real deve ser comandada diretamente pelo navegador.
 
 ```text
-DESFire EV3
-→ face 1:1
-→ PAD/liveness
-→ evidência autenticada do dispositivo
-→ validação da API
-→ AuthSession
+Tablet
+→ API / autorização
+→ controlador local confiável
+→ relé / fechadura
+
+Sensores
+→ controlador local
+→ eventos autenticados
+→ API
 ```
 
-A UI não é raiz de confiança. Em DEV, a evidência é simulada; em produção deverá haver attestation/assinatura e proteção anti-replay.
+Novos acessos permanecem `FAIL_CLOSED` quando a autorização central não puder ser validada. A política para uma sessão já autorizada será fechada junto ao controlador/Edge no projeto executivo.
 
-## Estoque sensível
+## QA
 
-```text
-autenticação
-→ porta autorizada
-→ porta abre
-→ sensor confirma entrada
-→ porta fecha
-→ armário sensível autorizado [se necessário]
-→ armário abre/fecha
-→ acesso ativo
-```
-
-Selecionar várias ordens cria uma única sessão de acesso. Se **qualquer** uma das ordens contiver item sensível, toda a sessão exige permissão de acesso sensível.
-
-Offline + estoque sensível permanece `FAIL_CLOSED` por padrão.
-
-## Testes do núcleo DEV
+Testes do núcleo:
 
 ```bash
 node --test tests/store.test.js
 ```
 
-A suíte cobre:
+A suíte cobre autenticação simulada, múltiplas ORs, estoque sensível, sequência física, coordenadas, estado de picking no servidor, idempotência e rejeição de confirmação inconsistente.
 
-- pelo menos dez ordens sintéticas pendentes;
-- presença da lista de materiais no contrato das ordens;
-- sessão vinculada a múltiplas ordens;
-- idempotência;
-- `ENTRY_CONFIRMED → EM_SEPARACAO` para todas as ordens da sessão;
-- bloqueio de item sensível sem permissão;
-- ausência de `STOCK_CONSUMED` no Terminal.
+## Próximo marco
 
-## Segurança do DEV
+O software funcional está em **candidato de aplicação**, não em produção.
 
-- dados 100% fictícios;
-- nenhum segredo real;
-- nenhum número pessoal hardcoded no repositório;
-- nenhum banco real no frontend;
-- nenhum acesso ao SimplesVet;
-- `noindex`, `nofollow`, `noarchive`;
-- challenges e sessões temporárias;
-- eventos append-only no mock;
-- nenhum movimento real de estoque.
+O próximo marco é:
 
-## Documentação vigente
-
-- `docs/TERMINAL-ARQUITETURA-V2.md`
-- `docs/DELTA-IMPLEMENTACAO-V2.md`
-- `docs/AUTH-EVIDENCE-CONTRACT-V1.md`
-- `docs/TERMINAL-CORE-CONTRACT-V1.md`
-- `docs/OFFLINE-EDGE-V1.md`
-- `docs/INTEGRACAO-HVB-SISTEMA-DELTA-V2.md`
-- `docs/HANDOFF-HVB-SISTEMA-TERMINAL-V2.md`
-- `docs/TESTE-MULTI-ORDEM-WHATSAPP-DEV.md`
-
-## Limites
-
-Não avançar sem autorização específica para hardware real, dados reais, deploy de produção, domínio/DNS, provedor de WhatsApp ou integração com sistemas externos.
+```text
+VISITA TÉCNICA
+→ projeto executivo físico
+→ seleção do hardware
+→ adapters reais
+→ teste integrado
+→ homologação
+→ TERMINAL_V1_FROZEN
+```
