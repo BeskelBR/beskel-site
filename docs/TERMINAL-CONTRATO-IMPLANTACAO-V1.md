@@ -31,7 +31,7 @@ Entradas mínimas previstas:
 Saídas mínimas previstas:
 
 - comando da porta principal;
-- comando do compartimento sensível.
+- comando do compartimento sensível, acionado somente sob demanda durante AccessSession autorizada.
 
 ## 3. Eventos físicos
 
@@ -44,7 +44,7 @@ PRESENCE_CONFIRMED
 DOOR_CLOSED
 ```
 
-Para sensíveis, o projeto físico deve distinguir autorização/comando de abertura do evento comprovado por sensor.
+Para sensíveis, o projeto físico deve distinguir autorização/comando de abertura do evento comprovado por sensor. O armário não é destravado junto com a porta principal.
 
 ## 4. Terminal de Retirada
 
@@ -147,3 +147,35 @@ Cada tarefa deve carregar no mínimo:
 - `sources[]` preservando OR/ajuste de origem.
 
 A implementação real deve reservar saldo transacionalmente para impedir dupla alocação concorrente. O mock atual valida a semântica FEFO/FIFO, mas não substitui a reserva PostgreSQL de produção.
+
+
+## 9. Sessão de medicação sensível
+
+Quando a AccessSession contém medicação sensível e o funcionário possui permissão, a API registra elegibilidade, não abertura antecipada.
+
+Contrato mínimo:
+
+```text
+SENSITIVE_ACCESS_ELIGIBLE
+SENSITIVE_ACCESS_REQUESTED
+SENSITIVE_ACCESS_GRANTED
+SENSITIVE_DOOR_OPENED
+SENSITIVE_DOOR_CLOSED
+SENSITIVE_LOCK_CONFIRMED
+SENSITIVE_ACCESS_COMPLETED
+```
+
+Regras:
+
+- sem segunda autenticação NFC/biométrica;
+- solicitação parte do Terminal de Retirada;
+- abertura física deve vir de controlador/sensor confiável;
+- autorização de abertura possui janela curta;
+- picking sensível só é permitido enquanto o sensor indicar armário aberto;
+- picking comum fica suspenso durante a sessão sensível ativa;
+- fechar o armário com pendências permite nova abertura posterior na mesma AccessSession;
+- `PICKING_READY` exige o armário fechado e a trava confirmada;
+- a abertura da porta principal jamais implica abertura do armário sensível;
+- cada abertura deve ser auditável por AccessSession, usuário, dispositivo, instante e número da abertura.
+
+A duração definitiva da janela de destravamento será parâmetro do controlador no projeto executivo. O mock usa 15 segundos apenas como contrato DEV.
