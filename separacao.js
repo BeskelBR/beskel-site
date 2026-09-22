@@ -38,57 +38,61 @@ async function apiPost(payload){
   return body.data;
 }
 
-function sourceEntries(){
-  const out=[];
-  (access?.orders||[]).forEach(order=>{
-    (order.items||[]).forEach((item,index)=>out.push({
-      source:`${order.order_id} · ${item.quantity}`,
-      member:`${order.order_id}:${index}`,
-      item
-    }));
-  });
-  (access?.live_items||[]).forEach((item,index)=>out.push({
-    source:`AJUSTE AO VIVO · ${item.quantity}`,
-    member:`live:${item.live_item_id||index}`,
-    item
-  }));
-  return out;
+function sourceLabel(source){
+  if(source?.source_type==="ORDER")return `${source.source_id} · ${source.quantity} un`;
+  return `AJUSTE AO VIVO · ${source?.quantity||0} un`;
 }
-
+function dateLabel(value){
+  if(!value)return "sem validade";
+  const date=new Date(value);
+  return Number.isNaN(date.getTime())?"—":date.toLocaleDateString("pt-BR");
+}
 function groupsFromAccess(){
-  const map=new Map();
-  sourceEntries().forEach(({source,member,item})=>{
-    const primary=String(item.location_code||"SEM COORD.").toUpperCase();
-    const key=`${primary}|${item.description}|${item.sensitive?1:0}`;
-    if(!map.has(key))map.set(key,{
-      key,
-      primary_location:primary,
-      description:item.description,
-      sensitive:item.sensitive===true,
-      quantity:0,
-      sources:[],
-      members:[],
-      alternatives:[]
-    });
-    const group=map.get(key);
-    group.quantity+=Number(item.quantity||0);
-    group.sources.push(source);
-    group.members.push(member);
-    (item.alternate_locations||[]).forEach(alt=>{
-      if(!group.alternatives.some(x=>x.location_code===alt.location_code)){
-        group.alternatives.push({
-          location_code:String(alt.location_code||"").toUpperCase(),
-          available_units:Number(alt.available_units||0),
-          sensitive_area:alt.sensitive_area===true
-        });
-      }
-    });
-  });
-  return [...map.values()].sort((a,b)=>activeLocation(a).localeCompare(activeLocation(b),"pt-BR",{numeric:true}));
+  return (access?.picking_tasks||[]).map(task=>({
+    key:task.picking_task_id,
+    picking_task_id:task.picking_task_id,
+    product_id:task.product_id,
+    primary_location:String(task.location_code||"SEM COORD.").toUpperCase(),
+    description:task.description,
+    sensitive:task.sensitive===true,
+    quantity:Number(task.quantity||0),
+    stock_lot_id:task.stock_lot_id,
+    lot_code:task.lot_code,
+    expires_at:task.expires_at,
+    received_at:task.received_at,
+    allocation_strategy:task.allocation_strategy||"FEFO",
+    sources:(task.sources||[]).map(sourceLabel),
+    alternatives:(task.fallback_lots||[]).map(lot=>({
+      stock_lot_id:lot.stock_lot_id,
+      lot_code:lot.lot_code,
+      location_code:String(lot.location_code||"").toUpperCase(),
+      available_units:Number(lot.available_units||0),
+      expires_at:lot.expires_at,
+      received_at:lot.received_at,
+      sensitive_area:lot.sensitive_area===true
+    }))
+  })).sort((a,b)=>activeLocation(a).localeCompare(activeLocation(b),"pt-BR",{numeric:true}));
 }
 function groupRecord(group){return access?.picking_state?.[group.key]||{};}
 function groupStatus(group){return groupRecord(group).status||"PENDING";}
 function activeLocation(group){return groupRecord(group).active_location||group.primary_location;}
+function activeStockLotId(group){return groupRecord(group).active_stock_lot_id||group.stock_lot_id;}
+function activeLotCode(group){return groupRecord(group).active_lot_code||group.lot_code;}
+function activeLot(group){
+  const stockLotId=activeStockLotId(group);
+  if(stockLotId===group.stock_lot_id)return {
+    stock_lot_id:group.stock_lot_id,
+    lot_code:group.lot_code,
+    location_code:group.primary_location,
+    expires_at:group.expires_at
+  };
+  return group.alternatives.find(lot=>lot.stock_lot_id===stockLotId)||{
+    stock_lot_id:stockLotId,
+    lot_code:activeLotCode(group),
+    location_code:activeLocation(group),
+    expires_at:null
+  };
+}
 function actualQuantity(group){
   const rec=groupRecord(group);
   if(rec.status==="PARTIAL")return Number(rec.actual_quantity||0);
@@ -111,6 +115,8 @@ async function pickingEvent(eventType,group,metadata={}){
         description:group.description,
         expected_quantity:group.quantity,
         location_code:activeLocation(group),
+        stock_lot_id:activeStockLotId(group),
+        lot_code:activeLotCode(group),
         ...metadata
       },
       command_id:cmd("pick"),
@@ -166,9 +172,9 @@ function render(){
     }else if(status==="EXCEPTION"&&canPick()){
       const alternatives=group.alternatives
         .filter(alt=>alt.location_code!==loc&&(!group.sensitive||alt.sensitive_area))
-        .map(alt=>`<button class="btn secondary" data-alt="${esc(group.key)}" data-alt-location="${esc(alt.location_code)}">Ir para ${esc(alt.location_code)}${alt.available_units?` · ${alt.available_units} un sist.`:""}</button>`).join("");
+        .map(alt=>`<button class="btn secondary" data-alt="${esc(group.key)}" data-alt-location="${esc(alt.location_code)}" data-alt-lot="${esc(alt.stock_lot_id)}">Ir para ${esc(alt.location_code)} · lote ${esc(alt.lot_code)} · val. ${esc(dateLabel(alt.expires_at))}${alt.available_units?` · ${alt.available_units} un livres`:""}</button>`).join("");
       controls=`
-        ${alternatives||'<span class="exception-hint">Sem coordenada alternativa cadastrada.</span>'}
+        ${alternatives||'<span class="exception-hint">Sem outro lote elegível com saldo livre.</span>'}
         <button class="btn warn" data-partial="${esc(group.key)}">Retirada parcial</button>
         <button class="btn warn" data-unavailable="${esc(group.key)}">Registrar indisponível</button>
         <button class="btn secondary" data-cancel-exception="${esc(group.key)}">Cancelar</button>
@@ -189,9 +195,9 @@ function render(){
       <div class="loc">${esc(loc)}</div>
       <div>
         <div class="material">${esc(group.description)}</div>
-        <div class="meta"><span>${sensitive}</span><span>${group.sources.length} referência(s)</span>${loc!==group.primary_location?`<span>Origem: ${esc(group.primary_location)}</span>`:""}</div>
+        <div class="meta"><span>${sensitive}</span><span>FEFO</span><span>Lote ${esc(activeLotCode(group))}</span><span>Val. ${esc(dateLabel(activeLot(group).expires_at))}</span><span>${group.sources.length} origem(ns)</span>${loc!==group.primary_location?`<span>Realocado de ${esc(group.primary_location)}</span>`:""}</div>
         <div class="orders">${group.sources.map(esc).join(" &nbsp; • &nbsp; ")}</div>
-        ${status==="EXCEPTION"?`<div class="exception-box"><strong>Não encontrado em ${esc(loc)}</strong><span>Escolha uma coordenada alternativa ou registre a contingência.</span></div>`:""}
+        ${status==="EXCEPTION"?`<div class="exception-box"><strong>Lote ${esc(activeLotCode(group))} não encontrado em ${esc(loc)}</strong><span>O desvio fica registrado. Escolha outro lote elegível, retirada parcial ou indisponibilidade.</span></div>`:""}
         <div class="actions">${controls}</div>
       </div>
       <div class="qty"><strong>${group.quantity}</strong><span>unidade(s)</span></div>
@@ -215,7 +221,7 @@ function render(){
       <div class="stat"><span>Progresso</span><strong>${resolved}/${total}</strong></div>
       <div class="stat"><span>Sessão</span><strong>${esc(stateLabel(access.state))}</strong></div>
     </div>
-    <section class="hero"><div class="hero-row"><div><div class="eyebrow">Separação guiada por coordenada</div><h1>Siga a sequência física do estoque</h1><p class="lead">Quando um material não estiver na coordenada prevista, registre a divergência e siga a contingência sem apagar o ocorrido.</p></div><div class="progress-wrap"><div class="progress-label"><span>Checklist</span><strong>${percent}%</strong></div><div class="progress"><div style="width:${percent}%"></div></div></div></div></section>
+    <section class="hero"><div class="hero-row"><div><div class="eyebrow">Separação por lote • FEFO</div><h1>Retire o lote indicado na coordenada informada</h1><p class="lead">A coordenada pertence ao lote armazenado. O sistema prioriza menor validade e usa a entrada mais antiga como desempate. Divergências físicas permanecem auditáveis.</p></div><div class="progress-wrap"><div class="progress-label"><span>Checklist</span><strong>${percent}%</strong></div><div class="progress"><div style="width:${percent}%"></div></div></div></div></section>
     ${closed?`<div class="notice critical"><strong>Sessão física encerrada.</strong> Esta tela está em modo de consulta.</div>`:""}
     ${exceptions?`<div class="notice critical"><strong>${exceptions} divergência(s) aberta(s).</strong> Resolva cada item antes da confirmação.</div>`:""}
     ${flowNotice}
@@ -247,7 +253,12 @@ function render(){
   document.querySelectorAll("[data-alt]").forEach(btn=>btn.addEventListener("click",async()=>{
     const group=groups.find(x=>x.key===btn.dataset.alt);if(!group)return;
     const from=activeLocation(group),to=btn.dataset.altLocation;
-    await pickingEvent("PICKING_LOCATION_REROUTED",group,{from_location:from,to_location:to});
+    await pickingEvent("PICKING_LOT_REALLOCATED",group,{
+      from_location:from,
+      from_stock_lot_id:activeStockLotId(group),
+      to_location:to,
+      to_stock_lot_id:btn.dataset.altLot
+    });
     render();
   }));
 
@@ -280,6 +291,8 @@ function render(){
       expected_quantity:group.quantity,
       actual_quantity:actualQuantity(group),
       location_code:activeLocation(group),
+      stock_lot_id:activeStockLotId(group),
+      lot_code:activeLotCode(group),
       status:groupStatus(group)
     }));
     try{
