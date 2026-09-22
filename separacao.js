@@ -4,6 +4,13 @@ const app=document.getElementById("separationApp");
 const API="/api/mock";
 const PICKING_DISPLAY_ID="HVB-PICKING-01";
 const ACCESS_ID=(location.pathname.match(/^\/separacao\/([^/]+)$/)||[])[1]||new URLSearchParams(location.search).get("access");
+const TOKEN_KEY=`hvb_separation_token_${ACCESS_ID||"none"}`;
+const tokenFromHash=decodeURIComponent(String(location.hash||"").replace(/^#/,""));
+if(tokenFromHash){
+  sessionStorage.setItem(TOKEN_KEY,tokenFromHash);
+  history.replaceState({},"",location.pathname+location.search);
+}
+const ACCESS_TOKEN=()=>sessionStorage.getItem(TOKEN_KEY)||"";
 let access=null;
 let filter="pending";
 let lastSignature="";
@@ -14,15 +21,16 @@ function stateLabel(v){
   return ({
     DOOR_AUTHORIZED:"Acesso liberado",
     DOOR_OPEN:"Porta aberta",
-    ENTRY_CONFIRMED:"Presença detectada",
+    ENTRY_CONFIRMED:"Presença detectada • picking em andamento",
+    PICKING_READY:"Picking concluído • aguardando saída",
+    EXIT_CONFIRMED:"Saída detectada • aguardando fechamento",
     READY_TO_CONFIRM:"Porta fechada • aguardando confirmação",
     WITHDRAWAL_CONFIRMED:"Retirada confirmada",
     CLOSED:"Sessão encerrada",
     EXPIRED:"Sessão expirada"
   }[v]||v||"—");
 }
-function canPick(){return ["ENTRY_CONFIRMED","READY_TO_CONFIRM"].includes(access?.state);}
-function canConfirm(){return access?.state==="READY_TO_CONFIRM";}
+function canPick(){return access?.state==="ENTRY_CONFIRMED";}
 function isResolved(status){return ["CONFIRMED","PARTIAL","UNAVAILABLE"].includes(status);}
 
 async function apiGet(params){
@@ -109,6 +117,7 @@ async function pickingEvent(eventType,group,metadata={}){
     access=await apiPost({
       action:"registerPickingEvent",
       access_session_id:ACCESS_ID,
+      session_token:ACCESS_TOKEN(),
       event_type:eventType,
       metadata:{
         group_key:group.key,
@@ -147,7 +156,7 @@ function render(){
     return;
   }
 
-  if(!["ENTRY_CONFIRMED","READY_TO_CONFIRM","CLOSED","EXPIRED"].includes(access.state)){waitingScreen();return;}
+  if(!["ENTRY_CONFIRMED","PICKING_READY","EXIT_CONFIRMED","READY_TO_CONFIRM","CLOSED","EXPIRED"].includes(access.state)){waitingScreen();return;}
 
   const groups=groupsFromAccess();
   const resolved=groups.filter(g=>isResolved(groupStatus(g))).length;
@@ -171,10 +180,10 @@ function render(){
       controls=`<button class="btn secondary" disabled>🔒 Sem autorização sensível</button>`;
     }else if(status==="EXCEPTION"&&canPick()){
       const alternatives=group.alternatives
-        .filter(alt=>alt.location_code!==loc&&(!group.sensitive||alt.sensitive_area))
+        .filter(alt=>alt.location_code!==loc&&alt.available_units>=group.quantity&&(!group.sensitive||alt.sensitive_area))
         .map(alt=>`<button class="btn secondary" data-alt="${esc(group.key)}" data-alt-location="${esc(alt.location_code)}" data-alt-lot="${esc(alt.stock_lot_id)}">Ir para ${esc(alt.location_code)} · lote ${esc(alt.lot_code)} · val. ${esc(dateLabel(alt.expires_at))}${alt.available_units?` · ${alt.available_units} un livres`:""}</button>`).join("");
       controls=`
-        ${alternatives||'<span class="exception-hint">Sem outro lote elegível com saldo livre.</span>'}
+        ${alternatives||'<span class="exception-hint">Sem outro lote único com saldo suficiente para esta tarefa.</span>'}
         <button class="btn warn" data-partial="${esc(group.key)}">Retirada parcial</button>
         <button class="btn warn" data-unavailable="${esc(group.key)}">Registrar indisponível</button>
         <button class="btn secondary" data-cancel-exception="${esc(group.key)}">Cancelar</button>
@@ -207,11 +216,13 @@ function render(){
   const allResolved=resolved===total&&total>0&&exceptions===0;
   let flowNotice="";
   if(allResolved&&access.state==="ENTRY_CONFIRMED"){
-    flowNotice=`<div class="notice"><strong>Checklist concluído.</strong> Agora simule/aguarde o fechamento da porta. A confirmação final será liberada depois de <code>DOOR_CLOSED</code>.</div>`;
-  }else if(access.state==="READY_TO_CONFIRM"&&!allResolved){
-    flowNotice=`<div class="notice critical"><strong>Porta fechada com pendências.</strong> A confirmação permanece bloqueada até que todas as linhas tenham resultado válido.</div>`;
-  }else if(access.state==="READY_TO_CONFIRM"&&allResolved){
-    flowNotice=`<div class="notice"><strong>Porta fechada.</strong> O resultado está pronto para confirmação final.</div>`;
+    flowNotice=`<div class="notice"><strong>Checklist concluído.</strong> Finalize a separação antes de sair da sala.</div>`;
+  }else if(access.state==="PICKING_READY"){
+    flowNotice=`<div class="notice"><strong>Separação concluída.</strong> Saia da sala. O Terminal de Acesso aguardará o sensor indicar ausência antes do fechamento.</div>`;
+  }else if(access.state==="EXIT_CONFIRMED"){
+    flowNotice=`<div class="notice"><strong>Saída detectada.</strong> Aguardando o fechamento físico da porta.</div>`;
+  }else if(access.state==="READY_TO_CONFIRM"){
+    flowNotice=`<div class="notice"><strong>Porta fechada.</strong> A confirmação final será feita no Terminal de Acesso externo.</div>`;
   }
 
   app.innerHTML=shell(`
@@ -227,7 +238,7 @@ function render(){
     ${flowNotice}
     <div class="toolbar"><h2>Materiais</h2><div class="filters"><button class="chip-btn ${filter==="pending"?"active":""}" data-filter="pending">Pendentes</button><button class="chip-btn ${filter==="all"?"active":""}" data-filter="all">Todos</button></div></div>
     <section class="pick-list">${cards}</section>
-    <div class="footer-actions"><div class="status">${exceptions?"Há divergências para resolver":allResolved?(canConfirm()?"Pronto para confirmar":"Checklist concluído • aguardando fechamento da porta"):"Confirme cada posição conforme separar"}</div><button class="btn primary confirm-all" id="confirmAll" ${allResolved&&canConfirm()&&!closed?"":"disabled"}>CONFIRMAR RETIRADA</button></div>
+    <div class="footer-actions"><div class="status">${exceptions?"Há divergências para resolver":allResolved?(access.state==="ENTRY_CONFIRMED"?"Checklist concluído • finalize a separação":"Separação concluída • aguarde o fluxo físico"):"Confirme cada posição conforme separar"}</div><button class="btn primary confirm-all" id="finishPicking" ${allResolved&&access.state==="ENTRY_CONFIRMED"&&!closed?"":"disabled"}>CONCLUIR SEPARAÇÃO</button></div>
   `);
 
   document.querySelectorAll("[data-filter]").forEach(btn=>btn.addEventListener("click",()=>{filter=btn.dataset.filter;render();}));
@@ -283,29 +294,21 @@ function render(){
     render();
   }));
 
-  document.getElementById("confirmAll")?.addEventListener("click",async()=>{
-    const latestGroups=groupsFromAccess();
-    const results=latestGroups.map(group=>({
-      key:group.key,
-      description:group.description,
-      expected_quantity:group.quantity,
-      actual_quantity:actualQuantity(group),
-      location_code:activeLocation(group),
-      stock_lot_id:activeStockLotId(group),
-      lot_code:activeLotCode(group),
-      status:groupStatus(group)
-    }));
+  document.getElementById("finishPicking")?.addEventListener("click",async()=>{
     try{
       access=await apiPost({
-        action:"confirmWithdrawal",
+        action:"registerAccessEvent",
         access_session_id:ACCESS_ID,
-        results,
-        command_id:cmd("confirm"),
-        source_device_id:PICKING_DISPLAY_ID
+        session_token:ACCESS_TOKEN(),
+        event_type:"PICKING_READY",
+        command_id:cmd("picking-ready"),
+        source_occurred_at:new Date().toISOString(),
+        source_device_id:PICKING_DISPLAY_ID,
+        metadata:{source:"picking-display"}
       });
       render();
     }catch(error){
-      alert("A retirada ainda não pode ser confirmada: "+error.message);
+      alert("A separação ainda não pode ser concluída: "+error.message);
     }
   });
 }
@@ -313,7 +316,9 @@ function render(){
 async function refresh(){
   if(!ACCESS_ID){app.innerHTML=shell(`<div class="empty">Sessão não informada. Abra esta tela a partir do Terminal de Acesso.</div>`);return;}
   try{
-    const latest=await apiGet({action:"accessSession",id:ACCESS_ID});
+    const token=ACCESS_TOKEN();
+    if(!token)throw new Error("SESSION_TOKEN_MISSING");
+    const latest=await apiGet({action:"accessSession",id:ACCESS_ID,session_token:token});
     if(!latest)throw new Error("SESSION_NOT_FOUND");
     const signature=JSON.stringify({state:latest.state,confirmation:latest.withdrawal_confirmation?.confirmed_at||null,picking_state:latest.picking_state||{},events:latest.events?.length||0});
     access=latest;
