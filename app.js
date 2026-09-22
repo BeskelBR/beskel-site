@@ -20,7 +20,11 @@ function readJson(key){ try{return JSON.parse(sessionStorage.getItem(key)||"null
 function writeJson(key,value){ sessionStorage.setItem(key,JSON.stringify(value)); }
 function clearLocal(){ sessionStorage.removeItem(AUTH_KEY); state.identity=null; state.evidence=null; state.auth=null; state.access=null; state.selectedOrders.clear(); }
 function esc(value){ return String(value??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c])); }
-function go(path){ history.pushState({},"",path); router(); }
+function go(path){
+  history.pushState({},"",path);
+  window.scrollTo({top:0,behavior:"instant"});
+  router();
+}
 function nowLabel(){ return new Date().toLocaleString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}); }
 function commandId(prefix="cmd"){
   const suffix=globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -29,7 +33,7 @@ function commandId(prefix="cmd"){
 function shell(content,title="Terminal de Acesso"){
   return `<div class="screen"><div class="dev-banner">Ambiente de desenvolvimento • Hardware e dados simulados</div><header class="topbar"><div class="brand-inline"><img src="/hvb/assets/logo-lateral.webp" alt="Hospital Veterinário Brasília"><div class="topbar-title">${esc(title)}</div></div><div class="clock" id="clock">${nowLabel()}</div></header><main class="content">${content}</main></div>`;
 }
-function render(html){ app.innerHTML=html; window.scrollTo({top:0,behavior:"instant"}); updateClock(); }
+function render(html){ app.innerHTML=html; updateClock(); }
 function updateClock(){ const el=document.getElementById("clock"); if(el)el.textContent=nowLabel(); }
 setInterval(updateClock,30000);
 
