@@ -10,17 +10,19 @@ A referência funcional vigente é `docs/TERMINAL-FLUXO-FISICO-N1-V4.md`.
 
 ```text
 NFC_VALIDATED
-→ BIOMETRIC_VALIDATED
+→ BIOMETRIC_VALIDATED            [automático após NFC]
 → WITHDRAWAL_CONTEXT_CONFIRMED
 → ACCESS_GRANTED
 → DOOR_OPENED
 → PRESENCE_CONFIRMED
 → PICKING GUIADO
+→ PICKING_READY
+→ PRESENCE_CLEARED
 → DOOR_CLOSED
-→ WITHDRAWAL_CONFIRMED
+→ WITHDRAWAL_CONFIRMED           [automático]
 ```
 
-O primeiro fator é **NFC TAG simples**, por decisão do HVB. A biometria permanece como segundo fator.
+O primeiro fator é **NFC TAG simples**, por decisão do HVB. A biometria permanece como segundo fator, porém a captura é iniciada automaticamente após a leitura da TAG; não existe botão intermediário de confirmação.
 
 ## Interfaces
 
@@ -28,7 +30,8 @@ O primeiro fator é **NFC TAG simples**, por decisão do HVB. A biometria perman
 - `/auth/:token` — autenticação DEV;
 - `/ordens` — seleção de ORs e ajuste ao vivo DEV;
 - `/acesso/:id` — AccessSession e eventos físicos;
-- `/separacao/:id` — Terminal de Retirada;
+- `/separacao` — Terminal de Retirada em kiosk, aguardando e assumindo automaticamente a AccessSession ativa;
+- `/separacao/:id` — rota DEV/compatibilidade para uma sessão específica;
 - `/admin/auditoria` — auditoria DEV.
 
 ## Logística por lote
@@ -51,7 +54,7 @@ Não ocorre nova autenticação. Abertura, fechamento e confirmação da trava s
 
 ## Terminal de Retirada
 
-O tablet interno recebe a mesma `AccessSession` do Terminal de Acesso.
+O tablet interno permanece em `/separacao` em modo kiosk e assume automaticamente a AccessSession ativa da sala. O operador não precisa abrir, parear ou transportar manualmente a sessão entre os dois terminais. No DEV a identidade do dispositivo é simulada; em produção deverá vir de provisionamento seguro do tablet/controlador.
 
 O picking é guiado por coordenada e suporta:
 
@@ -64,7 +67,7 @@ O picking é guiado por coordenada e suporta:
 
 O **estado do picking é autoridade do servidor** no contrato v1. O navegador não é mais a fonte oficial do checklist.
 
-A confirmação final só é aceita após `DOOR_CLOSED` e somente se todos os grupos esperados estiverem resolvidos. A API valida o conjunto de itens, quantidades e coordenadas antes de aceitar `WITHDRAWAL_CONFIRMED`.
+Após `PICKING_READY`, `PRESENCE_CLEARED` e `DOOR_CLOSED`, a API valida o estado server-side e gera `WITHDRAWAL_CONFIRMED` automaticamente. Não existe confirmação final adicional do operador.
 
 ## Limite do ambiente atual
 
@@ -134,3 +137,14 @@ VISITA TÉCNICA
 → homologação
 → TERMINAL_V1_FROZEN
 ```
+
+
+## Delta de redução de interação humana — 22/09/2026
+
+Três ações intermediárias foram removidas do fluxo do operador:
+
+1. NFC válida inicia automaticamente a biometria; não há botão **Confirmar identidade**.
+2. Após biometria aprovada, as ORs são carregadas automaticamente; não há botão **Ver ordens e materiais**.
+3. O Terminal de Retirada assume automaticamente a AccessSession da sala e, após saída + porta fechada, a retirada é confirmada automaticamente.
+
+Mantêm-se como ações humanas deliberadas: escolha do contexto/OR, confirmação de cada item retirado, tratamento de exceções e o botão **Retirar medicação sensível**.
