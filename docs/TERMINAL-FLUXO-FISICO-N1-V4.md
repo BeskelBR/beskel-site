@@ -82,9 +82,11 @@ Quando o lote esperado não é encontrado na coordenada registrada:
 ```text
 NÃO ENCONTRADO
 → STOCK_LOCATION_DISCREPANCY
-→ procurar OUTRO LOTE elegível do mesmo produto
-   ├─ existe → PICKING_LOT_REALLOCATED → nova coordenada/lote
-   └─ não existe
+→ sistema procura automaticamente o próximo lote elegível por FEFO/FIFO
+   ├─ existe lote único com saldo suficiente
+   │  → PICKING_LOT_REALLOCATED [automatic=true]
+   │  → nova coordenada/lote apresentada ao operador
+   └─ não existe alternativa suficiente
       ├─ PICKING_PARTIAL
       └─ PICKING_UNAVAILABLE
 ```
@@ -167,7 +169,7 @@ PRESENCE_CONFIRMED
 → WITHDRAWAL_CONFIRMED
 ```
 
-`PICKING_READY` só é aceito quando todas as tarefas estão resolvidas. Depois desse marco, o Terminal de Retirada fica somente leitura. A confirmação definitiva ocorre no Terminal de Acesso após saída detectada e porta fechada.
+`PICKING_READY` é gerado automaticamente quando todas as tarefas estão resolvidas e, quando aplicável, o armário sensível está em `COMPLETED`. Até `PRESENCE_CLEARED`, o operador pode desfazer o último item; o servidor então registra `PICKING_REOPENED` e retorna a `ENTRY_CONFIRMED`. Após a saída detectada, o picking fica imutável.
 
 A AccessSession ocupada não expira destrutivamente: ultrapassar o TTL gera alerta de timeout, mas preserva a possibilidade de concluir com segurança a saída e o fechamento.
 
@@ -214,3 +216,28 @@ TAG NFC
 - `DOOR_CLOSED` após `PICKING_READY` + `PRESENCE_CLEARED` dispara a confirmação final no servidor;
 - `WITHDRAWAL_CONFIRMED` continua server-authoritative;
 - o endpoint manual de confirmação permanece apenas como mecanismo técnico de recuperação/compatibilidade, não como ação normal do operador.
+
+## Delta final — auto-ready e recuperação FEFO
+
+O botão **Concluir separação** foi removido do fluxo normal.
+
+```text
+última tarefa resolvida
++ armário sensível seguro, quando aplicável
+→ PICKING_READY automático
+```
+
+A automação não elimina a correção humana: enquanto a presença ainda não tiver sido encerrada, **Desfazer último item** reabre o picking. Essa janela termina em `PRESENCE_CLEARED`.
+
+A contingência logística também deixa de pedir ao funcionário que escolha entre lotes equivalentes:
+
+```text
+NÃO ENCONTREI
+→ registrar divergência original
+→ ordenar alternativas por FEFO/FIFO
+→ escolher automaticamente a primeira alternativa suficiente
+→ registrar realocação automática
+→ exibir nova coordenada
+```
+
+Lotes/coordenadas já marcados como não encontrados na mesma tarefa são excluídos das próximas tentativas automáticas. Se nenhuma alternativa possuir saldo suficiente, a tarefa permanece `EXCEPTION` e o operador decide apenas entre parcial ou indisponível.
