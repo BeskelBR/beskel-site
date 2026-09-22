@@ -132,3 +132,37 @@ Após automatizar biometria pós-NFC, atribuição da sessão ao tablet interno 
 Resultado complementar: **52/52 verificações aprovadas / 0 falhas**.
 
 Observação: a identidade do tablet interno é simulada no DEV. Produção deve substituir a credencial embutida do mock por credencial de dispositivo protegida/provisionada.
+
+## QA complementar — auto-ready e FEFO automático
+
+Após o delta final do picking, foi executada uma bateria dirigida de **32 cenários lógicos**, todos aprovados, cobrindo:
+
+- autenticação, replay, token e concorrência;
+- `PICKING_READY` automático em confirmação normal, parcial e indisponível;
+- ausência de auto-ready enquanto ainda houver tarefa pendente;
+- `PICKING_ITEM_UNDONE` em `PICKING_READY`;
+- `PICKING_REOPENED`;
+- bloqueio de undo após `PRESENCE_CLEARED`;
+- correção de item sensível após armário seguro;
+- auto-ready sensível somente após `SENSITIVE_LOCK_CONFIRMED`;
+- realocação automática FEFO/FIFO;
+- preservação de `STOCK_LOCATION_DISCREPANCY`;
+- ordem auditável divergência → realocação;
+- avanço para um segundo fallback após nova divergência;
+- permanência em `EXCEPTION` sem fallback suficiente;
+- restrição de área sensível;
+- idempotência das divergências;
+- auto-confirmação final após saída e porta fechada;
+- sem regressão em retirada parcial, kiosk e segurança.
+
+Também foram executadas **7 verificações estáticas da interface**, todas aprovadas:
+
+- nenhum botão `CONCLUIR SEPARAÇÃO`;
+- nenhum handler `finishPicking`;
+- nenhuma seleção manual de lote alternativo;
+- aviso de realocação automática;
+- ação `Desfazer último item`;
+- cópia explícita de conclusão automática;
+- sintaxe válida dos módulos afetados.
+
+Resultado deste delta: **39/39 verificações aprovadas / 0 falhas**.
