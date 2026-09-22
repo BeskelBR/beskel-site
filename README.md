@@ -41,6 +41,14 @@ produto → lote → ocupação → coordenada
 
 O responsável do estoque define a posição física de cada lote no recebimento. Na retirada, a API aloca por **FEFO** e usa **FIFO** como desempate. Se a quantidade solicitada atravessar dois lotes, o Terminal recebe duas tarefas físicas independentes, cada uma com lote, validade, posição e quantidade.
 
+
+
+## Medicação sensível
+
+A medicação sensível possui subfluxo próprio dentro da AccessSession já autenticada. A permissão é validada no início, porém o armário permanece travado até o funcionário tocar **Retirar medicação sensível** no Terminal de Retirada.
+
+Não ocorre nova autenticação. Abertura, fechamento e confirmação da trava são eventos físicos independentes e auditáveis. `PICKING_READY` só é aceito depois que o armário sensível estiver confirmado como travado.
+
 ## Terminal de Retirada
 
 O tablet interno recebe a mesma `AccessSession` do Terminal de Acesso.
