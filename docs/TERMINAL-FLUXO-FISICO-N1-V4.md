@@ -119,3 +119,23 @@ Regras:
 - a coordenada volta a ficar livre quando a ocupação do lote é encerrada;
 - o Terminal recebe da API a tarefa já alocada com `stock_lot_id`, lote, validade, coordenada e quantidade;
 - o mock não altera estoque real nem representa reserva concorrente de produção.
+
+
+## Delta de integridade pós-QA — 22/09/2026
+
+Para tornar a sequência física executável sem contradição entre a tela interna e a porta, o N1 foi refinado sem alterar sua ordem macro:
+
+```text
+PRESENCE_CONFIRMED
+→ picking
+→ PICKING_READY
+→ PRESENCE_CLEARED
+→ DOOR_CLOSED
+→ WITHDRAWAL_CONFIRMED
+```
+
+`PICKING_READY` só é aceito quando todas as tarefas estão resolvidas. Depois desse marco, o Terminal de Retirada fica somente leitura. A confirmação definitiva ocorre no Terminal de Acesso após saída detectada e porta fechada.
+
+A AccessSession ocupada não expira destrutivamente: ultrapassar o TTL gera alerta de timeout, mas preserva a possibilidade de concluir com segurança a saída e o fechamento.
+
+A confirmação final é construída a partir do estado persistido no servidor, não de resultados informados pelo cliente.
