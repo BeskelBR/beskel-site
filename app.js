@@ -19,7 +19,7 @@ const state = {
 
 function readJson(key){ try{return JSON.parse(sessionStorage.getItem(key)||"null");}catch{return null;} }
 function writeJson(key,value){ sessionStorage.setItem(key,JSON.stringify(value)); }
-function clearLocal(){ sessionStorage.removeItem(AUTH_KEY); state.identity=null; state.evidence=null; state.auth=null; state.access=null; state.selectedOrders.clear(); }
+function clearLocal(){ sessionStorage.removeItem(AUTH_KEY); state.identity=null; state.evidence=null; state.auth=null; state.access=null; state.selectedOrders.clear(); state.biometricInProgress=false; }
 function esc(value){ return String(value??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c])); }
 function go(path){
   history.pushState({},"",path);
