@@ -364,6 +364,6 @@ function router(){
   return go("/");
 }
 
-captureWhatsappFromUrl();
 window.addEventListener("popstate",router);
-router();
+// Bootstrap intentionally occurs after terminal-v4.js loads, so the approved v4
+// functions are installed before the first route is rendered.
