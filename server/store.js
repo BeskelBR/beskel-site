@@ -820,7 +820,8 @@ function confirmWithdrawal({ accessSessionId, results = [], commandId, sourceDev
       ];
       if (!allowedPairs.some(x =>
         x.stock_lot_id === result.stock_lot_id &&
-        x.location_code === result.location_code
+        x.location_code === result.location_code &&
+        x.lot_code === result.lot_code
       )) throw new Error("PICKING_LOCATION_INVALID");
       if (state.status !== result.status) throw new Error("WITHDRAWAL_RESULTS_MISMATCH");
       if (String(state.active_location || group.primary_location).toUpperCase() !== result.location_code) throw new Error("WITHDRAWAL_RESULTS_MISMATCH");
