@@ -7,6 +7,7 @@ class IntegrationAdapter {
   createBiometricEvidence() { throw new Error("NOT_IMPLEMENTED"); }
   verifyIdentity() { throw new Error("NOT_IMPLEMENTED"); }
   getPendingOrders() { throw new Error("NOT_IMPLEMENTED"); }
+  getCatalog() { throw new Error("NOT_IMPLEMENTED"); }
   startAccessSession() { throw new Error("NOT_IMPLEMENTED"); }
   registerAccessEvent() { throw new Error("NOT_IMPLEMENTED"); }
   registerPickingEvent() { throw new Error("NOT_IMPLEMENTED"); }
@@ -31,6 +32,10 @@ class MockAdapter extends IntegrationAdapter {
 
   getPendingOrders(authSessionId) {
     return store.listPendingOrders(authSessionId);
+  }
+
+  getCatalog(authSessionId, query) {
+    return store.listCatalog(authSessionId, query);
   }
 
   startAccessSession(payload) {
