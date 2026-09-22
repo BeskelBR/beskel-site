@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const TERMINAL_ID = "HVB-T01";
 const BIOMETRIC_DEVICE_ID = "HVB-T01-BIO-DEV";
 const PICKING_DISPLAY_ID = "HVB-PICKING-01";
+const PICKING_DISPLAY_DEV_CREDENTIAL = process.env.HVB_PICKING_DISPLAY_DEV_CREDENTIAL || "HVB-PICKING-DEV-CREDENTIAL";
 
 const terminals = [
   {
@@ -742,6 +743,22 @@ function getAccessSessionDetail(accessSessionId, sessionToken) {
   return accessDetail(access,false);
 }
 
+function getActivePickingSession({ sourceDeviceId, deviceCredential }) {
+  if (String(sourceDeviceId || "") !== PICKING_DISPLAY_ID) throw new Error("UNTRUSTED_DEVICE");
+  if (!deviceCredential || String(deviceCredential) !== PICKING_DISPLAY_DEV_CREDENTIAL) throw new Error("UNTRUSTED_DEVICE");
+
+  const active = activeAccessSessions()
+    .filter(access => access.terminal_id === TERMINAL_ID)
+    .sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at))[0] || null;
+
+  if (!active) return null;
+  return {
+    ...accessDetail(active,false),
+    session_token:active.session_token,
+    auto_assigned:true
+  };
+}
+
 function registerAccessEvent({ accessSessionId, sessionToken, eventType, metadata = {}, commandId, sourceOccurredAt, sourceDeviceId }) {
   const payload = {
     accessSessionId:String(accessSessionId || ""),
@@ -800,6 +817,14 @@ function registerAccessEvent({ accessSessionId, sessionToken, eventType, metadat
       source_occurred_at:sourceOccurredAt || null,
       source_device_id:sourceDeviceId || null
     });
+
+    if (eventType === "DOOR_CLOSED") {
+      applyWithdrawalConfirmation(access,{
+        commandId:`auto-${commandId || id("confirm")}`,
+        sourceDeviceId,
+        automatic:true
+      });
+    }
 
     return {
       value:accessDetail(access,false),
@@ -1039,6 +1064,88 @@ function computeOrderFulfillment(access,results) {
   });
 }
 
+function buildWithdrawalResults(access) {
+  const expected = expectedPickingGroups(access);
+  if (!expected.length) throw new Error("WITHDRAWAL_RESULTS_INCOMPLETE");
+
+  return expected.map(group => {
+    const state = access.picking_state[group.key];
+    if (!state || !["CONFIRMED","PARTIAL","UNAVAILABLE"].includes(state.status)) throw new Error("WITHDRAWAL_RESULTS_INCOMPLETE");
+
+    const location_code = String(state.active_location || group.primary_location).toUpperCase();
+    const stock_lot_id = String(state.active_stock_lot_id || group.stock_lot_id);
+    const lot_code = String(state.active_lot_code || group.lot_code);
+    const allowedPairs = [
+      { stock_lot_id:group.stock_lot_id, lot_code:group.lot_code, location_code:group.primary_location },
+      ...(group.fallback_lots || [])
+    ];
+    if (!allowedPairs.some(x =>
+      x.stock_lot_id === stock_lot_id &&
+      x.location_code === location_code &&
+      x.lot_code === lot_code
+    )) throw new Error("PICKING_LOCATION_INVALID");
+
+    const actual_quantity = state.status === "CONFIRMED"
+      ? group.quantity
+      : state.status === "PARTIAL"
+        ? Number(state.actual_quantity || 0)
+        : 0;
+
+    if (state.status === "PARTIAL" && !(actual_quantity > 0 && actual_quantity < group.quantity)) throw new Error("PICKING_QUANTITY_INVALID");
+
+    return {
+      key:group.key,
+      description:group.description,
+      expected_quantity:group.quantity,
+      actual_quantity,
+      location_code,
+      stock_lot_id,
+      lot_code,
+      status:state.status
+    };
+  });
+}
+
+function applyWithdrawalConfirmation(access,{ commandId, sourceDeviceId, automatic = false } = {}) {
+  if (!access) throw new Error("ACCESS_SESSION_NOT_FOUND");
+  if (access.state !== "READY_TO_CONFIRM") throw new Error("WITHDRAWAL_NOT_READY");
+
+  const normalized = buildWithdrawalResults(access);
+  const fulfillment = computeOrderFulfillment(access,normalized);
+
+  fulfillment.forEach(item => {
+    const target = order(item.order_id);
+    if (!target) return;
+    target.fulfillment_status = item.fulfillment_status;
+    target.status = item.fulfillment_status === "COMPLETE"
+      ? "RETIRADA_CONFIRMADA"
+      : item.fulfillment_status === "PARTIAL"
+        ? "RETIRADA_PARCIAL"
+        : "RETIRADA_NAO_ATENDIDA";
+  });
+
+  const confirmedAt = now();
+  access.withdrawal_confirmation = {
+    confirmed_at:confirmedAt,
+    results:normalized,
+    order_fulfillment:fulfillment,
+    automatic:automatic === true
+  };
+  access.state = "WITHDRAWAL_CONFIRMED";
+
+  log(access,"WITHDRAWAL_CONFIRMED",{
+    results:normalized,
+    order_fulfillment:fulfillment,
+    command_id:commandId,
+    source_device_id:sourceDeviceId,
+    automatic:automatic === true,
+    trigger:automatic ? "DOOR_CLOSED" : "MANUAL_RECOVERY",
+    dev_no_stock_movement:true
+  });
+
+  return accessDetail(access,false);
+}
+
 function confirmWithdrawal({ accessSessionId, sessionToken, commandId, sourceDeviceId }) {
   const payload = {
     accessSessionId:String(accessSessionId || ""),
@@ -1050,75 +1157,10 @@ function confirmWithdrawal({ accessSessionId, sessionToken, commandId, sourceDev
     const access = rawAccess(accessSessionId);
     if (!access) throw new Error("ACCESS_SESSION_NOT_FOUND");
     requireSessionToken(access,sessionToken);
-    if (access.state !== "READY_TO_CONFIRM") throw new Error("WITHDRAWAL_NOT_READY");
     if (sourceDeviceId !== access.terminal_id) throw new Error("UNTRUSTED_DEVICE");
 
-    const expected = expectedPickingGroups(access);
-    if (!expected.length) throw new Error("WITHDRAWAL_RESULTS_INCOMPLETE");
-
-    const normalized = expected.map(group => {
-      const state = access.picking_state[group.key];
-      if (!state || !["CONFIRMED","PARTIAL","UNAVAILABLE"].includes(state.status)) throw new Error("WITHDRAWAL_RESULTS_INCOMPLETE");
-
-      const location_code = String(state.active_location || group.primary_location).toUpperCase();
-      const stock_lot_id = String(state.active_stock_lot_id || group.stock_lot_id);
-      const lot_code = String(state.active_lot_code || group.lot_code);
-      const allowedPairs = [
-        { stock_lot_id:group.stock_lot_id, lot_code:group.lot_code, location_code:group.primary_location },
-        ...(group.fallback_lots || [])
-      ];
-      if (!allowedPairs.some(x =>
-        x.stock_lot_id === stock_lot_id &&
-        x.location_code === location_code &&
-        x.lot_code === lot_code
-      )) throw new Error("PICKING_LOCATION_INVALID");
-
-      const actual_quantity = state.status === "CONFIRMED"
-        ? group.quantity
-        : state.status === "PARTIAL"
-          ? Number(state.actual_quantity || 0)
-          : 0;
-
-      if (state.status === "PARTIAL" && !(actual_quantity > 0 && actual_quantity < group.quantity)) throw new Error("PICKING_QUANTITY_INVALID");
-
-      return {
-        key:group.key,
-        description:group.description,
-        expected_quantity:group.quantity,
-        actual_quantity,
-        location_code,
-        stock_lot_id,
-        lot_code,
-        status:state.status
-      };
-    });
-
-    const fulfillment = computeOrderFulfillment(access,normalized);
-    fulfillment.forEach(item => {
-      const target = order(item.order_id);
-      if (!target) return;
-      target.fulfillment_status = item.fulfillment_status;
-      target.status = item.fulfillment_status === "COMPLETE"
-        ? "RETIRADA_CONFIRMADA"
-        : item.fulfillment_status === "PARTIAL"
-          ? "RETIRADA_PARCIAL"
-          : "RETIRADA_NAO_ATENDIDA";
-    });
-
-    const confirmedAt = now();
-    access.withdrawal_confirmation = { confirmed_at:confirmedAt, results:normalized, order_fulfillment:fulfillment };
-    access.state = "WITHDRAWAL_CONFIRMED";
-
-    log(access,"WITHDRAWAL_CONFIRMED",{
-      results:normalized,
-      order_fulfillment:fulfillment,
-      command_id:commandId,
-      source_device_id:sourceDeviceId,
-      dev_no_stock_movement:true
-    });
-
     return {
-      value:accessDetail(access,false),
+      value:applyWithdrawalConfirmation(access,{ commandId, sourceDeviceId, automatic:false }),
       result:() => accessDetail(access,false)
     };
   });
@@ -1154,8 +1196,10 @@ function terminalDescriptor(terminalId = TERMINAL_ID) {
     biometric_device_id:BIOMETRIC_DEVICE_ID,
     picking_display_id:PICKING_DISPLAY_ID,
     auth_contract_version:"4",
-    access_contract_version:"5",
-    sensitive_access_contract_version:"1"
+    access_contract_version:"6",
+    sensitive_access_contract_version:"1",
+    picking_auto_assignment:true,
+    withdrawal_auto_confirmation:true
   };
 }
 
@@ -1163,6 +1207,7 @@ module.exports = {
   TERMINAL_ID,
   BIOMETRIC_DEVICE_ID,
   PICKING_DISPLAY_ID,
+  PICKING_DISPLAY_DEV_CREDENTIAL,
   identifyCredential,
   createBiometricEvidence,
   verifyIdentity,
@@ -1170,6 +1215,7 @@ module.exports = {
   listCatalog,
   listStockLots:() => stockLots.map(lot=>({...lot})),
   startAccessSession,
+  getActivePickingSession,
   registerAccessEvent,
   registerPickingEvent,
   registerSensitiveEvent,
