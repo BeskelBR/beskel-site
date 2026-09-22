@@ -54,7 +54,7 @@ function openRoom(access, prefix = "flow") {
     sourceOccurredAt: "2026-09-22T02:00:01.000Z",
     sourceDeviceId: store.TERMINAL_ID
   });
-  return current;
+  return { ...current, session_token: access.session_token };
 }
 
 function resolveTask(access, task, status = "CONFIRMED", actualQuantity = task.quantity, prefix = "pick") {
@@ -73,7 +73,9 @@ function resolveTask(access, task, status = "CONFIRMED", actualQuantity = task.q
       group_key: task.picking_task_id,
       actual_quantity: actualQuantity
     }
-  });
+  }),
+    session_token: access.session_token
+  };
 }
 
 function finishPhysicalFlow(access, prefix = "finish") {
@@ -101,7 +103,7 @@ function finishPhysicalFlow(access, prefix = "finish") {
     sourceOccurredAt: "2026-09-22T02:00:04.000Z",
     sourceDeviceId: store.TERMINAL_ID
   });
-  return current;
+  return { ...current, session_token: access.session_token };
 }
 
 test("FEFO splits one demand across lots and product has no fixed coordinate", () => {
