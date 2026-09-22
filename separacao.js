@@ -45,7 +45,7 @@ function stateLabel(v){
     ENTRY_CONFIRMED:"Presença detectada • picking em andamento",
     PICKING_READY:"Picking concluído • aguardando saída",
     EXIT_CONFIRMED:"Saída detectada • aguardando fechamento",
-    READY_TO_CONFIRM:"Porta fechada • aguardando confirmação",
+    READY_TO_CONFIRM:"Porta fechada • finalização automática pendente",
     WITHDRAWAL_CONFIRMED:"Retirada confirmada",
     CLOSED:"Sessão encerrada",
     EXPIRED:"Sessão expirada"
@@ -187,6 +187,11 @@ function actualQuantity(group){
   if(rec.status==="CONFIRMED")return group.quantity;
   return null;
 }
+function lastResolvedGroup(groups){
+  return groups
+    .filter(group=>isResolved(groupStatus(group)))
+    .sort((a,b)=>Date.parse(groupRecord(b).updated_at||0)-Date.parse(groupRecord(a).updated_at||0))[0]||null;
+}
 function sensitiveUnlocked(group){
   if(!group.sensitive)return true;
   return access?.sensitive_access===true&&access?.sensitive_state==="OPEN";
@@ -326,11 +331,8 @@ function render(options={}){
     }else if(sensitiveLocked&&!isResolved(status)){
       controls=`<button class="btn secondary" disabled>🔒 Armário sensível fechado</button>`;
     }else if(status==="EXCEPTION"&&canPick()){
-      const alternatives=group.alternatives
-        .filter(alt=>alt.location_code!==loc&&alt.available_units>=group.quantity&&(!group.sensitive||alt.sensitive_area))
-        .map(alt=>`<button class="btn secondary" data-alt="${esc(group.key)}" data-alt-location="${esc(alt.location_code)}" data-alt-lot="${esc(alt.stock_lot_id)}">Ir para ${esc(alt.location_code)} · lote ${esc(alt.lot_code)} · val. ${esc(dateLabel(alt.expires_at))}${alt.available_units?` · ${alt.available_units} un livres`:""}</button>`).join("");
       controls=`
-        ${alternatives||'<span class="exception-hint">Sem outro lote único com saldo suficiente para esta tarefa.</span>'}
+        <span class="exception-hint">Nenhum outro lote FEFO elegível com saldo suficiente foi encontrado automaticamente.</span>
         <button class="btn warn" data-partial="${esc(group.key)}">Retirada parcial</button>
         <button class="btn warn" data-unavailable="${esc(group.key)}">Registrar indisponível</button>
         <button class="btn secondary" data-cancel-exception="${esc(group.key)}">Cancelar</button>
@@ -353,7 +355,8 @@ function render(options={}){
         <div class="material">${esc(group.description)}</div>
         <div class="meta"><span>${sensitive}</span><span>FEFO</span><span>Lote ${esc(activeLotCode(group))}</span><span>Val. ${esc(dateLabel(activeLot(group).expires_at))}</span><span>${group.sources.length} origem(ns)</span>${loc!==group.primary_location?`<span>Realocado de ${esc(group.primary_location)}</span>`:""}</div>
         <div class="orders">${group.sources.map(esc).join(" &nbsp; • &nbsp; ")}</div>
-        ${status==="EXCEPTION"?`<div class="exception-box"><strong>Lote ${esc(activeLotCode(group))} não encontrado em ${esc(loc)}</strong><span>O desvio fica registrado. Escolha outro lote elegível, retirada parcial ou indisponibilidade.</span></div>`:""}
+        ${rec.auto_reallocated&&status==="PENDING"?`<div class="notice"><strong>Realocado automaticamente por FEFO.</strong><span>O lote anterior foi registrado como divergente. Siga para ${esc(loc)} • lote ${esc(activeLotCode(group))}.</span></div>`:""}
+        ${status==="EXCEPTION"?`<div class="exception-box"><strong>Lote ${esc(activeLotCode(group))} não encontrado em ${esc(loc)}</strong><span>O desvio ficou registrado. O sistema tentou automaticamente o próximo lote FEFO elegível, mas não encontrou alternativa suficiente.</span></div>`:""}
         <div class="actions">${controls}</div>
       </div>
       <div class="qty"><strong>${group.quantity}</strong><span>unidade(s)</span></div>
@@ -368,18 +371,16 @@ function render(options={}){
 
   const allResolved=resolved===total&&total>0&&exceptions===0;
   const sensitiveSecured=!access.sensitive_access||access.sensitive_state==="COMPLETED";
-  const readyForFinish=allResolved&&sensitiveSecured;
+  const lastResolved=lastResolvedGroup(groups);
   let flowNotice="";
   if(allResolved&&access.state==="ENTRY_CONFIRMED"&&!sensitiveSecured){
-    flowNotice=`<div class="notice critical"><strong>Checklist resolvido, mas o armário sensível ainda não está confirmado como travado.</strong> Feche e confirme a trava antes de concluir a separação.</div>`;
-  }else if(readyForFinish&&access.state==="ENTRY_CONFIRMED"){
-    flowNotice=`<div class="notice"><strong>Checklist concluído.</strong> Finalize a separação antes de sair da sala.</div>`;
+    flowNotice=`<div class="notice critical"><strong>Checklist resolvido, mas o armário sensível ainda precisa ser fechado e travado.</strong> Ao confirmar a trava, o sistema concluirá o picking automaticamente.</div>`;
   }else if(access.state==="PICKING_READY"){
-    flowNotice=`<div class="notice"><strong>Separação concluída.</strong> Saia da sala. O Terminal de Acesso aguardará o sensor indicar ausência antes do fechamento.</div>`;
+    flowNotice=`<div class="notice"><strong>Separação concluída automaticamente.</strong> Saia da sala. Até o sensor registrar sua saída, você ainda pode corrigir o último item se necessário.</div>${lastResolved?`<div class="actions"><button class="btn secondary" id="undoLastResolved">Desfazer último item</button></div>`:""}`;
   }else if(access.state==="EXIT_CONFIRMED"){
     flowNotice=`<div class="notice"><strong>Saída detectada.</strong> Aguardando o fechamento físico da porta.</div>`;
   }else if(access.state==="READY_TO_CONFIRM"){
-    flowNotice=`<div class="notice"><strong>Porta fechada.</strong> A confirmação final será feita no Terminal de Acesso externo.</div>`;
+    flowNotice=`<div class="notice critical"><strong>Porta fechada.</strong> A finalização automática ainda está pendente; o sistema manterá a sessão recuperável sem repetir a retirada.</div>`;
   }
 
   app.innerHTML=shell(`
@@ -396,7 +397,7 @@ function render(options={}){
     <div class="toolbar"><h2>Materiais comuns</h2><div class="filters"><button class="chip-btn ${filter==="pending"?"active":""}" data-filter="pending">Pendentes</button><button class="chip-btn ${filter==="all"?"active":""}" data-filter="all">Todos</button></div></div>
     <section class="pick-list">${commonCards}</section>
     ${sensitiveSection}
-    <div class="footer-actions"><div class="status">${exceptions?"Há divergências para resolver":readyForFinish?(access.state==="ENTRY_CONFIRMED"?"Checklist concluído • finalize a separação":"Separação concluída • aguarde o fluxo físico"):"Confirme os itens e mantenha o armário sensível fechado fora da sessão de retirada"}</div><button class="btn primary confirm-all" id="finishPicking" ${readyForFinish&&access.state==="ENTRY_CONFIRMED"&&!closed?"":"disabled"}>CONCLUIR SEPARAÇÃO</button></div>
+    <div class="footer-actions"><div class="status">${exceptions?"Há divergências para resolver":access.state==="PICKING_READY"?"Separação concluída automaticamente • saia da sala":allResolved&&!sensitiveSecured?"Feche e trave o armário sensível":"Confirme os itens; o sistema concluirá a separação automaticamente"}</div></div>
   `);
 
   if(preserveScroll){
@@ -407,6 +408,12 @@ function render(options={}){
   }
 
   document.querySelectorAll("[data-filter]").forEach(btn=>btn.addEventListener("click",()=>{filter=btn.dataset.filter;render();}));
+
+  document.getElementById("undoLastResolved")?.addEventListener("click",async()=>{
+    if(!lastResolved)return;
+    await pickingEvent("PICKING_ITEM_UNDONE",lastResolved);
+    render();
+  });
 
   document.querySelectorAll("[data-confirm]").forEach(btn=>btn.addEventListener("click",async()=>{
     const group=groups.find(x=>x.key===btn.dataset.confirm);if(!group)return;
@@ -423,18 +430,6 @@ function render(options={}){
   document.querySelectorAll("[data-exception]").forEach(btn=>btn.addEventListener("click",async()=>{
     const group=groups.find(x=>x.key===btn.dataset.exception);if(!group)return;
     await pickingEvent("STOCK_LOCATION_DISCREPANCY",group,{system_quantity:group.quantity,found_quantity:null});
-    render();
-  }));
-
-  document.querySelectorAll("[data-alt]").forEach(btn=>btn.addEventListener("click",async()=>{
-    const group=groups.find(x=>x.key===btn.dataset.alt);if(!group)return;
-    const from=activeLocation(group),to=btn.dataset.altLocation;
-    await pickingEvent("PICKING_LOT_REALLOCATED",group,{
-      from_location:from,
-      from_stock_lot_id:activeStockLotId(group),
-      to_location:to,
-      to_stock_lot_id:btn.dataset.altLot
-    });
     render();
   }));
 
@@ -496,23 +491,6 @@ function render(options={}){
     }
   });
 
-  document.getElementById("finishPicking")?.addEventListener("click",async()=>{
-    try{
-      access=await apiPost({
-        action:"registerAccessEvent",
-        access_session_id:ACCESS_ID,
-        session_token:ACCESS_TOKEN(),
-        event_type:"PICKING_READY",
-        command_id:cmd("picking-ready"),
-        source_occurred_at:new Date().toISOString(),
-        source_device_id:PICKING_DISPLAY_ID,
-        metadata:{source:"picking-display"}
-      });
-      render();
-    }catch(error){
-      alert("A separação ainda não pode ser concluída: "+error.message);
-    }
-  });
 }
 
 async function refresh(){
