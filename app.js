@@ -13,7 +13,8 @@ const state = {
   evidence:null,
   auth:readJson(AUTH_KEY),
   access:null,
-  selectedOrders:new Set()
+  selectedOrders:new Set(),
+  biometricInProgress:false
 };
 
 function readJson(key){ try{return JSON.parse(sessionStorage.getItem(key)||"null");}catch{return null;} }
@@ -153,9 +154,8 @@ async function credentialScreen(token){
   try{
     state.identity=await apiPost({action:"identifyCredential",token,terminal_id:TERMINAL_ID});
     const p=state.identity.employee;
-    render(shell(`<div class="card"><div class="big-check">✓</div><div class="eyebrow">Credencial identificada</div><h1>${esc(p.name)}</h1><div class="person"><span class="role">${esc(p.role)}</span></div><div class="factor-list"><div class="factor ok"><b>✓</b><span>DESFire identificado</span></div><div class="factor pending"><b>2</b><span>Face 1:1 + liveness pendentes</span></div></div><div class="actions"><button class="btn" id="verify">Confirmar identidade</button><button class="btn ghost" id="cancel">Cancelar</button></div><p class="footer-note">DEV: câmera, PAD e attestation do dispositivo ainda são simulados.</p></div>`,"Autenticação"));
-    document.getElementById("verify").addEventListener("click",verifyIdentity);
-    document.getElementById("cancel").addEventListener("click",()=>go("/"));
+    render(shell(`<div class="card"><div class="big-check">✓</div><div class="eyebrow">Credencial identificada</div><h1>${esc(p.name)}</h1><div class="person"><span class="role">${esc(p.role)}</span></div><div class="factor-list"><div class="factor ok"><b>✓</b><span>DESFire identificado</span></div><div class="factor pending"><b>2</b><span>Iniciando face 1:1 + liveness automaticamente</span></div></div><p class="footer-note">DEV: a captura facial é simulada; em produção a câmera inicia imediatamente após a leitura NFC.</p></div>`,"Autenticação"));
+    return verifyIdentity();
   }catch(error){
     if(isConnectivityError(error))return failClosed();
     showError("Credencial não reconhecida","Não foi possível iniciar a autenticação.");
@@ -164,7 +164,9 @@ async function credentialScreen(token){
 
 async function verifyIdentity(){
   if(!state.identity)return go("/");
-  render(shell(`<div class="card"><div class="eyebrow">Etapa 2 de 2</div><h1>Verificando rosto e presença…</h1><p class="lead">Comparação 1:1 + liveness/PAD no componente local confiável.</p><div class="scan-frame"><div class="scan-face">◎</div><span>Simulação local</span></div></div>`,"Autenticação biométrica"));
+  if(state.biometricInProgress)return;
+  state.biometricInProgress=true;
+  render(shell(`<div class="card"><div class="eyebrow">Etapa 2 de 2</div><h1>Verificando rosto e presença…</h1><p class="lead">Comparação 1:1 + liveness/PAD iniciada automaticamente após a NFC.</p><div class="scan-frame"><div class="scan-face">◎</div><span>Simulação local</span></div></div>`,"Autenticação biométrica"));
   try{
     state.evidence=await apiPost({
       action:"createBiometricEvidence",
@@ -181,9 +183,10 @@ async function verifyIdentity(){
       terminal_id:TERMINAL_ID
     });
     writeJson(AUTH_KEY,state.auth);
-    render(shell(`<div class="card"><div class="big-check">✓</div><div class="eyebrow">Identidade confirmada</div><h1>${esc(state.auth.employee.name)}</h1><div class="factor-list"><div class="factor ok"><b>✓</b><span>DESFire EV3</span></div><div class="factor ok"><b>✓</b><span>Face 1:1</span></div><div class="factor ok"><b>✓</b><span>Liveness/PAD</span></div><div class="factor ok"><b>✓</b><span>Evidência vinculada ao dispositivo DEV</span></div></div><div class="actions"><button class="btn" id="orders">Ver ordens e materiais</button></div><p class="footer-note">A API recebeu uma evidência referenciada; a UI não enviou apenas um booleano de autenticação.</p></div>`,"Autenticação concluída"));
-    document.getElementById("orders").addEventListener("click",()=>go("/ordens"));
+    render(shell(`<div class="card"><div class="big-check">✓</div><div class="eyebrow">Identidade confirmada</div><h1>${esc(state.auth.employee.name)}</h1><div class="factor-list"><div class="factor ok"><b>✓</b><span>DESFire EV3</span></div><div class="factor ok"><b>✓</b><span>Face 1:1</span></div><div class="factor ok"><b>✓</b><span>Liveness/PAD</span></div></div><p class="footer-note">Carregando automaticamente as ordens disponíveis…</p></div>`,"Autenticação concluída"));
+    setTimeout(()=>go("/ordens"),250);
   }catch(error){
+    state.biometricInProgress=false;
     if(isConnectivityError(error))return failClosed();
     showError("Identidade não confirmada","Acesso não autorizado. Tente novamente.");
   }
