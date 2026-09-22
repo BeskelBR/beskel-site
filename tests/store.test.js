@@ -107,6 +107,46 @@ function finishPhysicalFlow(access, prefix = "finish") {
   return { ...current, session_token: access.session_token };
 }
 
+function startMixedSession(auth, commonProduct, sensitiveProduct, commandId = "mixed") {
+  return store.startAccessSession({
+    authSessionId:auth.auth_session_id,
+    orderIds:[],
+    liveItems:[
+      { live_item_id:`live-${commandId}-common`, product_id:commonProduct.product_id, quantity:1 },
+      { live_item_id:`live-${commandId}-sensitive`, product_id:sensitiveProduct.product_id, quantity:1 }
+    ],
+    terminalId:store.TERMINAL_ID,
+    commandId
+  });
+}
+
+function sensitiveEvent(access, eventType, sourceDeviceId, prefix = "sensitive", metadata = {}) {
+  return {
+    ...store.registerSensitiveEvent({
+      accessSessionId:access.access_session_id,
+      sessionToken:access.session_token,
+      eventType,
+      metadata,
+      commandId:`${prefix}-${eventType}`,
+      sourceOccurredAt:"2026-09-22T02:00:02.000Z",
+      sourceDeviceId
+    }),
+    session_token:access.session_token
+  };
+}
+
+function openSensitive(access, prefix = "sensitive-open") {
+  let current=sensitiveEvent(access,"SENSITIVE_ACCESS_REQUESTED",store.PICKING_DISPLAY_ID,prefix);
+  current={...sensitiveEvent({...current,session_token:access.session_token},"SENSITIVE_DOOR_OPENED",store.TERMINAL_ID,prefix),session_token:access.session_token};
+  return current;
+}
+
+function closeAndLockSensitive(access, prefix = "sensitive-close") {
+  let current=sensitiveEvent(access,"SENSITIVE_DOOR_CLOSED",store.TERMINAL_ID,prefix);
+  current={...sensitiveEvent({...current,session_token:access.session_token},"SENSITIVE_LOCK_CONFIRMED",store.TERMINAL_ID,prefix),session_token:access.session_token};
+  return current;
+}
+
 test("FEFO splits one demand across lots and product has no fixed coordinate", () => {
   const { auth } = authenticate();
   const product = store.listCatalog(auth.auth_session_id).find(item => !item.sensitive);
@@ -436,3 +476,469 @@ test("wrong device cannot emit physical events", () => {
     sourceDeviceId:"EVIL-DEVICE"
   }), /UNTRUSTED_DEVICE/);
 });
+
+test("sensitive session starts eligible but locked and does not open with the main door", () => {
+  const { auth } = authenticate("demo-rafael");
+  const sensitiveProduct = store.listCatalog(auth.auth_session_id).find(item => item.sensitive);
+  let access = startLiveSession(auth,sensitiveProduct,1,"sensitive-initial");
+  assert.equal(access.sensitive_access,true);
+  assert.equal(access.sensitive_access_eligible,true);
+  assert.equal(access.sensitive_access_granted,false);
+  assert.equal(access.sensitive_state,"LOCKED");
+  assert.equal(access.sensitive_open_count,0);
+  assert.equal(access.events.some(event=>event.event_type==="SENSITIVE_ACCESS_GRANTED"),false);
+
+  access = store.registerAccessEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"DOOR_OPENED",
+    commandId:"sensitive-main-door",
+    sourceDeviceId:store.TERMINAL_ID
+  });
+  assert.equal(access.sensitive_state,"LOCKED");
+  assert.equal(access.events.some(event=>event.event_type==="SENSITIVE_DOOR_OPENED"),false);
+});
+
+test("sensitive picking is impossible while cabinet is locked", () => {
+  const { auth } = authenticate("demo-rafael");
+  const sensitiveProduct = store.listCatalog(auth.auth_session_id).find(item => item.sensitive);
+  let access = startLiveSession(auth,sensitiveProduct,1,"sensitive-locked");
+  access = openRoom(access,"sensitive-locked");
+  const task=access.picking_tasks.find(item=>item.sensitive);
+  assert.throws(
+    ()=>resolveTask(access,task,"CONFIRMED",task.quantity,"sensitive-locked"),
+    /SENSITIVE_STORAGE_LOCKED/
+  );
+});
+
+test("sensitive access request is allowed only from the internal picking display", () => {
+  const { auth } = authenticate("demo-rafael");
+  const sensitiveProduct = store.listCatalog(auth.auth_session_id).find(item => item.sensitive);
+  let access = startLiveSession(auth,sensitiveProduct,1,"sensitive-request-device");
+  access = openRoom(access,"sensitive-request-device");
+
+  assert.throws(()=>store.registerSensitiveEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"SENSITIVE_ACCESS_REQUESTED",
+    commandId:"request-wrong-device",
+    sourceDeviceId:store.TERMINAL_ID
+  }), /UNTRUSTED_DEVICE/);
+
+  access=sensitiveEvent(access,"SENSITIVE_ACCESS_REQUESTED",store.PICKING_DISPLAY_ID,"request-right-device");
+  assert.equal(access.sensitive_state,"UNLOCK_AUTHORIZED");
+  assert.equal(access.sensitive_access_granted,true);
+  assert.ok(access.sensitive_unlock_expires_at);
+});
+
+test("sensitive access cannot be requested before physical presence is confirmed", () => {
+  const { auth } = authenticate("demo-rafael");
+  const sensitiveProduct = store.listCatalog(auth.auth_session_id).find(item => item.sensitive);
+  const access = startLiveSession(auth,sensitiveProduct,1,"sensitive-before-entry");
+
+  assert.throws(()=>store.registerSensitiveEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"SENSITIVE_ACCESS_REQUESTED",
+    commandId:"request-before-entry",
+    sourceDeviceId:store.PICKING_DISPLAY_ID
+  }), /SENSITIVE_ACCESS_NOT_ACTIVE/);
+});
+
+test("sensitive cabinet opening requires a prior request and trusted controller source", () => {
+  const { auth } = authenticate("demo-rafael");
+  const sensitiveProduct = store.listCatalog(auth.auth_session_id).find(item => item.sensitive);
+  let access = startLiveSession(auth,sensitiveProduct,1,"sensitive-open-sequence");
+  access = openRoom(access,"sensitive-open-sequence");
+
+  assert.throws(()=>store.registerSensitiveEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"SENSITIVE_DOOR_OPENED",
+    commandId:"open-without-request",
+    sourceDeviceId:store.TERMINAL_ID
+  }), /INVALID_SENSITIVE_SEQUENCE/);
+
+  access=sensitiveEvent(access,"SENSITIVE_ACCESS_REQUESTED",store.PICKING_DISPLAY_ID,"open-sequence");
+  assert.throws(()=>store.registerSensitiveEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"SENSITIVE_DOOR_OPENED",
+    commandId:"open-wrong-device",
+    sourceDeviceId:store.PICKING_DISPLAY_ID
+  }), /UNTRUSTED_DEVICE/);
+
+  access={...sensitiveEvent(access,"SENSITIVE_DOOR_OPENED",store.TERMINAL_ID,"open-sequence"),session_token:access.session_token};
+  assert.equal(access.sensitive_state,"OPEN");
+  assert.equal(access.sensitive_open_count,1);
+});
+
+test("no second biometric authentication is generated for sensitive access", () => {
+  const login = authenticate("demo-rafael");
+  const sensitiveProduct = store.listCatalog(login.auth.auth_session_id).find(item => item.sensitive);
+  let access = startLiveSession(login.auth,sensitiveProduct,1,"no-second-auth");
+  access = openRoom(access,"no-second-auth");
+  const before=store.listAudit(login.auth.auth_session_id).filter(event=>event.event_type==="BIOMETRIC_VALIDATED").length;
+
+  access=sensitiveEvent(access,"SENSITIVE_ACCESS_REQUESTED",store.PICKING_DISPLAY_ID,"no-second-auth");
+  access={...sensitiveEvent(access,"SENSITIVE_DOOR_OPENED",store.TERMINAL_ID,"no-second-auth"),session_token:access.session_token};
+
+  const after=store.listAudit(login.auth.auth_session_id).filter(event=>event.event_type==="BIOMETRIC_VALIDATED").length;
+  assert.equal(before,1);
+  assert.equal(after,1);
+});
+
+test("common picking is blocked throughout an active sensitive withdrawal session", () => {
+  const { auth } = authenticate("demo-rafael");
+  const catalog=store.listCatalog(auth.auth_session_id);
+  const common=catalog.find(item=>!item.sensitive);
+  const sensitive=catalog.find(item=>item.sensitive);
+  let access=startMixedSession(auth,common,sensitive,"sensitive-isolation");
+  access=openRoom(access,"sensitive-isolation");
+  const commonTask=access.picking_tasks.find(item=>!item.sensitive);
+
+  access=sensitiveEvent(access,"SENSITIVE_ACCESS_REQUESTED",store.PICKING_DISPLAY_ID,"sensitive-isolation");
+  assert.throws(()=>resolveTask(access,commonTask,"CONFIRMED",commonTask.quantity,"common-during-unlock"),/SENSITIVE_SESSION_ACTIVE/);
+
+  access={...sensitiveEvent(access,"SENSITIVE_DOOR_OPENED",store.TERMINAL_ID,"sensitive-isolation"),session_token:access.session_token};
+  assert.throws(()=>resolveTask(access,commonTask,"CONFIRMED",commonTask.quantity,"common-during-open"),/SENSITIVE_SESSION_ACTIVE/);
+
+  access={...sensitiveEvent(access,"SENSITIVE_DOOR_CLOSED",store.TERMINAL_ID,"sensitive-isolation"),session_token:access.session_token};
+  assert.throws(()=>resolveTask(access,commonTask,"CONFIRMED",commonTask.quantity,"common-during-close"),/SENSITIVE_SESSION_ACTIVE/);
+});
+
+test("sensitive picking is enabled only while cabinet door is physically open", () => {
+  const { auth } = authenticate("demo-rafael");
+  const sensitiveProduct=store.listCatalog(auth.auth_session_id).find(item=>item.sensitive);
+  let access=startLiveSession(auth,sensitiveProduct,1,"sensitive-pick-window");
+  access=openRoom(access,"sensitive-pick-window");
+  const task=access.picking_tasks.find(item=>item.sensitive);
+
+  access=sensitiveEvent(access,"SENSITIVE_ACCESS_REQUESTED",store.PICKING_DISPLAY_ID,"sensitive-pick-window");
+  assert.throws(()=>resolveTask(access,task,"CONFIRMED",task.quantity,"pick-before-open"),/SENSITIVE_STORAGE_LOCKED/);
+
+  access={...sensitiveEvent(access,"SENSITIVE_DOOR_OPENED",store.TERMINAL_ID,"sensitive-pick-window"),session_token:access.session_token};
+  access=resolveTask(access,task,"CONFIRMED",task.quantity,"pick-while-open");
+  assert.equal(access.picking_state[task.picking_task_id].status,"CONFIRMED");
+
+  access={...sensitiveEvent(access,"SENSITIVE_DOOR_CLOSED",store.TERMINAL_ID,"sensitive-pick-window"),session_token:access.session_token};
+  assert.throws(()=>resolveTask(access,task,"CONFIRMED",task.quantity,"pick-after-close"),/SENSITIVE_STORAGE_LOCKED/);
+});
+
+test("resolved sensitive session becomes completed only after door close and lock confirmation", () => {
+  const { auth } = authenticate("demo-rafael");
+  const sensitiveProduct=store.listCatalog(auth.auth_session_id).find(item=>item.sensitive);
+  let access=startLiveSession(auth,sensitiveProduct,1,"sensitive-complete");
+  access=openRoom(access,"sensitive-complete");
+  const task=access.picking_tasks[0];
+  access=openSensitive(access,"sensitive-complete");
+  access=resolveTask(access,task,"CONFIRMED",task.quantity,"sensitive-complete");
+
+  assert.equal(access.sensitive_state,"OPEN");
+  access={...sensitiveEvent(access,"SENSITIVE_DOOR_CLOSED",store.TERMINAL_ID,"sensitive-complete"),session_token:access.session_token};
+  assert.equal(access.sensitive_state,"CLOSED");
+  access={...sensitiveEvent(access,"SENSITIVE_LOCK_CONFIRMED",store.TERMINAL_ID,"sensitive-complete"),session_token:access.session_token};
+  assert.equal(access.sensitive_state,"COMPLETED");
+  assert.equal(access.sensitive_access_granted,false);
+});
+
+test("closing cabinet with pending sensitive items returns to locked and allows another opening", () => {
+  const { auth } = authenticate("demo-rafael");
+  const sensitiveProduct=store.listCatalog(auth.auth_session_id).find(item=>item.sensitive);
+  let access=startLiveSession(auth,sensitiveProduct,2,"sensitive-reopen");
+  access=openRoom(access,"sensitive-reopen");
+  const tasks=access.picking_tasks.filter(item=>item.sensitive);
+  assert.ok(tasks.length>=2);
+
+  access=openSensitive(access,"sensitive-reopen-1");
+  access=resolveTask(access,tasks[0],"CONFIRMED",tasks[0].quantity,"sensitive-reopen-1");
+  access=closeAndLockSensitive(access,"sensitive-reopen-1");
+  assert.equal(access.sensitive_state,"LOCKED");
+
+  access=sensitiveEvent(access,"SENSITIVE_ACCESS_REQUESTED",store.PICKING_DISPLAY_ID,"sensitive-reopen-2");
+  assert.equal(access.sensitive_state,"UNLOCK_AUTHORIZED");
+  access={...sensitiveEvent(access,"SENSITIVE_DOOR_OPENED",store.TERMINAL_ID,"sensitive-reopen-2"),session_token:access.session_token};
+  assert.equal(access.sensitive_open_count,2);
+});
+
+test("PICKING_READY is blocked until sensitive cabinet is locked after resolved picking", () => {
+  const { auth } = authenticate("demo-rafael");
+  const sensitiveProduct=store.listCatalog(auth.auth_session_id).find(item=>item.sensitive);
+  let access=startLiveSession(auth,sensitiveProduct,1,"sensitive-ready-guard");
+  access=openRoom(access,"sensitive-ready-guard");
+  const task=access.picking_tasks[0];
+  access=openSensitive(access,"sensitive-ready-guard");
+  access=resolveTask(access,task,"CONFIRMED",task.quantity,"sensitive-ready-guard");
+
+  assert.throws(()=>store.registerAccessEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"PICKING_READY",
+    commandId:"sensitive-ready-too-soon",
+    sourceDeviceId:store.PICKING_DISPLAY_ID
+  }), /SENSITIVE_STORAGE_NOT_SECURED/);
+
+  access=closeAndLockSensitive(access,"sensitive-ready-guard");
+  access=finishPhysicalFlow(access,"sensitive-ready-guard");
+  assert.equal(access.state,"READY_TO_CONFIRM");
+});
+
+test("sensitive unlock authorization expires quickly but the same authenticated session may request again", () => {
+  const originalNow=Date.now;
+  let fakeNow=Date.parse("2026-09-22T12:00:00.000Z");
+  Date.now=()=>fakeNow;
+  try{
+    const login=authenticate("demo-rafael");
+    const sensitiveProduct=store.listCatalog(login.auth.auth_session_id).find(item=>item.sensitive);
+    let access=startLiveSession(login.auth,sensitiveProduct,1,"sensitive-expiry");
+    access=openRoom(access,"sensitive-expiry");
+    access=sensitiveEvent(access,"SENSITIVE_ACCESS_REQUESTED",store.PICKING_DISPLAY_ID,"sensitive-expiry-1");
+    fakeNow+=16000;
+
+    assert.throws(()=>store.registerSensitiveEvent({
+      accessSessionId:access.access_session_id,
+      sessionToken:access.session_token,
+      eventType:"SENSITIVE_DOOR_OPENED",
+      commandId:"sensitive-expired-open",
+      sourceDeviceId:store.TERMINAL_ID
+    }), /SENSITIVE_UNLOCK_EXPIRED/);
+
+    const detail=store.getAccessSessionDetail(access.access_session_id,access.session_token);
+    assert.equal(detail.sensitive_state,"LOCKED");
+    access={...detail,session_token:access.session_token};
+    access=sensitiveEvent(access,"SENSITIVE_ACCESS_REQUESTED",store.PICKING_DISPLAY_ID,"sensitive-expiry-2");
+    assert.equal(access.sensitive_state,"UNLOCK_AUTHORIZED");
+
+    const biometricEvents=store.listAudit(login.auth.auth_session_id).filter(event=>event.event_type==="BIOMETRIC_VALIDATED");
+    assert.equal(biometricEvents.length,1);
+  }finally{
+    Date.now=originalNow;
+  }
+});
+
+test("sensitive unlock expiry is audited once", () => {
+  const originalNow=Date.now;
+  let fakeNow=Date.parse("2026-09-22T12:00:00.000Z");
+  Date.now=()=>fakeNow;
+  try{
+    const login=authenticate("demo-rafael");
+    const sensitiveProduct=store.listCatalog(login.auth.auth_session_id).find(item=>item.sensitive);
+    let access=startLiveSession(login.auth,sensitiveProduct,1,"sensitive-expiry-audit");
+    access=openRoom(access,"sensitive-expiry-audit");
+    access=sensitiveEvent(access,"SENSITIVE_ACCESS_REQUESTED",store.PICKING_DISPLAY_ID,"sensitive-expiry-audit");
+    fakeNow+=16000;
+    store.getAccessSessionDetail(access.access_session_id,access.session_token);
+    store.getAccessSessionDetail(access.access_session_id,access.session_token);
+    const expired=store.listAudit(login.auth.auth_session_id).filter(event=>event.event_type==="SENSITIVE_UNLOCK_EXPIRED");
+    assert.equal(expired.length,1);
+  }finally{
+    Date.now=originalNow;
+  }
+});
+
+test("duplicate sensitive request while unlock is already authorized is rejected", () => {
+  const { auth } = authenticate("demo-rafael");
+  const sensitiveProduct=store.listCatalog(auth.auth_session_id).find(item=>item.sensitive);
+  let access=startLiveSession(auth,sensitiveProduct,1,"sensitive-double-request");
+  access=openRoom(access,"sensitive-double-request");
+  access=sensitiveEvent(access,"SENSITIVE_ACCESS_REQUESTED",store.PICKING_DISPLAY_ID,"sensitive-double-request-1");
+
+  assert.throws(()=>store.registerSensitiveEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"SENSITIVE_ACCESS_REQUESTED",
+    commandId:"sensitive-double-request-2",
+    sourceDeviceId:store.PICKING_DISPLAY_ID
+  }), /INVALID_SENSITIVE_SEQUENCE/);
+});
+
+test("invalid sensitive close and lock transitions are rejected", () => {
+  const { auth } = authenticate("demo-rafael");
+  const sensitiveProduct=store.listCatalog(auth.auth_session_id).find(item=>item.sensitive);
+  let access=startLiveSession(auth,sensitiveProduct,1,"sensitive-invalid-transition");
+  access=openRoom(access,"sensitive-invalid-transition");
+
+  assert.throws(()=>store.registerSensitiveEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"SENSITIVE_DOOR_CLOSED",
+    commandId:"sensitive-close-locked",
+    sourceDeviceId:store.TERMINAL_ID
+  }), /INVALID_SENSITIVE_SEQUENCE/);
+
+  assert.throws(()=>store.registerSensitiveEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"SENSITIVE_LOCK_CONFIRMED",
+    commandId:"sensitive-lock-without-close",
+    sourceDeviceId:store.TERMINAL_ID
+  }), /INVALID_SENSITIVE_SEQUENCE/);
+});
+
+test("completed sensitive session cannot be reopened when no sensitive item is pending", () => {
+  const { auth } = authenticate("demo-rafael");
+  const sensitiveProduct=store.listCatalog(auth.auth_session_id).find(item=>item.sensitive);
+  let access=startLiveSession(auth,sensitiveProduct,1,"sensitive-no-reopen");
+  access=openRoom(access,"sensitive-no-reopen");
+  const task=access.picking_tasks[0];
+  access=openSensitive(access,"sensitive-no-reopen");
+  access=resolveTask(access,task,"CONFIRMED",task.quantity,"sensitive-no-reopen");
+  access=closeAndLockSensitive(access,"sensitive-no-reopen");
+  assert.equal(access.sensitive_state,"COMPLETED");
+
+  assert.throws(()=>store.registerSensitiveEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"SENSITIVE_ACCESS_REQUESTED",
+    commandId:"sensitive-reopen-complete",
+    sourceDeviceId:store.PICKING_DISPLAY_ID
+  }), /SENSITIVE_ITEMS_ALREADY_RESOLVED/);
+});
+
+test("normal session cannot request sensitive storage", () => {
+  const { auth } = authenticate("demo-rafael");
+  const commonProduct=store.listCatalog(auth.auth_session_id).find(item=>!item.sensitive);
+  let access=startLiveSession(auth,commonProduct,1,"normal-sensitive-request");
+  access=openRoom(access,"normal-sensitive-request");
+
+  assert.throws(()=>store.registerSensitiveEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"SENSITIVE_ACCESS_REQUESTED",
+    commandId:"normal-sensitive-request-event",
+    sourceDeviceId:store.PICKING_DISPLAY_ID
+  }), /SENSITIVE_ACCESS_DENIED/);
+});
+
+test("sensitive event requires the AccessSession token", () => {
+  const { auth } = authenticate("demo-rafael");
+  const sensitiveProduct=store.listCatalog(auth.auth_session_id).find(item=>item.sensitive);
+  let access=startLiveSession(auth,sensitiveProduct,1,"sensitive-token");
+  access=openRoom(access,"sensitive-token");
+
+  assert.throws(()=>store.registerSensitiveEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:"wrong",
+    eventType:"SENSITIVE_ACCESS_REQUESTED",
+    commandId:"sensitive-token-wrong",
+    sourceDeviceId:store.PICKING_DISPLAY_ID
+  }), /ACCESS_SESSION_UNAUTHORIZED/);
+});
+
+test("sensitive event idempotent replay does not increment cabinet opening twice", () => {
+  const { auth } = authenticate("demo-rafael");
+  const sensitiveProduct=store.listCatalog(auth.auth_session_id).find(item=>item.sensitive);
+  let access=startLiveSession(auth,sensitiveProduct,1,"sensitive-idempotent");
+  access=openRoom(access,"sensitive-idempotent");
+  access=sensitiveEvent(access,"SENSITIVE_ACCESS_REQUESTED",store.PICKING_DISPLAY_ID,"sensitive-idempotent");
+
+  const payload={
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"SENSITIVE_DOOR_OPENED",
+    commandId:"sensitive-open-same-command",
+    sourceOccurredAt:"2026-09-22T02:00:03.000Z",
+    sourceDeviceId:store.TERMINAL_ID
+  };
+  const first=store.registerSensitiveEvent(payload);
+  const second=store.registerSensitiveEvent(payload);
+  assert.equal(first.sensitive_open_count,1);
+  assert.equal(second.sensitive_open_count,1);
+});
+
+test("sensitive idempotency detects changed nested metadata", () => {
+  const { auth } = authenticate("demo-rafael");
+  const sensitiveProduct=store.listCatalog(auth.auth_session_id).find(item=>item.sensitive);
+  let access=startLiveSession(auth,sensitiveProduct,1,"sensitive-idem-conflict");
+  access=openRoom(access,"sensitive-idem-conflict");
+
+  store.registerSensitiveEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"SENSITIVE_ACCESS_REQUESTED",
+    metadata:{reason:{kind:"medication",count:1}},
+    commandId:"sensitive-idem-command",
+    sourceDeviceId:store.PICKING_DISPLAY_ID
+  });
+
+  assert.throws(()=>store.registerSensitiveEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"SENSITIVE_ACCESS_REQUESTED",
+    metadata:{reason:{kind:"medication",count:2}},
+    commandId:"sensitive-idem-command",
+    sourceDeviceId:store.PICKING_DISPLAY_ID
+  }), /IDEMPOTENCY_CONFLICT/);
+});
+
+test("common picking resumes only after cabinet lock is confirmed", () => {
+  const { auth } = authenticate("demo-rafael");
+  const catalog=store.listCatalog(auth.auth_session_id);
+  const common=catalog.find(item=>!item.sensitive);
+  const sensitive=catalog.find(item=>item.sensitive);
+  let access=startMixedSession(auth,common,sensitive,"sensitive-common-resume");
+  access=openRoom(access,"sensitive-common-resume");
+  const commonTask=access.picking_tasks.find(item=>!item.sensitive);
+  const sensitiveTask=access.picking_tasks.find(item=>item.sensitive);
+
+  access=openSensitive(access,"sensitive-common-resume");
+  access=resolveTask(access,sensitiveTask,"CONFIRMED",sensitiveTask.quantity,"sensitive-common-resume");
+  access={...sensitiveEvent(access,"SENSITIVE_DOOR_CLOSED",store.TERMINAL_ID,"sensitive-common-resume"),session_token:access.session_token};
+  assert.throws(()=>resolveTask(access,commonTask,"CONFIRMED",commonTask.quantity,"common-before-lock"),/SENSITIVE_SESSION_ACTIVE/);
+
+  access={...sensitiveEvent(access,"SENSITIVE_LOCK_CONFIRMED",store.TERMINAL_ID,"sensitive-common-resume"),session_token:access.session_token};
+  access=resolveTask(access,commonTask,"CONFIRMED",commonTask.quantity,"common-after-lock");
+  assert.equal(access.picking_state[commonTask.picking_task_id].status,"CONFIRMED");
+});
+
+test("sensitive cabinet remains closable and lockable after AccessSession timeout alert", () => {
+  const originalNow=Date.now;
+  let fakeNow=Date.parse("2026-09-22T12:00:00.000Z");
+  Date.now=()=>fakeNow;
+  try{
+    const { auth }=authenticate("demo-rafael");
+    const sensitiveProduct=store.listCatalog(auth.auth_session_id).find(item=>item.sensitive);
+    let access=startLiveSession(auth,sensitiveProduct,1,"sensitive-timeout-open");
+    access=openRoom(access,"sensitive-timeout-open");
+    const task=access.picking_tasks[0];
+    access=openSensitive(access,"sensitive-timeout-open");
+    access=resolveTask(access,task,"CONFIRMED",task.quantity,"sensitive-timeout-open");
+
+    fakeNow+=21*60*1000;
+    const detail=store.getAccessSessionDetail(access.access_session_id,access.session_token);
+    assert.equal(detail.state,"ENTRY_CONFIRMED");
+    assert.equal(detail.sensitive_state,"OPEN");
+    assert.ok(detail.timeout_alerted_at);
+
+    access={...detail,session_token:access.session_token};
+    access=closeAndLockSensitive(access,"sensitive-timeout-open");
+    assert.equal(access.sensitive_state,"COMPLETED");
+  }finally{
+    Date.now=originalNow;
+  }
+});
+
+test("sensitive access audit preserves request grant open close lock and completion sequence", () => {
+  const login=authenticate("demo-rafael");
+  const sensitiveProduct=store.listCatalog(login.auth.auth_session_id).find(item=>item.sensitive);
+  let access=startLiveSession(login.auth,sensitiveProduct,1,"sensitive-audit-sequence");
+  access=openRoom(access,"sensitive-audit-sequence");
+  const task=access.picking_tasks[0];
+  access=openSensitive(access,"sensitive-audit-sequence");
+  access=resolveTask(access,task,"CONFIRMED",task.quantity,"sensitive-audit-sequence");
+  access=closeAndLockSensitive(access,"sensitive-audit-sequence");
+
+  const types=store.listAudit(login.auth.auth_session_id)
+    .filter(event=>event.access_session_id===access.access_session_id)
+    .map(event=>event.event_type);
+  for(const expected of [
+    "SENSITIVE_ACCESS_ELIGIBLE",
+    "SENSITIVE_ACCESS_REQUESTED",
+    "SENSITIVE_ACCESS_GRANTED",
+    "SENSITIVE_DOOR_OPENED",
+    "SENSITIVE_DOOR_CLOSED",
+    "SENSITIVE_LOCK_CONFIRMED",
+    "SENSITIVE_ACCESS_COMPLETED"
+  ]) assert.ok(types.includes(expected),expected);
+});
+
