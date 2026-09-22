@@ -83,14 +83,6 @@ function finishPhysicalFlow(access, prefix = "finish") {
   let current = store.registerAccessEvent({
     accessSessionId: access.access_session_id,
     sessionToken: access.session_token,
-    eventType: "PICKING_READY",
-    commandId: `${prefix}-ready`,
-    sourceOccurredAt: "2026-09-22T02:00:02.000Z",
-    sourceDeviceId: store.PICKING_DISPLAY_ID
-  });
-  current = store.registerAccessEvent({
-    accessSessionId: access.access_session_id,
-    sessionToken: access.session_token,
     eventType: "PRESENCE_CLEARED",
     commandId: `${prefix}-exit`,
     sourceOccurredAt: "2026-09-22T02:00:03.000Z",
@@ -246,6 +238,7 @@ test("physical sequence requires picking ready, exit detection and door close in
   }), /INVALID_ACCESS_SEQUENCE/);
 
   access = resolveTask(access,task,"CONFIRMED",task.quantity,"physical");
+  assert.equal(access.state,"PICKING_READY");
   access = finishPhysicalFlow(access,"physical");
   assert.equal(access.state,"WITHDRAWAL_CONFIRMED");
 
@@ -291,6 +284,7 @@ test("expired clock never destroys an occupied session", () => {
 
     const task = detail.picking_tasks[0];
     access = resolveTask(access,task,"CONFIRMED",task.quantity,"timeout");
+    assert.equal(access.state,"PICKING_READY");
     access = finishPhysicalFlow(access,"timeout");
     assert.equal(access.state,"WITHDRAWAL_CONFIRMED");
   } finally {
@@ -664,6 +658,7 @@ test("PICKING_READY is blocked until sensitive cabinet is locked after resolved 
   }), /SENSITIVE_STORAGE_NOT_SECURED/);
 
   access=closeAndLockSensitive(access,"sensitive-ready-guard");
+  assert.equal(access.state,"PICKING_READY");
   access=finishPhysicalFlow(access,"sensitive-ready-guard");
   assert.equal(access.state,"WITHDRAWAL_CONFIRMED");
 });
@@ -975,6 +970,155 @@ test("internal picking display sees no session after automatic withdrawal confir
   assert.equal(claimed,null);
 });
 
+test("last resolved task automatically marks picking ready", () => {
+  const { auth } = authenticate();
+  const product = store.listCatalog(auth.auth_session_id).find(item => !item.sensitive);
+  let access = startLiveSession(auth,product,1,"auto-ready");
+  access = openRoom(access,"auto-ready");
+  const task=access.picking_tasks[0];
+  access=resolveTask(access,task,"CONFIRMED",task.quantity,"auto-ready");
+
+  assert.equal(access.state,"PICKING_READY");
+  const readyEvents=store.listAudit(auth.auth_session_id)
+    .filter(event=>event.access_session_id===access.access_session_id && event.event_type==="PICKING_READY");
+  assert.equal(readyEvents.length,1);
+  assert.equal(readyEvents[0].metadata.automatic,true);
+});
+
+test("last item may be undone after automatic picking ready until exit is detected", () => {
+  const { auth } = authenticate();
+  const product = store.listCatalog(auth.auth_session_id).find(item => !item.sensitive);
+  let access = startLiveSession(auth,product,1,"auto-ready-undo");
+  access = openRoom(access,"auto-ready-undo");
+  const task=access.picking_tasks[0];
+  access=resolveTask(access,task,"CONFIRMED",task.quantity,"auto-ready-undo");
+  assert.equal(access.state,"PICKING_READY");
+
+  access={
+    ...store.registerPickingEvent({
+      accessSessionId:access.access_session_id,
+      sessionToken:access.session_token,
+      eventType:"PICKING_ITEM_UNDONE",
+      commandId:"auto-ready-undo-last",
+      sourceDeviceId:store.PICKING_DISPLAY_ID,
+      metadata:{group_key:task.picking_task_id}
+    }),
+    session_token:access.session_token
+  };
+
+  assert.equal(access.state,"ENTRY_CONFIRMED");
+  assert.equal(access.picking_state[task.picking_task_id].status,"PENDING");
+});
+
+test("undo is rejected after exit is detected", () => {
+  const { auth } = authenticate();
+  const product = store.listCatalog(auth.auth_session_id).find(item => !item.sensitive);
+  let access = startLiveSession(auth,product,1,"auto-ready-exit");
+  access = openRoom(access,"auto-ready-exit");
+  const task=access.picking_tasks[0];
+  access=resolveTask(access,task,"CONFIRMED",task.quantity,"auto-ready-exit");
+  access={
+    ...store.registerAccessEvent({
+      accessSessionId:access.access_session_id,
+      sessionToken:access.session_token,
+      eventType:"PRESENCE_CLEARED",
+      commandId:"auto-ready-exit-cleared",
+      sourceDeviceId:store.TERMINAL_ID
+    }),
+    session_token:access.session_token
+  };
+
+  assert.throws(()=>store.registerPickingEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"PICKING_ITEM_UNDONE",
+    commandId:"auto-ready-exit-undo",
+    sourceDeviceId:store.PICKING_DISPLAY_ID,
+    metadata:{group_key:task.picking_task_id}
+  }), /PICKING_NOT_ACTIVE/);
+});
+
+test("stock discrepancy automatically reroutes to the next sufficient FEFO lot", () => {
+  const { auth } = authenticate();
+  const product = store.listCatalog(auth.auth_session_id).find(item => !item.sensitive);
+  let access = startLiveSession(auth,product,1,"auto-fefo-reroute");
+  access = openRoom(access,"auto-fefo-reroute");
+  const task=access.picking_tasks[0];
+  const expected=task.fallback_lots.find(lot=>lot.available_units>=task.quantity);
+  assert.ok(expected);
+
+  access={
+    ...store.registerPickingEvent({
+      accessSessionId:access.access_session_id,
+      sessionToken:access.session_token,
+      eventType:"STOCK_LOCATION_DISCREPANCY",
+      commandId:"auto-fefo-reroute-discrepancy",
+      sourceDeviceId:store.PICKING_DISPLAY_ID,
+      metadata:{group_key:task.picking_task_id}
+    }),
+    session_token:access.session_token
+  };
+
+  const state=access.picking_state[task.picking_task_id];
+  assert.equal(state.status,"PENDING");
+  assert.equal(state.active_stock_lot_id,expected.stock_lot_id);
+  assert.equal(state.auto_reallocated,true);
+  assert.equal(state.reallocation_strategy,"FEFO_FIFO");
+});
+
+test("stock discrepancy remains an exception when no sufficient fallback exists", () => {
+  const { auth } = authenticate();
+  const product = store.listCatalog(auth.auth_session_id).find(item => !item.sensitive);
+  let access = startLiveSession(auth,product,24,"auto-fefo-none");
+  access = openRoom(access,"auto-fefo-none");
+  const task=access.picking_tasks.find(item=>!item.fallback_lots.some(lot=>lot.available_units>=item.quantity));
+  assert.ok(task);
+
+  access={
+    ...store.registerPickingEvent({
+      accessSessionId:access.access_session_id,
+      sessionToken:access.session_token,
+      eventType:"STOCK_LOCATION_DISCREPANCY",
+      commandId:"auto-fefo-none-discrepancy",
+      sourceDeviceId:store.PICKING_DISPLAY_ID,
+      metadata:{group_key:task.picking_task_id}
+    }),
+    session_token:access.session_token
+  };
+
+  const state=access.picking_state[task.picking_task_id];
+  assert.equal(state.status,"EXCEPTION");
+  assert.equal(state.auto_reallocated,false);
+});
+
+test("automatic FEFO reroute preserves discrepancy then reroute audit order", () => {
+  const { auth } = authenticate();
+  const product = store.listCatalog(auth.auth_session_id).find(item => !item.sensitive);
+  let access = startLiveSession(auth,product,1,"auto-fefo-audit");
+  access = openRoom(access,"auto-fefo-audit");
+  const task=access.picking_tasks[0];
+
+  store.registerPickingEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"STOCK_LOCATION_DISCREPANCY",
+    commandId:"auto-fefo-audit-discrepancy",
+    sourceDeviceId:store.PICKING_DISPLAY_ID,
+    metadata:{group_key:task.picking_task_id}
+  });
+
+  const chronological=store.listAudit(auth.auth_session_id)
+    .filter(event=>event.access_session_id===access.access_session_id)
+    .slice()
+    .reverse()
+    .map(event=>event.event_type);
+  const discrepancyIndex=chronological.lastIndexOf("STOCK_LOCATION_DISCREPANCY");
+  const rerouteIndex=chronological.lastIndexOf("PICKING_LOT_REALLOCATED");
+
+  assert.ok(discrepancyIndex>=0);
+  assert.ok(rerouteIndex>discrepancyIndex);
+});
+
 test("DOOR_CLOSED triggers exactly one automatic withdrawal confirmation", () => {
   const { auth } = authenticate();
   const product = store.listCatalog(auth.auth_session_id).find(item => !item.sensitive);
@@ -983,13 +1127,7 @@ test("DOOR_CLOSED triggers exactly one automatic withdrawal confirmation", () =>
   const task=access.picking_tasks[0];
   access=resolveTask(access,task,"CONFIRMED",task.quantity,"auto-final-once");
 
-  store.registerAccessEvent({
-    accessSessionId:access.access_session_id,
-    sessionToken:access.session_token,
-    eventType:"PICKING_READY",
-    commandId:"auto-final-ready",
-    sourceDeviceId:store.PICKING_DISPLAY_ID
-  });
+  assert.equal(access.state,"PICKING_READY");
   store.registerAccessEvent({
     accessSessionId:access.access_session_id,
     sessionToken:access.session_token,
