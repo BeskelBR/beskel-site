@@ -20,6 +20,21 @@
       "source": "/pages/produtos.html",
       "destination": "/portfolio/",
       "permanent": true
+    },
+    {
+      "source": "/processo",
+      "destination": "/servicos/#processo",
+      "permanent": true
+    },
+    {
+      "source": "/processo/",
+      "destination": "/servicos/#processo",
+      "permanent": true
+    },
+    {
+      "source": "/pages/processo.html",
+      "destination": "/servicos/#processo",
+      "permanent": true
     }
   ],
   "rewrites": [
