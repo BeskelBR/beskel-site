@@ -247,7 +247,7 @@ test("physical sequence requires picking ready, exit detection and door close in
 
   access = resolveTask(access,task,"CONFIRMED",task.quantity,"physical");
   access = finishPhysicalFlow(access,"physical");
-  assert.equal(access.state,"READY_TO_CONFIRM");
+  assert.equal(access.state,"WITHDRAWAL_CONFIRMED");
 
   assert.throws(() => store.registerPickingEvent({
     accessSessionId:access.access_session_id,
@@ -292,7 +292,7 @@ test("expired clock never destroys an occupied session", () => {
     const task = detail.picking_tasks[0];
     access = resolveTask(access,task,"CONFIRMED",task.quantity,"timeout");
     access = finishPhysicalFlow(access,"timeout");
-    assert.equal(access.state,"READY_TO_CONFIRM");
+    assert.equal(access.state,"WITHDRAWAL_CONFIRMED");
   } finally {
     Date.now = originalNow;
   }
@@ -373,12 +373,6 @@ test("partial or unavailable picking does not mark the OR complete", () => {
   });
 
   access = finishPhysicalFlow(access,"partial-order");
-  access = store.confirmWithdrawal({
-    accessSessionId:access.access_session_id,
-    sessionToken:access.session_token,
-    commandId:"partial-order-confirm",
-    sourceDeviceId:store.TERMINAL_ID
-  });
 
   const fulfillment = access.withdrawal_confirmation.order_fulfillment.find(item => item.order_id===order.order_id);
   assert.notEqual(fulfillment.fulfillment_status,"COMPLETE");
@@ -396,26 +390,17 @@ test("final confirmation is generated from server picking state, not client resu
   access = resolveTask(access,task,"CONFIRMED",task.quantity,"server-final");
   access = finishPhysicalFlow(access,"server-final");
 
-  access = store.confirmWithdrawal({
-    accessSessionId:access.access_session_id,
-    sessionToken:access.session_token,
-    commandId:"server-final-confirm",
-    sourceDeviceId:store.TERMINAL_ID,
-    results:[{
-      key:"forged",
-      description:"forged",
-      expected_quantity:999,
-      actual_quantity:999,
-      location_code:"Z99",
-      stock_lot_id:"forged",
-      lot_code:"forged",
-      status:"CONFIRMED"
-    }]
-  });
-
   assert.equal(access.state,"WITHDRAWAL_CONFIRMED");
+  assert.equal(access.withdrawal_confirmation.automatic,true);
   assert.equal(access.withdrawal_confirmation.results[0].key,task.picking_task_id);
   assert.equal(access.withdrawal_confirmation.results[0].stock_lot_id,task.stock_lot_id);
+
+  assert.throws(() => store.confirmWithdrawal({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    commandId:"server-final-manual-retry",
+    sourceDeviceId:store.TERMINAL_ID
+  }), /WITHDRAWAL_NOT_READY/);
 });
 
 test("sensitive stock still requires explicit permission", () => {
@@ -680,7 +665,7 @@ test("PICKING_READY is blocked until sensitive cabinet is locked after resolved 
 
   access=closeAndLockSensitive(access,"sensitive-ready-guard");
   access=finishPhysicalFlow(access,"sensitive-ready-guard");
-  assert.equal(access.state,"READY_TO_CONFIRM");
+  assert.equal(access.state,"WITHDRAWAL_CONFIRMED");
 });
 
 test("sensitive unlock authorization expires quickly but the same authenticated session may request again", () => {
@@ -940,5 +925,97 @@ test("sensitive access audit preserves request grant open close lock and complet
     "SENSITIVE_LOCK_CONFIRMED",
     "SENSITIVE_ACCESS_COMPLETED"
   ]) assert.ok(types.includes(expected),expected);
+});
+
+test("internal picking display auto-assigns the active AccessSession", () => {
+  const { auth } = authenticate();
+  const product = store.listCatalog(auth.auth_session_id).find(item => !item.sensitive);
+  const access = startLiveSession(auth,product,1,"auto-pick-assign");
+
+  const claimed = store.getActivePickingSession({
+    sourceDeviceId:store.PICKING_DISPLAY_ID,
+    deviceCredential:store.PICKING_DISPLAY_DEV_CREDENTIAL
+  });
+
+  assert.equal(claimed.access_session_id,access.access_session_id);
+  assert.equal(claimed.session_token,access.session_token);
+  assert.equal(claimed.auto_assigned,true);
+});
+
+test("internal picking display auto-assignment requires trusted device identity", () => {
+  const { auth } = authenticate();
+  const product = store.listCatalog(auth.auth_session_id).find(item => !item.sensitive);
+  startLiveSession(auth,product,1,"auto-pick-trust");
+
+  assert.throws(() => store.getActivePickingSession({
+    sourceDeviceId:"UNTRUSTED-DISPLAY",
+    deviceCredential:store.PICKING_DISPLAY_DEV_CREDENTIAL
+  }), /UNTRUSTED_DEVICE/);
+
+  assert.throws(() => store.getActivePickingSession({
+    sourceDeviceId:store.PICKING_DISPLAY_ID,
+    deviceCredential:"wrong"
+  }), /UNTRUSTED_DEVICE/);
+});
+
+test("internal picking display sees no session after automatic withdrawal confirmation", () => {
+  const { auth } = authenticate();
+  const product = store.listCatalog(auth.auth_session_id).find(item => !item.sensitive);
+  let access = startLiveSession(auth,product,1,"auto-pick-release");
+  access = openRoom(access,"auto-pick-release");
+  const task=access.picking_tasks[0];
+  access=resolveTask(access,task,"CONFIRMED",task.quantity,"auto-pick-release");
+  access=finishPhysicalFlow(access,"auto-pick-release");
+
+  assert.equal(access.state,"WITHDRAWAL_CONFIRMED");
+  const claimed = store.getActivePickingSession({
+    sourceDeviceId:store.PICKING_DISPLAY_ID,
+    deviceCredential:store.PICKING_DISPLAY_DEV_CREDENTIAL
+  });
+  assert.equal(claimed,null);
+});
+
+test("DOOR_CLOSED triggers exactly one automatic withdrawal confirmation", () => {
+  const { auth } = authenticate();
+  const product = store.listCatalog(auth.auth_session_id).find(item => !item.sensitive);
+  let access = startLiveSession(auth,product,1,"auto-final-once");
+  access = openRoom(access,"auto-final-once");
+  const task=access.picking_tasks[0];
+  access=resolveTask(access,task,"CONFIRMED",task.quantity,"auto-final-once");
+
+  store.registerAccessEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"PICKING_READY",
+    commandId:"auto-final-ready",
+    sourceDeviceId:store.PICKING_DISPLAY_ID
+  });
+  store.registerAccessEvent({
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"PRESENCE_CLEARED",
+    commandId:"auto-final-exit",
+    sourceDeviceId:store.TERMINAL_ID
+  });
+
+  const closePayload={
+    accessSessionId:access.access_session_id,
+    sessionToken:access.session_token,
+    eventType:"DOOR_CLOSED",
+    commandId:"auto-final-close",
+    sourceDeviceId:store.TERMINAL_ID
+  };
+  const first=store.registerAccessEvent(closePayload);
+  const replay=store.registerAccessEvent(closePayload);
+
+  assert.equal(first.state,"WITHDRAWAL_CONFIRMED");
+  assert.equal(replay.state,"WITHDRAWAL_CONFIRMED");
+  assert.equal(first.withdrawal_confirmation.automatic,true);
+
+  const confirmations=store.listAudit(auth.auth_session_id)
+    .filter(event=>event.access_session_id===access.access_session_id && event.event_type==="WITHDRAWAL_CONFIRMED");
+  assert.equal(confirmations.length,1);
+  assert.equal(confirmations[0].metadata.automatic,true);
+  assert.equal(confirmations[0].metadata.trigger,"DOOR_CLOSED");
 });
 
