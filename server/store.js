@@ -430,7 +430,8 @@ function startAccessSession({ authSessionId, orderIds, liveItems = [], terminalI
       sensitive_access_granted:sensitive,
       state:"DOOR_AUTHORIZED",
       created_at:now(),
-      expires_at:Date.now()+1200000
+      expires_at:Date.now()+1200000,
+      picking_state:{}
     };
     accessSessions.set(access.access_session_id, access);
     log(access,"ACCESS_SESSION_CREATED",{ order_ids:ids, live_item_count:normalizedLiveItems.length, sensitive_access:sensitive, command_id:commandId });
@@ -443,6 +444,44 @@ function startAccessSession({ authSessionId, orderIds, liveItems = [], terminalI
       result:() => getAccessSessionDetail(access.access_session_id)
     };
   });
+}
+
+function expectedPickingGroups(access) {
+  const map = new Map();
+  const addItem = item => {
+    const primary = String(item?.location_code || "SEM COORD.").trim().toUpperCase();
+    const description = String(item?.description || "").trim();
+    const sensitive = item?.sensitive === true;
+    const key = `${primary}|${description}|${sensitive?1:0}`;
+    if (!map.has(key)) {
+      map.set(key,{
+        key,
+        primary_location:primary,
+        description,
+        sensitive,
+        quantity:0,
+        allowed_locations:new Set([primary])
+      });
+    }
+    const group = map.get(key);
+    group.quantity += Number(item?.quantity || 0);
+    (item?.alternate_locations || []).forEach(alt => {
+      const code = String(alt?.location_code || "").trim().toUpperCase();
+      if (!code) return;
+      if (sensitive && alt?.sensitive_area !== true) return;
+      group.allowed_locations.add(code);
+    });
+  };
+
+  access.order_ids.map(order).filter(Boolean).map(orderSummary).forEach(summary => {
+    (summary.items || []).forEach(addItem);
+  });
+  (access.live_items || []).forEach(addItem);
+
+  return [...map.values()].map(group => ({
+    ...group,
+    allowed_locations:[...group.allowed_locations]
+  }));
 }
 
 function rawAccess(accessSessionId) {
@@ -528,7 +567,48 @@ function registerPickingEvent({ accessSessionId, eventType, metadata = {}, comma
     if (!access) throw new Error("ACCESS_SESSION_NOT_FOUND");
     if (!["ENTRY_CONFIRMED","READY_TO_CONFIRM"].includes(access.state)) throw new Error("PICKING_NOT_ACTIVE");
     if (sourceDeviceId !== PICKING_DISPLAY_ID) throw new Error("UNTRUSTED_DEVICE");
-    log(access,eventType,{ ...metadata, command_id:commandId, source_device_id:sourceDeviceId });
+
+    const expected = expectedPickingGroups(access);
+    const groupKey = String(metadata?.group_key || "");
+    const group = expected.find(x => x.key === groupKey);
+    if (!group) throw new Error("PICKING_GROUP_INVALID");
+
+    const current = access.picking_state[group.key] || {
+      status:"PENDING",
+      active_location:group.primary_location,
+      actual_quantity:null
+    };
+    const next = { ...current, updated_at:now() };
+
+    if (eventType === "PICKING_ITEM_CONFIRMED") {
+      next.status = "CONFIRMED";
+      next.actual_quantity = group.quantity;
+    } else if (eventType === "PICKING_ITEM_UNDONE") {
+      next.status = "PENDING";
+      next.actual_quantity = null;
+    } else if (eventType === "STOCK_LOCATION_DISCREPANCY") {
+      next.status = "EXCEPTION";
+      next.discrepancy_location = current.active_location || group.primary_location;
+      next.actual_quantity = null;
+    } else if (eventType === "PICKING_LOCATION_REROUTED") {
+      const to = String(metadata?.to_location || "").trim().toUpperCase();
+      if (!group.allowed_locations.includes(to)) throw new Error("PICKING_LOCATION_INVALID");
+      next.status = "PENDING";
+      next.active_location = to;
+      next.actual_quantity = null;
+    } else if (eventType === "PICKING_PARTIAL") {
+      const actual = Number(metadata?.actual_quantity);
+      if (!Number.isFinite(actual) || actual <= 0 || actual >= group.quantity) throw new Error("PICKING_QUANTITY_INVALID");
+      next.status = "PARTIAL";
+      next.actual_quantity = actual;
+    } else if (eventType === "PICKING_UNAVAILABLE") {
+      next.status = "UNAVAILABLE";
+      next.actual_quantity = 0;
+    }
+
+    access.picking_state[group.key] = next;
+    log(access,eventType,{ ...metadata, group_key:group.key, command_id:commandId, source_device_id:sourceDeviceId });
+
     return {
       value:getAccessSessionDetail(access.access_session_id),
       result:() => getAccessSessionDetail(access.access_session_id)
@@ -542,7 +622,7 @@ function confirmWithdrawal({ accessSessionId, results = [], commandId, sourceDev
     description:String(item?.description || ""),
     expected_quantity:Number(item?.expected_quantity || 0),
     actual_quantity:Number(item?.actual_quantity ?? 0),
-    location_code:String(item?.location_code || ""),
+    location_code:String(item?.location_code || "").trim().toUpperCase(),
     status:String(item?.status || "")
   }));
   const payload = { accessSessionId:String(accessSessionId || ""), results:normalized, sourceDeviceId:String(sourceDeviceId || "") };
@@ -551,7 +631,24 @@ function confirmWithdrawal({ accessSessionId, results = [], commandId, sourceDev
     if (!access) throw new Error("ACCESS_SESSION_NOT_FOUND");
     if (access.state !== "READY_TO_CONFIRM") throw new Error("WITHDRAWAL_NOT_READY");
     if (sourceDeviceId !== PICKING_DISPLAY_ID) throw new Error("UNTRUSTED_DEVICE");
-    if (!normalized.length || normalized.some(item => !["CONFIRMED","PARTIAL","UNAVAILABLE"].includes(item.status))) throw new Error("WITHDRAWAL_RESULTS_INCOMPLETE");
+
+    const expected = expectedPickingGroups(access);
+    if (!expected.length || normalized.length !== expected.length) throw new Error("WITHDRAWAL_RESULTS_INCOMPLETE");
+
+    const byKey = new Map(normalized.map(item => [item.key,item]));
+    for (const group of expected) {
+      const result = byKey.get(group.key);
+      const state = access.picking_state[group.key];
+      if (!result || !state) throw new Error("WITHDRAWAL_RESULTS_INCOMPLETE");
+      if (!["CONFIRMED","PARTIAL","UNAVAILABLE"].includes(result.status)) throw new Error("WITHDRAWAL_RESULTS_INCOMPLETE");
+      if (result.description !== group.description || result.expected_quantity !== group.quantity) throw new Error("WITHDRAWAL_RESULTS_MISMATCH");
+      if (!group.allowed_locations.includes(result.location_code)) throw new Error("PICKING_LOCATION_INVALID");
+      if (state.status !== result.status) throw new Error("WITHDRAWAL_RESULTS_MISMATCH");
+      if (String(state.active_location || group.primary_location).toUpperCase() !== result.location_code) throw new Error("WITHDRAWAL_RESULTS_MISMATCH");
+      if (result.status === "CONFIRMED" && result.actual_quantity !== group.quantity) throw new Error("PICKING_QUANTITY_INVALID");
+      if (result.status === "PARTIAL" && !(result.actual_quantity > 0 && result.actual_quantity < group.quantity)) throw new Error("PICKING_QUANTITY_INVALID");
+      if (result.status === "UNAVAILABLE" && result.actual_quantity !== 0) throw new Error("PICKING_QUANTITY_INVALID");
+    }
 
     const confirmedAt = now();
     access.withdrawal_confirmation = { confirmed_at:confirmedAt, results:normalized };
