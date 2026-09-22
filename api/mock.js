@@ -33,6 +33,10 @@ module.exports = async function handler(req, res) {
         String(req.query?.id || ""),
         String(req.query?.session_token || "")
       ) });
+      if (action === "activePickingSession") return send(res, 200, { ok:true, data:adapter.getActivePickingSession({
+        sourceDeviceId:String(req.query?.source_device_id || ""),
+        deviceCredential:String(req.query?.device_credential || "")
+      }) });
       if (action === "audit") return send(res, 200, { ok:true, data:adapter.listAudit(String(req.query?.auth_session_id || "")) });
       if (action === "terminal") return send(res, 200, { ok:true, data:adapter.getTerminalDescriptor(String(req.query?.terminal_id || store.TERMINAL_ID)) });
       return send(res, 400, { ok:false, error:"INVALID_ACTION" });
