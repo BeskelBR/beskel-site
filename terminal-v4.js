@@ -269,10 +269,11 @@ accessScreen = async function(accessSessionId,prefetchedAccess=null,options={}){
     if(access.state==="WITHDRAWAL_CONFIRMED"&&!hvbV4CompletionTimer){
       hvbV4CompletionTimer=setTimeout(()=>{
         hvbV4CompletionTimer=null;
+        if(location.pathname!==`/acesso/${encodeURIComponent(accessSessionId)}`)return;
         v4StopAccessPoll();
         v4ClearSessionToken(accessSessionId);
         clearLocal();
-        if(location.pathname===`/acesso/${encodeURIComponent(accessSessionId)}`)go("/");
+        go("/");
       },4000);
     }
     if(Number.isFinite(options.restoreScroll)){
