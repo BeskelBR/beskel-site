@@ -346,7 +346,7 @@ function buildPickingTasks(orders, liveItems) {
   );
 }
 
-function publicEmployee(value) {function publicEmployee(value) {
+function publicEmployee(value) {
   return value ? { employee_id:value.employee_id, name:value.name, role:value.role } : null;
 }
 
@@ -375,7 +375,7 @@ function orderSummary(value) {
   };
 }
 
-function canonicalHash(value) {function canonicalHash(value) {
+function canonicalHash(value) {
   const normalized = JSON.stringify(value, Object.keys(value || {}).sort());
   return crypto.createHash("sha256").update(normalized).digest("hex");
 }
@@ -643,7 +643,7 @@ function expectedPickingGroups(access) {
   }));
 }
 
-function rawAccess(accessSessionId) {function rawAccess(accessSessionId) {
+function rawAccess(accessSessionId) {
   const access = accessSessions.get(String(accessSessionId || ""));
   if (access && access.expires_at < Date.now() && !["CLOSED","EXPIRED"].includes(access.state)) {
     access.state = "EXPIRED";
