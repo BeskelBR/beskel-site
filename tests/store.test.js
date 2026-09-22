@@ -21,258 +21,266 @@ function authenticate(token) {
   return { identity, evidence, auth };
 }
 
-test("Terminal v2 exposes at least ten synthetic orders with material details", () => {
+function openRoom(access, prefix) {
+  let current = store.registerAccessEvent({
+    accessSessionId: access.access_session_id,
+    eventType: "DOOR_OPENED",
+    commandId: `${prefix}-door`,
+    sourceOccurredAt: "2026-09-22T02:00:00.000Z",
+    sourceDeviceId: store.TERMINAL_ID
+  });
+  current = store.registerAccessEvent({
+    accessSessionId: access.access_session_id,
+    eventType: "PRESENCE_CONFIRMED",
+    commandId: `${prefix}-presence`,
+    sourceOccurredAt: "2026-09-22T02:00:01.000Z",
+    sourceDeviceId: store.TERMINAL_ID
+  });
+  return current;
+}
+
+function confirmTask(accessSessionId, task, prefix) {
+  return store.registerPickingEvent({
+    accessSessionId,
+    eventType: "PICKING_ITEM_CONFIRMED",
+    commandId: `${prefix}-${task.picking_task_id}`,
+    sourceDeviceId: store.PICKING_DISPLAY_ID,
+    metadata: {
+      group_key:task.picking_task_id,
+      description:task.description,
+      expected_quantity:task.quantity,
+      location_code:task.location_code,
+      stock_lot_id:task.stock_lot_id,
+      lot_code:task.lot_code,
+      actual_quantity:task.quantity
+    }
+  });
+}
+
+test("pending orders expose logical products, not fixed product coordinates", () => {
   const marina = authenticate("demo-marina");
   const orders = store.listPendingOrders(marina.auth.auth_session_id);
-  assert.ok(orders.length >= 10, `expected at least 10 pending orders, got ${orders.length}`);
+  assert.ok(orders.length >= 10);
   for (const order of orders) {
-    assert.ok(Array.isArray(order.items));
-    assert.equal(order.items.length, order.item_count);
-    assert.ok(order.items.every(item => item.description && Number(item.quantity) > 0));
+    assert.ok(order.items.length > 0);
+    assert.ok(order.items.every(item => item.product_id && item.description));
+    assert.ok(order.items.every(item => item.allocation_strategy === "FEFO"));
+    assert.ok(order.items.every(item => item.location_code === undefined));
   }
-  assert.ok(orders.some(order => order.has_sensitive_items));
-  assert.ok(orders.some(order => !order.has_sensitive_items));
 });
 
-test("Terminal v2 supports one access session bound to multiple withdrawal orders", () => {
-  const marina = authenticate("demo-marina");
-  const orders = store.listPendingOrders(marina.auth.auth_session_id);
-  const selected = [orders[0], orders[1], orders[2]].filter(Boolean);
-  assert.equal(selected.length, 3);
-
-  const accessCommand = "test-multi-access-session-001";
-  const first = store.startAccessSession({
-    authSessionId: marina.auth.auth_session_id,
-    orderIds: selected.map(order => order.order_id),
-    terminalId: store.TERMINAL_ID,
-    commandId: accessCommand
-  });
-  const repeated = store.startAccessSession({
-    authSessionId: marina.auth.auth_session_id,
-    orderIds: selected.map(order => order.order_id),
-    terminalId: store.TERMINAL_ID,
-    commandId: accessCommand
-  });
-
-  assert.equal(repeated.access_session_id, first.access_session_id);
-  assert.equal(first.orders.length, 3);
-  assert.deepEqual(
-    new Set(first.orders.map(order => order.order_id)),
-    new Set(selected.map(order => order.order_id))
-  );
-  assert.ok(first.orders.every(order => Array.isArray(order.items) && order.items.length > 0));
-  assert.equal(first.state, "DOOR_AUTHORIZED");
-
-  let current = first;
-  const sequence = ["DOOR_OPENED", "ENTRY_CONFIRMED"];
-  sequence.forEach((eventType, index) => {
-    const envelope = {
-      accessSessionId: first.access_session_id,
-      eventType,
-      commandId: `test-multi-event-${index}`,
-      sourceOccurredAt: `2026-09-16T09:0${index}:00.000Z`,
-      sourceDeviceId: store.TERMINAL_ID,
-      metadata: { source: "node-test" }
-    };
-    current = store.registerAccessEvent(envelope);
-    const retried = store.registerAccessEvent(envelope);
-    assert.equal(retried.state, current.state);
-  });
-
-  assert.equal(current.state, "ENTRY_CONFIRMED");
-  assert.ok(current.orders.every(order => order.status === "EM_SEPARACAO"));
-  assert.ok(!store.listAudit().some(event => event.event_type === "STOCK_CONSUMED"));
+test("each active DEV stock lot occupies its own coordinate", () => {
+  const lots = store.listStockLots();
+  const active = lots.filter(lot => lot.status === "AVAILABLE" && Number(lot.quantity_available) > 0);
+  const coordinates = active.map(lot => lot.location_code);
+  assert.equal(new Set(coordinates).size, coordinates.length);
+  assert.ok(active.every(lot => lot.stock_lot_id && lot.lot_code && lot.product_id));
+  assert.ok(active.every(lot => lot.location_assigned_by === "stock_manager_dev"));
 });
 
-test("Sensitive access remains denied to an authenticated employee without permission", () => {
-  const carlos = authenticate("demo-carlos");
-  const orders = store.listPendingOrders(carlos.auth.auth_session_id);
-  const sensitive = orders.find(order => order.has_sensitive_items);
-  assert.ok(sensitive);
-  assert.throws(() => store.startAccessSession({
-    authSessionId: carlos.auth.auth_session_id,
-    orderIds: [sensitive.order_id],
-    terminalId: store.TERMINAL_ID,
-    commandId: "test-sensitive-denied-v2"
-  }), /SENSITIVE_ACCESS_DENIED/);
-});
-
-test("Terminal v4 exposes physical coordinates and supports the approved NFC/biometric picking sequence", () => {
+test("live withdrawal is allocated by FEFO and may split one product across lots", () => {
   const rafael = authenticate("demo-rafael");
-  const pending = store.listPendingOrders(rafael.auth.auth_session_id);
-  assert.ok(pending.length > 0);
-  assert.ok(pending.some(order => order.items.some(item => item.location_code)));
-  assert.ok(pending.every(order => order.items.every(item => Array.isArray(item.alternate_locations))));
-
   const catalog = store.listCatalog(rafael.auth.auth_session_id);
-  assert.ok(catalog.length > 0);
-  const catalogProduct = catalog[0];
+  const product = catalog.find(item => !item.sensitive);
+  assert.ok(product);
+  assert.equal(product.location_code, undefined);
 
   const access = store.startAccessSession({
     authSessionId: rafael.auth.auth_session_id,
     orderIds: [],
     liveItems: [{
-      live_item_id: "live-test-v4",
-      product_id: catalogProduct.product_id,
-      quantity: 2
+      live_item_id:"live-fefo-split",
+      product_id:product.product_id,
+      quantity:5
     }],
-    terminalId: store.TERMINAL_ID,
-    commandId: "test-v4-live-access-001"
+    terminalId:store.TERMINAL_ID,
+    commandId:"test-fefo-split-access"
   });
 
-  assert.equal(access.state, "DOOR_AUTHORIZED");
-  assert.equal(access.live_items.length, 1);
-  assert.equal(access.live_items[0].product_id, catalogProduct.product_id);
-  assert.equal(access.live_items[0].sensitive, catalogProduct.sensitive);
-  assert.equal(access.live_items[0].location_code, catalogProduct.location_code);
+  const tasks = access.picking_tasks
+    .filter(task => task.product_id === product.product_id)
+    .sort((a,b)=>a.allocation_rank-b.allocation_rank);
 
-  let current = store.registerAccessEvent({
-    accessSessionId: access.access_session_id,
-    eventType: "DOOR_OPENED",
-    commandId: "test-v4-door-open",
-    sourceOccurredAt: "2026-09-20T19:00:00.000Z",
-    sourceDeviceId: store.TERMINAL_ID,
-    metadata: { source: "node-test" }
+  assert.ok(tasks.length >= 2, "5 units should span the first 3-unit lot and a later lot");
+  assert.equal(tasks.reduce((sum,task)=>sum+task.quantity,0),5);
+  assert.ok(Date.parse(tasks[0].expires_at) <= Date.parse(tasks[1].expires_at));
+  assert.notEqual(tasks[0].stock_lot_id,tasks[1].stock_lot_id);
+  assert.notEqual(tasks[0].location_code,tasks[1].location_code);
+  assert.ok(tasks.every(task => task.allocation_strategy === "FEFO"));
+});
+
+test("multiple ORs consolidate demand while preserving source allocation", () => {
+  const marina = authenticate("demo-marina");
+  const orders = store.listPendingOrders(marina.auth.auth_session_id);
+  const selected = orders.slice(0,3);
+  assert.equal(selected.length,3);
+
+  const access = store.startAccessSession({
+    authSessionId:marina.auth.auth_session_id,
+    orderIds:selected.map(order=>order.order_id),
+    terminalId:store.TERMINAL_ID,
+    commandId:"test-multi-order-fefo"
   });
-  assert.equal(current.state, "DOOR_OPEN");
 
-  current = store.registerAccessEvent({
-    accessSessionId: access.access_session_id,
-    eventType: "PRESENCE_CONFIRMED",
-    commandId: "test-v4-presence",
-    sourceOccurredAt: "2026-09-20T19:00:01.000Z",
-    sourceDeviceId: store.TERMINAL_ID,
-    metadata: { source: "node-test" }
-  });
-  assert.equal(current.state, "ENTRY_CONFIRMED");
+  assert.equal(access.orders.length,3);
+  assert.ok(access.picking_tasks.length > 0);
+  assert.ok(access.picking_tasks.every(task => Array.isArray(task.sources) && task.sources.length > 0));
+  assert.ok(access.picking_tasks.flatMap(task=>task.sources).some(source => source.source_type === "ORDER"));
+});
 
-  current = store.registerPickingEvent({
-    accessSessionId: access.access_session_id,
-    eventType: "STOCK_LOCATION_DISCREPANCY",
-    commandId: "test-v4-discrepancy",
-    sourceDeviceId: store.PICKING_DISPLAY_ID,
-    metadata: {
-      group_key:`${catalogProduct.location_code}|${catalogProduct.description}|${catalogProduct.sensitive?1:0}`,
-      description:catalogProduct.description,
-      location_code:catalogProduct.location_code
-    }
-  });
-  assert.equal(current.state, "ENTRY_CONFIRMED");
+test("sensitive access remains denied without permission after lot allocation", () => {
+  const carlos = authenticate("demo-carlos");
+  const catalog = store.listCatalog(carlos.auth.auth_session_id);
+  const sensitiveProduct = catalog.find(item => item.sensitive);
+  assert.ok(sensitiveProduct);
 
-  current = store.registerPickingEvent({
-    accessSessionId: access.access_session_id,
-    eventType: "PICKING_ITEM_CONFIRMED",
-    commandId: "test-v4-live-item-confirmed",
-    sourceDeviceId: store.PICKING_DISPLAY_ID,
-    metadata: {
-      group_key:`${catalogProduct.location_code}|${catalogProduct.description}|${catalogProduct.sensitive?1:0}`,
-      description:catalogProduct.description,
-      expected_quantity:2,
-      location_code:catalogProduct.location_code,
-      actual_quantity:2
-    }
-  });
-  assert.equal(current.picking_state[`${catalogProduct.location_code}|${catalogProduct.description}|${catalogProduct.sensitive?1:0}`].status, "CONFIRMED");
-
-  current = store.registerAccessEvent({
-    accessSessionId: access.access_session_id,
-    eventType: "DOOR_CLOSED",
-    commandId: "test-v4-door-closed",
-    sourceOccurredAt: "2026-09-20T19:00:02.000Z",
-    sourceDeviceId: store.TERMINAL_ID,
-    metadata: { source: "node-test" }
-  });
-  assert.equal(current.state, "READY_TO_CONFIRM");
-
-  current = store.confirmWithdrawal({
-    accessSessionId: access.access_session_id,
-    results: [{
-      key: `${catalogProduct.location_code}|${catalogProduct.description}|${catalogProduct.sensitive?1:0}`,
-      description: catalogProduct.description,
-      expected_quantity: 2,
-      actual_quantity: 2,
-      location_code: catalogProduct.location_code,
-      status: "CONFIRMED"
+  assert.throws(() => store.startAccessSession({
+    authSessionId:carlos.auth.auth_session_id,
+    orderIds:[],
+    liveItems:[{
+      live_item_id:"live-sensitive-denied",
+      product_id:sensitiveProduct.product_id,
+      quantity:1
     }],
-    commandId: "test-v4-confirm",
-    sourceDeviceId: store.PICKING_DISPLAY_ID
+    terminalId:store.TERMINAL_ID,
+    commandId:"test-sensitive-denied-fefo"
+  }), /SENSITIVE_ACCESS_DENIED/);
+});
+
+test("picking state is server-authoritative and final confirmation is lot-aware", () => {
+  const rafael = authenticate("demo-rafael");
+  const product = store.listCatalog(rafael.auth.auth_session_id).find(item => !item.sensitive);
+  const access = store.startAccessSession({
+    authSessionId:rafael.auth.auth_session_id,
+    orderIds:[],
+    liveItems:[{ live_item_id:"live-confirm", product_id:product.product_id, quantity:2 }],
+    terminalId:store.TERMINAL_ID,
+    commandId:"test-lot-aware-confirm-access"
   });
-  assert.equal(current.state, "WITHDRAWAL_CONFIRMED");
-  assert.ok(current.withdrawal_confirmation);
-  assert.ok(store.listAudit().some(event => event.event_type === "NFC_VALIDATED"));
-  assert.ok(store.listAudit().some(event => event.event_type === "BIOMETRIC_VALIDATED"));
-  assert.ok(store.listAudit().some(event => event.event_type === "WITHDRAWAL_CONFIRMED"));
+
+  openRoom(access,"test-lot-aware");
+  const task = access.picking_tasks[0];
+  const afterPick = confirmTask(access.access_session_id,task,"test-confirm-task");
+
+  assert.equal(afterPick.picking_state[task.picking_task_id].status,"CONFIRMED");
+  assert.equal(afterPick.picking_state[task.picking_task_id].active_stock_lot_id,task.stock_lot_id);
+
+  const ready = store.registerAccessEvent({
+    accessSessionId:access.access_session_id,
+    eventType:"DOOR_CLOSED",
+    commandId:"test-lot-aware-close",
+    sourceOccurredAt:"2026-09-22T02:00:02.000Z",
+    sourceDeviceId:store.TERMINAL_ID
+  });
+  assert.equal(ready.state,"READY_TO_CONFIRM");
+
+  const confirmed = store.confirmWithdrawal({
+    accessSessionId:access.access_session_id,
+    results:[{
+      key:task.picking_task_id,
+      description:task.description,
+      expected_quantity:task.quantity,
+      actual_quantity:task.quantity,
+      location_code:task.location_code,
+      stock_lot_id:task.stock_lot_id,
+      lot_code:task.lot_code,
+      status:"CONFIRMED"
+    }],
+    commandId:"test-lot-aware-final",
+    sourceDeviceId:store.PICKING_DISPLAY_ID
+  });
+
+  assert.equal(confirmed.state,"WITHDRAWAL_CONFIRMED");
+  assert.equal(confirmed.withdrawal_confirmation.results[0].stock_lot_id,task.stock_lot_id);
   assert.ok(!store.listAudit().some(event => event.event_type === "STOCK_CONSUMED"));
 });
 
-
-test("Terminal v4 keeps picking state on the server and rejects forged final results", () => {
-  const marina = authenticate("demo-marina");
-  const orders = store.listPendingOrders(marina.auth.auth_session_id);
-  const target = orders.find(order => !order.has_sensitive_items) || orders[0];
-
+test("server rejects forged lot or coordinate in final result", () => {
+  const rafael = authenticate("demo-rafael");
+  const product = store.listCatalog(rafael.auth.auth_session_id).find(item => !item.sensitive);
   const access = store.startAccessSession({
-    authSessionId: marina.auth.auth_session_id,
-    orderIds: [target.order_id],
-    terminalId: store.TERMINAL_ID,
-    commandId: "test-v4-server-picking-access"
+    authSessionId:rafael.auth.auth_session_id,
+    orderIds:[],
+    liveItems:[{ live_item_id:"live-forge", product_id:product.product_id, quantity:1 }],
+    terminalId:store.TERMINAL_ID,
+    commandId:"test-forge-access"
   });
 
+  openRoom(access,"test-forge");
+  const task = access.picking_tasks[0];
+  confirmTask(access.access_session_id,task,"test-forge-task");
   store.registerAccessEvent({
-    accessSessionId: access.access_session_id,
-    eventType: "DOOR_OPENED",
-    commandId: "test-v4-server-picking-door",
-    sourceOccurredAt: "2026-09-22T02:00:00.000Z",
-    sourceDeviceId: store.TERMINAL_ID
-  });
-  store.registerAccessEvent({
-    accessSessionId: access.access_session_id,
-    eventType: "PRESENCE_CONFIRMED",
-    commandId: "test-v4-server-picking-presence",
-    sourceOccurredAt: "2026-09-22T02:00:01.000Z",
-    sourceDeviceId: store.TERMINAL_ID
-  });
-
-  const detail = store.getAccessSessionDetail(access.access_session_id);
-  const firstItem = detail.orders[0].items[0];
-  const key = `${firstItem.location_code}|${firstItem.description}|${firstItem.sensitive?1:0}`;
-
-  const afterPick = store.registerPickingEvent({
-    accessSessionId: access.access_session_id,
-    eventType: "PICKING_ITEM_CONFIRMED",
-    commandId: "test-v4-server-picking-confirm-item",
-    sourceDeviceId: store.PICKING_DISPLAY_ID,
-    metadata: {
-      group_key:key,
-      description:firstItem.description,
-      expected_quantity:firstItem.quantity,
-      location_code:firstItem.location_code,
-      actual_quantity:firstItem.quantity
-    }
-  });
-
-  assert.equal(afterPick.picking_state[key].status, "CONFIRMED");
-  assert.equal(store.getAccessSessionDetail(access.access_session_id).picking_state[key].status, "CONFIRMED");
-
-  store.registerAccessEvent({
-    accessSessionId: access.access_session_id,
-    eventType: "DOOR_CLOSED",
-    commandId: "test-v4-server-picking-close",
-    sourceOccurredAt: "2026-09-22T02:00:02.000Z",
-    sourceDeviceId: store.TERMINAL_ID
+    accessSessionId:access.access_session_id,
+    eventType:"DOOR_CLOSED",
+    commandId:"test-forge-close",
+    sourceOccurredAt:"2026-09-22T02:00:02.000Z",
+    sourceDeviceId:store.TERMINAL_ID
   });
 
   assert.throws(() => store.confirmWithdrawal({
-    accessSessionId: access.access_session_id,
-    results: [{
-      key,
-      description:firstItem.description,
-      expected_quantity:firstItem.quantity + 99,
-      actual_quantity:firstItem.quantity + 99,
-      location_code:firstItem.location_code,
+    accessSessionId:access.access_session_id,
+    results:[{
+      key:task.picking_task_id,
+      description:task.description,
+      expected_quantity:task.quantity,
+      actual_quantity:task.quantity,
+      location_code:"Z99",
+      stock_lot_id:"lot-forged",
+      lot_code:"FORGED",
       status:"CONFIRMED"
     }],
-    commandId:"test-v4-forged-result",
+    commandId:"test-forged-result",
     sourceDeviceId:store.PICKING_DISPLAY_ID
-  }), /WITHDRAWAL_RESULTS_/);
+  }), /(PICKING_LOCATION_INVALID|WITHDRAWAL_RESULTS_MISMATCH)/);
+});
+
+test("missing expected lot can be reallocated only to another eligible lot", () => {
+  const rafael = authenticate("demo-rafael");
+  const product = store.listCatalog(rafael.auth.auth_session_id).find(item => !item.sensitive);
+  const access = store.startAccessSession({
+    authSessionId:rafael.auth.auth_session_id,
+    orderIds:[],
+    liveItems:[{ live_item_id:"live-reallocate", product_id:product.product_id, quantity:1 }],
+    terminalId:store.TERMINAL_ID,
+    commandId:"test-reallocate-access"
+  });
+
+  openRoom(access,"test-reallocate");
+  const task = access.picking_tasks[0];
+  assert.ok(task.fallback_lots.length > 0);
+  const fallback = task.fallback_lots[0];
+
+  store.registerPickingEvent({
+    accessSessionId:access.access_session_id,
+    eventType:"STOCK_LOCATION_DISCREPANCY",
+    commandId:"test-reallocate-discrepancy",
+    sourceDeviceId:store.PICKING_DISPLAY_ID,
+    metadata:{
+      group_key:task.picking_task_id,
+      description:task.description,
+      expected_quantity:task.quantity,
+      location_code:task.location_code,
+      stock_lot_id:task.stock_lot_id,
+      lot_code:task.lot_code
+    }
+  });
+
+  const rerouted = store.registerPickingEvent({
+    accessSessionId:access.access_session_id,
+    eventType:"PICKING_LOT_REALLOCATED",
+    commandId:"test-reallocate-lot",
+    sourceDeviceId:store.PICKING_DISPLAY_ID,
+    metadata:{
+      group_key:task.picking_task_id,
+      from_location:task.location_code,
+      from_stock_lot_id:task.stock_lot_id,
+      to_location:fallback.location_code,
+      to_stock_lot_id:fallback.stock_lot_id
+    }
+  });
+
+  const state = rerouted.picking_state[task.picking_task_id];
+  assert.equal(state.active_location,fallback.location_code);
+  assert.equal(state.active_stock_lot_id,fallback.stock_lot_id);
+  assert.equal(state.active_lot_code,fallback.lot_code);
 });
