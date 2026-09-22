@@ -700,6 +700,7 @@ function rawAccess(accessSessionId) {
     access.sensitive_state = "LOCKED";
     access.sensitive_access_granted = false;
     access.sensitive_unlock_expires_at = null;
+    access.sensitive_unlock_expired_at = now();
     log(access,"SENSITIVE_UNLOCK_EXPIRED",{ barrier_id:"SENSITIVE_STORAGE" });
   }
 
@@ -933,6 +934,7 @@ function registerSensitiveEvent({
       if (!unresolved.length) throw new Error("SENSITIVE_ITEMS_ALREADY_RESOLVED");
       access.sensitive_state = "UNLOCK_AUTHORIZED";
       access.sensitive_access_granted = true;
+      access.sensitive_unlock_expired_at = null;
       access.sensitive_unlock_expires_at = Date.now()+15000;
       log(access,"SENSITIVE_ACCESS_REQUESTED",{
         barrier_id:"SENSITIVE_STORAGE",
@@ -948,7 +950,10 @@ function registerSensitiveEvent({
       });
     } else if (eventType === "SENSITIVE_DOOR_OPENED") {
       if (sourceDeviceId !== access.terminal_id) throw new Error("UNTRUSTED_DEVICE");
-      if (access.sensitive_state !== "UNLOCK_AUTHORIZED") throw new Error("INVALID_SENSITIVE_SEQUENCE");
+      if (access.sensitive_state !== "UNLOCK_AUTHORIZED") {
+        if (access.sensitive_state === "LOCKED" && access.sensitive_unlock_expired_at) throw new Error("SENSITIVE_UNLOCK_EXPIRED");
+        throw new Error("INVALID_SENSITIVE_SEQUENCE");
+      }
       if (!access.sensitive_unlock_expires_at || access.sensitive_unlock_expires_at < Date.now()) {
         access.sensitive_state = "LOCKED";
         access.sensitive_access_granted = false;
