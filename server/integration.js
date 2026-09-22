@@ -14,6 +14,7 @@ class IntegrationAdapter {
   registerSensitiveEvent() { throw new Error("NOT_IMPLEMENTED"); }
   confirmWithdrawal() { throw new Error("NOT_IMPLEMENTED"); }
   getAccessSession() { throw new Error("NOT_IMPLEMENTED"); }
+  getActivePickingSession() { throw new Error("NOT_IMPLEMENTED"); }
   getTerminalDescriptor() { throw new Error("NOT_IMPLEMENTED"); }
   listAudit() { throw new Error("NOT_IMPLEMENTED"); }
 }
@@ -61,6 +62,10 @@ class MockAdapter extends IntegrationAdapter {
 
   getAccessSession(accessSessionId, sessionToken) {
     return store.getAccessSessionDetail(accessSessionId, sessionToken);
+  }
+
+  getActivePickingSession(payload) {
+    return store.getActivePickingSession(payload);
   }
 
   getTerminalDescriptor(terminalId) {
