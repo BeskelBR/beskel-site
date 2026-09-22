@@ -10,6 +10,7 @@ let hvbV4AccessPoll = null;
 let hvbV4AccessPollId = null;
 let hvbV4AccessSignature = null;
 let hvbV4AccessPollBusy = false;
+let hvbV4CompletionTimer = null;
 
 function v4TokenKey(accessSessionId){
   return `hvb_access_session_token_${accessSessionId}`;
@@ -265,6 +266,15 @@ accessScreen = async function(accessSessionId,prefetchedAccess=null,options={}){
     bindDev(access);
     v4EnsureAccessPoll(accessSessionId);
     hvbV4AccessSignature=v4AccessSignature(access);
+    if(access.state==="WITHDRAWAL_CONFIRMED"&&!hvbV4CompletionTimer){
+      hvbV4CompletionTimer=setTimeout(()=>{
+        hvbV4CompletionTimer=null;
+        v4StopAccessPoll();
+        v4ClearSessionToken(accessSessionId);
+        clearLocal();
+        if(location.pathname===`/acesso/${encodeURIComponent(accessSessionId)}`)go("/");
+      },4000);
+    }
     if(Number.isFinite(options.restoreScroll)){
       requestAnimationFrame(()=>{
         const maxScroll=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
@@ -285,7 +295,7 @@ devControls = function(access){
   else if(access.state==="PICKING_READY")button=`<button class="btn secondary" data-event="PRESENCE_CLEARED">Simular saída da sala</button>`;
   else if(access.state==="EXIT_CONFIRMED")button=`<button class="btn secondary" data-event="DOOR_CLOSED">Simular fechamento da porta</button>`;
   else if(access.state==="READY_TO_CONFIRM")button=`<button class="btn secondary" disabled>Finalização automática em andamento…</button>`;
-  else if(access.state==="WITHDRAWAL_CONFIRMED")button=`<button class="btn ghost" id="finish">Finalizar demonstração</button>`;
+  else if(access.state==="WITHDRAWAL_CONFIRMED")button=`<button class="btn secondary" disabled>Retirada concluída • retornando ao início…</button>`;
   else button=`<button class="btn ghost" id="finish">Voltar ao terminal</button>`;
   return `<div class="dev-panel"><div class="eyebrow">Controles DEV</div><p>Simulação da sequência física aprovada. O picking deve ser concluído antes da saída e do fechamento da porta.</p><div class="actions">${button}</div></div>`;
 };
