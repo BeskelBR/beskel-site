@@ -3,6 +3,7 @@
 const app=document.getElementById("separationApp");
 const API="/api/mock";
 const PICKING_DISPLAY_ID="HVB-PICKING-01";
+const TERMINAL_ID="HVB-T01";
 const ACCESS_ID=(location.pathname.match(/^\/separacao\/([^/]+)$/)||[])[1]||new URLSearchParams(location.search).get("access");
 const TOKEN_KEY=`hvb_separation_token_${ACCESS_ID||"none"}`;
 const tokenFromHash=decodeURIComponent(String(location.hash||"").replace(/^#/,""));
@@ -110,7 +111,10 @@ function actualQuantity(group){
 }
 function sensitiveUnlocked(group){
   if(!group.sensitive)return true;
-  return access?.sensitive_access===true&&access?.sensitive_access_granted===true;
+  return access?.sensitive_access===true&&access?.sensitive_state==="OPEN";
+}
+function sensitiveSessionActive(){
+  return ["UNLOCK_AUTHORIZED","OPEN","CLOSED"].includes(access?.sensitive_state);
 }
 async function pickingEvent(eventType,group,metadata={}){
   try{
@@ -135,6 +139,56 @@ async function pickingEvent(eventType,group,metadata={}){
     alert("Não foi possível registrar o evento de separação: "+error.message);
     throw error;
   }
+}
+
+async function sensitiveEvent(eventType,sourceDeviceId,metadata={}){
+  try{
+    access=await apiPost({
+      action:"registerSensitiveEvent",
+      access_session_id:ACCESS_ID,
+      session_token:ACCESS_TOKEN(),
+      event_type:eventType,
+      metadata,
+      command_id:cmd("sensitive"),
+      source_occurred_at:new Date().toISOString(),
+      source_device_id:sourceDeviceId
+    });
+    render();
+  }catch(error){
+    alert("Não foi possível alterar o acesso à medicação sensível: "+error.message);
+    throw error;
+  }
+}
+
+function sensitiveStatePanel(groups){
+  if(!access?.sensitive_access)return "";
+  const pending=groups.filter(group=>group.sensitive&&!isResolved(groupStatus(group))).length;
+  const total=groups.filter(group=>group.sensitive).length;
+  const state=access.sensitive_state||"LOCKED";
+  let action="";
+  let text="";
+
+  if(state==="LOCKED"){
+    text=pending
+      ? `Armário travado. ${pending} de ${total} tarefa(s) sensível(is) ainda precisam ser resolvidas.`
+      : "Itens sensíveis resolvidos; aguarde confirmação de segurança.";
+    if(pending) action=`<button class="btn warn" id="requestSensitive">RETIRAR MEDICAÇÃO SENSÍVEL</button>`;
+  }else if(state==="UNLOCK_AUTHORIZED"){
+    text="Abertura autorizada para esta AccessSession, sem nova autenticação. A autorização expira rapidamente se a porta não abrir.";
+    action=`<button class="btn secondary" id="simulateSensitiveOpen">DEV • Simular armário aberto</button>`;
+  }else if(state==="OPEN"){
+    text="Armário sensível aberto. Resolva somente os itens sensíveis e feche o armário assim que concluir esta sessão.";
+    action=`<button class="btn warn" id="simulateSensitiveClose">DEV • Simular armário fechado</button>`;
+  }else if(state==="CLOSED"){
+    text="Porta do armário fechada. Aguardando confirmação da trava.";
+    action=`<button class="btn secondary" id="simulateSensitiveLock">DEV • Simular trava confirmada</button>`;
+  }else if(state==="COMPLETED"){
+    text=`Retirada sensível concluída e armário confirmado como travado. Aberturas nesta sessão: ${access.sensitive_open_count||0}.`;
+  }else{
+    text="Estado do armário sensível indisponível.";
+  }
+
+  return `<section class="notice critical"><strong>Medicação sensível</strong><span>${esc(text)}</span><div class="actions" style="margin-top:12px">${action}</div></section>`;
 }
 
 function shell(content){
@@ -167,17 +221,21 @@ function render(){
   const readonly=!canPick();
   const closed=["CLOSED","EXPIRED"].includes(access.state);
 
-  const cards=shown.map(group=>{
+  const renderCard=group=>{
     const rec=groupRecord(group);
     const status=groupStatus(group);
     const loc=activeLocation(group);
-    const locked=!sensitiveUnlocked(group);
+    const sensitiveLocked=group.sensitive&&!sensitiveUnlocked(group);
+    const commonBlocked=!group.sensitive&&sensitiveSessionActive();
+    const locked=sensitiveLocked||commonBlocked;
     const cls=`pick-card ${isResolved(status)?"done":""} ${locked?"locked":""}`;
     const sensitive=group.sensitive?'<span style="color:var(--critical);font-weight:800">⚠ SENSÍVEL</span>':"item comum";
     let controls="";
 
-    if(locked){
-      controls=`<button class="btn secondary" disabled>🔒 Sem autorização sensível</button>`;
+    if(commonBlocked){
+      controls=`<button class="btn secondary" disabled>Conclua e tranque a sessão de medicação sensível</button>`;
+    }else if(sensitiveLocked&&!isResolved(status)){
+      controls=`<button class="btn secondary" disabled>🔒 Armário sensível fechado</button>`;
     }else if(status==="EXCEPTION"&&canPick()){
       const alternatives=group.alternatives
         .filter(alt=>alt.location_code!==loc&&alt.available_units>=group.quantity&&(!group.sensitive||alt.sensitive_area))
@@ -189,11 +247,11 @@ function render(){
         <button class="btn secondary" data-cancel-exception="${esc(group.key)}">Cancelar</button>
       `;
     }else if(status==="CONFIRMED"){
-      controls=canPick()?`<button class="btn secondary" data-undo="${esc(group.key)}">Desfazer</button>`:`<span class="resolved-label">✓ Retirado</span>`;
+      controls=canPick()&&!sensitiveLocked&&!commonBlocked?`<button class="btn secondary" data-undo="${esc(group.key)}">Desfazer</button>`:`<span class="resolved-label">✓ Retirado</span>`;
     }else if(status==="PARTIAL"){
-      controls=canPick()?`<span class="resolved-label">⚠ Parcial: ${esc(rec.actual_quantity)} un</span><button class="btn secondary" data-undo="${esc(group.key)}">Desfazer</button>`:`<span class="resolved-label">⚠ Parcial: ${esc(rec.actual_quantity)} un</span>`;
+      controls=canPick()&&!sensitiveLocked&&!commonBlocked?`<span class="resolved-label">⚠ Parcial: ${esc(rec.actual_quantity)} un</span><button class="btn secondary" data-undo="${esc(group.key)}">Desfazer</button>`:`<span class="resolved-label">⚠ Parcial: ${esc(rec.actual_quantity)} un</span>`;
     }else if(status==="UNAVAILABLE"){
-      controls=canPick()?`<span class="resolved-label">⚠ Indisponível</span><button class="btn secondary" data-undo="${esc(group.key)}">Desfazer</button>`:`<span class="resolved-label">⚠ Indisponível</span>`;
+      controls=canPick()&&!sensitiveLocked&&!commonBlocked?`<span class="resolved-label">⚠ Indisponível</span><button class="btn secondary" data-undo="${esc(group.key)}">Desfazer</button>`:`<span class="resolved-label">⚠ Indisponível</span>`;
     }else if(readonly){
       controls=`<span class="resolved-label">Aguardando resolução anterior</span>`;
     }else{
@@ -211,11 +269,21 @@ function render(){
       </div>
       <div class="qty"><strong>${group.quantity}</strong><span>unidade(s)</span></div>
     </article>`;
-  }).join("")||`<div class="empty">Nenhum item pendente nesta visualização.</div>`;
+  };
+
+  const commonCards=shown.filter(group=>!group.sensitive).map(renderCard).join("")||`<div class="empty">Nenhum item comum pendente nesta visualização.</div>`;
+  const sensitiveCards=shown.filter(group=>group.sensitive).map(renderCard).join("")||`<div class="empty">Nenhuma medicação sensível pendente nesta visualização.</div>`;
+  const sensitiveSection=access.sensitive_access
+    ? `${sensitiveStatePanel(groups)}<div class="toolbar"><h2>Medicação sensível</h2></div><section class="pick-list">${sensitiveCards}</section>`
+    : "";
 
   const allResolved=resolved===total&&total>0&&exceptions===0;
+  const sensitiveSecured=!access.sensitive_access||access.sensitive_state==="COMPLETED";
+  const readyForFinish=allResolved&&sensitiveSecured;
   let flowNotice="";
-  if(allResolved&&access.state==="ENTRY_CONFIRMED"){
+  if(allResolved&&access.state==="ENTRY_CONFIRMED"&&!sensitiveSecured){
+    flowNotice=`<div class="notice critical"><strong>Checklist resolvido, mas o armário sensível ainda não está confirmado como travado.</strong> Feche e confirme a trava antes de concluir a separação.</div>`;
+  }else if(readyForFinish&&access.state==="ENTRY_CONFIRMED"){
     flowNotice=`<div class="notice"><strong>Checklist concluído.</strong> Finalize a separação antes de sair da sala.</div>`;
   }else if(access.state==="PICKING_READY"){
     flowNotice=`<div class="notice"><strong>Separação concluída.</strong> Saia da sala. O Terminal de Acesso aguardará o sensor indicar ausência antes do fechamento.</div>`;
@@ -236,9 +304,10 @@ function render(){
     ${closed?`<div class="notice critical"><strong>Sessão física encerrada.</strong> Esta tela está em modo de consulta.</div>`:""}
     ${exceptions?`<div class="notice critical"><strong>${exceptions} divergência(s) aberta(s).</strong> Resolva cada item antes da confirmação.</div>`:""}
     ${flowNotice}
-    <div class="toolbar"><h2>Materiais</h2><div class="filters"><button class="chip-btn ${filter==="pending"?"active":""}" data-filter="pending">Pendentes</button><button class="chip-btn ${filter==="all"?"active":""}" data-filter="all">Todos</button></div></div>
-    <section class="pick-list">${cards}</section>
-    <div class="footer-actions"><div class="status">${exceptions?"Há divergências para resolver":allResolved?(access.state==="ENTRY_CONFIRMED"?"Checklist concluído • finalize a separação":"Separação concluída • aguarde o fluxo físico"):"Confirme cada posição conforme separar"}</div><button class="btn primary confirm-all" id="finishPicking" ${allResolved&&access.state==="ENTRY_CONFIRMED"&&!closed?"":"disabled"}>CONCLUIR SEPARAÇÃO</button></div>
+    <div class="toolbar"><h2>Materiais comuns</h2><div class="filters"><button class="chip-btn ${filter==="pending"?"active":""}" data-filter="pending">Pendentes</button><button class="chip-btn ${filter==="all"?"active":""}" data-filter="all">Todos</button></div></div>
+    <section class="pick-list">${commonCards}</section>
+    ${sensitiveSection}
+    <div class="footer-actions"><div class="status">${exceptions?"Há divergências para resolver":readyForFinish?(access.state==="ENTRY_CONFIRMED"?"Checklist concluído • finalize a separação":"Separação concluída • aguarde o fluxo físico"):"Confirme os itens e mantenha o armário sensível fechado fora da sessão de retirada"}</div><button class="btn primary confirm-all" id="finishPicking" ${readyForFinish&&access.state==="ENTRY_CONFIRMED"&&!closed?"":"disabled"}>CONCLUIR SEPARAÇÃO</button></div>
   `);
 
   document.querySelectorAll("[data-filter]").forEach(btn=>btn.addEventListener("click",()=>{filter=btn.dataset.filter;render();}));
@@ -294,6 +363,19 @@ function render(){
     render();
   }));
 
+  document.getElementById("requestSensitive")?.addEventListener("click",async()=>{
+    await sensitiveEvent("SENSITIVE_ACCESS_REQUESTED",PICKING_DISPLAY_ID,{source:"picking-display"});
+  });
+  document.getElementById("simulateSensitiveOpen")?.addEventListener("click",async()=>{
+    await sensitiveEvent("SENSITIVE_DOOR_OPENED",TERMINAL_ID,{source:"dev-sensitive-sensor"});
+  });
+  document.getElementById("simulateSensitiveClose")?.addEventListener("click",async()=>{
+    await sensitiveEvent("SENSITIVE_DOOR_CLOSED",TERMINAL_ID,{source:"dev-sensitive-sensor"});
+  });
+  document.getElementById("simulateSensitiveLock")?.addEventListener("click",async()=>{
+    await sensitiveEvent("SENSITIVE_LOCK_CONFIRMED",TERMINAL_ID,{source:"dev-sensitive-lock"});
+  });
+
   document.getElementById("finishPicking")?.addEventListener("click",async()=>{
     try{
       access=await apiPost({
@@ -320,7 +402,7 @@ async function refresh(){
     if(!token)throw new Error("SESSION_TOKEN_MISSING");
     const latest=await apiGet({action:"accessSession",id:ACCESS_ID,session_token:token});
     if(!latest)throw new Error("SESSION_NOT_FOUND");
-    const signature=JSON.stringify({state:latest.state,confirmation:latest.withdrawal_confirmation?.confirmed_at||null,picking_state:latest.picking_state||{},events:latest.events?.length||0});
+    const signature=JSON.stringify({state:latest.state,sensitive_state:latest.sensitive_state,confirmation:latest.withdrawal_confirmation?.confirmed_at||null,picking_state:latest.picking_state||{},events:latest.events?.length||0});
     access=latest;
     if(signature!==lastSignature||!app.innerHTML){lastSignature=signature;render();}
   }catch{
