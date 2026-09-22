@@ -85,3 +85,50 @@ Esta bateria valida o núcleo lógico e contratos do branch atual. Ainda não su
 - comissionamento no HVB.
 
 O próximo nível de QA deve ocorrer após a definição física da visita técnica e implementação dos adapters reais.
+
+
+## QA complementar — delta de redução de interação humana
+
+Após automatizar biometria pós-NFC, atribuição da sessão ao tablet interno e confirmação final após fechamento da porta, foi executada nova bateria dirigida.
+
+### Núcleo lógico
+
+**36/36 cenários aprovados**, incluindo:
+
+- autenticação e replay;
+- identidade de dispositivo biométrico;
+- idempotência;
+- concorrência de sala;
+- FEFO;
+- token da AccessSession;
+- timeout antes e depois da entrada;
+- isolamento de medicação sensível;
+- kiosk interno com identidade de dispositivo;
+- autoatribuição de AccessSession;
+- expiração de sessão antes de autoatribuição;
+- `PICKING_READY`;
+- saída e fechamento da porta;
+- `WITHDRAWAL_CONFIRMED` automático;
+- replay de `DOOR_CLOSED` sem duplicação;
+- retirada parcial;
+- sessão sensível + retirada comum;
+- permissões e auditoria.
+
+### Contrato/UI
+
+**16/16 verificações aprovadas**, incluindo:
+
+- ausência de botão intermediário de biometria;
+- ausência de botão intermediário para abrir ORs;
+- início automático da biometria após NFC;
+- ausência de pareamento manual do Terminal de Retirada;
+- rota kiosk `/separacao`;
+- descoberta da sessão via POST;
+- credencial DEV do dispositivo fora de query string;
+- ausência de botão de confirmação final;
+- retorno automático do Terminal de Acesso à tela inicial;
+- retorno automático do tablet interno à espera da próxima sessão.
+
+Resultado complementar: **52/52 verificações aprovadas / 0 falhas**.
+
+Observação: a identidade do tablet interno é simulada no DEV. Produção deve substituir a credencial embutida do mock por credencial de dispositivo protegida/provisionada.
