@@ -32,23 +32,33 @@ A tela interna recebe a mesma `AccessSession` e consolida ORs + ajustes ao vivo.
 - indicação de item sensível;
 - referências às ORs de origem.
 
-## Contingência de coordenada
+## Alocação por lote e contingência
 
-Quando o material não é encontrado no endereço informado:
+A coordenada pertence à ocupação física do **lote**, não ao produto. O responsável pelo estoque registra a coordenada ao armazenar o lote recebido.
+
+Para itens com validade, o motor seleciona lotes por:
+
+```text
+1. FEFO — menor validade primeiro
+2. FIFO — entrada mais antiga como desempate
+3. identificador determinístico como último desempate
+```
+
+Uma mesma solicitação pode gerar várias tarefas de picking quando precisar consumir mais de um lote.
+
+Quando o lote esperado não é encontrado na coordenada registrada:
 
 ```text
 NÃO ENCONTRADO
 → STOCK_LOCATION_DISCREPANCY
-→ procurar posição alternativa cadastrada
-   ├─ existe → PICKING_LOCATION_REROUTED → continuar picking
+→ procurar OUTRO LOTE elegível do mesmo produto
+   ├─ existe → PICKING_LOT_REALLOCATED → nova coordenada/lote
    └─ não existe
       ├─ PICKING_PARTIAL
       └─ PICKING_UNAVAILABLE
 ```
 
-A divergência não é apagada mesmo quando a retirada consegue continuar.
-
-Para item sensível, apenas coordenadas marcadas como área sensível podem ser apresentadas como alternativa.
+A divergência do lote/posição original permanece auditável mesmo quando a retirada continua por outro lote. Para item sensível, a realocação só pode apontar para lote armazenado em área sensível.
 
 ## Confirmação
 
@@ -88,3 +98,24 @@ A revisão de pré-implantação consolidou os seguintes pontos:
 - o mock continua sem movimentação real de estoque.
 
 O estado atual é **candidato de aplicação**, ainda dependente da substituição do `MockAdapter` por API/PostgreSQL reais e dos adapters físicos de NFC, biometria e controlador.
+
+
+## Invariante logística de estoque
+
+```text
+PRODUTO
+→ LOTE
+→ OCUPAÇÃO FÍSICA
+→ COORDENADA
+```
+
+Não existe vínculo permanente `produto → coordenada`.
+
+Regras:
+
+- um lote ativo ocupa uma coordenada registrada pelo responsável do estoque;
+- lotes distintos do mesmo produto permanecem fisicamente separados;
+- o mesmo produto pode existir simultaneamente em várias coordenadas porque possui lotes distintos;
+- a coordenada volta a ficar livre quando a ocupação do lote é encerrada;
+- o Terminal recebe da API a tarefa já alocada com `stock_lot_id`, lote, validade, coordenada e quantidade;
+- o mock não altera estoque real nem representa reserva concorrente de produção.
