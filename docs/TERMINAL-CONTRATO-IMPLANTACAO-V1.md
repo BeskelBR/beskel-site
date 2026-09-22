@@ -213,3 +213,37 @@ PICKING_READY
 ```
 
 Nenhum botão de confirmação final deve ser apresentado ao operador. Se a finalização automática falhar, o evento físico de `DOOR_CLOSED` deve permanecer registrado e a sessão ficar em estado técnico recuperável, sem exigir que o funcionário repita a retirada.
+
+## 11. Auto-ready e recuperação logística automática
+
+### Encerramento do picking
+
+A produção não deve apresentar botão **Concluir separação**.
+
+O servidor promove automaticamente:
+
+```text
+ENTRY_CONFIRMED
++ todas as picking_tasks resolvidas
++ nenhuma EXCEPTION aberta
++ sensitive_state = COMPLETED, quando aplicável
+→ PICKING_READY
+```
+
+Até o sensor emitir `PRESENCE_CLEARED`, é permitido `PICKING_ITEM_UNDONE` exclusivamente como correção do checklist já concluído. Essa ação deve registrar `PICKING_REOPENED` e retornar a `ENTRY_CONFIRMED`. Após a saída, alterações de picking são rejeitadas.
+
+### `Não encontrei`
+
+Ao receber `STOCK_LOCATION_DISCREPANCY`, o Sistema deve:
+
+1. preservar lote/coordenada divergentes na auditoria;
+2. excluir lotes já falhos naquela tarefa;
+3. consultar os demais lotes elegíveis;
+4. aplicar FEFO, FIFO em empate e desempate determinístico;
+5. selecionar automaticamente a primeira alternativa com saldo suficiente para a tarefa;
+6. registrar `PICKING_LOT_REALLOCATED` com `automatic=true`;
+7. apresentar ao Terminal somente a nova coordenada/lote.
+
+O funcionário não escolhe manualmente qual lote usar.
+
+Se nenhuma alternativa individual possuir saldo suficiente, o sistema não improvisa divisão tardia da tarefa no Terminal: mantém `EXCEPTION` e oferece somente `PICKING_PARTIAL` ou `PICKING_UNAVAILABLE`. Uma eventual recomposição transacional entre múltiplos lotes deve ser tratada pelo HVB Sistema/API, não pela UI do Terminal.
