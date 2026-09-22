@@ -44,17 +44,13 @@ Compartilhar apenas identidade institucional e decisões arquiteturais explicita
 
 1. TopBar
 2. Header
-3. Hero
-4. Ambulância veterinária
-5. Como podemos ajudar
-6. O HVB
-7. Estrutura
-8. Especialidades
-9. Corpo clínico
-10. Emergência 24h
-11. Conteúdo
-12. Localização e contato
-13. Footer
+3. Hero — Hospital 24h, Emergência e Ambulância como prioridades
+4. Especialidades
+5. Localização e contato
+6. Conteúdo
+7. Footer
+
+As informações institucionais detalhadas de **O HVB**, **Estrutura** e **Corpo Clínico** foram deliberadamente movidas para páginas próprias, mantendo a Home mais objetiva.
 
 O HVB Integra permanece como frente em desenvolvimento e não integra a navegação pública atual.
 
