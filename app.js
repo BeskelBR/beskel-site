@@ -184,6 +184,7 @@ async function verifyIdentity(){
     });
     writeJson(AUTH_KEY,state.auth);
     render(shell(`<div class="card"><div class="big-check">✓</div><div class="eyebrow">Identidade confirmada</div><h1>${esc(state.auth.employee.name)}</h1><div class="factor-list"><div class="factor ok"><b>✓</b><span>DESFire EV3</span></div><div class="factor ok"><b>✓</b><span>Face 1:1</span></div><div class="factor ok"><b>✓</b><span>Liveness/PAD</span></div></div><p class="footer-note">Carregando automaticamente as ordens disponíveis…</p></div>`,"Autenticação concluída"));
+    state.biometricInProgress=false;
     setTimeout(()=>go("/ordens"),250);
   }catch(error){
     state.biometricInProgress=false;
