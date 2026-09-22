@@ -11,12 +11,43 @@ Subprojeto: `05_TERMINAL_E_INFRAESTRUTURA`
    - seleção de uma ou mais ORs; e/ou
    - ajuste ao vivo versionado para a AccessSession.
 4. `ACCESS_GRANTED`
-   - porta principal;
-   - acesso ao compartimento sensível quando o contexto exigir e o usuário possuir permissão.
+   - libera somente a porta principal;
+   - se houver medicação sensível, a permissão é validada para a sessão, mas o armário permanece travado.
 5. `PRESENCE_CONFIRMED`
-6. separação guiada no Terminal de Retirada por coordenada física exata
-7. `DOOR_CLOSED`
-8. `WITHDRAWAL_CONFIRMED`
+6. separação guiada no Terminal de Retirada por lote/coordenada
+   - materiais comuns podem ser retirados normalmente;
+   - medicação sensível usa uma sessão de abertura sob demanda dentro da mesma AccessSession.
+7. `PICKING_READY`
+8. `PRESENCE_CLEARED`
+9. `DOOR_CLOSED`
+10. `WITHDRAWAL_CONFIRMED`
+
+### Subfluxo de medicação sensível
+
+```text
+SENSITIVE_ACCESS_ELIGIBLE
+→ funcionário toca "RETIRAR MEDICAÇÃO SENSÍVEL"
+→ SENSITIVE_ACCESS_REQUESTED
+→ SENSITIVE_ACCESS_GRANTED
+→ SENSITIVE_DOOR_OPENED
+→ picking somente dos itens sensíveis
+→ SENSITIVE_DOOR_CLOSED
+→ SENSITIVE_LOCK_CONFIRMED
+→ SENSITIVE_ACCESS_COMPLETED
+```
+
+Não há segunda rodada de NFC/biometria. A identidade e a permissão já pertencem à AccessSession autenticada.
+
+No DEV, a autorização de abertura expira em 15 segundos se o sensor não registrar a abertura. Expirada a janela, o armário permanece travado e o mesmo funcionário pode solicitar outra abertura dentro da sessão, sem nova autenticação.
+
+Enquanto o subfluxo sensível estiver em `UNLOCK_AUTHORIZED`, `OPEN` ou `CLOSED`, o picking comum fica bloqueado. Isso reduz o tempo de armário aberto e mantém a retirada sensível como uma sessão operacional isolada.
+
+`PICKING_READY` exige, quando houver itens sensíveis:
+
+- todos os itens sensíveis resolvidos;
+- porta do armário fechada;
+- trava confirmada;
+- `sensitive_state = COMPLETED`.
 
 ## Credencial
 
@@ -68,7 +99,9 @@ A confirmação final só é habilitada quando:
 
 - todas as linhas têm resultado resolvido (`CONFIRMED`, `PARTIAL` ou `UNAVAILABLE`);
 - não há divergência aberta;
-- a porta já gerou `DOOR_CLOSED`.
+- o armário sensível, quando aplicável, já está em `COMPLETED`;
+- a saída da sala foi detectada;
+- a porta principal já gerou `DOOR_CLOSED`.
 
 A v4 DEV então registra `WITHDRAWAL_CONFIRMED` e preserva o resultado para auditoria, sem gerar `STOCK_CONSUMED`.
 
@@ -139,3 +172,16 @@ PRESENCE_CONFIRMED
 A AccessSession ocupada não expira destrutivamente: ultrapassar o TTL gera alerta de timeout, mas preserva a possibilidade de concluir com segurança a saída e o fechamento.
 
 A confirmação final é construída a partir do estado persistido no servidor, não de resultados informados pelo cliente.
+
+
+## Delta final — medicação sensível sob demanda
+
+A alteração final aprovada separa o destravamento do armário sensível do acesso principal à sala.
+
+Abertura da porta principal nunca gera `SENSITIVE_DOOR_OPENED`.
+
+A sessão conserva a autorização do funcionário, mas o armário fica fisicamente travado até pedido explícito no Terminal de Retirada. Cada abertura fica vinculada à mesma AccessSession, usuário e trilha de auditoria.
+
+Se o armário for fechado com itens sensíveis ainda pendentes, `SENSITIVE_LOCK_CONFIRMED` devolve o subfluxo a `LOCKED`, permitindo outra abertura sob demanda. Quando não restar item sensível pendente, a confirmação da trava promove o subfluxo a `COMPLETED`.
+
+O Terminal não permite sair para `PICKING_READY` enquanto o armário não estiver confirmado como travado.
