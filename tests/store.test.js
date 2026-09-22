@@ -159,6 +159,21 @@ test("Terminal v4 exposes physical coordinates and supports the approved NFC/bio
   });
   assert.equal(current.state, "ENTRY_CONFIRMED");
 
+  current = store.registerPickingEvent({
+    accessSessionId: access.access_session_id,
+    eventType: "PICKING_ITEM_CONFIRMED",
+    commandId: "test-v4-live-item-confirmed",
+    sourceDeviceId: store.PICKING_DISPLAY_ID,
+    metadata: {
+      group_key:`${catalogProduct.location_code}|${catalogProduct.description}|${catalogProduct.sensitive?1:0}`,
+      description:catalogProduct.description,
+      expected_quantity:2,
+      location_code:catalogProduct.location_code,
+      actual_quantity:2
+    }
+  });
+  assert.equal(current.picking_state[`${catalogProduct.location_code}|${catalogProduct.description}|${catalogProduct.sensitive?1:0}`].status, "CONFIRMED");
+
   current = store.registerAccessEvent({
     accessSessionId: access.access_session_id,
     eventType: "DOOR_CLOSED",
