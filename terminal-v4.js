@@ -38,10 +38,10 @@ function v4StateLabel(value){
 
 function v4LiveItemsPanel(){
   const rows=state.liveItems.length
-    ? state.liveItems.map((item,index)=>`<div class="material-row"><span><b>${esc(item.location_code)}</b> · ${esc(item.description)} ${item.sensitive?'<span class="chip sensitive">Sensível</span>':""}</span><strong>${esc(item.quantity)}</strong><button class="btn ghost" data-remove-live="${index}">Remover</button></div>`).join("")
+    ? state.liveItems.map((item,index)=>`<div class="material-row"><span>${esc(item.description)} ${item.sensitive?'<span class="chip sensitive">Sensível</span>':""}</span><strong>${esc(item.quantity)}</strong><button class="btn ghost" data-remove-live="${index}">Remover</button></div>`).join("")
     : `<p class="lead">Nenhum ajuste ao vivo adicionado.</p>`;
-  const options=state.catalog.map(item=>`<option value="${esc(item.product_id)}">${esc(item.description)} · ${esc(item.location_code)}${item.sensitive?" · SENSÍVEL":""}</option>`).join("");
-  return `<div class="dev-panel live-context-panel"><div class="eyebrow">Edição ao vivo • catálogo</div><p>Adicione apenas materiais cadastrados. Sensibilidade e coordenada vêm do catálogo do servidor e não podem ser definidas pelo operador.</p><div class="materials-list">${rows}</div><div class="live-add-form"><select id="liveProduct"><option value="">Selecione um material…</option>${options}</select><input id="liveQty" type="number" min="1" step="1" value="1" inputmode="numeric"><button class="btn secondary" id="addLiveItem">+ Adicionar</button></div></div>`;
+  const options=state.catalog.map(item=>`<option value="${esc(item.product_id)}">${esc(item.description)} · ${esc(item.allocation_strategy||"FEFO")}${item.sensitive?" · SENSÍVEL":""}</option>`).join("");
+  return `<div class="dev-panel live-context-panel"><div class="eyebrow">Edição ao vivo • catálogo</div><p>Adicione apenas materiais cadastrados. A coordenada não pertence ao produto: o servidor escolherá lote e posição por FEFO/FIFO no momento da AccessSession.</p><div class="materials-list">${rows}</div><div class="live-add-form"><select id="liveProduct"><option value="">Selecione um material…</option>${options}</select><input id="liveQty" type="number" min="1" step="1" value="1" inputmode="numeric"><button class="btn secondary" id="addLiveItem">+ Adicionar</button></div></div>`;
 }
 
 function v4UpdateSelection(orders){
@@ -68,8 +68,8 @@ function v4BindLiveItems(orders){
       product_id:product.product_id,
       description:product.description,
       quantity,
-      location_code:product.location_code,
-      sensitive:product.sensitive===true
+      sensitive:product.sensitive===true,
+      allocation_strategy:product.allocation_strategy||"FEFO"
     });
     const host=document.getElementById("liveContextHost");
     if(host) host.innerHTML=v4LiveItemsPanel();
@@ -175,7 +175,7 @@ authorizeAccess = async function(orderIds,liveItems=[]){
 function v4AccessOrders(access){
   const orders=(access.orders||[]).map(order=>`<div class="access-order"><div class="row"><div><div class="eyebrow">${esc(order.order_id)}</div><strong>${esc(order.patient?.name||"Paciente")}</strong></div>${order.has_sensitive_items?'<span class="chip sensitive">Sensível</span>':'<span class="chip">Comum</span>'}</div><div class="order-meta"><span>${esc(order.episode_id)}</span><span>${order.item_count} itens</span></div>${materialsList(order)}</div>`).join("");
   const live=(access.live_items||[]).length
-    ? `<div class="access-order"><div class="eyebrow">Ajustes ao vivo</div><strong>Materiais adicionados na etapa 3</strong><div class="materials-list">${access.live_items.map(item=>`<div class="material-row"><span><b>${esc(item.location_code)}</b> · ${esc(item.description)}</span><strong>${esc(item.quantity)}</strong>${item.sensitive?'<span class="chip sensitive">Sensível</span>':""}</div>`).join("")}</div></div>`
+    ? `<div class="access-order"><div class="eyebrow">Ajustes ao vivo</div><strong>Materiais adicionados na etapa 3</strong><div class="materials-list">${access.live_items.map(item=>`<div class="material-row"><span>${esc(item.description)}</span><strong>${esc(item.quantity)}</strong>${item.sensitive?'<span class="chip sensitive">Sensível</span>':""}</div>`).join("")}</div></div>`
     : "";
   return orders+live;
 }
@@ -195,6 +195,7 @@ accessScreen = async function(accessSessionId){
       ${sensitive}
       <div class="section-title">Contexto confirmado da retirada</div>
       <div class="access-orders">${v4AccessOrders(access)}</div>
+      <div class="notice"><b>Alocação logística</b><span>${access.picking_tasks?.length||0} tarefa(s) física(s) por lote. Regra: FEFO; FIFO como desempate. A posição pertence ao lote armazenado, não ao produto.</span></div>
       <div class="notice"><b>Fluxo físico N1</b><span>NFC → biometria → contexto da retirada → abertura → presença → separação guiada → fechamento da porta → confirmação.</span></div>
       <div class="dev-panel"><div class="eyebrow">Terminal de Retirada</div><p>Abra a tela interna vinculada a esta mesma AccessSession para acompanhar a separação em tempo real.</p><div class="actions"><button class="btn" id="openSeparation">Abrir Terminal de Retirada</button></div></div>
       ${devControls(access)}
