@@ -200,7 +200,7 @@ accessScreen = async function(accessSessionId){
     state.access={...access,session_token:sessionToken};
     const totalItems=(access.orders||[]).reduce((sum,order)=>sum+(order.item_count||0),0)+(access.live_items||[]).length;
     const sensitive=access.sensitive_access
-      ? `<div class="notice sensitive-notice"><b>Acesso sensível autorizado</b><span>Esta sessão contém material sensível e a permissão foi validada antes da abertura.</span></div>`
+      ? `<div class="notice sensitive-notice"><b>Medicação sensível elegível</b><span>A permissão foi validada na autenticação inicial, mas o armário permanece travado. A abertura ocorrerá somente sob demanda no Terminal de Retirada, sem nova autenticação.</span></div>`
       : "";
     render(shell(`
       <div class="access-banner"><div class="big-check">✓</div><div><div class="eyebrow">Sessão de acesso</div><h1>${esc(access.employee?.name||"Funcionário")}</h1></div></div>
@@ -209,7 +209,7 @@ accessScreen = async function(accessSessionId){
       <div class="section-title">Contexto confirmado da retirada</div>
       <div class="access-orders">${v4AccessOrders(access)}</div>
       <div class="notice"><b>Alocação logística</b><span>${access.picking_tasks?.length||0} tarefa(s) física(s) por lote. Regra: FEFO; FIFO como desempate. A posição pertence ao lote armazenado, não ao produto.</span></div>
-      <div class="notice"><b>Fluxo físico N1</b><span>NFC → biometria → contexto da retirada → abertura → presença → separação guiada → fechamento da porta → confirmação.</span></div>
+      <div class="notice"><b>Fluxo físico N1</b><span>NFC → biometria → contexto da retirada → porta principal → presença → picking comum e, quando necessário, sessão sensível sob demanda → saída → fechamento → confirmação.</span></div>
       <div class="dev-panel"><div class="eyebrow">Terminal de Retirada</div><p>Abra a tela interna vinculada a esta mesma AccessSession para acompanhar a separação em tempo real.</p><div class="actions"><button class="btn" id="openSeparation">Abrir Terminal de Retirada</button></div></div>
       ${devControls(access)}
       <p class="footer-note">DEV: controladores, sensores, câmera e NFC estão simulados. Nenhum movimento real de estoque é realizado.</p>
@@ -228,7 +228,7 @@ accessScreen = async function(accessSessionId){
 
 devControls = function(access){
   let button="";
-  if(access.state==="DOOR_AUTHORIZED")button=`<button class="btn secondary" data-event="DOOR_OPENED">${access.sensitive_access?"Simular abertura + acesso sensível":"Simular porta aberta"}</button>`;
+  if(access.state==="DOOR_AUTHORIZED")button=`<button class="btn secondary" data-event="DOOR_OPENED">Simular porta principal aberta</button>`;
   else if(access.state==="DOOR_OPEN")button=`<button class="btn secondary" data-event="PRESENCE_CONFIRMED">Simular presença detectada</button>`;
   else if(access.state==="ENTRY_CONFIRMED")button=`<button class="btn secondary" disabled>Separação em andamento no Terminal de Retirada</button>`;
   else if(access.state==="PICKING_READY")button=`<button class="btn secondary" data-event="PRESENCE_CLEARED">Simular saída da sala</button>`;
