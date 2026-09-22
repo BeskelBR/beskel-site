@@ -4,17 +4,9 @@ const app=document.getElementById("separationApp");
 const API="/api/mock";
 const PICKING_DISPLAY_ID="HVB-PICKING-01";
 const ACCESS_ID=(location.pathname.match(/^\/separacao\/([^/]+)$/)||[])[1]||new URLSearchParams(location.search).get("access");
-const STORAGE_KEY=`hvb_separation_${ACCESS_ID||"none"}`;
-
 let access=null;
 let filter="pending";
-let localState=loadState();
 let lastSignature="";
-
-function loadState(){
-  try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}")||{};}catch{return {};}
-}
-function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(localState));}
 function esc(v){return String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));}
 function nowLabel(){return new Date().toLocaleString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});}
 function cmd(prefix){return `${prefix}-${globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`}`;}
@@ -29,7 +21,7 @@ function stateLabel(v){
     EXPIRED:"Sessão expirada"
   }[v]||v||"—");
 }
-function canPick(){return access?.state==="ENTRY_CONFIRMED";}
+function canPick(){return ["ENTRY_CONFIRMED","READY_TO_CONFIRM"].includes(access?.state);}
 function canConfirm(){return access?.state==="READY_TO_CONFIRM";}
 function isResolved(status){return ["CONFIRMED","PARTIAL","UNAVAILABLE"].includes(status);}
 
@@ -94,7 +86,7 @@ function groupsFromAccess(){
   });
   return [...map.values()].sort((a,b)=>activeLocation(a).localeCompare(activeLocation(b),"pt-BR",{numeric:true}));
 }
-function groupRecord(group){return localState[group.key]||{};}
+function groupRecord(group){return access?.picking_state?.[group.key]||{};}
 function groupStatus(group){return groupRecord(group).status||"PENDING";}
 function activeLocation(group){return groupRecord(group).active_location||group.primary_location;}
 function actualQuantity(group){
@@ -108,10 +100,6 @@ function sensitiveUnlocked(group){
   if(!group.sensitive)return true;
   return access?.sensitive_access===true&&access?.sensitive_access_granted===true;
 }
-function writeGroup(group,patch){
-  localState[group.key]={...groupRecord(group),...patch,updated_at:new Date().toISOString()};
-  saveState();
-}
 async function pickingEvent(eventType,group,metadata={}){
   try{
     access=await apiPost({
@@ -119,6 +107,7 @@ async function pickingEvent(eventType,group,metadata={}){
       access_session_id:ACCESS_ID,
       event_type:eventType,
       metadata:{
+        group_key:group.key,
         description:group.description,
         expected_quantity:group.quantity,
         location_code:activeLocation(group),
@@ -240,21 +229,18 @@ function render(){
   document.querySelectorAll("[data-confirm]").forEach(btn=>btn.addEventListener("click",async()=>{
     const group=groups.find(x=>x.key===btn.dataset.confirm);if(!group)return;
     await pickingEvent("PICKING_ITEM_CONFIRMED",group,{actual_quantity:group.quantity});
-    writeGroup(group,{status:"CONFIRMED",actual_quantity:group.quantity});
     render();
   }));
 
   document.querySelectorAll("[data-undo]").forEach(btn=>btn.addEventListener("click",async()=>{
     const group=groups.find(x=>x.key===btn.dataset.undo);if(!group)return;
     await pickingEvent("PICKING_ITEM_UNDONE",group);
-    writeGroup(group,{status:"PENDING",actual_quantity:null});
     render();
   }));
 
   document.querySelectorAll("[data-exception]").forEach(btn=>btn.addEventListener("click",async()=>{
     const group=groups.find(x=>x.key===btn.dataset.exception);if(!group)return;
     await pickingEvent("STOCK_LOCATION_DISCREPANCY",group,{system_quantity:group.quantity,found_quantity:null});
-    writeGroup(group,{status:"EXCEPTION",discrepancy_location:activeLocation(group)});
     render();
   }));
 
@@ -262,7 +248,6 @@ function render(){
     const group=groups.find(x=>x.key===btn.dataset.alt);if(!group)return;
     const from=activeLocation(group),to=btn.dataset.altLocation;
     await pickingEvent("PICKING_LOCATION_REROUTED",group,{from_location:from,to_location:to});
-    writeGroup(group,{status:"PENDING",active_location:to});
     render();
   }));
 
@@ -271,7 +256,6 @@ function render(){
     const actual=Number(prompt(`Quantidade realmente encontrada (máx. ${group.quantity}):`,"1"));
     if(!Number.isFinite(actual)||actual<=0||actual>=group.quantity)return alert("Informe quantidade maior que zero e menor que a solicitada.");
     await pickingEvent("PICKING_PARTIAL",group,{actual_quantity:actual});
-    writeGroup(group,{status:"PARTIAL",actual_quantity:actual});
     render();
   }));
 
@@ -279,13 +263,12 @@ function render(){
     const group=groups.find(x=>x.key===btn.dataset.unavailable);if(!group)return;
     if(!confirm("Registrar que nenhuma unidade foi encontrada?"))return;
     await pickingEvent("PICKING_UNAVAILABLE",group,{actual_quantity:0});
-    writeGroup(group,{status:"UNAVAILABLE",actual_quantity:0});
     render();
   }));
 
-  document.querySelectorAll("[data-cancel-exception]").forEach(btn=>btn.addEventListener("click",()=>{
+  document.querySelectorAll("[data-cancel-exception]").forEach(btn=>btn.addEventListener("click",async()=>{
     const group=groups.find(x=>x.key===btn.dataset.cancelException);if(!group)return;
-    writeGroup(group,{status:"PENDING"});
+    await pickingEvent("PICKING_ITEM_UNDONE",group);
     render();
   }));
 
@@ -319,7 +302,7 @@ async function refresh(){
   try{
     const latest=await apiGet({action:"accessSession",id:ACCESS_ID});
     if(!latest)throw new Error("SESSION_NOT_FOUND");
-    const signature=JSON.stringify({state:latest.state,confirmation:latest.withdrawal_confirmation?.confirmed_at||null,events:latest.events?.length||0});
+    const signature=JSON.stringify({state:latest.state,confirmation:latest.withdrawal_confirmation?.confirmed_at||null,picking_state:latest.picking_state||{},events:latest.events?.length||0});
     access=latest;
     if(signature!==lastSignature||!app.innerHTML){lastSignature=signature;render();}
   }catch{
