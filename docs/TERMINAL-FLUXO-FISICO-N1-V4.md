@@ -72,3 +72,19 @@ A v4 DEV então registra `WITHDRAWAL_CONFIRMED` e preserva o resultado para audi
 ## Limite de implantação
 
 Esta revisão fecha o **fluxo funcional DEV**. Hardware real, sensores reais, relés/fechaduras, biometria real e escrituração transacional no HVB Sistema dependem do projeto executivo e da integração física/API.
+
+
+## Fechamento de software — revisão 22/09/2026
+
+A revisão de pré-implantação consolidou os seguintes pontos:
+
+- o fluxo v4 é carregado antes da primeira renderização da rota;
+- o link para o Terminal de Retirada pertence à própria sessão e não depende mais do bridge de DOM;
+- o estado do picking passou a ser mantido no servidor do contrato, não no `localStorage` do tablet;
+- cada evento de picking é validado contra o grupo esperado da AccessSession;
+- a confirmação final é rejeitada se itens, quantidades, coordenadas ou estados divergirem do contexto autorizado;
+- a edição ao vivo usa catálogo autenticado do servidor;
+- sensibilidade e coordenada do material adicionado ao vivo não são definidas manualmente pelo operador;
+- o mock continua sem movimentação real de estoque.
+
+O estado atual é **candidato de aplicação**, ainda dependente da substituição do `MockAdapter` por API/PostgreSQL reais e dos adapters físicos de NFC, biometria e controlador.
