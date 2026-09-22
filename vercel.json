@@ -4,23 +4,85 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
-        { "key": "Cache-Control", "value": "no-store" }
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(self), microphone=(), geolocation=()"
+        }
       ]
     }
   ],
   "rewrites": [
-    { "source": "/hvb/assets/logo-principal.webp", "destination": "/assets/logo-principal.png" },
-    { "source": "/hvb/assets/logo-lateral.webp", "destination": "/assets/logo-lateral.png" },
-    { "source": "/auth/:token", "destination": "/index.html" },
-    { "source": "/ordens", "destination": "/index.html" },
-    { "source": "/acesso/:id", "destination": "/index.html" },
-    { "source": "/separacao/:id", "destination": "/separacao.html" },
-    { "source": "/admin/auditoria", "destination": "/index.html" },
-    { "source": "/atendimentos", "destination": "/index.html" },
-    { "source": "/atendimento/:id", "destination": "/index.html" },
-    { "source": "/materiais", "destination": "/index.html" },
-    { "source": "/retirada", "destination": "/index.html" },
-    { "source": "/sucesso", "destination": "/index.html" }
+    {
+      "source": "/hvb/assets/logo-principal.webp",
+      "destination": "/assets/logo-principal.png"
+    },
+    {
+      "source": "/hvb/assets/logo-lateral.webp",
+      "destination": "/assets/logo-lateral.png"
+    },
+    {
+      "source": "/auth/:token",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/ordens",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/acesso/:id",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/separacao/:id",
+      "destination": "/separacao.html"
+    },
+    {
+      "source": "/admin/auditoria",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/atendimentos",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/atendimento/:id",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/materiais",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/retirada",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/sucesso",
+      "destination": "/index.html"
+    }
   ]
 }
