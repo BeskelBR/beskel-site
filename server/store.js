@@ -900,8 +900,8 @@ function registerPickingEvent({ accessSessionId, sessionToken, eventType, metada
     const group = expected.find(x => x.key === groupKey);
     if (!group) throw new Error("PICKING_GROUP_INVALID");
 
-    if (group.sensitive && access.sensitive_state !== "OPEN") throw new Error("SENSITIVE_STORAGE_LOCKED");
-    if (!group.sensitive && ["UNLOCK_AUTHORIZED","OPEN","CLOSED"].includes(access.sensitive_state)) throw new Error("SENSITIVE_SESSION_ACTIVE");
+    if (!reopeningReadyState && group.sensitive && access.sensitive_state !== "OPEN") throw new Error("SENSITIVE_STORAGE_LOCKED");
+    if (!reopeningReadyState && !group.sensitive && ["UNLOCK_AUTHORIZED","OPEN","CLOSED"].includes(access.sensitive_state)) throw new Error("SENSITIVE_SESSION_ACTIVE");
 
     const current = access.picking_state[group.key] || {
       status:"PENDING",
@@ -911,6 +911,7 @@ function registerPickingEvent({ accessSessionId, sessionToken, eventType, metada
       actual_quantity:null
     };
     const next = { ...current, updated_at:now() };
+    let automaticReallocationAudit = null;
 
     if (eventType === "PICKING_ITEM_CONFIRMED") {
       next.status = "CONFIRMED";
@@ -964,7 +965,7 @@ function registerPickingEvent({ accessSessionId, sessionToken, eventType, metada
             reallocated_at:now()
           }
         ];
-        log(access,"PICKING_LOT_REALLOCATED",{
+        automaticReallocationAudit = {
           group_key:group.key,
           from_stock_lot_id:failedLotId,
           from_location:failedLocation,
@@ -976,7 +977,7 @@ function registerPickingEvent({ accessSessionId, sessionToken, eventType, metada
           trigger:"STOCK_LOCATION_DISCREPANCY",
           command_id:commandId,
           source_device_id:sourceDeviceId
-        });
+        };
       } else {
         next.status = "EXCEPTION";
         next.auto_reallocated = false;
@@ -1023,6 +1024,7 @@ function registerPickingEvent({ accessSessionId, sessionToken, eventType, metada
 
     access.picking_state[group.key] = next;
     log(access,eventType,{ ...metadata, group_key:group.key, command_id:commandId, source_device_id:sourceDeviceId });
+    if (automaticReallocationAudit) log(access,"PICKING_LOT_REALLOCATED",automaticReallocationAudit);
 
     if (reopeningReadyState) {
       access.state = "ENTRY_CONFIRMED";
