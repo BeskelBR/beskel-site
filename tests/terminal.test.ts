@@ -109,64 +109,28 @@ test("scan identifica contexto sem criar movimento, execução ou cobrança", as
   );
   assert.equal((await row("leitura_terminal_consulta", id)).episodio_id, null);
 });
-test("retirada usa o movimento original e retry/consulta recuperam a mesma confirmação", async () => {
+test("retirada legada bloqueia novos comandos sem movimentar estoque", async () => {
   const s = await scenario(),
     key = randomUUID();
-  const rs = await Promise.all([
-    post("/terminal/retiradas", s.withdrawalBody, s.device, key),
-    post("/terminal/retiradas", s.withdrawalBody, s.device, key),
-  ]);
-  for (const r of rs) assert.equal(r.statusCode, 200, r.body);
-  assert.equal(rs[0]?.json().id, rs[1]?.json().id);
-  const result = rs[0]?.json();
-  assert.equal(
-    (await row("transacao_estoque", result.id)).comando_id,
-    result.comando_id,
-  );
-  assert.equal((await row("retirada_terminal", result.id)).leitura_id, s.scan);
+  for (let n = 0; n < 2; n++) {
+    const r = await post(
+      "/terminal/retiradas",
+      s.withdrawalBody,
+      s.device,
+      key,
+    );
+    assert.equal(r.statusCode, 409, r.body);
+    assert.equal(r.json().erro, "terminal_retirada_legada_use_mobile_api");
+  }
   assert.equal(
     (await row("posicao_estoque", s.position)).saldo_base,
-    "18.000000",
-  );
-  assert.equal(
-    (await row("posicao_estoque", s.destination)).saldo_base,
-    "2.000000",
-  );
-  assert.equal(
-    (await post("/terminal/retiradas", s.withdrawalBody, s.device)).statusCode,
-    409,
-  );
-  assert.equal(
-    (await row("posicao_estoque", s.position)).saldo_base,
-    "18.000000",
+    "20.000000",
   );
   const status = await read(
     `/terminal/comandos/${key}?unidade_id=${f.unit}`,
     s.device,
   );
-  assert.equal(status.statusCode, 200, status.body);
-  assert.equal(status.json().entidade_id, result.id);
-  assert.equal(status.json().estado, "confirmado");
-  assert.equal(
-    (
-      await read(
-        `/terminal/comandos/${randomUUID()}?unidade_id=${f.unit}`,
-        s.device,
-      )
-    ).statusCode,
-    404,
-  );
-  assert.equal(
-    (
-      await post(
-        "/terminal/retiradas",
-        { ...s.withdrawalBody, quantidade_base: "3" },
-        s.device,
-        key,
-      )
-    ).statusCode,
-    409,
-  );
+  assert.equal(status.statusCode, 404, status.body);
 });
 test("dispositivo, confirmação literal e credencial API são obrigatórios", async () => {
   const s = await scenario();

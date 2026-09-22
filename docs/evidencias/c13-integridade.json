@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-16T11:00:58.004Z",
+  "previousContractDifferences": [
+    "/v1/atribuicoes get"
+  ],
+  "operations": 384,
+  "paths": 231,
+  "databases": {
+    "DEV": {
+      "migrations": 64,
+      "hashMismatches": []
+    },
+    "TEST": {
+      "migrations": 64,
+      "hashMismatches": []
+    }
+  },
+  "tables": [
+    {
+      "relkind": "r",
+      "n": 184
+    },
+    {
+      "relkind": "v",
+      "n": 70
+    }
+  ],
+  "permissions": 119,
+  "historicalMismatches": []
+}

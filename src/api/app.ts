@@ -1,3 +1,59 @@
+import { terminalV1Actions } from "../domain/terminal-v1/service.ts";
+import { terminalV1Inputs } from "../domain/terminal-v1/schemas.ts";
+import { registerTerminalV1 } from "../domain/terminal-v1/routes.ts";
+import type { V1EvidenceAdapter } from "../domain/terminal-v1/evidence.ts";
+import {
+  financialCorrectionInputs,
+  financialCorrectionActions,
+  financialCorrectionLists,
+} from "../domain/financial-corrections/service.ts";
+import {
+  dailyCorrectionInputs,
+  dailyCorrectionActions,
+  dailyCorrectionLists,
+} from "../domain/daily-corrections/service.ts";
+import {
+  clinicalCorrectionInputs,
+  clinicalCorrectionActions,
+  clinicalCorrectionLists,
+} from "../domain/clinical-corrections/service.ts";
+import { terminalAccessActions } from "../domain/terminal-access/service.ts";
+import { accessInputs } from "../domain/terminal-access/schemas.ts";
+import { registerTerminalAccess } from "../domain/terminal-access/routes.ts";
+import type { TerminalEvidenceAdapter } from "../domain/terminal-access/evidence.ts";
+import {
+  registryInputs,
+  registryActions,
+} from "../domain/registry-corrections/service.ts";
+import { registerRegistryCorrections } from "../domain/registry-corrections/routes.ts";
+import {
+  linksInputs,
+  linksActions,
+  linksLists,
+} from "../domain/links-audit/service.ts";
+import { registerReadAudit } from "../domain/links-audit/routes.ts";
+import { auditedTransaction } from "../domain/links-audit/read-audit.ts";
+import {
+  medicalComplementActions,
+  medicalComplementLists,
+} from "../domain/medical-complements/service.ts";
+import { medicalComplementInputs } from "../domain/medical-complements/schemas.ts";
+import { registerMedicalComplements } from "../domain/medical-complements/routes.ts";
+import {
+  supplierOutflowActions,
+  supplierOutflowLists,
+} from "../domain/supplier-outflow/service.ts";
+import { supplierOutflowInputs } from "../domain/supplier-outflow/schemas.ts";
+import {
+  supplierCreditActions,
+  supplierCreditLists,
+} from "../domain/supplier-credit/service.ts";
+import { supplierCreditInputs } from "../domain/supplier-credit/schemas.ts";
+import {
+  installmentActions,
+  installmentLists,
+} from "../domain/supplier-installments/service.ts";
+import { installmentInputs } from "../domain/supplier-installments/schemas.ts";
 import {
   acquisitionActions,
   acquisitionLists,
@@ -46,7 +102,7 @@ import type { Actor } from "../domain/core.ts";
 import { actions, lists } from "../domain/foundation.ts";
 import type { Body } from "../domain/foundation.ts";
 import { inputs, object, uuid, text } from "../domain/schemas.ts";
-import { transaction } from "../persistence/database.ts";
+
 import {
   inventoryActions,
   inventoryLists,
@@ -121,7 +177,12 @@ const headers = object(
   ["authorization", "idempotency-key"],
 );
 headers.additionalProperties = true;
-export async function buildApp(db: pg.Pool, logging = false) {
+export async function buildApp(
+  db: pg.Pool,
+  logging = false,
+  terminalEvidence?: TerminalEvidenceAdapter,
+  terminalV1Evidence?: V1EvidenceAdapter,
+) {
   const app = Fastify({
     bodyLimit: 32768,
     logger: logging,
@@ -136,7 +197,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     openapi: {
       info: {
         title: "HVB Sistema — Clínica, Financeiro e Exames",
-        version: "0.16.0",
+        version: "0.27.0",
       },
       servers: [{ url: "http://127.0.0.1:3100" }],
       components: {
@@ -231,7 +292,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ]);
     const actor = identity.rows[0] as Actor | undefined;
     if (!actor) throw new DomainError(401, "credencial_invalida");
-    return transaction(db, actor.organizacao_id, async (tx) => {
+    return auditedTransaction(db, req, actor, async (tx) => {
       // Serialize revocation/deactivation against already authorized mutations.
       const valid = await tx.query(
         `SELECT c.id FROM credencial c JOIN usuario u
@@ -245,6 +306,9 @@ export async function buildApp(db: pg.Pool, logging = false) {
   }
   registerPortal(app, db, errors);
   registerMedicalRecord(app, authenticated, errors);
+  registerMedicalComplements(app, authenticated, errors);
+  registerReadAudit(app, authenticated, errors);
+  registerRegistryCorrections(app, authenticated, errors);
   app.get(
     "/health",
     {
@@ -267,7 +331,7 @@ export async function buildApp(db: pg.Pool, logging = false) {
     async () => {
       try {
         const r = await db.query(
-          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='052_acquisition_cost_integrity.sql') AS ready, current_user AS role",
+          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='076_terminal_v1_conservation.sql') AS ready, current_user AS role",
         );
         if (!r.rows[0].ready || r.rows[0].role !== "hvb_app")
           throw new Error("not ready");
@@ -316,6 +380,9 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...inputs,
     ...inventoryInputs,
     ...clinicalInputs,
+    ...clinicalCorrectionInputs,
+    ...dailyCorrectionInputs,
+    ...financialCorrectionInputs,
     ...dailyInputs,
     ...financialInputs,
     ...examInputs,
@@ -326,14 +393,25 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...purchaseInputs,
     ...payableInputs,
     ...terminalInputs,
+    ...accessInputs,
+    ...terminalV1Inputs,
     ...pricingInputs,
     ...acquisitionInputs,
+    ...installmentInputs,
+    ...supplierCreditInputs,
+    ...supplierOutflowInputs,
     ...medicalInputs,
+    ...medicalComplementInputs,
+    ...linksInputs,
+    ...registryInputs,
   };
   for (const action of [
     ...actions,
     ...inventoryActions,
     ...clinicalActions,
+    ...clinicalCorrectionActions,
+    ...dailyCorrectionActions,
+    ...financialCorrectionActions,
     ...dailyActions,
     ...financialActions,
     ...examActions,
@@ -344,18 +422,34 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...purchaseActions,
     ...payableActions,
     ...terminalActions,
+    ...terminalAccessActions(terminalEvidence),
+    ...terminalV1Actions(terminalV1Evidence),
     ...pricingActions,
     ...acquisitionActions,
+    ...installmentActions,
+    ...supplierCreditActions,
+    ...supplierOutflowActions,
     ...medicalActions,
+    ...medicalComplementActions,
+    ...linksActions,
+    ...registryActions,
   ]) {
     app.post(
       `/v1${action.path}`,
       {
+        ...(action.input === "medicalAttachment" ? { bodyLimit: 360000 } : {}),
         preValidation: async (req) => {
           strictValues(allInputs[action.input], req.body);
         },
         schema: {
           operationId: `post_${action.path.replace(/[^a-z]/g, "_")}`,
+          ...(action.path === "/terminal/retiradas"
+            ? {
+                deprecated: true,
+                description:
+                  "Legado C5: novos comandos bloqueados (409). Retry de comando histórico confirmado recupera o resultado original. Use Terminal de Acesso V2.",
+              }
+            : {}),
           security: [{ bearer: [] }],
           headers: action.deviceRequired
             ? { ...headers, required: [...headers.required, "x-device-id"] }
@@ -427,6 +521,9 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...lists,
     ...inventoryLists,
     ...clinicalLists,
+    ...clinicalCorrectionLists,
+    ...dailyCorrectionLists,
+    ...financialCorrectionLists,
     ...dailyLists,
     ...financialLists,
     ...examLists,
@@ -439,7 +536,12 @@ export async function buildApp(db: pg.Pool, logging = false) {
     ...terminalLists,
     ...pricingLists,
     ...acquisitionLists,
+    ...installmentLists,
+    ...supplierCreditLists,
+    ...supplierOutflowLists,
     ...medicalLists,
+    ...medicalComplementLists,
+    ...linksLists,
   ]) {
     const stockPosition = list.table === "posicao_estoque";
     const stockLedger = list.table === "lancamento_estoque_consulta";
@@ -486,6 +588,9 @@ export async function buildApp(db: pg.Pool, logging = false) {
           "avaliacao_id",
           "responsabilidade_id",
           "deposito_id",
+          ...(list.path.startsWith("/financeiro/")
+            ? ["extrato_id", "anterior_id"]
+            : []),
           "parcela_id",
           "conta_financeira_id",
           "item_comercial_id",
@@ -522,6 +627,11 @@ export async function buildApp(db: pg.Pool, logging = false) {
             ? [
                 "obrigacao_id",
                 "correcao_de_id",
+                "origem_obrigacao_id",
+                "saida_id",
+                "conciliacao_id",
+                "plano_id",
+                "alocacao_id",
                 "pagamento_id",
                 "liquidacao_id",
               ]
@@ -539,7 +649,11 @@ export async function buildApp(db: pg.Pool, logging = false) {
                 "custo_recebimento_id",
               ]
             : []),
+          ...(list.path.startsWith("/agenda/") ? ["vinculo_id"] : []),
           "evolucao_id",
+          ...(list.path.startsWith("/prontuario/")
+            ? ["evolucao_versao_id", "anexo_id", "coautoria_id"]
+            : []),
           ...(list.path.startsWith("/terminal/")
             ? ["etiqueta_id", "leitura_id", "dispositivo_id"]
             : []),
@@ -618,6 +732,10 @@ export async function buildApp(db: pg.Pool, logging = false) {
                   "utilizada",
                   "revisao_temporal",
                   "revertido",
+                  "revertida",
+                  "obrigacao_revertida",
+                  "preco_atual",
+                  "recebimento_revertido",
                   "fechada",
                   "exige_coleta",
                   "obrigatorio",
@@ -646,6 +764,12 @@ export async function buildApp(db: pg.Pool, logging = false) {
                 ].includes(column)
               ? { type: "boolean", nullable: column === "booleano" }
               : [
+                    ...(list.table === "anexo_evolucao_consulta"
+                      ? ["tamanho"]
+                      : []),
+                    ...(list.table === "vinculo_agendamento_consulta"
+                      ? ["episodio_versao"]
+                      : []),
                     "capacidade",
                     "vaga",
                     "versao",
@@ -784,6 +908,8 @@ export async function buildApp(db: pg.Pool, logging = false) {
     );
   }
   registerTerminal(app, authenticated, errors);
+  registerTerminalAccess(app, authenticated, errors);
+  registerTerminalV1(app, authenticated, errors);
   await app.ready();
   return app;
 }

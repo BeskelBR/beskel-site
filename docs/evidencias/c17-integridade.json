@@ -1,0 +1,66 @@
+{
+  "executed_at": "2026-09-22T13:32:58.079Z",
+  "databases": {
+    "DEV": {
+      "migrations": 72,
+      "mismatches": [],
+      "tabelas": 198,
+      "views": 75,
+      "permissoes": 128,
+      "protection": [
+        {
+          "relname": "revisao_deposito_adquirente",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "revisao_item_extrato",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        }
+      ]
+    },
+    "TEST": {
+      "migrations": 72,
+      "mismatches": [],
+      "tabelas": 198,
+      "views": 75,
+      "permissoes": 128,
+      "protection": [
+        {
+          "relname": "revisao_deposito_adquirente",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "revisao_item_extrato",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        }
+      ]
+    }
+  },
+  "historical_migrations_unchanged": true,
+  "openapi": {
+    "paths": 259,
+    "operations": 416,
+    "added": [
+      "post /v1/financeiro/depositos/{id}/cancelar",
+      "post /v1/financeiro/depositos/{id}/corrigir",
+      "post /v1/financeiro/extrato/{id}/cancelar",
+      "post /v1/financeiro/extrato/{id}/corrigir",
+      "post /v1/financeiro/conciliacoes/{id}/refazer",
+      "post /v1/financeiro/alocacoes-deposito/{id}/refazer",
+      "get /v1/financeiro/revisoes-depositos",
+      "get /v1/financeiro/revisoes-extrato"
+    ],
+    "removed": [],
+    "changed": [
+      "get /v1/financeiro/depositos",
+      "get /v1/financeiro/alocacoes-deposito",
+      "get /v1/financeiro/extrato",
+      "get /v1/financeiro/conciliacoes",
+      "get /v1/financeiro/avaliacoes"
+    ]
+  }
+}

@@ -595,15 +595,15 @@ export const financialLists = [
     path: "/financeiro/depositos",
     table: "deposito_consulta",
     columns:
-      "id,unidade_id,conta_financeira_id,adquirente,referencia,depositado_em,valor,evidencia,autor_id,motivo,criada_em,nao_alocado,nao_conciliado",
+      "id,unidade_id,conta_financeira_id,adquirente,referencia,depositado_em,valor,evidencia,autor_id,motivo,criada_em,nao_alocado,nao_conciliado,revisao_id,substituta_id,situacao",
     unit: true,
     permission: "financeiro:ler",
   },
   {
     path: "/financeiro/alocacoes-deposito",
-    table: "alocacao_deposito",
+    table: "alocacao_deposito_consulta",
     columns:
-      "id,unidade_id,deposito_id,parcela_id,valor,autor_id,motivo,criada_em",
+      "id,unidade_id,deposito_id,parcela_id,valor,autor_id,motivo,criada_em,anterior_id,revertido",
     unit: true,
     permission: "financeiro:ler",
   },
@@ -611,15 +611,15 @@ export const financialLists = [
     path: "/financeiro/extrato",
     table: "extrato_consulta",
     columns:
-      "id,unidade_id,conta_financeira_id,referencia,ocorrido_em,valor,evidencia,autor_id,motivo,criada_em,nao_conciliado",
+      "id,unidade_id,conta_financeira_id,referencia,ocorrido_em,valor,evidencia,autor_id,motivo,criada_em,nao_conciliado,revisao_id,substituta_id,situacao",
     unit: true,
     permission: "financeiro:ler",
   },
   {
     path: "/financeiro/conciliacoes",
-    table: "vinculo_conciliacao",
+    table: "vinculo_conciliacao_consulta",
     columns:
-      "id,unidade_id,deposito_id,extrato_id,valor,evidencia,autor_id,motivo,criada_em",
+      "id,unidade_id,deposito_id,extrato_id,valor,evidencia,autor_id,motivo,criada_em,anterior_id,revertido",
     unit: true,
     permission: "financeiro:ler",
   },

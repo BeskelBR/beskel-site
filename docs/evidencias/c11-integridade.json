@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-16T05:45:08.220Z",
+  "tables": [
+    {
+      "relkind": "r",
+      "n": 179
+    },
+    {
+      "relkind": "v",
+      "n": 68
+    }
+  ],
+  "permissions": 115,
+  "operations": 365,
+  "paths": 221,
+  "previousContractDifferences": [],
+  "migrations": 60,
+  "hashMismatches": [],
+  "historicalMismatches": []
+}

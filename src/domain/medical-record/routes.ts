@@ -15,6 +15,7 @@ const kinds = [
   "ordem",
   "programacao",
   "execucao",
+  "correcao_execucao",
   "consumo",
   "estorno_consumo",
   "resultado_exame",

@@ -387,9 +387,9 @@ export const lists = [
   },
   {
     path: "/atribuicoes",
-    table: "usuario_papel",
+    table: "atribuicao_consulta",
     permission: "acesso:administrar",
-    columns: "id,usuario_id,papel_id,unidade_id",
+    columns: "id,usuario_id,papel_id,unidade_id,ativo,versao",
   },
   {
     path: "/credenciais",

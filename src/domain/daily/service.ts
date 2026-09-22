@@ -657,16 +657,16 @@ export const dailyLists = [
   },
   {
     path: "/diarias/pacotes-episodio",
-    table: "pacote_episodio",
+    table: "pacote_episodio_consulta",
     columns:
-      "id,unidade_id,episodio_id,pacote_versao_id,inicio,fim,autor_id,motivo",
+      "id,unidade_id,episodio_id,pacote_versao_id,inicio,fim,autor_id,motivo,revisao_id,substituta_id,situacao",
     unit: true,
   },
   {
     path: "/diarias/periodos",
     table: "periodo_diaria_consulta",
     columns:
-      "id,unidade_id,episodio_id,pacote_episodio_id,pacote_versao_id,classificacao_episodio_id,inicio,fim,fuso,autor_id,motivo,necessita_revisao",
+      "id,unidade_id,episodio_id,pacote_episodio_id,pacote_versao_id,classificacao_episodio_id,inicio,fim,fuso,autor_id,motivo,necessita_revisao,revisao_id,substituta_id,situacao",
     unit: true,
   },
   {

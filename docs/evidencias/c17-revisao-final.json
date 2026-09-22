@@ -1,0 +1,26 @@
+{
+  "executed_at": "2026-09-22T13:37:28.961Z",
+  "branch": "hvb-sistema-dev",
+  "head": "789ee1f26241be9e636ea0ad328d03a1cea6f04b",
+  "staged_files": 0,
+  "changed_and_untracked_files": 148,
+  "secret_scan_hits": [],
+  "diff_check": "passed",
+  "protected_local_branches": [],
+  "focused_checks": "passed",
+  "tests": 56,
+  "seed_runs": 2,
+  "seed_revisions": {
+    "deposit": 2,
+    "statement": 2
+  },
+  "seed_links": {
+    "reconciliation": 2,
+    "allocation": 2
+  },
+  "parcel_available": "97.00",
+  "receipt_available": "100.00",
+  "dev_admin_credential_rotated_after_expiry": true,
+  "git_writes_attempted": false,
+  "next_action": "Aguardar e avaliar o delta intermediário do usuário; nenhum módulo seguinte iniciado."
+}

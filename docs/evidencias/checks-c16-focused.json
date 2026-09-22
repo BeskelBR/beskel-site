@@ -1,0 +1,57 @@
+{
+  "executed_at": "2026-09-17T12:46:05.872Z",
+  "branch": "hvb-sistema-dev",
+  "scope": "correções de diárias, cobertura, financeiro e correção clínica",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 1756,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 146,
+      "output": "Checked 154 files in 59ms. No fixes applied.\nFound 2 infos.",
+      "error": "scripts\\seed-daily-corrections.ts:104:5 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n  i Template literals are preferred over string concatenation.\n  \n    102 │   await writeFile(\n    103 │     \".local/daily-corrections-demo.json\",\n  > 104 │     JSON.stringify(\n        │     ^^^^^^^^^^^^^^^\n  > 105 │       {\n         ...\n  > 114 │       2,\n  > 115 │     ) + \"\\n\",\n        │     ^^^^^^^^\n    116 │     { mode: 0o600 },\n    117 │   );\n  \n  i Unsafe fix: Use a template literal.\n  \n    102 102 │     await writeFile(\n    103 103 │       \".local/daily-corrections-demo.json\",\n    104     │ - ····JSON.stringify(\n        104 │ + ····`${JSON.stringify(\n    105 105 │         {\n    106 106 │           episode: s.episode,\n    ······· │ \n    113 113 │         null,\n    114 114 │         2,\n    115     │ - ····)·+·\"\\n\",\n        115 │ + ····)}\\n`,\n    116 116 │       { mode: 0o600 },\n    117 117 │     );\n  \n\ntests\\medical-complements.test.ts:256:24 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n  i Template literals are preferred over string concatenation.\n  \n    254 │     b = attachment(s);\n    255 │   for (const extra of [\n  > 256 │     { conteudo_base64: b.conteudo_base64 + \"\\n\" },\n        │                        ^^^^^^^^^^^^^^^^^^^^^^^^\n    257 │     { conteudo_base64: \"!!!!\" },\n    258 │     { mime: \"application/pdf\" },\n  \n  i Unsafe fix: Use a template literal.\n  \n    254 254 │       b = attachment(s);\n    255 255 │     for (const extra of [\n    256     │ - ····{·conteudo_base64:·b.conteudo_base64·+·\"\\n\"·},\n        256 │ + ····{·conteudo_base64:·`${b.conteudo_base64}\\n`·},\n    257 257 │       { conteudo_base64: \"!!!!\" },\n    258 258 │       { mime: \"application/pdf\" },"
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 119,
+      "output": "Checked 157 files in 36ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 193,
+      "output": "✔ quantidades de estoque usam aritmética inteira e conversão sem arredondamento (1.0586ms)\n✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (6.2412ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (0.7871ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.2264ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (5.293ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 143.6257",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 194,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 18376,
+      "output": "✔ anulação é novo fato sem sucessora, fecha pendência material e libera programação sem estoque (1708.4116ms)\n✔ corrige executor, versão e programação no mesmo episódio sem reescrever a origem (78.5197ms)\n✔ remoção explícita de programação e cadeia de retificação permanecem rastreáveis (75.4287ms)\n✔ consumo ativo bloqueia ambas correções; estorno explícito restaura saldo antes de anular (84.3045ms)\n✔ retry concorrente mantém revisão única, payload distinto conflita e decisões concorrentes se excluem (200.5898ms)\n✔ permissões, RLS, outro episódio e executor inativo são bloqueados (106.0501ms)\n✔ contexto inválido reverte revisão, sucessora, auditoria e outbox atomicamente (60.4559ms)\n✔ anulação disputa com consumo sem deixar baixa ativa ligada a ato anulado (62.3012ms)\n✔ correção não invade programação já concluída e anulação documental pode ocorrer após encerramento (66.9323ms)\n✔ cobrança anterior fica em revisão sem apagar item ou mudar valor; cobertura perde origem ativa (253.786ms)\n✔ anulação invalida origem de coleta e aplicação preventiva, preservando os fatos (247.1996ms)\n✔ prontuário expõe anulação e autoria da correção, histórico não pode ser apagado (57.8986ms)\n✔ correção cria sucessora e cadeia, preserva origem e saldo (1855.9454ms)\n✔ retry retorna a mesma revisão e decisões concorrentes têm um único vencedor (294.1932ms)\n✔ associação exige tratar filhos; correção/cancelamento liberam intervalo sem apagar fatos (108.9785ms)\n✔ sucessora inválida faz rollback da revisão, comando e efeitos (87.7216ms)\n✔ sobreposição continua barrada na API e diretamente no banco (82.5645ms)\n✔ reserva ativa exige liberação explícita; contexto antigo deixa de reservar (165.1747ms)\n✔ cobertura requer reversão e reavaliação explícita na sucessora (150.7518ms)\n✔ cancelamento versus reserva serializa sem reserva ativa em período cancelado (93.2422ms)\n✔ cancelamento de associação versus novo período tem um único vencedor (79.3738ms)\n✔ documento da diária exige reversão financeira sem alterar valor histórico (289.4129ms)\n✔ documento de valor zero por cobertura também exige reversão explícita (187.0089ms)\n✔ permissão, tenant, episódio e confirmações explícitas protegem correções (139.1299ms)\n✔ histórico é imutável e listas exibem a revisão tipada (113.6895ms)\n✔ inserções SQL concorrentes também preservam exclusividade do intervalo (61.9802ms)\n✔ cancelamento versus documentação financeira não deixa dívida nova sobre origem cancelada (154.4881ms)\n✔ pacote incompleto não pode ser aprovado; simulação exige confirmação explícita (1843.0357ms)\n✔ aprovação congela regras e membros de grupo; versões evoluem sem sobrescrever (107.6339ms)\n✔ limite concorrente inclui apenas uma administração e nunca gera cobrança (187.8679ms)\n✔ repetição e versão esperada impedem duplicação de avaliação e consumo de limite (312.0274ms)\n✔ reavaliação compensa anterior e preserva cadeia; reversão libera limite (226.0077ms)\n✔ reserva protege limite e efetivação mantém efeito único (135.8159ms)\n✔ reservas concorrentes, liberação e expiração não criam fato ou avaliação (796.4286ms)\n✔ itens distintos contam identidade clínica compartilhada, incluindo reserva e reversão (197.0781ms)\n✔ janela por episódio compartilha limite entre períodos; fronteira temporal é explícita (134.0155ms)\n✔ prioridade decide regra explícita e empate vira pendência (165.0481ms)\n✔ classificação referencia medição de peso informada e mudança invalida período sem apagar avaliação (120.3917ms)\n✔ alta retroativa e retificação da origem exigem revisão, preservando capacidade até decisão (217.1296ms)\n✔ execução parcial fica pendente sem converter parcial em administração integral (76.7458ms)\n✔ isolamento e permissões impedem avaliar outra unidade ou aprovar regra sem papel (62.362ms)\n✔ quantidade física é exata, não muda consumo/custo e material do tutor permanece pendente (128.5032ms)\n✔ limites por período são independentes e cobertura ilimitada é somente explícita (231.528ms)\n✔ consultas de diária serializam regras, alocações e estados com filtros paginados (135.7355ms)\n✔ catálogo e preço preservam versão, vigência e centavos sem coerção (1844.6054ms)\n✔ origem comercial única, confirmação literal e reavaliação com versão esperada (286.1021ms)\n✔ preço ausente fica pendente e emissão não produz conta a receber fictícia (212.9912ms)\n✔ responsabilidades fecham valor; falha desfaz item, comando e rateio (158.2878ms)\n✔ títulos parciais concorrentes não duplicam valor da responsabilidade (190.8095ms)\n✔ recebimento deduplica referência e retry sem liquidar automaticamente (188.8596ms)\n✔ liquidações concorrentes respeitam saldo de ambos os lados (169.1518ms)\n✔ crédito usa recebimento disponível e aplicação não duplica dinheiro (253.4ms)\n✔ reversão encadeada preserva histórico e permite nova avaliação (225.0317ms)\n✔ caixa tem uma sessão aberta, diferença explícita e fechamento preservado (109.0958ms)\n✔ cartão, depósito e conciliação permanecem fatos separados com limites (185.5235ms)\n✔ RBAC, organização, unidade e pagador impedem alocação cruzada (194.2976ms)\n✔ listas financeiras paginadas serializam valores exatos e estado (86.4974ms)\n✔ diária omitida permanece pendente; inclusão documenta zero e reversão sinaliza revisão (194.6088ms)\n✔ retificação clínica preserva dívida histórica e impede nova emissão obsoleta (135.6266ms)\n✔ consumo do tutor mantém custo e cobertura comercial pendente (118.8102ms)\n✔ SQL não acrescenta efeito financeiro a comando confirmado nem arredonda centavos (148.2543ms)\n✔ depósito agregado admite repasses parciais sem liquidar tutor novamente (99.8941ms)\n✔ execução substituta exige reverter documento anterior para não duplicar dívida (147.9041ms)\nℹ tests 63\nℹ suites 0\nℹ pass 63\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 18322.9214",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 1764,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

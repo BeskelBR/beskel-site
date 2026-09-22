@@ -3,7 +3,6 @@ import type { PoolClient } from "pg";
 import { authorize, DomainError, one } from "../core.ts";
 import type { Actor } from "../core.ts";
 import type { Action, Body } from "../foundation.ts";
-import { inventoryActions } from "../inventory/service.ts";
 const scope: Action["scope"] = async (_t, _a, b) => b.unidade_id as string;
 async function insert(
   tx: PoolClient,
@@ -110,43 +109,8 @@ export const terminalActions: Action[] = [
     permission: "terminal:usar",
     scope,
     deviceRequired: true,
-    async run(tx, a, b, _id, cmd) {
-      await authorize(tx, a, "estoque:movimentar", b.unidade_id as string);
-      const scan = await one(
-        tx,
-        "SELECT l.*,e.posicao_id FROM leitura_terminal l JOIN etiqueta_terminal e ON e.organizacao_id=l.organizacao_id AND e.id=l.etiqueta_id WHERE l.organizacao_id=$1 AND l.unidade_id=$2 AND l.id=$3",
-        [a.organizacao_id, b.unidade_id, b.leitura_id],
-      );
-      await sourcePermissions(
-        tx,
-        a,
-        { ...b, episodio_id: scan.episodio_id },
-        scan,
-      );
-      if (scan.posicao_id !== b.origem_id)
-        throw new DomainError(409, "origem_diverge_da_leitura");
-      await tx.query("SELECT validar_contexto_terminal($1,$2,$3)", [
-        a.organizacao_id,
-        scan.etiqueta_id,
-        scan.episodio_id,
-      ]);
-      const positions = await tx.query(
-        "SELECT id FROM posicao_estoque WHERE organizacao_id=$1 AND unidade_id=$2 AND id=ANY($3::uuid[])",
-        [a.organizacao_id, b.unidade_id, [b.origem_id, b.destino_id]],
-      );
-      if (positions.rowCount !== 2)
-        throw new DomainError(409, "posicoes_divergentes_da_unidade");
-      const action = inventoryActions.find(
-        (x) => x.path === "/estoque/retiradas",
-      );
-      if (!action) throw new Error("Contrato de retirada ausente");
-      const movement = await action.run(tx, a, b, "", cmd);
-      return {
-        id: await insert(tx, a, b, cmd, "retirada_terminal", {
-          id: movement.id,
-          leitura_id: b.leitura_id,
-        }),
-      };
+    async run() {
+      throw new DomainError(409, "terminal_retirada_legada_use_mobile_api");
     },
   },
 ];

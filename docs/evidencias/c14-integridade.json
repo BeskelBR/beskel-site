@@ -1,0 +1,137 @@
+{
+  "executed_at": "2026-09-16T11:24:33.953Z",
+  "databases": {
+    "DEV": {
+      "migrations": 66,
+      "mismatches": [],
+      "tabelas": 193,
+      "views": 72,
+      "permissoes": 125,
+      "protection": [
+        {
+          "relname": "ordem_retirada",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "item_ordem_retirada",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "desafio_acesso",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "evidencia_acesso",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "autenticacao_acesso",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "sessao_acesso",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "sessao_ordem_retirada",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "evento_acesso",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "evento_ordem_retirada",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        }
+      ]
+    },
+    "TEST": {
+      "migrations": 66,
+      "mismatches": [],
+      "tabelas": 193,
+      "views": 72,
+      "permissoes": 125,
+      "protection": [
+        {
+          "relname": "ordem_retirada",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "item_ordem_retirada",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "desafio_acesso",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "evidencia_acesso",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "autenticacao_acesso",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "evento_acesso",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "evento_ordem_retirada",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "sessao_acesso",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "sessao_ordem_retirada",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        }
+      ]
+    }
+  },
+  "historical_migrations_unchanged": true,
+  "openapi": {
+    "paths": 242,
+    "operations": 399,
+    "added": [
+      "post /v1/retiradas/ordens",
+      "get /v1/retiradas/ordens",
+      "post /v1/retiradas/ordens/{id}/submit",
+      "post /v1/retiradas/ordens/{id}/cancelar",
+      "post /v1/terminal/acesso/desafios",
+      "get /v1/terminal/acesso/desafios",
+      "post /v1/terminal/acesso/autenticacoes",
+      "get /v1/terminal/acesso/autenticacoes",
+      "post /v1/terminal/acesso/sessoes",
+      "get /v1/terminal/acesso/sessoes",
+      "post /v1/terminal/acesso/sessoes/{id}/eventos",
+      "get /v1/retiradas/itens",
+      "get /v1/retiradas/eventos",
+      "get /v1/terminal/acesso/vinculos",
+      "get /v1/terminal/acesso/eventos"
+    ],
+    "removed": [],
+    "legacy_deprecated": true
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "executed_at": "2026-09-15T22:32:13.397Z",
+  "branch": "hvb-sistema-dev",
+  "scope": "crédito de fornecedores, parcelas e contas a pagar",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 1647,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 143,
+      "output": "Checked 122 files in 47ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 117,
+      "output": "Checked 125 files in 30ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 213,
+      "output": "✔ quantidades de estoque usam aritmética inteira e conversão sem arredondamento (0.7402ms)\n✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (6.4529ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (0.8438ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.2345ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (5.6879ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 153.7846",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 200,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 10090,
+      "output": "✔ obrigação explícita não recebe estoque nem cria pagamento e documento não duplica (1719.2763ms)\n✔ pagamento deduplica retry e referência sem liquidar automaticamente (110.9496ms)\n✔ liquidações concorrentes não excedem obrigação nem pagamento (199.7844ms)\n✔ reversão encadeada recompõe saldos e não apaga fatos (106.445ms)\n✔ fornecedor, pedido, unidade e organização devem coincidir (161.1848ms)\n✔ centavos, datas, confirmação e alvo único são exigidos (97.4633ms)\n✔ cancelamento e recebimento físicos não compensam dívida por inferência (87.0424ms)\n✔ listas paginadas exigem permissão própria e filtros de unidade (91.2001ms)\n✔ SQL preserva histórico e rejeita efeito anexado ao comando concluído (135.6825ms)\n✔ correção documental exige reversão prévia e aceita um único sucessor (113.6237ms)\n✔ crédito declarado não reduz dívida, não cria pagamento e não devolve estoque (1643.9442ms)\n✔ aplicação compartilha liquidação original e quita parcela sem pagamento fictício (128.3038ms)\n✔ reversões recompõem crédito, dívida e parcela e impedem estorno de fonte aplicada (116.8272ms)\n✔ aplicações concorrentes em obrigações distintas não excedem crédito disponível (134.9232ms)\n✔ pagamento e crédito concorrentes compartilham limite da mesma dívida (168.6072ms)\n✔ retry não duplica aplicação e a mesma referência não registra outro crédito (87.343ms)\n✔ centavos, temporalidade e fonte única são exigidos (96.9238ms)\n✔ fornecedor, unidade, RLS e permissões impedem crédito de outro contexto (316.1642ms)\n✔ correção documental exige reversão e uma única sucessora da mesma origem (132.2965ms)\n✔ origem documental não limita compensação a uma única obrigação do fornecedor (107.2104ms)\n✔ reversão concorrente da fonte ou sua aplicação aceita apenas uma intenção (73.2501ms)\n✔ indicadores de consultas retornam booleanos, incluindo parcelas e aquisição (225.3677ms)\n✔ plano distribui valor integral sem criar nova dívida, pagamento ou estoque (1740.2992ms)\n✔ soma incorreta, valor zero e datas fora de ordem rejeitam o plano atomicamente (100.7122ms)\n✔ liquidação anterior permanece sem parcela até alocação explícita, sem duplicar baixa (117.1953ms)\n✔ alocação idempotente e reversão recompõem parcela sem desfazer liquidação (158.3195ms)\n✔ alocações concorrentes respeitam limites da parcela e da liquidação (171.5501ms)\n✔ reprogramação exige reverter alocações e aceita uma única sucessora concorrente (103.8004ms)\n✔ reversão da liquidação inativa alocações; obrigação corrigida exige novo plano (124.5904ms)\n✔ contextos cruzados, unidade, RLS e permissões bloqueiam alocações impróprias (217.0577ms)\n✔ estorno concorrente de liquidação não deixa parcela quitada indevidamente (127.3139ms)\n✔ plano também cobre despesa e vencimentos iguais explícitos sem inferir juros (90.4378ms)\nℹ tests 32\nℹ suites 0\nℹ pass 32\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 10036.2524",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 1552,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

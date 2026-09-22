@@ -1,0 +1,57 @@
+{
+  "executed_at": "2026-09-16T05:43:16.633Z",
+  "branch": "hvb-sistema-dev",
+  "scope": "complementos do prontuário e narrativa",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 1605,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 135,
+      "output": "Checked 131 files in 48ms. No fixes applied.\nFound 1 info.",
+      "error": "tests\\medical-complements.test.ts:256:24 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n  i Template literals are preferred over string concatenation.\n  \n    254 │     b = attachment(s);\n    255 │   for (const extra of [\n  > 256 │     { conteudo_base64: b.conteudo_base64 + \"\\n\" },\n        │                        ^^^^^^^^^^^^^^^^^^^^^^^^\n    257 │     { conteudo_base64: \"!!!!\" },\n    258 │     { mime: \"application/pdf\" },\n  \n  i Unsafe fix: Use a template literal.\n  \n    254 254 │       b = attachment(s);\n    255 255 │     for (const extra of [\n    256     │ - ····{·conteudo_base64:·b.conteudo_base64·+·\"\\n\"·},\n        256 │ + ····{·conteudo_base64:·`${b.conteudo_base64}\\n`·},\n    257 257 │       { conteudo_base64: \"!!!!\" },\n    258 258 │       { mime: \"application/pdf\" },"
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 116,
+      "output": "Checked 134 files in 30ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 214,
+      "output": "✔ quantidades de estoque usam aritmética inteira e conversão sem arredondamento (1.0898ms)\n✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (6.2927ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (0.8624ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.2391ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (10.9936ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 157.6747",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 320,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 9748,
+      "output": "✔ modelo versionado compõe texto exato na evolução original e preserva respostas privadas (3863.4695ms)\n✔ modelo aceita versão explicitamente escolhida e concorrência produz um sucessor (155.7747ms)\n✔ campos duplicados, respostas desconhecidas, ausentes, numéricas e texto excessivo são rejeitados sem evolução parcial (66.1893ms)\n✔ anexo é privado, transacional, tipado e idempotente com hash dos bytes (65.4057ms)\n✔ limite de anexo, base64 canônico, MIME, nome e hash de origem são conferidos (66.4488ms)\n✔ retificar mantém anexo na versão histórica e somente seu autor pode revogar (71.0391ms)\n✔ coautoria declara somente o próprio usuário e impede duplicidade e autoria original (64.3452ms)\n✔ retificação encerra vigência da coautoria sem apagá-la, revogação é pessoal (57.5983ms)\n✔ coautoria concorrente com retificação nunca passa a valer para o texto novo (52.0245ms)\n✔ busca exige acesso ao conteúdo, limita paciente/unidade e separa versão atual do histórico (63.9851ms)\n✔ busca pagina metadados sem repetições e trata consulta como dado (55.7137ms)\n✔ permissões, unidade e organização protegem comandos e preservam isolamento RLS (55.6194ms)\n✔ anexos e declarações em evolução invalidada são rejeitados (48.2831ms)\n✔ integridade SQL rejeita proveniência falsa, alteração e uso de comando concluído (54.3793ms)\n✔ evolução guarda texto exato, autor, hash e instante sem alterar estoque (1543.887ms)\n✔ retificação concorrente tem um sucessor e invalidação preserva conteúdo anterior (221.7683ms)\n✔ criação e retry deduplicam referência sem duplicar versões (99.6599ms)\n✔ paciente/episódio, tempo futuro e conteúdo inválido são recusados (96.8417ms)\n✔ linha do tempo preserva planejamento e IDs de execução/consumo/estorno (129.23ms)\n✔ fontes selecionadas exigem suas permissões e metadados não liberam texto (58.2391ms)\n✔ período, fontes e cursor compostos têm limites explícitos (44.7824ms)\n✔ paginação desempata instantes idênticos sem perder ou repetir fatos (75.3927ms)\n✔ fontes documentais e agenda mostram versões sem copiar conteúdo (253.6999ms)\n✔ exames e aplicações externas preservam ID, estado e natureza (353.3475ms)\n✔ saída retroativa preserva relato e sinaliza revisão temporal até retificação (61.7672ms)\n✔ unidade e RLS isolam relato, e SQL preserva o histórico (70.8484ms)\nℹ tests 26\nℹ suites 0\nℹ pass 26\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 9693.8662",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 1633,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

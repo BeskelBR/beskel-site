@@ -1,0 +1,39 @@
+{
+  "executed_at": "2026-09-17T12:19:57.222Z",
+  "branch": "hvb-sistema-dev",
+  "head": "789ee1f26241be9e636ea0ad328d03a1cea6f04b",
+  "staged": "",
+  "changed_files": 119,
+  "secret_match_files": [],
+  "check_scope": "correção clínica e dependências: clínica, diárias, financeiro, exames, protocolos e prontuário",
+  "check_steps": [
+    {
+      "name": "typecheck",
+      "status": 0
+    },
+    {
+      "name": "lint",
+      "status": 0
+    },
+    {
+      "name": "format",
+      "status": 0
+    },
+    {
+      "name": "unit",
+      "status": 0
+    },
+    {
+      "name": "migrate",
+      "status": 0
+    },
+    {
+      "name": "integration",
+      "status": 0
+    },
+    {
+      "name": "openapi",
+      "status": 0
+    }
+  ]
+}

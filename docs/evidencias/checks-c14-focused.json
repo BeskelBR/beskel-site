@@ -1,0 +1,57 @@
+{
+  "executed_at": "2026-09-16T22:25:25.226Z",
+  "branch": "hvb-sistema-dev",
+  "scope": "terminal de acesso V2, legado e fundação",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 6399,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 148,
+      "output": "Checked 148 files in 54ms. No fixes applied.\nFound 1 info.",
+      "error": "tests\\medical-complements.test.ts:256:24 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n  i Template literals are preferred over string concatenation.\n  \n    254 │     b = attachment(s);\n    255 │   for (const extra of [\n  > 256 │     { conteudo_base64: b.conteudo_base64 + \"\\n\" },\n        │                        ^^^^^^^^^^^^^^^^^^^^^^^^\n    257 │     { conteudo_base64: \"!!!!\" },\n    258 │     { mime: \"application/pdf\" },\n  \n  i Unsafe fix: Use a template literal.\n  \n    254 254 │       b = attachment(s);\n    255 255 │     for (const extra of [\n    256     │ - ····{·conteudo_base64:·b.conteudo_base64·+·\"\\n\"·},\n        256 │ + ····{·conteudo_base64:·`${b.conteudo_base64}\\n`·},\n    257 257 │       { conteudo_base64: \"!!!!\" },\n    258 258 │       { mime: \"application/pdf\" },"
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 118,
+      "output": "Checked 151 files in 35ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 789,
+      "output": "✔ quantidades de estoque usam aritmética inteira e conversão sem arredondamento (1.1453ms)\n✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (6.3638ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (0.8809ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.2422ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (11.1926ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 737.4653",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 734,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 16146,
+      "output": "✔ todas as consultas publicadas serializam conforme contrato sem SELECT irrestrito (4863.025ms)\n✔ retry transacional desfaz tentativa anterior e respeita limite de três tentativas (134.0597ms)\n✔ health, readiness, organização, contrato OpenAPI e autenticação (55.995ms)\n✔ cadastro, vínculo, papéis, dispositivo e proveniência sintética executáveis (108.3608ms)\n✔ oito comandos concorrentes e retry após resposta perdida produzem um único efeito (85.2386ms)\n✔ falha de integridade reverte comando, domínio, auditoria e outbox (33.0418ms)\n✔ FK composta e RLS bloqueiam outra organização; contexto não vaza no pool (13.7079ms)\n✔ RBAC nega escrita ao leitor e ABAC restringe unidade/dispositivo no servidor (21.5096ms)\n✔ credencial opaca, expirada, NFC e revogada; desativação de usuário/dispositivo (39.2685ms)\n✔ capacidade por vaga, concorrência, intervalo e consistência de unidade (76.7888ms)\n✔ alta clínica separada da ocupação e saída, com versão esperada e histórico (52.975ms)\n✔ paginação keyset, limites, entradas desconhecidas e datas futuras (11.7797ms)\n✔ privilégios: app não altera auditoria, apaga cadastro, assume worker ou cria tabela (5.7708ms)\n✔ workers concorrentes não reservam o mesmo job; inbox deduplica repetição (87.5586ms)\n✔ lease expirada, fencing, backoff e erro permanente viram pendência (34.6036ms)\n✔ autenticação e acesso com duas ordens: só ENTRY_CONFIRMED inicia separação, sem estoque/clínica/financeiro (2872.0707ms)\n✔ retry concorrente produz um evento, payload diferente conflita e referência duplicada é rejeitada (130.0408ms)\n✔ simulação exige adaptador no servidor; UI não fornece flags de confiança (144.2625ms)\n✔ evidência expirada, futura ou negativa não autentica; falta de dispositivo e decimal numérico rejeitados (78.189ms)\n✔ escopo sensível é explícito; armário exige entrada e porta fechada (152.2768ms)\n✔ operador sem permissão sensível não cria sessão sensível (70.5409ms)\n✔ ordem não pode pertencer a duas sessões ativas concorrentes (87.9364ms)\n✔ RLS, unidade, episódio encerrado e dispositivo alheio mantêm fronteiras (114.0244ms)\n✔ cancelamento e itens são append-only; novas confirmações de fulfillment não existem (99.0384ms)\n✔ evento futuro, fora de ordem e expansão de escopo são rejeitados atomicamente (159.5713ms)\n✔ nova credencial não assume sessão vinculada à credencial original (107.7354ms)\n✔ autenticação curta expirada não abre acesso; desativação do dispositivo bloqueia evento (910.2057ms)\n✔ consultas tipadas, filtros, auditoria e outbox preservam evidência sem expor assinatura (93.3988ms)\n✔ scan identifica contexto sem criar movimento, execução ou cobrança (1747.9929ms)\n✔ retirada legada bloqueia novos comandos sem movimentar estoque (82.0849ms)\n✔ dispositivo, confirmação literal e credencial API são obrigatórios (69.3599ms)\n✔ revogação entre scan e confirmação bloqueia retirada sem perder histórico (70.897ms)\n✔ outro operador ou dispositivo não reutiliza leitura alheia (100.6168ms)\n✔ episódio escolhido deve ser compatível e continuar aberto na confirmação (133.2856ms)\n✔ RLS, unidade, alvo e saldo inválidos não deixam retirada parcial (79.139ms)\n✔ desativação concorrente do dispositivo é revalidada antes do comando (62.9719ms)\nℹ tests 36\nℹ suites 0\nℹ pass 36\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 16093.0716",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 1716,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

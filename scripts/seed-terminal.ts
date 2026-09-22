@@ -24,12 +24,7 @@ try {
     [f.org, f.adminRole, permissions],
   );
   const s = await terminalScenario(app, f.adminToken, f.unit, "seed-c5");
-  const withdrawal = await s.create(
-    "retirada",
-    "/terminal/retiradas",
-    s.withdrawalBody,
-    s.device,
-  );
+  // C14: seed legado demonstra apenas identificação; não cria nova retirada.
   const references = {
     patient: s.patient,
     episode: s.episode,
@@ -38,8 +33,8 @@ try {
     scan: s.scan,
     origin: s.position,
     destination: s.destination,
-    withdrawal,
-    commandKey: "seed-c5-terminal-retirada",
+    legado: true,
+    commandKey: "seed-c5-terminal-leitura",
   };
   await writeFile(
     ".local/terminal-demo.json",
@@ -47,7 +42,7 @@ try {
     { mode: 0o600 },
   );
   console.log(
-    "Seed C5 fictício: leitura e retirada confirmada de duas unidades, saldo 18 na origem e 2 no destino; nenhuma execução clínica.",
+    "Seed legado C5: contexto identificado. Novas retiradas descontinuadas pelo C14; histórico preservado.",
   );
 } finally {
   await app.close();

@@ -1,0 +1,57 @@
+{
+  "executed_at": "2026-09-22T18:50:46.337Z",
+  "branch": "hvb-sistema-dev",
+  "scope": "Terminal v1, estoque, C5/C14 e clínica",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 2029,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 169,
+      "output": "Checked 166 files in 64ms. No fixes applied.\nFound 1 info.",
+      "error": "tests\\medical-complements.test.ts:256:24 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n  i Template literals are preferred over string concatenation.\n  \n    254 │     b = attachment(s);\n    255 │   for (const extra of [\n  > 256 │     { conteudo_base64: b.conteudo_base64 + \"\\n\" },\n        │                        ^^^^^^^^^^^^^^^^^^^^^^^^\n    257 │     { conteudo_base64: \"!!!!\" },\n    258 │     { mime: \"application/pdf\" },\n  \n  i Unsafe fix: Use a template literal.\n  \n    254 254 │       b = attachment(s);\n    255 255 │     for (const extra of [\n    256     │ - ····{·conteudo_base64:·b.conteudo_base64·+·\"\\n\"·},\n        256 │ + ····{·conteudo_base64:·`${b.conteudo_base64}\\n`·},\n    257 257 │       { conteudo_base64: \"!!!!\" },\n    258 258 │       { mime: \"application/pdf\" },"
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 135,
+      "output": "Checked 169 files in 41ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 226,
+      "output": "✔ quantidades de estoque usam aritmética inteira e conversão sem arredondamento (0.7923ms)\n✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (7.248ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (1.1194ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.3254ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (12.0814ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 168.2513",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 659,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 25230,
+      "output": "✔ execução confirmada sem lote preserva saldo e abre pendência; confirmação não é inferida (1925.1418ms)\n✔ programação só conclui uma vez sob concorrência e evento real deduplica chaves diferentes (263.3865ms)\n✔ parciais e conclusão ficam distintas; retificação preserva o original (139.4687ms)\n✔ ordem versionada exige versão esperada e mantém programação anterior para revisão (64.7619ms)\n✔ sobreposição gera revisão e não exclui ordem; material previsto não cria execução nem consumo (71.9582ms)\n✔ consumo identificado baixa uma vez, preserva custódia do tutor e resolve a pendência (98.9009ms)\n✔ falha em um item desfaz o lote inteiro sem apagar execução; decimais aninhados são exatos (66.8707ms)\n✔ consumos concorrentes e reserva não excedem saldo disponível (74.4855ms)\n✔ material de outro tutor, episódio ou unidade não pode ser alocado ao paciente (259.7027ms)\n✔ estorno agregado reabre pendência, compensa todos os itens e permite retificar (127.8694ms)\n✔ registro tardio compara horário ocorrido com alta; programação não executada não vira fato (114.4235ms)\n✔ permissões clínicas, contexto de unidade e SQL imutável não admitem atalhos (112.5796ms)\n✔ consumo em dois lotes preserva custo exato e estorno integral; validade e custo desconhecido ficam pendentes (95.3605ms)\n✔ retirada transfere e o consumo debita somente o destino identificado (71.095ms)\n✔ alta preserva programações futuras e fatos anteriores com pendência de revisão (59.1518ms)\n✔ SQL não pode adicionar lançamento usando comando já confirmado (50.6637ms)\n✔ listas clínicas paginadas respeitam filtros e mapa exige período limitado (90.8003ms)\n✔ apresentações são dimensionais, exatas, versionadas e imutáveis (1926.2995ms)\n✔ frações decimais preservam precisão e rejeitam arredondamento silencioso (44.4793ms)\n✔ repetição concorrente de entrada e timeout simulado geram um único par (198.4418ms)\n✔ duas retiradas concorrentes não excedem saldo e não registram consumo (85.2554ms)\n✔ transferências opostas usam ordem determinística e preservam total (81.9879ms)\n✔ reserva protege disponibilidade e efetivação transfere uma única vez (64.0416ms)\n✔ reservas concorrentes, liberação e expiração não alteram saldo físico (536.8986ms)\n✔ devolução parcial é vinculada, limitada e reversível antes da origem (75.5304ms)\n✔ perda e reversão preservam razão; reversão de entrada não pode consumir reserva (62.1972ms)\n✔ custódia do tutor e custo desconhecido ficam explícitos sem custo hospitalar inventado (100.2113ms)\n✔ validade pendente, vencida e recipiente aberto sem regra impedem retirada, preservando entrada (113.0415ms)\n✔ inventário aplica diferença vinculada e rejeita contagem após movimentação concorrente (95.5221ms)\n✔ inventário sem divergência não inventa movimento e ajuste não passa por cima de reserva (52.6951ms)\n✔ isolamento, permissões e proteção SQL impedem atalhos de saldo e livro incompleto (35.2854ms)\n✔ consultas paginadas de estoque seguem OpenAPI e devolvem decimais como strings (38.9748ms)\n✔ autenticação e acesso com duas ordens: só ENTRY_CONFIRMED inicia separação, sem estoque/clínica/financeiro (3259.0806ms)\n✔ retry concorrente produz um evento, payload diferente conflita e referência duplicada é rejeitada (137.7805ms)\n✔ simulação exige adaptador no servidor; UI não fornece flags de confiança (162.7109ms)\n✔ evidência expirada, futura ou negativa não autentica; falta de dispositivo e decimal numérico rejeitados (80.3445ms)\n✔ escopo sensível é explícito; armário exige entrada e porta fechada (164.4206ms)\n✔ operador sem permissão sensível não cria sessão sensível (72.964ms)\n✔ ordem não pode pertencer a duas sessões ativas concorrentes (90.1335ms)\n✔ RLS, unidade, episódio encerrado e dispositivo alheio mantêm fronteiras (110.4244ms)\n✔ cancelamento e itens são append-only; novas confirmações de fulfillment não existem (96.4694ms)\n✔ evento futuro, fora de ordem e expansão de escopo são rejeitados atomicamente (141.3648ms)\n✔ nova credencial não assume sessão vinculada à credencial original (87.9318ms)\n✔ autenticação curta expirada não abre acesso; desativação do dispositivo bloqueia evento (905.0127ms)\n✔ consultas tipadas, filtros, auditoria e outbox preservam evidência sem expor assinatura (118.7715ms)\n✔ NFC inicia biometria automaticamente; identidade provisionada, replay e adaptador fechado (3191.4906ms)\n✔ FEFO/FIFO divide demanda e conserva ORs, ajustes e origens clínicas sem executar ou consumir (397.8367ms)\n✔ sessão única por sala, origem clínica tipada e entradas do cliente estritas (382.6667ms)\n✔ não encontrado realoca automaticamente e exclui todos os lotes já falhos (385.8626ms)\n✔ alternativas insuficientes não fragmentam tarefa; parcial conserva origens e OR não atendida (317.6304ms)\n✔ sem alternativa resulta em exceção e indisponibilidade explícita, sem movimento (240.3113ms)\n✔ PICKING_READY automático pode reabrir antes da saída, nunca depois de PRESENCE_CLEARED (230.7609ms)\n✔ armário sensível exige toque, abertura, fechamento e trava; mesma autenticação (294.2833ms)\n✔ reserva física não pode ser liberada por endpoint M2 enquanto sessão está ativa (183.2063ms)\n✔ erro técnico preserva DOOR_CLOSED e recovery confirma sem nova retirada (238.3494ms)\n✔ idempotência recursiva e eventos físicos reentregues não duplicam confirmação (221.9637ms)\n✔ RLS, trilha imutável e projeção protegida no banco (158.549ms)\n✔ timeout pré-entrada falha fechado, libera reservas e permite retomar a mesma OR (266.0622ms)\n✔ timeout com presença mantém sala e reservas protegidas; alerta único e conclusão após lease (272.2836ms)\n✔ funcionário sem poder sensível é recusado mesmo com dispositivo autorizado (152.0034ms)\n✔ janela sensível vencida não presume trava; fechamento com itens pendentes permite nova abertura (270.7389ms)\n✔ picking comum fica suspenso durante acesso sensível; catálogo é autoridade (288.6395ms)\n✔ reservas M2 concorrentes com alocação Terminal nunca excedem o saldo (146.3425ms)\n✔ coordenadas livres independem do produto e não aceitam mistura de lotes (192.3984ms)\n✔ revogação da credencial do dispositivo bloqueia novas entregas e replay (112.9521ms)\n✔ scan identifica contexto sem criar movimento, execução ou cobrança (1981.9525ms)\n✔ retirada legada bloqueia novos comandos sem movimentar estoque (84.8063ms)\n✔ dispositivo, confirmação literal e credencial API são obrigatórios (82.6455ms)\n✔ revogação entre scan e confirmação bloqueia retirada sem perder histórico (76.8422ms)\n✔ outro operador ou dispositivo não reutiliza leitura alheia (108.7034ms)\n✔ episódio escolhido deve ser compatível e continuar aberto na confirmação (148.6596ms)\n✔ RLS, unidade, alvo e saldo inválidos não deixam retirada parcial (82.8116ms)\n✔ desativação concorrente do dispositivo é revalidada antes do comando (69.7779ms)\nℹ tests 73\nℹ suites 0\nℹ pass 73\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 25166.58",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 1956,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

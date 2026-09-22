@@ -1,0 +1,48 @@
+{
+  "executed_at": "2026-09-17T12:16:23.393Z",
+  "databases": {
+    "DEV": {
+      "migrations": 68,
+      "mismatches": [],
+      "tabelas": 194,
+      "views": 72,
+      "permissoes": 127,
+      "protection": [
+        {
+          "relname": "revisao_execucao",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        }
+      ]
+    },
+    "TEST": {
+      "migrations": 68,
+      "mismatches": [],
+      "tabelas": 194,
+      "views": 72,
+      "permissoes": 127,
+      "protection": [
+        {
+          "relname": "revisao_execucao",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        }
+      ]
+    }
+  },
+  "historical_migrations_unchanged": true,
+  "openapi": {
+    "paths": 245,
+    "operations": 402,
+    "added": [
+      "post /v1/clinica/execucoes/{id}/corrigir-contexto",
+      "post /v1/clinica/execucoes/{id}/anular",
+      "get /v1/clinica/revisoes-execucao"
+    ],
+    "removed": [],
+    "changed": [
+      "get /v1/prontuario/linha-do-tempo",
+      "get /v1/clinica/execucoes"
+    ]
+  }
+}

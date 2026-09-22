@@ -1,0 +1,61 @@
+{
+  "executed_at": "2026-09-17T12:46:58.845Z",
+  "databases": {
+    "DEV": {
+      "migrations": 70,
+      "mismatches": [],
+      "tabelas": 196,
+      "views": 73,
+      "permissoes": 128,
+      "protection": [
+        {
+          "relname": "revisao_pacote_episodio",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "revisao_periodo_diaria",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        }
+      ]
+    },
+    "TEST": {
+      "migrations": 70,
+      "mismatches": [],
+      "tabelas": 196,
+      "views": 73,
+      "permissoes": 128,
+      "protection": [
+        {
+          "relname": "revisao_pacote_episodio",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "revisao_periodo_diaria",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        }
+      ]
+    }
+  },
+  "historical_migrations_unchanged": true,
+  "openapi": {
+    "paths": 251,
+    "operations": 408,
+    "added": [
+      "post /v1/diarias/pacotes-episodio/{id}/cancelar",
+      "post /v1/diarias/pacotes-episodio/{id}/corrigir",
+      "post /v1/diarias/periodos/{id}/cancelar",
+      "post /v1/diarias/periodos/{id}/corrigir",
+      "get /v1/diarias/revisoes-pacotes-episodio",
+      "get /v1/diarias/revisoes-periodos"
+    ],
+    "removed": [],
+    "changed": [
+      "get /v1/diarias/pacotes-episodio",
+      "get /v1/diarias/periodos"
+    ]
+  }
+}

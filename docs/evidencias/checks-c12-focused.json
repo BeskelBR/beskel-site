@@ -1,0 +1,57 @@
+{
+  "executed_at": "2026-09-16T05:59:05.497Z",
+  "branch": "hvb-sistema-dev",
+  "scope": "vínculos, auditoria, fundação, agenda e portal",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 1645,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 129,
+      "output": "Checked 136 files in 46ms. No fixes applied.\nFound 1 info.",
+      "error": "tests\\medical-complements.test.ts:256:24 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n  i Template literals are preferred over string concatenation.\n  \n    254 │     b = attachment(s);\n    255 │   for (const extra of [\n  > 256 │     { conteudo_base64: b.conteudo_base64 + \"\\n\" },\n        │                        ^^^^^^^^^^^^^^^^^^^^^^^^\n    257 │     { conteudo_base64: \"!!!!\" },\n    258 │     { mime: \"application/pdf\" },\n  \n  i Unsafe fix: Use a template literal.\n  \n    254 254 │       b = attachment(s);\n    255 255 │     for (const extra of [\n    256     │ - ····{·conteudo_base64:·b.conteudo_base64·+·\"\\n\"·},\n        256 │ + ····{·conteudo_base64:·`${b.conteudo_base64}\\n`·},\n    257 257 │       { conteudo_base64: \"!!!!\" },\n    258 258 │       { mime: \"application/pdf\" },"
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 113,
+      "output": "Checked 139 files in 31ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 193,
+      "output": "✔ quantidades de estoque usam aritmética inteira e conversão sem arredondamento (0.7721ms)\n✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (6.3661ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (0.8795ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.2435ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (5.0499ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 143.4711",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 215,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 13020,
+      "output": "✔ todas as consultas publicadas serializam conforme contrato sem SELECT irrestrito (1643.0537ms)\n✔ retry transacional desfaz tentativa anterior e respeita limite de três tentativas (130.6092ms)\n✔ health, readiness, organização, contrato OpenAPI e autenticação (55.4044ms)\n✔ cadastro, vínculo, papéis, dispositivo e proveniência sintética executáveis (71.6549ms)\n✔ oito comandos concorrentes e retry após resposta perdida produzem um único efeito (73.7998ms)\n✔ falha de integridade reverte comando, domínio, auditoria e outbox (24.179ms)\n✔ FK composta e RLS bloqueiam outra organização; contexto não vaza no pool (12.1982ms)\n✔ RBAC nega escrita ao leitor e ABAC restringe unidade/dispositivo no servidor (20.5145ms)\n✔ credencial opaca, expirada, NFC e revogada; desativação de usuário/dispositivo (39.604ms)\n✔ capacidade por vaga, concorrência, intervalo e consistência de unidade (66.8507ms)\n✔ alta clínica separada da ocupação e saída, com versão esperada e histórico (44.2044ms)\n✔ paginação keyset, limites, entradas desconhecidas e datas futuras (11.6019ms)\n✔ privilégios: app não altera auditoria, apaga cadastro, assume worker ou cria tabela (6.9537ms)\n✔ workers concorrentes não reservam o mesmo job; inbox deduplica repetição (192.3075ms)\n✔ lease expirada, fencing, backoff e erro permanente viram pendência (33.6099ms)\n✔ vínculo explícito preserva episódio e agenda, sem fabricar ato clínico (1680.8886ms)\n✔ vínculo exige chegada, paciente/unidade corretos e versão esperada do episódio (191.3229ms)\n✔ concorrência permite um vínculo e correção preserva revogação antes de novo vínculo (137.099ms)\n✔ cancelar depois do vínculo sinaliza revisão sem alterar episódio (124.472ms)\n✔ cancelamento concorrente não deixa vínculo vigente indevido (64.3101ms)\n✔ GET clínico grava identidade, rota-modelo e IDs sem texto nem token (81.7421ms)\n✔ recusas autenticadas persistem 403/404, health e credencial desconhecida não criam identidade (8.4716ms)\n✔ HEAD também deixa trilha e leitura da própria auditoria não recursa (6.5225ms)\n✔ auditoria consultiva exige papel global, limita período e isola organização (14.1688ms)\n✔ auditoria pagina conjunto fechado e mantém registros imutáveis (10.171ms)\n✔ portal mantém identidade separada e audita caixa e mensagem indisponível (214.7321ms)\n✔ falha ao persistir auditoria retém resultado e desfaz a transação (8.292ms)\n✔ portal exige identidade separada e concessão explícita por vínculo (1850.0219ms)\n✔ portal entrega conteúdo exato sem expor metadados internos na caixa (158.0974ms)\n✔ conta de outro responsável e organização não leem a mensagem (177.9186ms)\n✔ documento interno, destinatário divergente e versão pendente não publicam (263.2581ms)\n✔ revogações de conta, concessão e documento suspendem acesso existente (265.8432ms)\n✔ encerrar vínculo bloqueia leitura sem apagar concessão ou mensagem (91.7632ms)\n✔ preferência tem histórico, concorrência e bloqueia nova tentativa (189.4188ms)\n✔ resultado incerto exige conciliação e falha permite uma nova tentativa (237.5756ms)\n✔ retornos preservam sequência, tempo e enviado não implica lido (98.5592ms)\n✔ retry e referência deduplicam e nenhum envio externo é aceito (87.6544ms)\n✔ listas seguem contrato, permissões e unidade sem conteúdo privado (142.2144ms)\n✔ SQL preserva histórico, comando fechado e documento atômico (171.386ms)\n✔ mensagem de agenda exige paciente, responsável e versão exata vigente (147.8879ms)\n✔ tentativas têm teto e retorno tardio não restaura acesso revogado (149.0252ms)\n✔ recursos tipados preservam identidade e unidade (1418.0003ms)\n✔ disponibilidade explícita, bloqueio e fronteiras sem sobreposição (167.1264ms)\n✔ concorrência reserva uma única vez e falha multirrecurso é atômica (269.8739ms)\n✔ retry concorrente tem efeito único e referência não duplica (57.1167ms)\n✔ reprogramação preserva histórico, reinicia confirmação e libera horário anterior (118.9693ms)\n✔ versão esperada serializa correções e conflito preserva reserva atual (70.4725ms)\n✔ revogação sinaliza revisão sem liberar reserva e reprogramação resolve (85.8433ms)\n✔ estados operacionais exigem sequência e não criam execução ou cobrança (74.7709ms)\n✔ cancelamento e ausência liberam recursos, futuro não prova ocorrência (68.5217ms)\n✔ mapa limitado usa interseção, fuso, recurso e versão atual (87.0603ms)\n✔ RBAC, unidade e RLS isolam agenda (54.3334ms)\n✔ histórico SQL é imutável e não aceita reutilizar comando concluído (127.8409ms)\nℹ tests 53\nℹ suites 0\nℹ pass 53\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 12969.4334",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 1589,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

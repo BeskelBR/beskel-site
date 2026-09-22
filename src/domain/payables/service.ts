@@ -90,7 +90,7 @@ export const payableLists = definitions.map(
     table: ["obrigacoes", "pagamentos"].includes(path)
       ? `${table}_consulta`
       : table,
-    columns: `id,unidade_id,${fields.join(",")},autor_id,motivo,criada_em${path === "obrigacoes" ? ",saldo,revertido,necessita_revisao" : path === "pagamentos" ? ",disponivel,revertido" : ""}`,
+    columns: `id,unidade_id,${fields.join(",")}${path === "liquidacoes" ? ",credito_id" : ""},autor_id,motivo,criada_em${path === "obrigacoes" ? ",saldo,revertido,necessita_revisao" : path === "pagamentos" ? ",disponivel,revertido" : ""}`,
     unit: true,
     permission: "pagar:ler",
   }),

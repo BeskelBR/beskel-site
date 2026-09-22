@@ -1,0 +1,57 @@
+{
+  "executed_at": "2026-09-22T13:32:26.803Z",
+  "branch": "hvb-sistema-dev",
+  "scope": "correções do financeiro do cliente, financeiro e diárias",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 1819,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 162,
+      "output": "Checked 158 files in 55ms. No fixes applied.\nFound 1 info.",
+      "error": "tests\\medical-complements.test.ts:256:24 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n  i Template literals are preferred over string concatenation.\n  \n    254 │     b = attachment(s);\n    255 │   for (const extra of [\n  > 256 │     { conteudo_base64: b.conteudo_base64 + \"\\n\" },\n        │                        ^^^^^^^^^^^^^^^^^^^^^^^^\n    257 │     { conteudo_base64: \"!!!!\" },\n    258 │     { mime: \"application/pdf\" },\n  \n  i Unsafe fix: Use a template literal.\n  \n    254 254 │       b = attachment(s);\n    255 255 │     for (const extra of [\n    256     │ - ····{·conteudo_base64:·b.conteudo_base64·+·\"\\n\"·},\n        256 │ + ····{·conteudo_base64:·`${b.conteudo_base64}\\n`·},\n    257 257 │       { conteudo_base64: \"!!!!\" },\n    258 258 │       { mime: \"application/pdf\" },"
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 122,
+      "output": "Checked 161 files in 37ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 200,
+      "output": "✔ quantidades de estoque usam aritmética inteira e conversão sem arredondamento (1.1337ms)\n✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (6.6641ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (0.8036ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.2189ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (6.92ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 144.3963",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 197,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 15546,
+      "output": "✔ correção cria sucessora e cadeia, preserva origem e saldo (1807.5991ms)\n✔ retry retorna a mesma revisão e decisões concorrentes têm um único vencedor (273.7051ms)\n✔ associação exige tratar filhos; correção/cancelamento liberam intervalo sem apagar fatos (93.5814ms)\n✔ sucessora inválida faz rollback da revisão, comando e efeitos (81.125ms)\n✔ sobreposição continua barrada na API e diretamente no banco (77.6604ms)\n✔ reserva ativa exige liberação explícita; contexto antigo deixa de reservar (149.9219ms)\n✔ cobertura requer reversão e reavaliação explícita na sucessora (134.6055ms)\n✔ cancelamento versus reserva serializa sem reserva ativa em período cancelado (90.4575ms)\n✔ cancelamento de associação versus novo período tem um único vencedor (99.4755ms)\n✔ documento da diária exige reversão financeira sem alterar valor histórico (319.0616ms)\n✔ documento de valor zero por cobertura também exige reversão explícita (227.2544ms)\n✔ permissão, tenant, episódio e confirmações explícitas protegem correções (162.0494ms)\n✔ histórico é imutável e listas exibem a revisão tipada (130.9592ms)\n✔ inserções SQL concorrentes também preservam exclusividade do intervalo (80.6849ms)\n✔ cancelamento versus documentação financeira não deixa dívida nova sobre origem cancelada (218.5748ms)\n✔ corrige depósito e extrato com mesma referência preservando valor original e saldo disponível único (2022.7873ms)\n✔ cancelamento não cria sucessora nem libera referência para duplicação (117.5365ms)\n✔ refazer conciliação exige última revisão revertida, mantém cadeia e limites (127.2672ms)\n✔ alocação revertida pode ser refeita sem duplicar recebimento ou parcela (121.7446ms)\n✔ depósito exige reversão de todas as alocações e conciliações antes de correção (126.6983ms)\n✔ extrato exige reversão própria e não altera a alocação do depósito (126.5159ms)\n✔ conta/adquirente/referência corrigíveis na mesma unidade sem roubar outra linhagem (152.0782ms)\n✔ retry concorrente e comando distinto não duplicam revisão (160.5351ms)\n✔ refazer concorrente admite um sucessor e retry recupera resultado sem relançar (271.4277ms)\n✔ correção versus conciliação serializa sem vínculo ativo para origem obsoleta (116.6714ms)\n✔ referências duplicadas concorrentes e valores imprecisos permanecem bloqueados (114.3561ms)\n✔ erro na sucessora desfaz revisão e comando; data e unidade permanecem protegidas (143.4559ms)\n✔ RLS, permissões e confirmação literal protegem correções e consultas (136.1891ms)\n✔ consultas expõem estado/cadeia; SQL não pode alterar história ou reutilizar comando fechado (224.5838ms)\n✔ SQL concorrente protege referência sem depender da trava prévia do serviço (117.5841ms)\n✔ banco recusa reabertura de outro par e revisão sem sucessora efetiva (182.8407ms)\n✔ corrigir exige conciliar além de reverter; cancelamento usa somente a alçada de reversão (102.7653ms)\n✔ catálogo e preço preservam versão, vigência e centavos sem coerção (1897.3348ms)\n✔ origem comercial única, confirmação literal e reavaliação com versão esperada (321.2664ms)\n✔ preço ausente fica pendente e emissão não produz conta a receber fictícia (210.0982ms)\n✔ responsabilidades fecham valor; falha desfaz item, comando e rateio (154.0896ms)\n✔ títulos parciais concorrentes não duplicam valor da responsabilidade (185.2485ms)\n✔ recebimento deduplica referência e retry sem liquidar automaticamente (201.247ms)\n✔ liquidações concorrentes respeitam saldo de ambos os lados (200.8302ms)\n✔ crédito usa recebimento disponível e aplicação não duplica dinheiro (286.5769ms)\n✔ reversão encadeada preserva histórico e permite nova avaliação (268.5467ms)\n✔ caixa tem uma sessão aberta, diferença explícita e fechamento preservado (140.7064ms)\n✔ cartão, depósito e conciliação permanecem fatos separados com limites (222.4707ms)\n✔ RBAC, organização, unidade e pagador impedem alocação cruzada (224.2801ms)\n✔ listas financeiras paginadas serializam valores exatos e estado (114.8208ms)\n✔ diária omitida permanece pendente; inclusão documenta zero e reversão sinaliza revisão (298.5499ms)\n✔ retificação clínica preserva dívida histórica e impede nova emissão obsoleta (291.1629ms)\n✔ consumo do tutor mantém custo e cobertura comercial pendente (249.5545ms)\n✔ SQL não acrescenta efeito financeiro a comando confirmado nem arredonda centavos (239.6716ms)\n✔ depósito agregado admite repasses parciais sem liquidar tutor novamente (203.0485ms)\n✔ execução substituta exige reverter documento anterior para não duplicar dívida (276.4508ms)\nℹ tests 51\nℹ suites 0\nℹ pass 51\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 15477.7366",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 1837,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

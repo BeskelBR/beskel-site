@@ -135,11 +135,19 @@ async function addVersion(tx: PoolClient, a: Actor, b: Body, orderId: string) {
     );
   return { id, ordem_id: orderId, versao: version };
 }
-async function execution(tx: PoolClient, a: Actor, b: Body, original?: string) {
+export async function execution(
+  tx: PoolClient,
+  a: Actor,
+  b: Body,
+  original?: string,
+  context?: { id: string; executorId: string },
+) {
   const old = original
     ? await get(tx, a, "execucao", original, "ordem_versao_id,programacao_id")
     : undefined;
-  const versionId = old?.ordem_versao_id ?? s(b, "ordem_versao_id");
+  const versionId = context
+    ? s(b, "ordem_versao_id")
+    : (old?.ordem_versao_id ?? s(b, "ordem_versao_id"));
   const version = await get(
     tx,
     a,
@@ -149,7 +157,7 @@ async function execution(tx: PoolClient, a: Actor, b: Body, original?: string) {
   );
   await episodeLock(tx, a, version.episodio_id);
   if (original) await authorize(tx, a, "clinica:executar", version.unidade_id);
-  const id = randomUUID();
+  const id = context?.id ?? randomUUID();
   await tx.query(
     `INSERT INTO execucao(id,organizacao_id,unidade_id,episodio_id,ordem_versao_id,programacao_id,evento_referencia,correcao_de_id,executor_id,executada_em,quantidade_aplicada,unidade_medida_id,resultado,situacao_material,confirmacao_humana,motivo)
     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
@@ -159,10 +167,14 @@ async function execution(tx: PoolClient, a: Actor, b: Body, original?: string) {
       version.unidade_id,
       version.episodio_id,
       versionId,
-      old ? old.programacao_id : (b.programacao_id ?? null),
+      context
+        ? (b.programacao_id ?? null)
+        : old
+          ? old.programacao_id
+          : (b.programacao_id ?? null),
       b.evento_referencia,
       original ?? null,
-      a.usuario_id,
+      context?.executorId ?? a.usuario_id,
       occurred(s(b, "executada_em")),
       b.quantidade_aplicada,
       b.unidade_medida_id,
@@ -561,7 +573,7 @@ export const clinicalLists = [
     path: "/clinica/execucoes",
     table: "execucao_consulta",
     columns:
-      "id,unidade_id,episodio_id,ordem_versao_id,programacao_id,evento_referencia,correcao_de_id,executor_id,executada_em,registrada_em,quantidade_aplicada,unidade_medida_id,resultado,situacao_material,motivo,substituida_por_id,conciliacao_material",
+      "id,unidade_id,episodio_id,ordem_versao_id,programacao_id,evento_referencia,correcao_de_id,executor_id,executada_em,registrada_em,quantidade_aplicada,unidade_medida_id,resultado,situacao_material,motivo,substituida_por_id,conciliacao_material,anulacao_id",
     unit: true,
   },
   {

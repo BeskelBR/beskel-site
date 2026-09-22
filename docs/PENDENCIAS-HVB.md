@@ -6,7 +6,7 @@ M0/M1 foi limitado à fundação local com dados fictícios. As decisões abaixo
 |---|---|---|
 | Papéis, poderes e unidades reais | PENDENTE, configuração hospitalar | Antes de contas e operação reais; perfis do seed são PROPOSTOS |
 | Login humano, emissão/renovação/recuperação de credenciais, MFA/step-up e limites de abuso | PENDENTE, etapa de autenticação operacional | Antes de expor a API; M1 usa tokens opacos provisionados por administrador DEV |
-| Retificação de cadastros/fatos encerrados, remoção de atribuições e alteração de capacidade/local com histórico | PENDENTE, casos de uso posteriores | Antes de uso assistencial; não executar SQL manual para contornar preservação |
+| Retificação de cadastros/fatos encerrados e governança | PARCIAL: C13 entrega cadastros básicos, revogação de atribuições e capacidade; C15 entrega correção/anulação clínica no mesmo episódio | Restam limites específicos dos lotes C13/C15 e correções de outros módulos; antes de uso assistencial, sem SQL manual para contornar preservação |
 | Regra de episódios simultâneos do mesmo paciente | PENDENTE | Antes de operação clínica; episódios não são fechados/unificados por inferência |
 | Catálogo completo de espécies, raça e dados cadastrais mínimos | PROPOSTO/PENDENTE | Próximo refinamento; catálogo atual é sintético e reduzido |
 | Matriz física de locais, capacidade e vagas | PENDENTE | Antes de ocupação real; capacidade é informada explicitamente |
@@ -17,7 +17,6 @@ M0/M1 foi limitado à fundação local com dados fictícios. As decisões abaixo
 | Governança de logs, retenção, testes de restauração, RPO/RTO e contingência | PENDENTE | Antes de produção; metas do pacote não viraram SLA |
 | Diárias, medicamentos incluídos, limites, tempo, preços e exceções | PENDENTE, fora de M0/M1 | Não ativar regra comercial ambígua; validar com equipe responsável |
 | Inventário, lotes, apresentações, conversões, custos e material do tutor | PENDENTE, M2 | Exige próximo lote; não presumir informação pelo nome |
-| Contratos mínimos para retomar Terminal | PENDENTE após recorte de M2 | Terminal permanece congelado; Fundação não autoriza sua alteração |
 | Migração real, exportação de legado, integrações e dados hospitalares | EXIGE NOVA AUTORIZAÇÃO | Nenhuma atividade desse tipo foi executada |
 | Nuvem paga, DNS, site, produção, fiscal, pagamentos, mensageria | EXIGE NOVA AUTORIZAÇÃO | Não provisionado nem acionado |
 
@@ -25,7 +24,7 @@ Plano próprio e Petlove permanecem fora do escopo. O modelo histórico não é 
 
 ## Continuação M2 — 13/09/2026
 
-As linhas anteriores foram preservadas para resolução conjunta, conforme solicitado. O mecanismo técnico de inventário, lotes, conversão, reservas, custos declarados e custódia do tutor foi entregue no recorte M2; seus dados e políticas operacionais continuam pendentes. Os contratos persistentes de estoque permitem avaliar futuramente a retomada do Terminal, sem autorizar alterações naquela pasta ou branch.
+Registro histórico M2: as linhas foram inicialmente preservadas para resolução conjunta. C14 retira da lista ativa apenas pendências afetadas comprovadamente resolvidas, com histórico separado. O mecanismo técnico de inventário, lotes, conversão, reservas, custos declarados e custódia do tutor foi entregue no recorte M2; seus dados e políticas operacionais continuam pendentes. C14 entrega a fronteira backend do Terminal de Acesso, sem autorizar alterações naquela pasta ou branch.
 
 | Item novo ou refinado | Estado atual | Quando precisa fechar |
 |---|---|---|
@@ -33,7 +32,7 @@ As linhas anteriores foram preservadas para resolução conjunta, conforme solic
 | Validade por data, fuso e regra após abertura | PROPOSTO DEV; retirada exige validade conhecida/isenta e recipiente utilizável; nenhum prazo inferido | Validar critério operacional de vencimento e responsáveis antes de uso real |
 | Transferência entre unidades hospitalares | PENDENTE; movimento atual exige mesma unidade | Antes de logística entre unidades e autorização em ambas |
 | Abertura/fracionamento, troca de recipiente ou de custódia | PENDENTE; recipiente aberto pode ser declarado na entrada, mas não há transformação de posição existente | Antes de fracionar estoques já recebidos ou transferir propriedade |
-| Expiração automática e efetivação parcial de reservas | PENDENTE; expiração explícita, efetivação integral e limite provisório DEV de 24 horas | Antes de depender de liberação automática; reserva vencida continua protegendo saldo até comando |
+| Expiração automática e efetivação parcial de reservas fora do Terminal | PARCIAL: C18 resolve reserva física protegida, parcial e conclusão após lease no Terminal; M2 genérico mantém expiração explícita/efetivação integral | Definir automação e parciais dos demais fluxos; vencimento não libera saldo de sessão com presença |
 | Reserva após reversão de efetivação | PROPOSTO; compensação física não reativa a reserva | Confirmar necessidade de uma nova reserva e fluxo operacional |
 | Recontagem, cancelamento de sessão e dupla aprovação | PENDENTE; versão obsoleta bloqueia ajuste e requer nova sessão/contagem, sem apagar a anterior | Antes de inventário operacional; sessão com contagem pendente não pode ser encerrada |
 | Retificação de lote, validade, custo e cadastros de estoque | PENDENTE; identidades e snapshots preservados, sem edição destrutiva | Definir fatos compensatórios e autoria antes de corrigir catálogo real |
@@ -54,7 +53,6 @@ O usuário solicitou continuidade e informou indisponibilidade para resolver as 
 | Catálogo clínico, vias, unidades de dose, concentração e limites | PENDENTE; valores informados explicitamente; não há cálculo de dose ou escolha de tratamento | Antes de uso assistencial e aprovação do catálogo |
 | Programação por frequência, suspensão e interrupção de ordem | PENDENTE; horários explícitos, versão nova e não execução individual com motivo | Definir recorrência, destino das programações existentes e limites de automação |
 | Execução parcial, conclusão e desvios da quantidade prescrita | PROPOSTO DEV; parcial/integral declarados; uma conclusão ativa por programação; sem cálculo de adequação da dose | Validar semântica de parciais, totais, unidades e revisão profissional |
-| Retificação de executor, versão ou programação incorretos e anulação de ato registrado por engano | PENDENTE; retificação atual preserva versão/programação e exige estornar consumo ativo antes | Antes de documentação clínica real; não apagar fatos nem inventar aplicação compensatória |
 | Registro tardio, alta retroativa e exceções após alta | PROPOSTO DEV; aceita fato anterior à alta; nova execução posterior ao limite hospitalar é recusada; alta retroativa preserva fatos e gera revisão | Aprovar fluxo assistencial de exceção, sem confundir cuidado domiciliar e hospitalar |
 | Sobreposição de ordens | PROPOSTO; alerta por mesmo item/episódio e interseção de vigências, sem excluir ordens | Refinar critérios clínicos; alerta atual não detecta interações medicamentosas |
 | Confirmação integral do material efetivamente usado | PROPOSTO; até 20 posições distintas por consumo, um consumo ativo por execução; consumo avulso exige episódio/finalidade/motivo | Definir conciliação parcelada, acréscimos e correções; atual exige estorno integral e novo consumo |
@@ -79,7 +77,7 @@ As linhas históricas foram preservadas. O mecanismo de diária configurável fo
 | Aprovação de regras operacionais | PENDENTE; endpoint aprova SOMENTE simulação com autoria e confirmação | Definir aprovação hospitalar, papéis, vigência, revisão e ativação segura |
 | Administração parcial, unidade clínica e unidade física | PENDENTE; parciais ficam pendentes, administração integral conta uma execução; quantidade física exige produto e unidade base | Validar semântica de parciais/acúmulo, dose e conversões; não inferir equivalência |
 | Cobertura física de material do tutor | PENDENTE; fato físico e custo preservados, cobertura permanece pendente | Definir propriedade, serviços associados e efeito comercial sem custo hospitalar inventado |
-| Cancelamento/correção de associação, período e classificação | PENDENTE; associação e período imutáveis; classificação só admite encerramento único; reavaliação preserva histórico | Definir fatos compensatórios, mudanças retroativas e migração entre pacotes |
+| Correção de classificação e migração retroativa de diárias | PARCIAL: C16 resolveu associação/período; classificação original só admite encerramento único | Implementar correção de classificação se necessária; definir migração/reavaliação em lote e divisão/fusão sem recalcular efeitos implicitamente; parte resolvida em PENDENCIAS-RESOLVIDAS-C16.md |
 | Reservas de diária | PROPOSTO DEV; somente evento já identificado, cobertura integral, até 24h, liberação/expiração explícitas | Definir reserva de planejamento, efetivação parcial e expiração automática; reserva vencida ainda compromete capacidade |
 | Revisão de origem/período alterado | PENDENTE fluxo operacional; consulta sinaliza revisão, sem liberação automática da capacidade | Definir responsável, prazo, fila dedicada e efeito sobre outras avaliações; revisar/reverter explicitamente |
 | Orçamento SQL e concorrência M4 | INVESTIGADO; avaliação 17/14 statements totais/funcionais e reavaliação 19/16; compromisso é agregado do histórico por uso | Medir histórico longo, muitos grupos/regras e concorrência por episódio antes de homologação; sem SLA local |
@@ -104,7 +102,7 @@ O núcleo comercial/financeiro foi implementado com registros fictícios. As lin
 | Crédito de cliente | PROPOSTO DEV; somente saldo não alocado de recebimento do mesmo pagador/unidade; aplicação imediata atômica | Definir crédito reconhecido sem recebimento, reserva futura, devolução efetiva, transferência e tratamento de legado |
 | Caixa e conferência | PENDENTE processo; abertura, entradas em dinheiro, contagem e diferença explícitas; uma sessão aberta | Definir suprimento, sangria, saídas, ajustes de sessão fechada, revisão/dupla aprovação e responsáveis |
 | Adquirente, taxas e parcelas | PENDENTE regras; bruto/taxa/líquido e datas informados por parcela; repasse separado da quitação do tutor | Validar taxas reais, antecipação, chargeback, estorno e diferença de repasse; recebimento com parcela registrada não pode ser revertido pelo fluxo simples |
-| Depósito, extrato e conciliação | PROPOSTO DEV; dados fictícios manuais, mesma conta/adquirente, alocação parcial/múltiplas parcelas, evidência humana | Integração/extrato real exige autorização; divergência permanece saldo aberto; um vínculo por par, reabertura do mesmo par após reversão e correção de depósito/extrato exigem fluxo futuro |
+| Depósito, extrato e conciliação: operação real | PARCIAL: C17 entregou revisão/cancelamento de origem e refazer conciliação/alocação com predecessor após reversão; dados continuam fictícios/manuais | Homologar fonte bancária, importação, evidências, alçadas e divergências; parte técnica resolvida em PENDENCIAS-RESOLVIDAS-C17.md |
 | Despesas, compras, contas a pagar, comissões e fiscal | PENDENTE refinamento posterior; este recorte entrega recebíveis e repasses | Validar processos reais; nenhuma obrigação fiscal ou contábil inferida |
 | Relatórios e revisão comercial | PENDENTE apresentação operacional; consultas mostram valores originais, reversão, saldos e revisão por origem/cobertura | Definir indicadores, regime, período, fila agregada e responsáveis; filtrar reversões explicitamente, não somar saldos históricos como dívida atual |
 | Concorrência e desempenho financeiro | INVESTIGADO; advisory lock por organização/unidade; avaliação usa 14 statements totais/11 funcionais no benchmark | Medir muitas unidades/pagadores, história longa, muitos rateios e contenção; metas locais não são SLA |
@@ -146,7 +144,7 @@ Protocolos preventivos entregues em simulação. Pendências anteriores preserva
 | Reprogramação, suspensão e não realização | PENDENTE; planejamentos preservados, encerramento da adesão impede novos | Definir fatos compensatórios e cancelamento individual sem apagar histórico |
 | Aplicação interna e identidade profissional | PROPOSTO DEV; mesmo ID da execução integral ativa; confere item, paciente e horário | Validar adequação clínica, assinatura profissional e atribuição de autoria; confirmação DEV não é assinatura assistencial |
 | Aplicação externa | PENDENTE verificação; profissional, lote e fabricante declarados, sem execução/consumo HVB | Aprovar evidências, anexos e reconhecimento de aplicações externas; declaração não é verificação do prestador |
-| Correção e invalidação | PROPOSTO DEV; sucessor único, interna segue retificação clínica | Definir invalidação sem sucessor, ajuste de metadados mantendo execução e mudança de origem; não fabricar eventos compensatórios |
+| Correção e invalidação preventiva | C15 permite anular origem clínica interna; aplicação perde vigência sem ser apagada. Correções externas ainda exigem sucessora | Restam invalidação externa sem sucessor, ajuste de metadados mantendo execução e mudança de origem; não fabricar aplicações compensatórias |
 | Lote/fabricante e consumo físico | PROPOSTO DEV; consumo identificado da mesma execução, lote vem da posição, sem segunda baixa | Conciliar divergência entre texto declarado e lote físico; manter custódia do tutor e revisão de estornos |
 | Encerramento retroativo conflitante | PENDENTE política; encerramento anterior a aplicação registrada é recusado | Aprovar tratamento da exceção sem apagar aplicações |
 | Concorrência/desempenho preventivo | INVESTIGADO; lock por paciente, episódio antes quando há fato clínico; 7/9/9 statements no ensaio | Medir múltiplos pacientes, histórico longo e até 50 etapas por versão; ensaio local não é SLA |
@@ -259,7 +257,6 @@ Pendências anteriores preservadas. A [matriz de cobertura](COBERTURA-NUCLEO.md)
 | Cobertura da execução e material | SEPARADO; custo físico persiste e a cobertura testada é da execução | Homologar o que cada regra inclui; cobertura de serviço não autoriza presumir cobertura de todo insumo |
 | Correção clínica e documento já entregue | HISTÓRICO preservado; revisão comercial sinalizada | Definir revisão humana, documento substituto e comunicação autorizada; não alterar nem reenviar por inferência |
 | Aquisição/despesas | FALTA FUNCIONAL explícita para C4 | Construir obrigação/pagamento simulado com valores informados; processo real, fiscal e alçadas seguem pendentes |
-| Terminal/NFC | FALTA FUNCIONAL em SISTEMA para C5 | Consolidar contrato/simulação de leitura e confirmação; não editar Terminal ou assumir leitor/rede reais |
 | Verificação global | ADIADA; nove testes pontuais C3 aprovados | Executar suíte geral, carga, instalação vazia e homologação quando chegar a etapa acordada |
 
 Nenhuma mensagem externa ou assinatura válida foi emitida; Vercel/Cloudflare continuam com o usuário.
@@ -287,12 +284,11 @@ Pendências anteriores preservadas. Terminal físico, hardware e sua branch cont
 | Item novo ou refinado | Estado atual | Quando precisa fechar |
 |---|---|---|
 | Etiquetas e identidade | UUID fictício identifica alvo, sem autenticar | Definir suporte físico, emissão, perda, clonagem, renovação e reassociação; não confiar no UID como segredo |
-| Operador e sessão | Credencial API individual, dispositivo ativo e leitura vinculada ao autor | Homologar login, troca rápida de usuário, bloqueio de tela, MFA e duração de sessão |
+| Operador e sessão reais | C18 entrega NFC revogável + biometria DEV, dispositivos separados e sessão canônica exclusiva; C14 fica como baseline | Homologar identificação, login/troca de usuário, bloqueio de tela e prazos reais; no contrato v1 NFC simples não é Bearer nem prova biométrica |
 | Contexto e retrospectividade | Episódio escolhido e validado no servidor; leitura passada explícita DEV | Aprovar validade temporal da seleção e política de registro tardio |
 | Repetição e resposta perdida | Retry/consulta por mesma chave, corpo, operador e dispositivo | Implementar experiência de estado desconhecido e reconciliação; 404 não garante que uma transação concorrente terminou |
-| Offline/cache | NÃO IMPLEMENTADO, conforme contrato | Decidir viabilidade e regras antes de guardar fila/contexto ou permitir operação desconectada |
-| Retirada e execução | Movimento físico com confirmação, sem ato clínico inferido | Homologar ergonomia e ação explícita no cliente; leitura/retirada não comprovam administração |
-| Auditoria consultiva | Operador consulta seus comandos com dispositivo ativo | Definir suporte/supervisão, comandos de dispositivo desativado, retenção e auditoria de leituras |
+| Offline/cache | C14 não concede autorização offline; sensível fail_closed; ocorrida_em e recebimento separados | Projetar Edge/reconciliação e política formal antes de qualquer operação desconectada; não reutilizar confirmação histórica como abertura física |
+| Auditoria consultiva | Operador consulta comandos e sessões; auditoria persistente de leituras entregue em C12 e verificada em C14 | Restam suporte/supervisão, consulta de dispositivo desativado, retenção e exportação; auditoria de leitura não permanece falta técnica |
 | Equipamento e verificação geral | NÃO EXERCITADOS; 28 testes pontuais de API/banco passaram | Homologar leitor, rede, energia, cliente visual e carga quando chegar a etapa acordada |
 
 Nenhuma etiqueta física gravada, segredo salvo no terminal ou serviço externo acionado.
@@ -329,3 +325,192 @@ Pendências anteriores preservadas. O rateio DEV é explícito; não aprova trat
 | Verificação geral e operação | ADIADAS; 32 testes pontuais passaram | Retomar suíte geral, instalação vazia, carga e homologação após consolidação |
 
 Nenhum custo histórico sobrescrito, documento fiscal emitido, pagamento ou contato externo executado.
+
+
+## Consolidação C8 — 15/09/2026
+
+Pendências anteriores preservadas. O cronograma DEV não aprova condições financeiras nem agenda pagamentos reais.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Plano e alçadas | DEV: valor integral, datas/parcelas explícitas e histórico | Homologar aceite, autorização, número máximo operacional, dia útil, juros/multas e arredondamento |
+| Vencimento documental e cronograma | Vencimento original preservado; plano acrescenta datas | Definir data operacional de exigibilidade e apresentação na interface sem apagar o documento |
+| Liquidação sem parcela | Visível e sem alocação automática | Definir fila de revisão, importação futura e responsáveis; soma dos saldos de parcelas pode exceder dívida pelo valor ainda sem vínculo |
+| Reprogramação | Nova versão exige reverter alocações e depois realocar liquidações | Homologar ergonomia em lote, retomada de falha parcial e evidência do acordo |
+| Correção/reversão | Histórico preservado; estorno da liquidação inativa alocações | Distinguir correção de registro, devolução monetária real e renegociação; obrigação corrigida inicia sem plano |
+| Complementos financeiros | Crédito comercial e conciliação de saídas ainda faltam | Implementar os próximos recortes sem presumir canal bancário ou compensação automática |
+| Operação e verificação geral | ADIADAS; 25 testes pontuais passaram | Retomar suíte geral, instalação vazia, carga e homologação após consolidação |
+
+Nenhum débito agendado, juros calculados, pagamento real ou contato com fornecedor executado.
+
+
+## Consolidação C9 — 15/09/2026
+
+Pendências anteriores preservadas. Crédito declarado DEV não comprova devolução física, direito ao abatimento ou reconhecimento fiscal.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Origem e documento do crédito | DEV explícito; referência opcional à obrigação e correção encadeada | Homologar documentação, aceite do fornecedor, fiscalização e alçadas |
+| Compensação | Apenas aplicação explícita no mesmo fornecedor/unidade | Homologar condições de uso, prazos/expiração e devolução de dinheiro; sem regra presumida |
+| Devolução física/comercial | Separada do crédito declarado | Definir evidência e vínculo com retorno material; emissão de crédito não movimenta estoque |
+| Fonte da liquidação | Pagamento ou crédito, exclusivamente; mesmo ID nas parcelas | Clientes devem distinguir credito_id e pagamento_id nulo, sem chamar crédito de débito bancário |
+| Indicadores booleanos | Corrigidos quatro campos antes serializados como texto | Adaptar consumidores de aquisição/parcelas e validar na interface futura |
+| Conciliação de saídas | Próximo recorte técnico | Relacionar pagamento e evidência de extrato sem integração bancária ou baixa inferida |
+| Publicação C8/C9 | BLOQUEADA por erro interno da revisão automática, mesmo após autorização | Retomar git add/commit/push somente quando o mecanismo de aprovação estiver disponível; autorização do usuário já registrada |
+| Verificação geral e operação | ADIADAS; 37 testes pontuais passaram | Retomar suíte geral, instalação vazia, carga e homologação após consolidação |
+
+Nenhum pagamento real, crédito fiscal emitido, retorno físico automático ou contato externo executado.
+
+
+## Consolidação C10 — 15/09/2026
+
+Pendências anteriores preservadas. O usuário adiou a resolução de pendências e bloqueios até o fechamento do ciclo básico, com verificações pontuais e sem repetir tentativas de publicação.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Extrato e origem bancária | DEV declarado, separado do extrato de entradas M5 | Homologar fonte real, importação, identificador externo, evidência e retenção |
+| Agrupamento e datas | Vínculos explícitos por conta; parcial e múltiplos pagamentos/saídas | Validar critérios operacionais e diferenças entre datas de pagamento, lançamento e valor |
+| Tarifas e diferenças | Residual visível, sem atribuição automática | Definir classificação e vínculo a despesa, devolução ou correção com evidência |
+| Reversão do pagamento | Inativa vínculo; extrato permanece sem conciliação | Distinguir correção de registro de estorno bancário real e homologar revisão |
+| Autorização financeira | Permissões DEV separadas; nenhum débito externo | Aprovar alçadas, segregação, aceite e acesso bancário antes da operação |
+| Publicação C8–C10 | ADIADA pelo usuário; erro da revisão automática registrado | Tratar após ciclo básico, sem novas tentativas repetidas agora |
+| Verificação geral | ADIADA; 26 testes pontuais passaram | Conferir matriz e executar suíte geral/instalação/carga na etapa consolidada |
+
+### Ordem de resolução após o ciclo básico
+
+1. Bloqueio técnico de publicação e preservação/versionamento dos lotes locais.
+2. Decisões de domínio que afetem critérios de aceite (clínica, fiscal, custo, financeiro, acesso e assinatura).
+3. Integrações, infraestrutura e experiência operacional, observando dependências e autorizações existentes.
+4. Verificação consolidada e homologação, com correções focadas nos resultados.
+
+Esta ordem organiza o trabalho futuro; não autoriza infraestrutura paga, mensagens externas, dados reais ou M7. Nenhum pagamento ou acesso bancário foi executado neste recorte.
+
+
+## Consolidação C11 — 16/09/2026
+
+Pendências anteriores preservadas. O grupo técnico de prontuário foi implementado em DEV; políticas assistenciais e operação continuam pendentes. Publicação C8–C11 e verificações gerais permanecem adiadas conforme o usuário.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Modelos clínicos | DEV versionado, campos/texto explícitos; versão histórica selecionável | Homologar formulários, aprovação, retirada e uso de versões antigas |
+| Anexos pequenos | DEV privado e transacional, até 256 KiB; cabeçalho PDF/PNG/JPEG | Definir armazenamento de maiores, antivírus/sanitização, upload operacional, backup, criptografia e retenção |
+| Revogação de anexos | Apenas autor, conteúdo bloqueado na API e bytes preservados | Definir alçada administrativa, retenção legal e eventual descarte autorizado |
+| Coautoria | Declaração pessoal sobre versão/hash, sem validade de assinatura comprovada | Homologar papéis profissionais, aceite, coassinatura e assinatura válida |
+| Retificações | Anexos/respostas/coautorias permanecem na versão histórica | Definir ergonomia de revisão e eventual novo vínculo explícito sem transferência silenciosa |
+| Busca | Lexical em português, por paciente/unidade, sem OCR ou trechos de narrativa | Homologar filtros, volumes, desempenho e experiência de busca |
+| Auditoria de leituras e vínculos | Próximo grupo de consolidação | Implementar rastreio e agenda–episódio; conferir faltas da matriz antes do fechamento básico |
+| Publicação e verificação geral | ADIADAS; 31 testes pontuais e seed repetido passaram | Retomar na ordem pós-ciclo já registrada, sem retries de Git agora |
+
+Nenhum dado clínico real, serviço externo, assinatura válida, envio de arquivo a terceiros ou infraestrutura paga foi utilizado.
+
+
+## Consolidação C12 — 16/09/2026
+
+Pendências anteriores preservadas. Relação agenda–episódio e trilha de consultas identificadas foram implementadas; as linhas históricas acima continuam como proveniência, com o estado atual refinado abaixo.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Agenda–episódio | DEV explícito, mesmo paciente/unidade, chegada/conclusão e versão esperada | Homologar alçadas, registro retrospectivo e ergonomia de correção |
+| Cancelamento posterior | Inativa vínculo e sinaliza revisão, sem desfazer episódio | Definir responsável e prazo de revisão |
+| Auditoria de consultas | DEV: GET/HEAD identificados internos/portal, metadados e recusas de domínio | Homologar finalidade, retenção, suporte, exportação e particionamento/carga |
+| Tentativas anônimas e entrega HTTP | Fora da trilha de domínio; logs minimizados existentes | Implementar monitoramento operacional; evento de consulta não comprova leitura humana |
+| Disponibilidade da trilha | Falha ao gravar impede liberar resultado | Definir observabilidade, capacidade, recuperação e operação de suporte |
+| Correções funcionais antigas | Continuam faltas de software, detalhadas em FECHAMENTO-CICLO-BASICO.md | Consolidar cadastros/acesso, clínica, diárias, financeiro cliente, exames/protocolos e agenda sem presumir decisões hospitalares |
+| Publicação C8–C12 | ADIADA, sem nova tentativa de Git | Retomar o bloqueio na etapa definida pelo usuário |
+| Verificação geral | ADIADA; 58 testes pontuais e seed repetido passaram | Executar sobre versão consolidada, após fechar funções necessárias |
+
+O inventário não autoriza serviços externos, dados reais, mensagens, assinatura válida ou infraestrutura paga. Nenhuma pendência anterior foi apagada.
+
+
+## Consolidação C13 — 16/09/2026
+
+Etapa de cadastros/acesso finalizada localmente. Pendências anteriores preservadas; as faltas históricas de correção básica, capacidade e remoção de atribuições têm agora o recorte abaixo implementado.
+
+| Item novo ou refinado | Estado atual | Quando precisa fechar |
+|---|---|---|
+| Dados básicos | DEV: revisão de paciente/responsável/usuário/unidade/dispositivo e nome/capacidade de local | Homologar alçadas, qualidade dos dados e apresentação do histórico |
+| Espécie e estado vital | Correção explícita, sem reescrever fatos clínicos/documentos | Definir revisão de efeitos derivados e registro clínico correspondente quando aplicável |
+| Capacidade | Redução bloqueada por vaga ainda ocupada; ocupações históricas preservadas | Homologar alterações planejadas e capacidades por vigência; sem recálculo retroativo |
+| Atribuições | Revogar/restaurar com histórico; permissões vigentes consultadas sob trava | Aprovar segregação, último administrador, recuperação e mudança das permissões do próprio papel |
+| Identidade e estrutura | IDs, pertencimento, fuso e hierarquia preservados | Fusão/deduplicação, transferência entre IDs e alteração estrutural exigem fluxo próprio |
+| Contrato de consulta | GET /atribuicoes inclui ativo/versao e conserva concessões revogadas | Consumidores devem distinguir estado atual de origem histórica |
+| Reinício local | Cluster existente recuperado pelo PostgreSQL; migrations verificadas | Operação, desligamento, backup/restauração e uso de OneDrive continuam pendentes |
+| Continuidade do núcleo | Correção clínica C15, diárias C16 e financeiro do cliente C17 entregues no recorte | Parar após C17 para delta intermediário solicitado em 22/09; inventário posterior preservado |
+| Publicação C8–C13 e verificação geral | ADIADAS; 43 testes pontuais e demonstração repetida passaram | Retomar conforme a ordem consolidada, sem novas tentativas de Git nesta etapa |
+
+Nenhum dado real, recuperação de conta operacional, serviço externo ou infraestrutura paga foi utilizado.
+
+## Adequação C14 — Terminal de Acesso V2 — 16/09/2026
+
+Por pedido do usuário, os três registros afetados e resolvidos/substituídos saíram da lista ativa. Descrições anteriores e evidências estão em [PENDENCIAS-RESOLVIDAS-C14.md](PENDENCIAS-RESOLVIDAS-C14.md). Não foi feita baixa global das pendências históricas de outros módulos. A ADR 0024 substitui a fronteira de C5, preservando ADR 0015 e migrations 047/048.
+
+| Pendência restante | Estado atual | Tratamento posterior |
+|---|---|---|
+| Clientes Terminal/Mobile e correções após retirada encerrada | C18 entrega backend de picking, fulfillment por OR/ajuste e transferência M2; parte técnica arquivada em PENDENCIAS-RESOLVIDAS-C18.md | Implementar clientes quando autorizados; definir compensações logísticas pós-saída e eventual inclusão de material do tutor na sala |
+| Classificação hospitalar real e revisão de políticas sensíveis | C18 deriva sensibilidade do catálogo, valida RBAC e faz abertura sob demanda sem segunda autenticação | Aprovar catálogo/papéis reais e processo de revisão versionada das políticas; não há novo step-up dentro da AccessSession v1 |
+| Adaptador real de identidade/biometria e provisionamento | C18 separa ACCESS/BIOMETRIC/PICKING/CONTROLLER e vincula cada dispositivo a credencial API; NFC simples revogável e evidência assinada somente DEV | Homologar leitura NFC, face 1:1/PAD, atestação, instalação/rotação/substituição de credenciais e dispositivos, limites de abuso e retenção; DESFire não é requisito presumido deste v1 |
+| Intertravamento, sensores e emergência reais | C18 vincula sala/dispositivos, impede sessão física dupla e preserva presença/reserva após timeout; falha de confirmação mantém porta fechada recuperável | Implementar controlador, heartbeat de recovery, evidências reais de porta/trava/presença, perda de sensor, emergência e recuperação supervisionada |
+| Abandono/cancelamento durante presença e contexto clínico alterado | C18 mantém reserva e fulfillment por origem; OR pré-entrada expirada pode ser retomada; saída física não é ato clínico | Definir cancelamento em presença, material já retirado, encerramento de episódio durante a sessão e correção posterior; não liberar saldo ou inferir consumo para contornar o caso |
+| Correção de rascunho | Itens imutáveis por criação; cancelamento/recriação disponível | Se necessário, acrescentar revisão versionada sem reescrever solicitações ou ampliar autorização vigente |
+| Consumidores do endpoint legado | Novas retiradas bloqueadas; GET/histórico e recuperação de comando confirmado preservados | Migrar clientes quando autorizada a etapa do Terminal/Mobile; avaliar remoção futura somente após inventário de uso |
+| Homologação e publicação C8–C14 | 41 testes pontuais e demonstração local repetida aprovados; lotes locais | Verificação geral, instalação vazia, carga, cliente, rede/energia e resolução do bloqueio Git permanecem após consolidação do núcleo |
+
+WhatsApp continua somente notificação futura; nenhum canal foi ativado. Sem mudança de pasta/branch Terminal, produção, infraestrutura paga ou dados reais. Continuidade atualizada por C16: correção clínica e associação/período entregues no recorte; próxima frente é o financeiro do cliente.
+
+## Consolidação C15 — Correção clínica — 17/09/2026
+
+A falta técnica M3 de correção de executor/versão/programação e anulação sem substituto foi resolvida no mesmo episódio e saiu da lista ativa. Histórico/evidências em [PENDENCIAS-RESOLVIDAS-C15.md](PENDENCIAS-RESOLVIDAS-C15.md). Demais pendências permanecem abaixo e nos lotes de origem.
+
+| Pendência restante | Estado atual | Tratamento posterior |
+|---|---|---|
+| Troca de paciente/episódio ou unidade | C15 recusa; correção está confinada ao mesmo episódio | Projetar transferência referenciada com permissões dos dois contextos e revisão dos efeitos; não mover fatos por UPDATE |
+| Executor inativo e atribuição profissional | C15 exige usuário ativo da mesma organização; autor da revisão não se confunde com executor declarado | Definir atribuição histórica, validação profissional, ciência, assinatura e alçadas; correção não é assinatura do executor indicado |
+| Restauração de anulação e replanejamento | Anulação é fato final; programação sem execução vigente volta a prevista, sem nova tarefa/aplicação | Definir novo fato de restauração se necessário e decisão operacional sobre cancelar/reprogramar; não apagar anulação |
+| Efeitos derivados | Cobertura, cobrança, coleta/resultado e aplicação interna indicam origem inválida; valores e documentos preservados | Usar revisões/compensações próprias; não confundir anulação clínica com devolução de estoque, perdão de dívida ou retirada de laudo |
+| Revisões temporais e prescrição retroativa | Anulação resolve pendências materiais/temporais da própria execução; correção com sucessora resolve material, preservando outras revisões humanas | Refinar regularização temporal e prescrição quando necessário; não encerrar toda pendência por alteração de contexto |
+| Verificação geral e publicação C8–C15 | 109 testes do recorte passaram; seed repetido sem duplicação; alterações locais | Instalação vazia, carga, homologação e bloqueio Git seguem após consolidação; continuidade avançou em C16; próxima frente técnica é o financeiro do cliente |
+
+
+## Consolidação C16 — Correção de diárias — 17/09/2026
+
+Parte técnica de associação/período resolvida, com histórico em [PENDENCIAS-RESOLVIDAS-C16.md](PENDENCIAS-RESOLVIDAS-C16.md). Não encerra a classificação nem as regras hospitalares reais.
+
+| Pendência restante | Estado atual | Tratamento posterior |
+|---|---|---|
+| Classificação original e efeitos clínicos | Classificação continua admitindo só encerramento único; período sucessor referencia classificação válida explícita | Projetar retificação/invalidação da classificação com revisão dos efeitos, sem atualizar o fato original |
+| Retroatividade e migração em lote | Correção pontual de datas passadas admite regras existentes; efeitos ativos precisam de compensação prévia | Definir divisão/fusão, sequenciamento em lote e reavaliação supervisionada; não copiar limites ou dívida automaticamente |
+| Restauração e transferência | Cancelamento final e correção no mesmo episódio/unidade; sem restauração | Criar fatos próprios caso necessários, com permissão de todos os contextos e proteção de dependências |
+| Cobrança após cancelar associação | Barreira financeira por histórico de diária/evento de cobertura permanece; não há conversão automática em serviço avulso | Definir decisão comercial explícita de regularização, sem retirar silenciosamente a obrigação de avaliar cobertura |
+| Políticas e alçadas de correção | Permissão dedicada, confirmação literal, motivo e autoria em DEV; não equivale a aprovação hospitalar | Homologar prazos, alçadas, revisão humana, operação e apresentação de histórico |
+| Verificação geral e publicação C8–C16 | 68 testes pontuais e seed repetido aprovados; lotes locais | Instalação vazia, carga, homologação e bloqueio Git seguem após consolidação; próxima frente: depósito/extrato e conciliação do cliente |
+
+
+## Consolidação C17 — Financeiro do cliente — 22/09/2026
+
+A parte técnica M5 resolvida saiu da descrição ativa, com histórico em [PENDENCIAS-RESOLVIDAS-C17.md](PENDENCIAS-RESOLVIDAS-C17.md). Etapa encerrada antes do delta intermediário; nenhum módulo seguinte foi iniciado.
+
+| Pendência restante | Estado atual | Tratamento posterior |
+|---|---|---|
+| Fonte bancária e evidência | Depósito/extrato declarados manualmente em DEV; evidência textual, sem comprovação externa | Homologar importação, identificador do provedor, documentos, retenção e conferência; nenhuma conexão bancária ativada |
+| Alçadas e referência histórica | Revisão exige reverter dependências; referência permanece reservada à cadeia, mesmo após cancelamento | Homologar segregação, revisão humana, validade dos documentos e eventual liberação supervisionada de referências |
+| Restauração e transferência | Cancelamento final; correção pode mudar conta/adquirente/referência dentro da mesma unidade | Restauração ou transferência entre unidades exige fluxo específico e revisão dos dois contextos |
+| Adquirente e caixa | Refazer vínculo não altera recebimento, parcela, taxa nem quitação; restrições M5 preservadas | Estorno real, chargeback, antecipação, correção de parcelas e ajuste de caixa fechado continuam próprios |
+| Operação local e credenciais | Cluster existente recuperado; nova credencial administrativa sintética criada após expiração | Backup/restauração, operação em OneDrive, recuperação administrativa e rotação operacional continuam pendentes; não ampliar validade de tokens reais |
+| Publicação e verificação geral C8–C17 | 56 testes pontuais e seed repetido aprovados; alterações locais | Retomar bloqueio Git, instalação vazia, carga e homologação na fase organizada já prevista |
+| Próxima ação | C17 finalizada | Receber e auditar o delta intermediário antes de retomar exames/protocolos ou outra frente do inventário |
+
+## Delta N1 C18 — Terminal v1 — 22/09/2026
+
+O usuário esclareceu expressamente que o congelamento preserva baseline/histórico, mas permite este delta aditivo. Partes técnicas resolvidas/substituídas saíram das descrições ativas acima; histórico e evidências em [PENDENCIAS-RESOLVIDAS-C18.md](PENDENCIAS-RESOLVIDAS-C18.md). C5/C14 não foram apagados nem convertidos silenciosamente.
+
+| Decisão ou trabalho restante | Estado atual | Tratamento organizado posterior |
+|---|---|---|
+| Parâmetros hospitalares | Catálogo, sensibilidade, papéis, salas, coordenadas, destino em trânsito e prazos explícitos; cenários sintéticos | Aprovação hospitalar antes de dados reais; 15 segundos é apenas janela DEV, não política definitiva |
+| Infraestrutura real de identidade/controlador | Backend e vínculo de credencial entregues; servidor sem adaptador biométrico falha fechado | Escolher/homologar adaptador e provisionamento, sensores, atestação, renovação e operação do kiosk |
+| Offline/Edge e emergências | Nenhuma autorização offline permissiva; envelopes e replay preservam fatos; presença não expira destrutivamente | Decisão humana sobre continuidade física segura, alimentação/rede, saída de emergência e supervisão |
+| Evolução de configuração e correções logísticas | Configurações/fatos imutáveis no recorte; correção de último item antes da saída entregue | Revisões de política/provisionamento e compensação após sessão encerrada, incluindo retorno físico e tutor |
+| Interface e consumidores | Contrato/OpenAPI/eventos prontos no backend; nenhuma outra pasta/branch foi alterada | Implementar e homologar clientes em autorização própria, substituindo fluxo C5/C14 sem apagar histórico |
+| Publicação e validação geral C8–C18 | 78 testes pontuais C18; 35 operações adicionadas sem mudar/remover as anteriores; lotes locais | Resolver bloqueio Git adiado; instalação vazia, carga, suíte geral e homologação continuam na fase prevista |
+| Continuidade do núcleo | Delta Terminal v1 backend encerrado | Retomar inventário restante do sistema; não declarar todo o núcleo concluído nem reabrir faltas técnicas já comprovadamente resolvidas |
+
+Nenhuma decisão de hardware, infraestrutura paga, Supabase, Vercel, Cloudflare, migração real ou publicação foi tomada por inferência.

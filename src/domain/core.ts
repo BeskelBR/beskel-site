@@ -39,10 +39,14 @@ export async function authorize(
   permission: string,
   unit?: string,
 ) {
+  await tx.query(
+    "SELECT pg_advisory_xact_lock_shared(hashtextextended('acesso:'||$1::text||':'||$2::text,0))",
+    [actor.organizacao_id, actor.usuario_id],
+  );
   const result = await tx.query(
-    `SELECT 1 FROM usuario_papel up JOIN papel_permissao pp
+    `SELECT 1 FROM atribuicao_consulta up JOIN papel_permissao pp
     ON (up.organizacao_id,up.papel_id)=(pp.organizacao_id,pp.papel_id)
-    WHERE up.organizacao_id=$1 AND up.usuario_id=$2 AND pp.permissao=$3
+    WHERE up.organizacao_id=$1 AND up.usuario_id=$2 AND up.ativo AND pp.permissao=$3
     AND (up.unidade_id IS NULL OR up.unidade_id=$4::uuid) LIMIT 1`,
     [actor.organizacao_id, actor.usuario_id, permission, unit ?? null],
   );

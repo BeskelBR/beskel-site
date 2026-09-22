@@ -1,0 +1,57 @@
+{
+  "executed_at": "2026-09-16T10:59:19.675Z",
+  "branch": "hvb-sistema-dev",
+  "scope": "cadastros, acesso, fundação e auditoria",
+  "node": "v24.19.0",
+  "results": [
+    {
+      "name": "typecheck",
+      "status": 0,
+      "elapsed_ms": 8460,
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "lint",
+      "status": 0,
+      "elapsed_ms": 142,
+      "output": "Checked 140 files in 52ms. No fixes applied.\nFound 1 info.",
+      "error": "tests\\medical-complements.test.ts:256:24 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n  i Template literals are preferred over string concatenation.\n  \n    254 │     b = attachment(s);\n    255 │   for (const extra of [\n  > 256 │     { conteudo_base64: b.conteudo_base64 + \"\\n\" },\n        │                        ^^^^^^^^^^^^^^^^^^^^^^^^\n    257 │     { conteudo_base64: \"!!!!\" },\n    258 │     { mime: \"application/pdf\" },\n  \n  i Unsafe fix: Use a template literal.\n  \n    254 254 │       b = attachment(s);\n    255 255 │     for (const extra of [\n    256     │ - ····{·conteudo_base64:·b.conteudo_base64·+·\"\\n\"·},\n        256 │ + ····{·conteudo_base64:·`${b.conteudo_base64}\\n`·},\n    257 257 │       { conteudo_base64: \"!!!!\" },\n    258 258 │       { mime: \"application/pdf\" },"
+    },
+    {
+      "name": "format",
+      "status": 0,
+      "elapsed_ms": 118,
+      "output": "Checked 143 files in 31ms. No fixes applied.",
+      "error": ""
+    },
+    {
+      "name": "unit",
+      "status": 0,
+      "elapsed_ms": 801,
+      "output": "✔ quantidades de estoque usam aritmética inteira e conversão sem arredondamento (1.1191ms)\n✔ hash canônico ignora ordem das chaves e distingue operação/conteúdo (6.4289ms)\n✔ tempo ocorrido aceita fuso explícito e rejeita futuro/inválido (0.8704ms)\n✔ ambiente recusa banco remoto, produção e nome genérico (0.2545ms)\n✔ storage privado confina caminho e organização; calcula hash do conteúdo (11.6217ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 745.8853",
+      "error": ""
+    },
+    {
+      "name": "migrate",
+      "status": 0,
+      "elapsed_ms": 790,
+      "output": "Migrations DEV verificadas/aplicadas.",
+      "error": ""
+    },
+    {
+      "name": "integration",
+      "status": 0,
+      "elapsed_ms": 15704,
+      "output": "✔ todas as consultas publicadas serializam conforme contrato sem SELECT irrestrito (6678.3621ms)\n✔ retry transacional desfaz tentativa anterior e respeita limite de três tentativas (151.5466ms)\n✔ health, readiness, organização, contrato OpenAPI e autenticação (92.0283ms)\n✔ cadastro, vínculo, papéis, dispositivo e proveniência sintética executáveis (128.4969ms)\n✔ oito comandos concorrentes e retry após resposta perdida produzem um único efeito (83.9497ms)\n✔ falha de integridade reverte comando, domínio, auditoria e outbox (27.0458ms)\n✔ FK composta e RLS bloqueiam outra organização; contexto não vaza no pool (31.2675ms)\n✔ RBAC nega escrita ao leitor e ABAC restringe unidade/dispositivo no servidor (51.4891ms)\n✔ credencial opaca, expirada, NFC e revogada; desativação de usuário/dispositivo (52.995ms)\n✔ capacidade por vaga, concorrência, intervalo e consistência de unidade (96.0409ms)\n✔ alta clínica separada da ocupação e saída, com versão esperada e histórico (59.5882ms)\n✔ paginação keyset, limites, entradas desconhecidas e datas futuras (15.8708ms)\n✔ privilégios: app não altera auditoria, apaga cadastro, assume worker ou cria tabela (7.0163ms)\n✔ workers concorrentes não reservam o mesmo job; inbox deduplica repetição (95.566ms)\n✔ lease expirada, fencing, backoff e erro permanente viram pendência (34.611ms)\n✔ vínculo explícito preserva episódio e agenda, sem fabricar ato clínico (1785.0149ms)\n✔ vínculo exige chegada, paciente/unidade corretos e versão esperada do episódio (212.3111ms)\n✔ concorrência permite um vínculo e correção preserva revogação antes de novo vínculo (273.1222ms)\n✔ cancelar depois do vínculo sinaliza revisão sem alterar episódio (145.4181ms)\n✔ cancelamento concorrente não deixa vínculo vigente indevido (73.9281ms)\n✔ GET clínico grava identidade, rota-modelo e IDs sem texto nem token (119.4366ms)\n✔ recusas autenticadas persistem 403/404, health e credencial desconhecida não criam identidade (9.2484ms)\n✔ HEAD também deixa trilha e leitura da própria auditoria não recursa (6.5509ms)\n✔ auditoria consultiva exige papel global, limita período e isola organização (14.6177ms)\n✔ auditoria pagina conjunto isolado e mantém registros imutáveis (14.9402ms)\n✔ portal mantém identidade separada e audita caixa e mensagem indisponível (259.6647ms)\n✔ falha ao persistir auditoria retém resultado e desfaz a transação (6.6524ms)\n✔ paciente mantém ID, estado original e revisões encadeadas sem perder vínculos (1563.6372ms)\n✔ concorrência, alteração vazia e dados inválidos não deixam revisão parcial (80.0952ms)\n✔ responsável, unidade, dispositivo e usuário recebem revisão sem mudar identidade ou credenciais (67.2148ms)\n✔ capacidade protege maior vaga ocupada e permite reduzir após encerramento (51.9973ms)\n✔ redução de capacidade concorrente com ocupação tem um vencedor coerente (22.0374ms)\n✔ permissões e unidades limitam leitura/escrita; trigger privilegiado não atravessa organização (37.0991ms)\n✔ SQL direto não altera cadastro; revisão exige comando aberto e mantém história imutável (16.0836ms)\n✔ falha após atualizar projeção desfaz cadastro, revisão e comando juntos (7.8613ms)\n✔ revogação e restauração de atribuição preservam origem e afetam autorização imediatamente (55.4161ms)\n✔ revisões concorrentes de acesso admitem uma transição e negam administrador restrito (12.4381ms)\n✔ revogar aguarda transação já autorizada e bloqueia a seguinte (33.5309ms)\nℹ tests 38\nℹ suites 0\nℹ pass 38\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 15644.972",
+      "error": ""
+    },
+    {
+      "name": "openapi",
+      "status": 0,
+      "elapsed_ms": 1717,
+      "output": "OpenAPI gerado dos schemas executados pela API.",
+      "error": ""
+    }
+  ]
+}

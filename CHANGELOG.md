@@ -1,5 +1,85 @@
 # Changelog
 
+## 0.27.0 — 22/09/2026
+
+- C18, delta N1 Terminal v1: NFC revogável, biometria DEV verificada, dispositivos provisionados distintos e sessões exclusivas por sala.
+- Contexto de ORs/ajustes, coordenadas/ocupações, alocação FEFO/FIFO com reservas M2, divergências/realocação, parcial e checklist canônico.
+- Armário sensível sob demanda; timeout com presença não destrutivo; confirmação automática recuperável após porta fechada e fulfillment por origem, sem consumo/execução/cobrança.
+- Migrations aditivas 073–076, 22 tabelas novas com RLS forçada, ADR 0028, matriz de dados/API e contrato de eventos. C5/C14 preservados como histórico.
+- 78 testes pontuais aprovados; 451 operações/288 caminhos no OpenAPI, sem remover ou modificar operações anteriores. Pendências afetadas resolvidas arquivadas; limitações reais permanecem explícitas. C8–C18 locais.
+
+## 0.26.0 — 2026-09-22
+
+- C17: correção/cancelamento de depósitos e extrato por fatos imutáveis; referências reservadas à mesma cadeia e dependências revertidas explicitamente.
+- Conciliações/alocações podem ser refeitas após reversão pelo último vínculo do mesmo par, com saldos revalidados e sem duplicar recebimento.
+- Migrations 071–072; 416 operações/259 caminhos; 56 testes pontuais e demonstração repetida aprovados.
+- Pendência M5 resolvida no recorte e arquivada; limites restantes atualizados. C8–C17 locais; ponto de parada para delta intermediário.
+
+## 0.25.0 — 2026-09-17
+
+- C16: cancelamento e correção de associação/período por sucessora no mesmo episódio, com histórico imutável.
+- Reservas, cobertura e documentos financeiros, inclusive de valor zero, exigem compensações explícitas; intervalos vigentes protegidos em API e SQL concorrente.
+- Migrations 069–070; 408 operações/251 caminhos; 68 testes pontuais aprovados e seed repetido sem duplicação.
+- Pendência M4 atualizada por parte resolvida; classificação/automação retroativa e decisões humanas seguem separadas. C8–C16 locais; próxima frente: correções no financeiro do cliente.
+
+## 0.24.0 — 2026-09-17
+
+- C15: correção de executor, versão e programação por sucessora, e anulação documental sem aplicação fictícia. Origem e autoria preservadas.
+- Consumo ativo exige estorno prévio; anulação não altera estoque ou valores. Programação, diárias, financeiro, exames, protocolos e prontuário reconhecem origem anulada.
+- Migrations 067–068; 402 operações/245 caminhos; 109 testes do recorte passaram e seed repetiu sem duplicação.
+- Pendência técnica M3 encerrada no recorte; limites operacionais separados. C8–C15 locais; próxima frente: correções de diárias.
+
+## 0.23.0 — 2026-09-16
+
+- C14: Terminal de Acesso V2, ordens ligadas a episódio/produtos, evidência verificada DEV, autenticação curta, sessões com múltiplas ordens e eventos físicos simulados.
+- ENTRY_CONFIRMED inicia separação; autenticar/autorizar/acessar não movimenta estoque, clínica ou cobrança. Escopo sensível explícito e sequência do armário protegida.
+- Novas retiradas pelo endpoint legado bloqueadas/deprecated; histórico, migrations 047/048 e ADR 0015 preservados.
+- Migrations 065–066, 399 operações em 242 caminhos; 41 testes pontuais aprovados e demonstração repetida.
+- Pendências afetadas revisadas; três registros resolvidos/substituídos arquivados fora da lista ativa. Mobile/fulfillment e hardware continuam futuros. C8–C14 locais.
+
+## 0.22.0 — 2026-09-16
+
+- C13: revisões cadastrais com antes/depois, IDs preservados e versão esperada; capacidade protegida contra ocupação concorrente.
+- Revogação/restauração de atribuições com histórico e serialização contra operações autorizadas.
+- GET /atribuicoes acrescenta ativo/versao. Migrations 063–064; 384 operações em 231 caminhos.
+- 43 testes pontuais aprovados; demonstração repetida sem duplicação. Etapa finalizada localmente; publicação C8–C13 segue adiada.
+
+## 0.21.0 — 2026-09-16
+
+- C12: vínculo agenda–episódio com revogação/histórico e auditoria persistente de consultas identificadas, internas e do portal.
+- Leituras dependem da gravação da trilha, com metadados minimizados e consulta administrativa segregada.
+- Migrations 061–062; três tabelas, uma view, duas permissões e cinco operações. Total: 370 operações em 224 caminhos.
+- 58 testes pontuais aprovados e seed repetido. Inventário de refinamentos funcionais preservado antes de declarar núcleo integralmente concluído. Publicação C8–C12 continua adiada.
+
+## 0.20.0 — 2026-09-16
+
+- C11: modelos versionados, preenchimento na evolução nativa, anexos privados, busca textual e coautoria pessoal.
+- Complementos ligados à versão/hash; retificação e revogação preservam histórico.
+- Migrations 059–060; seis tabelas, quatro views, três permissões e 16 operações. Total: 365 operações em 221 caminhos.
+- 31 testes pontuais aprovados e seed repetível. Próximo grupo: vínculos/auditoria. Publicação C8–C11 adiada conforme o usuário.
+
+## 0.19.0 — 2026-09-15
+
+- C10: saída de extrato declarada e conciliação parcial/agrupada de pagamentos, com saldos e correções/reversões.
+- Conciliação não liquida dívida; reversão do pagamento deixa o extrato para revisão. Crédito comercial não é débito bancário.
+- Migrations 057–058; três tabelas, três views, duas permissões e sete operações; total 349 operações em 210 caminhos.
+- 26 testes pontuais aprovados. Sem nova tentativa de publicação: pendências e bloqueios adiados conforme o usuário.
+
+## 0.18.0 — 2026-09-15
+
+- C9: crédito comercial documentado, saldo, aplicação parcial e correção/reversão com histórico.
+- Aplicação usa a mesma liquidação financeira, com fonte exclusiva pagamento ou crédito, e pode ser alocada em parcelas sem segunda baixa.
+- Leituras de liquidação acrescentam credito_id; quatro indicadores de aquisição/parcelas corrigidos para booleanos.
+- Migrations 055–056; duas tabelas, duas views, duas permissões e seis operações; total 342 operações em 206 caminhos.
+- 37 testes pontuais aprovados e seed repetível. C8/C9 locais; publicação bloqueada pela revisão automática. Próximo: conciliação de saídas.
+
+## 0.17.0 — 2026-09-15
+
+- C8: plano integral e versionado de parcelas para obrigações de fornecedor/despesa, com datas e valores explícitos.
+- Alocação parcial de liquidações existentes, reversão e reprogramação sem duplicar dívida ou pagamento; valores sem parcela visíveis.
+- Migrations 053–054; quatro tabelas, quatro views, duas permissões e oito operações; total 336 operações em 203 caminhos.
+- 25 testes pontuais aprovados e seed repetível. Próximos complementos: crédito comercial e conciliação de saídas.
+
 ## 0.16.0 — 2026-09-15
 
 - C7: rateio versionado dos componentes de aquisição por item, fechado contra a precificação original.

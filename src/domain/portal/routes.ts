@@ -2,7 +2,7 @@ import type { FastifyInstance, FastifyRequest } from "fastify";
 import type pg from "pg";
 import { digest, DomainError } from "../core.ts";
 import { object, uuid, text } from "../schemas.ts";
-import { transaction } from "../../persistence/database.ts";
+import { auditedTransaction } from "../links-audit/read-audit.ts";
 export function registerPortal(
   app: FastifyInstance,
   db: pg.Pool,
@@ -20,7 +20,7 @@ export function registerPortal(
       await db.query("SELECT * FROM hvb.autenticar_portal($1)", [digest(token)])
     ).rows[0];
     if (!identity) throw new DomainError(401, "credencial_portal_invalida");
-    return transaction(db, identity.organizacao_id, async (tx) => {
+    return auditedTransaction(db, req, identity, async (tx) => {
       await tx.query("SELECT travar_conta_portal($1,$2)", [
         identity.organizacao_id,
         identity.conta_portal_id,

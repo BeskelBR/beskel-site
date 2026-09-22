@@ -14,6 +14,16 @@ M5 acrescenta catálogo/preço versionados, conta, avaliação comercial, respon
 
 M6A acrescenta catálogo técnico, solicitações, coletas, avaliação de amostras, resultados estruturados e correções versionadas. A liberação humana DEV preserva conteúdo e hash verificável, sem interpretação clínica automática. M6B acrescenta protocolos versionados, adesão do paciente, recorrência em dias/calendário, aplicações internas/externas, revisão de atrasos e vínculo com consumo físico. M6C acrescenta modelos e campos versionados, autorização, conteúdo privado com hash, aprovação, declaração de assinatura não verificada e registro de entrega simulado. **M6 está em andamento**; M6D acrescenta agenda com recursos, disponibilidade, conflitos, reprogramação e transições operacionais. M6E acrescenta portal com credenciais próprias, acesso por paciente, preferências e comunicação simulada com documentos/agenda versionados. C1 integra fornecedor/pedido/recebimento à mesma entrada física M2. C2 acrescenta evolução clínica versionada e linha do tempo por paciente, preservando IDs originais e permissões por fonte. A consolidação do núcleo segue antes das decisões hospitalares; a interface permanece futura.
 
+C14 permanece como baseline histórico do **Terminal de Acesso V2**, com ordens, autenticação simulada, sessões e eventos sem fulfillment. C18 evolui essa fronteira para o contrato Terminal v1 abaixo. Novas retiradas pela rota legada /terminal/retiradas continuam bloqueadas. Ver [relatório histórico C14](docs/RELATORIO-C14.md).
+
+C15 entrega **correção clínica**: executor/versão/programação podem ser corrigidos por sucessora no mesmo episódio, e um ato registrado indevidamente pode ser anulado sem inventar outra execução. Exige estorno prévio de consumo ativo e preserva documentos derivados para revisão. Ver [relatório C15](docs/RELATORIO-C15.md).
+
+C16 entrega **correção de diárias**: associação e período podem ser cancelados ou substituídos com histórico. Reservas, cobertura e documentos financeiros exigem compensação explícita prévia; o sistema preserva valores e saldo físico. Ver [relatório C16](docs/RELATORIO-C16.md).
+
+C17 entrega **correções do financeiro do cliente**: depósito/extrato corrigíveis com histórico e reabertura explícita de conciliação/alocação após reversão. Etapa concluída; parada para o delta intermediário do usuário. Ver [relatório C17](docs/RELATORIO-C17.md) e [ponto de parada](docs/PONTO-DE-PARADA-C17.md).
+
+C18 incorpora o delta N1 **Terminal v1 canônico**: NFC revogável + biometria DEV, dispositivos separados, contexto de ORs/ajustes, sessão exclusiva da sala, FEFO/FIFO com reservas M2, checklist, sensível sob demanda e confirmação automática recuperável após saída. Fulfillment preserva origem e não gera consumo, execução clínica ou cobrança. Rotas novas em `/v1/terminal/v1`; baselines C5/C14 preservados. [Relatório C18](docs/RELATORIO-C18.md), [modelo e matriz API](docs/DADOS-C18.md), [contrato de eventos](docs/CONTRATO-EVENTOS-TERMINAL-V1.md). O servidor normal falha fechado sem adaptador biométrico; não há hardware ou cliente real instalado.
+
 ## Executar neste Windows
 
 Requisitos: Node **24**, pnpm **11.19.0**. O wrapper abaixo usa o pnpm disponível ou o runtime já existente no Codex. Não instala nada globalmente.
@@ -40,6 +50,15 @@ Set-Location 'C:\Users\Admin\OneDrive\BESKEL\PARCEIROS\HVB\SISTEMA'
 .\scripts\pnpm.ps1 db:seed:terminal
 .\scripts\pnpm.ps1 db:seed:pricing
 .\scripts\pnpm.ps1 db:seed:acquisition
+.\scripts\pnpm.ps1 db:seed:installments
+.\scripts\pnpm.ps1 db:seed:supplier-credit
+.\scripts\pnpm.ps1 db:seed:supplier-outflow
+.\scripts\pnpm.ps1 db:seed:medical-complements
+.\scripts\pnpm.ps1 db:seed:links-audit
+.\scripts\pnpm.ps1 db:seed:registry
+.\scripts\pnpm.ps1 db:seed:terminal-access
+.\scripts\pnpm.ps1 db:seed:clinical-corrections
+.\scripts\pnpm.ps1 db:seed:daily-corrections
 .\scripts\pnpm.ps1 check
 .\scripts\pnpm.ps1 dev
 ```
@@ -247,11 +266,11 @@ Obrigações de fornecedores e despesas com valores explícitos, pagamentos decl
 
 pnpm db:seed:payables demonstra obrigação 100, pagamento declarado 60 e saldo 40; referências locais em .local/payables-demo.json. Não executa pagamento real. pnpm check:payables verifica o recorte (24 testes aprovados). Ver [relatório C4](docs/RELATORIO-C4.md), [dicionário](docs/DADOS-C4.md) e [ADR 0014](docs/adr/0014-contas-pagar.md).
 
-### Contrato de terminal simulado C5
+### Contrato legado de terminal C5
 
-Rotas sob /v1/terminal permitem configurar etiquetas fictícias, registrar leituras, confirmar retirada e consultar o comando por chave. Leitura não é autenticação ou ato clínico. Retirada exige credencial API, dispositivo ativo, permissões e confirmação humana; reutiliza o movimento físico existente.
+Rotas legadas sob /v1/terminal preservam configuração de etiquetas fictícias, leituras e consulta de comando. Desde C14, novas retiradas por esse caminho são bloqueadas. Leitura não é autenticação nem ato clínico. O contrato vigente está na [ADR 0028](docs/adr/0028-terminal-v1-canonico.md), que supersede funcionalmente ADRs 0015/0024 para o Terminal v1 e preserva o histórico.
 
-pnpm db:seed:terminal gera a demonstração (origem 18/destino 2 após retirar duas unidades). Referências em .local/terminal-demo.json, sem credenciais. pnpm check:terminal executa o recorte de 28 testes aprovados. O código permanece dentro de SISTEMA; nenhuma edição ou execução do projeto Terminal.
+pnpm db:seed:terminal demonstra apenas identificação, sem nova retirada. Referências em .local/terminal-demo.json, sem credenciais. O recorte legado preserva leituras e agora verifica bloqueio de novas retiradas; integra check:terminal-access. O código permanece dentro de SISTEMA; nenhuma edição ou execução do projeto Terminal.
 
 Em resposta perdida, consultar/repetir a mesma chave e corpo; não criar uma nova intenção automaticamente. Ver [contrato e limites](docs/adr/0015-terminal-simulado.md), [dicionário](docs/DADOS-C5.md) e [relatório C5](docs/RELATORIO-C5.md).
 
@@ -267,4 +286,68 @@ pnpm db:seed:pricing demonstra preço 105, obrigação 100 e vínculo 100, com s
 
 Rateio explícito de frete/acréscimo/desconto entre os itens do pedido e custo atribuído a cada entrada recebida. Componentes fecham contra a precificação; recebimentos parciais respeitam orçamento e quantidade. Revisão e reversão preservam histórico; preço posterior fica sinalizado. Custos analíticos de aquisição não reescrevem o custo físico do lote ou de consumos anteriores.
 
-pnpm db:seed:acquisition demonstra rateio 105, entradas de duas e três caixas, custos 42 e 63. pnpm check:acquisition executa o recorte de 32 testes. Ver [relatório C7](docs/RELATORIO-C7.md), [dicionário](docs/DADOS-C7.md) e [decisões/limites](docs/adr/0017-custo-aquisicao.md). Próximo: plano de parcelas de fornecedor.
+pnpm db:seed:acquisition demonstra rateio 105, entradas de duas e três caixas, custos 42 e 63. pnpm check:acquisition executa o recorte de 32 testes. Ver [relatório C7](docs/RELATORIO-C7.md), [dicionário](docs/DADOS-C7.md) e [decisões/limites](docs/adr/0017-custo-aquisicao.md). C8 acrescenta o plano de parcelas abaixo.
+
+
+### Parcelas de fornecedores C8
+
+Plano integral com versões, datas e valores explícitos. Liquidações existentes podem ser distribuídas entre parcelas sem criar nova dívida ou pagamento. Reprogramação e reversões preservam histórico; valores liquidados ainda sem parcela ficam visíveis. Nenhum débito é agendado automaticamente.
+
+pnpm db:seed:installments demonstra obrigação 100, parcelas 40/60, liquidação 60 e saldos 0/40. pnpm check:installments executa o recorte de 25 testes. Ver [relatório C8](docs/RELATORIO-C8.md), [dicionário](docs/DADOS-C8.md) e [decisões/limites](docs/adr/0018-parcelas-fornecedores.md). C9 acrescenta o crédito comercial abaixo.
+
+
+### Crédito comercial de fornecedores C9
+
+Crédito com origem/documento explícitos, aplicação parcial à obrigação e saldo próprio. A aplicação usa a liquidação original e pode quitar parcelas sem criar pagamento bancário. Reversões e correções preservam histórico; não há devolução física automática.
+
+pnpm db:seed:supplier-credit demonstra crédito 60, aplicação 40, crédito disponível 20 e dívida 60. pnpm check:supplier-credit executa 37 testes pontuais. Ver [relatório C9](docs/RELATORIO-C9.md), [dicionário](docs/DADOS-C9.md) e [mudanças de contrato](docs/adr/0019-credito-fornecedor.md). C10 acrescenta conciliação de saídas abaixo. C8–C13 permanecem locais; publicação e pendências serão tratadas após o ciclo básico.
+
+
+### Conciliação de saídas C10
+
+Pagamentos declarados podem ser conciliados parcialmente com saídas de extrato da mesma conta, com vínculos explícitos, saldos e histórico. Conciliação não liquida dívida nem cria operação bancária; crédito comercial permanece separado.
+
+pnpm db:seed:supplier-outflow demonstra pagamento 60, extrato 100, conciliação 60 e residual 40. pnpm check:supplier-outflow executa 26 testes pontuais. Ver [relatório C10](docs/RELATORIO-C10.md), [dicionário](docs/DADOS-C10.md) e [decisões](docs/adr/0020-conciliacao-saidas.md). C11 acrescenta os complementos do prontuário abaixo.
+
+
+### Complementos do prontuário C11
+
+Modelos versionados organizam texto informado na evolução original. Anexos privados de até 256 KiB e declarações pessoais de coautoria apontam para a versão exata; retificações preservam o histórico. Busca textual exige paciente/unidade e permissão de conteúdo clínico. Coautoria não equivale a assinatura válida.
+
+pnpm db:seed:medical-complements demonstra modelo, preenchimento, anexo e busca com dados fictícios. pnpm check:medical-complements executa 31 testes pontuais. Ver [relatório C11](docs/RELATORIO-C11.md), [dicionário](docs/DADOS-C11.md) e [decisões/limites](docs/adr/0021-complementos-prontuario.md). C12 acrescenta vínculos/auditoria abaixo. Pendências e publicação seguem para depois da consolidação.
+
+
+### Vínculos e auditoria C12
+
+Agenda e episódio podem ser relacionados explicitamente para o mesmo paciente/unidade, com revogação e histórico. Consultas identificadas internas e do portal geram trilha persistente; falha de gravação retém o resultado. Tokens, narrativa e termos de busca não são copiados para a auditoria.
+
+pnpm db:seed:links-audit demonstra um vínculo e a trilha de consulta, sem inferir execução clínica. pnpm check:links-audit executa 58 testes pontuais. Ver [relatório C12](docs/RELATORIO-C12.md), [dicionário](docs/DADOS-C12.md) e [limites](docs/adr/0022-vinculos-auditoria.md). Os grupos C1–C12 têm entregas DEV; [refinamentos funcionais ainda pendentes](docs/FECHAMENTO-CICLO-BASICO.md) impedem declarar completude integral do núcleo.
+
+
+### Revisões cadastrais e acesso C13
+
+Correções de dados básicos preservam IDs e histórico antes/depois. Nome/capacidade dos locais têm revisão concorrente segura com ocupações. Atribuições de papel podem ser revogadas/restauradas; a autorização usa o estado vigente. GET /atribuicoes inclui ativo e versao.
+
+pnpm db:seed:registry demonstra revisão de paciente/capacidade e revogação/restauração de uma atribuição própria. pnpm check:registry executa 43 testes pontuais. Ver [relatório C13](docs/RELATORIO-C13.md), [dicionário](docs/DADOS-C13.md) e [decisões](docs/adr/0023-revisoes-cadastros-acesso.md). Etapa concluída em DEV; continuidade avançou em C15/C16, com financeiro do cliente como próxima frente.
+
+### Verificação Terminal V2
+
+Recorte: `pnpm check:terminal-access` (41 testes). Demonstração local: `pnpm db:seed:terminal-access`; repetições verificam o mesmo manifesto concluído, sem duplicar o cenário. Migrations 065–066; versão 0.23.0; 399 operações/242 caminhos. Auditoria, ADR 0024 e pendências atualizadas em docs. C8–C14 continuam locais, com publicação adiada conforme o bloqueio já registrado. Correções de diárias entregues no recorte C16; próxima frente: financeiro do cliente.
+
+### Correção clínica C15
+
+`pnpm check:clinical-corrections` verifica clínica e dependências atingidas (109 testes). `pnpm db:seed:clinical-corrections` demonstra correção e anulação pelos mesmos comandos nas repetições. Versão 0.24.0, migrations 067–068, 402 operações em 245 caminhos. C8–C15 permanecem locais; publicação e verificação geral seguem adiadas. Contrato/limites: [DADOS-C15](docs/DADOS-C15.md) e [ADR 0025](docs/adr/0025-correcao-clinica.md).
+
+
+## C16 — Correção de diárias
+
+`pnpm check:daily-corrections` executa 68 testes pontuais. `pnpm db:seed:daily-corrections` demonstra correção e cancelamento de período/associação, repetíveis pelos mesmos comandos. Versão 0.25.0, migrations 069–070, 408 operações em 251 caminhos. C8–C16 permanecem locais; publicação e verificação geral seguem adiadas. Contrato/limites: [DADOS-C16](docs/DADOS-C16.md) e [ADR 0026](docs/adr/0026-correcao-diarias.md).
+
+
+## C17 — Correções financeiras
+
+`pnpm check:financial-corrections`: 56 testes pontuais aprovados. `pnpm db:seed:financial-corrections`: demonstração repetível com referências em .local/financial-corrections-demo.json. Versão 0.26.0, migrations 071–072, 416 operações em 259 caminhos. C8–C17 continuam locais, com publicação e verificação geral adiadas. [Contratos C17](docs/DADOS-C17.md). Próxima ação: receber e avaliar o delta intermediário, sem iniciar o módulo seguinte.
+
+## C18 — Contrato Terminal v1
+
+`node scripts/check.mjs --terminal-v1` (ou `pnpm check:terminal-v1`): 78 testes pontuais aprovados, incluindo 20 jornadas/falhas novas. Migrations 073–076, versão 0.27.0, 451 operações/288 caminhos, 220 tabelas/77 views. As 416 operações anteriores foram preservadas integralmente. Migrations aplicadas e auditadas DEV/TEST; sem novo seed operacional DEV. Os cenários de teste usam dados sintéticos e injetam o simulador explicitamente. C8–C18 permanecem locais. [Ponto atual de continuidade](docs/PONTO-DE-PARADA-C18.md).

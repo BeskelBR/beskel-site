@@ -1,0 +1,302 @@
+{
+  "executed_at": "2026-09-22T18:54:20.652Z",
+  "databases": {
+    "DEV": {
+      "migrations": 76,
+      "mismatches": [],
+      "tabelas": 220,
+      "views": 77,
+      "permissoes": 128,
+      "protection": [
+        {
+          "relname": "tv1_attempt",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_auth",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_challenge",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_context",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_context_order",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_coordinate",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_demand",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_device",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_discrepancy",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_event",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_fulfillment",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_movement",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_nfc",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_nfc_revocation",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_occupancy",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_order",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_order_item",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_product_policy",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_room",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_session",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_source",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_task",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        }
+      ],
+      "stock": {
+        "discrepancies": 0
+      },
+      "physical": {
+        "invalid_movements": 0
+      }
+    },
+    "TEST": {
+      "migrations": 76,
+      "mismatches": [],
+      "tabelas": 220,
+      "views": 77,
+      "permissoes": 128,
+      "protection": [
+        {
+          "relname": "tv1_attempt",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_auth",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_challenge",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_context",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_context_order",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_coordinate",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_demand",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_device",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_discrepancy",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_event",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_fulfillment",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_movement",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_nfc",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_nfc_revocation",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_occupancy",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_order",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_order_item",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_product_policy",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_room",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_session",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_source",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        },
+        {
+          "relname": "tv1_task",
+          "relrowsecurity": true,
+          "relforcerowsecurity": true
+        }
+      ],
+      "stock": {
+        "discrepancies": 0
+      },
+      "physical": {
+        "invalid_movements": 0
+      }
+    }
+  },
+  "historical_migrations_001_072_unchanged": true,
+  "openapi": {
+    "version": "0.27.0",
+    "paths": 288,
+    "operations": 451,
+    "added": [
+      "post /v1/terminal/v1/rooms",
+      "get /v1/terminal/v1/rooms",
+      "post /v1/terminal/v1/devices",
+      "get /v1/terminal/v1/devices",
+      "post /v1/terminal/v1/employee-nfc",
+      "post /v1/terminal/v1/employee-nfc/{id}/revoke",
+      "post /v1/terminal/v1/product-policies",
+      "post /v1/terminal/v1/coordinates",
+      "get /v1/terminal/v1/coordinates",
+      "post /v1/terminal/v1/occupancies",
+      "get /v1/terminal/v1/occupancies",
+      "post /v1/terminal/v1/occupancies/{id}/release",
+      "post /v1/terminal/v1/nfc",
+      "post /v1/terminal/v1/biometric",
+      "post /v1/terminal/v1/withdrawal-orders",
+      "get /v1/terminal/v1/withdrawal-orders",
+      "post /v1/terminal/v1/withdrawal-contexts",
+      "get /v1/terminal/v1/withdrawal-contexts",
+      "post /v1/terminal/v1/access-sessions",
+      "post /v1/terminal/v1/access-sessions/{id}/physical-events",
+      "post /v1/terminal/v1/access-sessions/{id}/picking-events",
+      "post /v1/terminal/v1/access-sessions/{id}/sensitive-access",
+      "post /v1/terminal/v1/access-sessions/{id}/recover",
+      "get /v1/terminal/v1/access-sessions/{id}",
+      "get /v1/terminal/v1/rooms/{id}/active-session",
+      "get /v1/terminal/v1/challenges/{id}",
+      "get /v1/terminal/v1/auth-sessions/{id}",
+      "get /v1/terminal/v1/withdrawal-order-items",
+      "get /v1/terminal/v1/demands",
+      "get /v1/terminal/v1/fulfillments",
+      "get /v1/terminal/v1/events",
+      "get /v1/terminal/v1/discrepancies",
+      "get /v1/terminal/v1/attempts",
+      "get /v1/terminal/v1/movements",
+      "get /v1/terminal/v1/rooms/{id}/free-coordinates"
+    ],
+    "removed": [],
+    "changed": []
+  },
+  "new_tables": 22,
+  "source_sha256": "27f01af2f370d0d7c9f246161a6259a953fe1ba2dcafb9e343d384bd60e50eb1"
+}

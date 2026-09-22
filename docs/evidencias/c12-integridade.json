@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-16T06:00:56.954Z",
+  "previousContractDifferences": [],
+  "operations": 370,
+  "paths": 224,
+  "databases": {
+    "DEV": {
+      "migrations": 62,
+      "hashMismatches": []
+    },
+    "TEST": {
+      "migrations": 62,
+      "hashMismatches": []
+    }
+  },
+  "tables": [
+    {
+      "relkind": "r",
+      "n": 182
+    },
+    {
+      "relkind": "v",
+      "n": 69
+    }
+  ],
+  "permissions": 117,
+  "historicalMismatches": []
+}
