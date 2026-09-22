@@ -8,19 +8,41 @@ state.catalog = state.catalog || [];
 
 let hvbV4AccessPoll = null;
 let hvbV4AccessPollId = null;
+let hvbV4AccessSignature = null;
+
+function v4AccessSignature(access){
+  return JSON.stringify({
+    state:access?.state||null,
+    sensitive_state:access?.sensitive_state||null,
+    timeout_alerted_at:access?.timeout_alerted_at||null,
+    withdrawal_confirmation:access?.withdrawal_confirmation?.confirmed_at||null
+  });
+}
 
 function v4StopAccessPoll(){
   if(hvbV4AccessPoll) clearInterval(hvbV4AccessPoll);
   hvbV4AccessPoll = null;
   hvbV4AccessPollId = null;
+  hvbV4AccessSignature = null;
 }
 function v4EnsureAccessPoll(id){
   if(hvbV4AccessPoll && hvbV4AccessPollId === id) return;
   v4StopAccessPoll();
   hvbV4AccessPollId = id;
-  hvbV4AccessPoll = setInterval(()=>{
+  hvbV4AccessPoll = setInterval(async()=>{
     if(location.pathname !== `/acesso/${encodeURIComponent(id)}`) return v4StopAccessPoll();
-    accessScreen(id);
+    const sessionToken=v4SessionToken(id);
+    if(!sessionToken)return v4StopAccessPoll();
+    try{
+      const latest=await apiGet({action:"accessSession",id,session_token:sessionToken});
+      const nextSignature=v4AccessSignature(latest);
+      if(nextSignature===hvbV4AccessSignature)return;
+
+      const scrollTop=window.scrollY||document.documentElement.scrollTop||0;
+      await accessScreen(id,latest,{restoreScroll:scrollTop});
+    }catch(error){
+      if(isConnectivityError(error))return;
+    }
   },2500);
 }
 
@@ -191,13 +213,14 @@ function v4SessionToken(accessSessionId){
     : sessionStorage.getItem(`hvb_access_session_token_${accessSessionId}`)||"";
 }
 
-accessScreen = async function(accessSessionId){
+accessScreen = async function(accessSessionId,prefetchedAccess=null,options={}){
   try{
     const sessionToken=v4SessionToken(accessSessionId);
     if(!sessionToken)return go("/");
-    const access=await apiGet({action:"accessSession",id:accessSessionId,session_token:sessionToken});
+    const access=prefetchedAccess||await apiGet({action:"accessSession",id:accessSessionId,session_token:sessionToken});
     if(!access)return go("/");
     state.access={...access,session_token:sessionToken};
+    hvbV4AccessSignature=v4AccessSignature(access);
     const totalItems=(access.orders||[]).reduce((sum,order)=>sum+(order.item_count||0),0)+(access.live_items||[]).length;
     const sensitive=access.sensitive_access
       ? `<div class="notice sensitive-notice"><b>Medicação sensível elegível</b><span>A permissão foi validada na autenticação inicial, mas o armário permanece travado. A abertura ocorrerá somente sob demanda no Terminal de Retirada, sem nova autenticação.</span></div>`
@@ -220,6 +243,12 @@ accessScreen = async function(accessSessionId){
     });
     bindDev(access);
     v4EnsureAccessPoll(accessSessionId);
+    if(Number.isFinite(options.restoreScroll)){
+      requestAnimationFrame(()=>{
+        const maxScroll=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
+        window.scrollTo(0,Math.min(options.restoreScroll,maxScroll));
+      });
+    }
   }catch(error){
     if(isConnectivityError(error))return failClosed("A API HVB ficou indisponível. O Terminal não emitirá novas autorizações ou transições enquanto estiver desconectado.");
     go("/");
