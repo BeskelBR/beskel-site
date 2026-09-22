@@ -4,6 +4,7 @@
 // Mantém app.js como base e substitui somente as telas/controles reabertos nesta revisão.
 
 state.liveItems = state.liveItems || [];
+state.catalog = state.catalog || [];
 
 let hvbV4AccessPoll = null;
 let hvbV4AccessPollId = null;
@@ -39,7 +40,8 @@ function v4LiveItemsPanel(){
   const rows=state.liveItems.length
     ? state.liveItems.map((item,index)=>`<div class="material-row"><span><b>${esc(item.location_code)}</b> · ${esc(item.description)} ${item.sensitive?'<span class="chip sensitive">Sensível</span>':""}</span><strong>${esc(item.quantity)}</strong><button class="btn ghost" data-remove-live="${index}">Remover</button></div>`).join("")
     : `<p class="lead">Nenhum ajuste ao vivo adicionado.</p>`;
-  return `<div class="dev-panel live-context-panel"><div class="eyebrow">Edição ao vivo • DEV</div><p>Use quando a retirada precisar incluir material fora das ORs selecionadas. O ajuste fica vinculado à AccessSession e será auditável.</p><div class="materials-list">${rows}</div><div class="actions"><button class="btn secondary" id="addLiveItem">+ Adicionar material</button></div></div>`;
+  const options=state.catalog.map(item=>`<option value="${esc(item.product_id)}">${esc(item.description)} · ${esc(item.location_code)}${item.sensitive?" · SENSÍVEL":""}</option>`).join("");
+  return `<div class="dev-panel live-context-panel"><div class="eyebrow">Edição ao vivo • catálogo</div><p>Adicione apenas materiais cadastrados. Sensibilidade e coordenada vêm do catálogo do servidor e não podem ser definidas pelo operador.</p><div class="materials-list">${rows}</div><div class="live-add-form"><select id="liveProduct"><option value="">Selecione um material…</option>${options}</select><input id="liveQty" type="number" min="1" step="1" value="1" inputmode="numeric"><button class="btn secondary" id="addLiveItem">+ Adicionar</button></div></div>`;
 }
 
 function v4UpdateSelection(orders){
@@ -56,18 +58,18 @@ function v4UpdateSelection(orders){
 
 function v4BindLiveItems(orders){
   document.getElementById("addLiveItem")?.addEventListener("click",()=>{
-    const description=prompt("Material a adicionar:");
-    if(!description?.trim()) return;
-    const quantity=Number(prompt("Quantidade:","1"));
-    if(!Number.isFinite(quantity)||quantity<=0) return alert("Quantidade inválida.");
-    const locationCode=(prompt("Coordenada física:","MANUAL")||"MANUAL").trim().toUpperCase();
-    const sensitive=confirm("Este material pertence ao estoque sensível?");
+    const productId=document.getElementById("liveProduct")?.value||"";
+    const product=state.catalog.find(item=>item.product_id===productId);
+    const quantity=Number(document.getElementById("liveQty")?.value||0);
+    if(!product)return alert("Selecione um material cadastrado.");
+    if(!Number.isFinite(quantity)||quantity<=0)return alert("Quantidade inválida.");
     state.liveItems.push({
       live_item_id:`live_${Date.now()}_${state.liveItems.length+1}`,
-      description:description.trim(),
+      product_id:product.product_id,
+      description:product.description,
       quantity,
-      location_code:locationCode,
-      sensitive
+      location_code:product.location_code,
+      sensitive:product.sensitive===true
     });
     const host=document.getElementById("liveContextHost");
     if(host) host.innerHTML=v4LiveItemsPanel();
@@ -91,8 +93,12 @@ ordersScreen = async function(){
   state.selectedOrders.clear();
   state.liveItems=[];
   try{
-    const orders=await apiGet({action:"pendingOrders",auth_session_id:auth.auth_session_id});
-    const cards=orders.length?orders.map(orderCard).join(""):`<div class="card"><h2>Nenhuma ordem pendente</h2><p class="lead">Você ainda pode registrar um material por edição ao vivo.</p></div>`;
+    const [orders,catalog]=await Promise.all([
+      apiGet({action:"pendingOrders",auth_session_id:auth.auth_session_id}),
+      apiGet({action:"catalog",auth_session_id:auth.auth_session_id})
+    ]);
+    state.catalog=Array.isArray(catalog)?catalog:[];
+    const cards=orders.length?orders.map(orderCard).join(""):`<div class="card"><h2>Nenhuma ordem pendente</h2><p class="lead">Você ainda pode registrar um material cadastrado por edição ao vivo.</p></div>`;
     render(shell(`
       <div class="eyebrow">Usuário autenticado</div>
       <h1>${esc(auth.employee.name)}</h1>
@@ -137,7 +143,11 @@ ordersScreen = async function(){
 authorizeAccess = async function(orderIds,liveItems=[]){
   if(!state.auth?.auth_session_id)return go("/");
   const ids=[...new Set((orderIds||[]).filter(Boolean))];
-  const additions=(Array.isArray(liveItems)?liveItems:[]).map(item=>({...item}));
+  const additions=(Array.isArray(liveItems)?liveItems:[]).map(item=>({
+    live_item_id:item.live_item_id,
+    product_id:item.product_id,
+    quantity:item.quantity
+  }));
   if(!ids.length&&!additions.length)return;
   render(shell(`<div class="card"><div class="eyebrow">Etapa 3 • Contexto da retirada</div><h1>Validando retirada…</h1><p class="lead">A API está verificando ORs, ajustes ao vivo, permissões e eventual acesso ao estoque sensível.</p></div>`,"Controle de acesso"));
   try{
