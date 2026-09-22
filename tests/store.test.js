@@ -104,15 +104,17 @@ test("Terminal v4 exposes physical coordinates and supports the approved NFC/bio
   assert.ok(pending.some(order => order.items.some(item => item.location_code)));
   assert.ok(pending.every(order => order.items.every(item => Array.isArray(item.alternate_locations))));
 
+  const catalog = store.listCatalog(rafael.auth.auth_session_id);
+  assert.ok(catalog.length > 0);
+  const catalogProduct = catalog[0];
+
   const access = store.startAccessSession({
     authSessionId: rafael.auth.auth_session_id,
     orderIds: [],
     liveItems: [{
       live_item_id: "live-test-v4",
-      description: "Material DEV avulso",
-      quantity: 2,
-      sensitive: false,
-      location_code: "T1"
+      product_id: catalogProduct.product_id,
+      quantity: 2
     }],
     terminalId: store.TERMINAL_ID,
     commandId: "test-v4-live-access-001"
@@ -120,6 +122,9 @@ test("Terminal v4 exposes physical coordinates and supports the approved NFC/bio
 
   assert.equal(access.state, "DOOR_AUTHORIZED");
   assert.equal(access.live_items.length, 1);
+  assert.equal(access.live_items[0].product_id, catalogProduct.product_id);
+  assert.equal(access.live_items[0].sensitive, catalogProduct.sensitive);
+  assert.equal(access.live_items[0].location_code, catalogProduct.location_code);
 
   let current = store.registerAccessEvent({
     accessSessionId: access.access_session_id,
@@ -146,7 +151,11 @@ test("Terminal v4 exposes physical coordinates and supports the approved NFC/bio
     eventType: "STOCK_LOCATION_DISCREPANCY",
     commandId: "test-v4-discrepancy",
     sourceDeviceId: store.PICKING_DISPLAY_ID,
-    metadata: { description: "Material DEV avulso", location_code: "T1" }
+    metadata: {
+      group_key:`${catalogProduct.location_code}|${catalogProduct.description}|${catalogProduct.sensitive?1:0}`,
+      description:catalogProduct.description,
+      location_code:catalogProduct.location_code
+    }
   });
   assert.equal(current.state, "ENTRY_CONFIRMED");
 
@@ -163,11 +172,11 @@ test("Terminal v4 exposes physical coordinates and supports the approved NFC/bio
   current = store.confirmWithdrawal({
     accessSessionId: access.access_session_id,
     results: [{
-      key: "T1|Material DEV avulso|0",
-      description: "Material DEV avulso",
+      key: `${catalogProduct.location_code}|${catalogProduct.description}|${catalogProduct.sensitive?1:0}`,
+      description: catalogProduct.description,
       expected_quantity: 2,
       actual_quantity: 2,
-      location_code: "T1",
+      location_code: catalogProduct.location_code,
       status: "CONFIRMED"
     }],
     commandId: "test-v4-confirm",
