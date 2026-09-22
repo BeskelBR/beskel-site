@@ -215,10 +215,10 @@ function sensitiveStatePanel(groups){
     action=`<button class="btn secondary" id="simulateSensitiveOpen">DEV • Simular armário aberto</button>`;
   }else if(state==="OPEN"){
     text="Armário sensível aberto. Resolva somente os itens sensíveis e feche o armário assim que concluir esta sessão.";
-    action=`<button class="btn warn" id="simulateSensitiveClose">DEV • Simular armário fechado</button>`;
+    action=`<button class="btn warn" id="simulateSensitiveCloseAndLock">DEV • Simular fechamento do armário</button>`;
   }else if(state==="CLOSED"){
-    text="Porta do armário fechada. Aguardando confirmação da trava.";
-    action=`<button class="btn secondary" id="simulateSensitiveLock">DEV • Simular trava confirmada</button>`;
+    text="Porta do armário fechada. O sistema está confirmando a trava automaticamente.";
+    action=`<button class="btn secondary" disabled>Confirmando trava…</button>`;
   }else if(state==="COMPLETED"){
     text=`Retirada sensível concluída e armário confirmado como travado. Aberturas nesta sessão: ${access.sensitive_open_count||0}.`;
   }else{
@@ -420,11 +420,35 @@ function render(options={}){
   document.getElementById("simulateSensitiveOpen")?.addEventListener("click",async()=>{
     await sensitiveEvent("SENSITIVE_DOOR_OPENED",TERMINAL_ID,{source:"dev-sensitive-sensor"});
   });
-  document.getElementById("simulateSensitiveClose")?.addEventListener("click",async()=>{
-    await sensitiveEvent("SENSITIVE_DOOR_CLOSED",TERMINAL_ID,{source:"dev-sensitive-sensor"});
-  });
-  document.getElementById("simulateSensitiveLock")?.addEventListener("click",async()=>{
-    await sensitiveEvent("SENSITIVE_LOCK_CONFIRMED",TERMINAL_ID,{source:"dev-sensitive-lock"});
+  document.getElementById("simulateSensitiveCloseAndLock")?.addEventListener("click",async()=>{
+    const btn=document.getElementById("simulateSensitiveCloseAndLock");
+    if(btn)btn.disabled=true;
+    try{
+      access=await apiPost({
+        action:"registerSensitiveEvent",
+        access_session_id:ACCESS_ID,
+        session_token:ACCESS_TOKEN(),
+        event_type:"SENSITIVE_DOOR_CLOSED",
+        metadata:{source:"dev-sensitive-sensor"},
+        command_id:cmd("sensitive-close"),
+        source_occurred_at:new Date().toISOString(),
+        source_device_id:TERMINAL_ID
+      });
+      access=await apiPost({
+        action:"registerSensitiveEvent",
+        access_session_id:ACCESS_ID,
+        session_token:ACCESS_TOKEN(),
+        event_type:"SENSITIVE_LOCK_CONFIRMED",
+        metadata:{source:"dev-sensitive-lock"},
+        command_id:cmd("sensitive-lock"),
+        source_occurred_at:new Date().toISOString(),
+        source_device_id:TERMINAL_ID
+      });
+      render();
+    }catch(error){
+      if(btn)btn.disabled=false;
+      alert("Não foi possível confirmar o fechamento seguro do armário: "+error.message);
+    }
   });
 
   document.getElementById("finishPicking")?.addEventListener("click",async()=>{
