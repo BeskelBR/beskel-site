@@ -98,6 +98,18 @@ module.exports = async function handler(req, res) {
         }) });
       }
 
+      if (action === "registerSensitiveEvent") {
+        return send(res, 200, { ok:true, data:adapter.registerSensitiveEvent({
+          accessSessionId:String(body.access_session_id || ""),
+          sessionToken:String(body.session_token || ""),
+          eventType:String(body.event_type || ""),
+          metadata:body.metadata && typeof body.metadata === "object" ? body.metadata : {},
+          commandId:String(body.command_id || ""),
+          sourceOccurredAt:String(body.source_occurred_at || ""),
+          sourceDeviceId:String(body.source_device_id || "")
+        }) });
+      }
+
       if (action === "confirmWithdrawal") {
         return send(res, 200, { ok:true, data:adapter.confirmWithdrawal({
           accessSessionId:String(body.access_session_id || ""),
@@ -120,6 +132,7 @@ module.exports = async function handler(req, res) {
       "ORDER_REQUIRED","ORDER_NOT_AVAILABLE","ORDER_ALREADY_RESERVED","ROOM_IN_USE","LIVE_ITEM_INVALID","PRODUCT_NOT_FOUND","STOCK_INSUFFICIENT","SENSITIVE_ACCESS_DENIED",
       "ACCESS_SESSION_NOT_FOUND","ACCESS_SESSION_UNAUTHORIZED","ACCESS_SESSION_INACTIVE","INVALID_ACCESS_SEQUENCE",
       "INVALID_PICKING_EVENT","PICKING_NOT_ACTIVE","PICKING_NOT_READY","PICKING_GROUP_INVALID","PICKING_LOCATION_INVALID","PICKING_QUANTITY_INVALID","PICKING_REALLOCATION_INSUFFICIENT",
+      "INVALID_SENSITIVE_EVENT","INVALID_SENSITIVE_SEQUENCE","SENSITIVE_ACCESS_NOT_ACTIVE","SENSITIVE_STORAGE_LOCKED","SENSITIVE_SESSION_ACTIVE","SENSITIVE_UNLOCK_EXPIRED","SENSITIVE_ITEMS_ALREADY_RESOLVED","SENSITIVE_STORAGE_NOT_SECURED",
       "WITHDRAWAL_NOT_READY","WITHDRAWAL_RESULTS_INCOMPLETE","WITHDRAWAL_RESULTS_MISMATCH","AUDIT_ACCESS_DENIED"
     ];
     if (known.includes(error.message)) return send(res, 400, { ok:false, error:error.message });
