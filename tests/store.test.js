@@ -180,3 +180,75 @@ test("Terminal v4 exposes physical coordinates and supports the approved NFC/bio
   assert.ok(store.listAudit().some(event => event.event_type === "WITHDRAWAL_CONFIRMED"));
   assert.ok(!store.listAudit().some(event => event.event_type === "STOCK_CONSUMED"));
 });
+
+
+test("Terminal v4 keeps picking state on the server and rejects forged final results", () => {
+  const marina = authenticate("demo-marina");
+  const orders = store.listPendingOrders(marina.auth.auth_session_id);
+  const target = orders.find(order => !order.has_sensitive_items) || orders[0];
+
+  const access = store.startAccessSession({
+    authSessionId: marina.auth.auth_session_id,
+    orderIds: [target.order_id],
+    terminalId: store.TERMINAL_ID,
+    commandId: "test-v4-server-picking-access"
+  });
+
+  store.registerAccessEvent({
+    accessSessionId: access.access_session_id,
+    eventType: "DOOR_OPENED",
+    commandId: "test-v4-server-picking-door",
+    sourceOccurredAt: "2026-09-22T02:00:00.000Z",
+    sourceDeviceId: store.TERMINAL_ID
+  });
+  store.registerAccessEvent({
+    accessSessionId: access.access_session_id,
+    eventType: "PRESENCE_CONFIRMED",
+    commandId: "test-v4-server-picking-presence",
+    sourceOccurredAt: "2026-09-22T02:00:01.000Z",
+    sourceDeviceId: store.TERMINAL_ID
+  });
+
+  const detail = store.getAccessSessionDetail(access.access_session_id);
+  const firstItem = detail.orders[0].items[0];
+  const key = `${firstItem.location_code}|${firstItem.description}|${firstItem.sensitive?1:0}`;
+
+  const afterPick = store.registerPickingEvent({
+    accessSessionId: access.access_session_id,
+    eventType: "PICKING_ITEM_CONFIRMED",
+    commandId: "test-v4-server-picking-confirm-item",
+    sourceDeviceId: store.PICKING_DISPLAY_ID,
+    metadata: {
+      group_key:key,
+      description:firstItem.description,
+      expected_quantity:firstItem.quantity,
+      location_code:firstItem.location_code,
+      actual_quantity:firstItem.quantity
+    }
+  });
+
+  assert.equal(afterPick.picking_state[key].status, "CONFIRMED");
+  assert.equal(store.getAccessSessionDetail(access.access_session_id).picking_state[key].status, "CONFIRMED");
+
+  store.registerAccessEvent({
+    accessSessionId: access.access_session_id,
+    eventType: "DOOR_CLOSED",
+    commandId: "test-v4-server-picking-close",
+    sourceOccurredAt: "2026-09-22T02:00:02.000Z",
+    sourceDeviceId: store.TERMINAL_ID
+  });
+
+  assert.throws(() => store.confirmWithdrawal({
+    accessSessionId: access.access_session_id,
+    results: [{
+      key,
+      description:firstItem.description,
+      expected_quantity:firstItem.quantity + 99,
+      actual_quantity:firstItem.quantity + 99,
+      location_code:firstItem.location_code,
+      status:"CONFIRMED"
+    }],
+    commandId:"test-v4-forged-result",
+    sourceDeviceId:store.PICKING_DISPLAY_ID
+  }), /WITHDRAWAL_RESULTS_/);
+});
