@@ -185,3 +185,32 @@ A sessão conserva a autorização do funcionário, mas o armário fica fisicame
 Se o armário for fechado com itens sensíveis ainda pendentes, `SENSITIVE_LOCK_CONFIRMED` devolve o subfluxo a `LOCKED`, permitindo outra abertura sob demanda. Quando não restar item sensível pendente, a confirmação da trava promove o subfluxo a `COMPLETED`.
 
 O Terminal não permite sair para `PICKING_READY` enquanto o armário não estiver confirmado como travado.
+
+
+## Delta N1 — redução de interação humana
+
+Sem alterar as invariantes de segurança, o fluxo operacional foi simplificado:
+
+```text
+TAG NFC
+→ biometria iniciada automaticamente
+→ ORs/contexto
+→ INICIAR RETIRADA
+→ porta / presença por sensores
+→ Terminal de Retirada assume a AccessSession automaticamente
+→ picking
+→ saída
+→ porta fechada
+→ WITHDRAWAL_CONFIRMED automático
+```
+
+### Regras
+
+- leitura NFC válida dispara a etapa biométrica sem toque intermediário;
+- biometria aprovada encaminha automaticamente às ORs;
+- o tablet interno fica permanentemente em `/separacao` e consulta a sessão ativa da sala usando identidade de dispositivo;
+- no DEV, essa identidade é simulada; produção exige credencial de dispositivo provisionada e protegida;
+- o operador não transfere `access_session_id` nem token entre telas;
+- `DOOR_CLOSED` após `PICKING_READY` + `PRESENCE_CLEARED` dispara a confirmação final no servidor;
+- `WITHDRAWAL_CONFIRMED` continua server-authoritative;
+- o endpoint manual de confirmação permanece apenas como mecanismo técnico de recuperação/compatibilidade, não como ação normal do operador.
