@@ -57,6 +57,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/separacao",
+      "destination": "/separacao.html"
+    },
+    {
       "source": "/separacao/:id",
       "destination": "/separacao.html"
     },
