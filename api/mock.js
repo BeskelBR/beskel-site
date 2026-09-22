@@ -28,6 +28,7 @@ module.exports = async function handler(req, res) {
     if (req.method === "GET") {
       const action = String(req.query?.action || "");
       if (action === "pendingOrders") return send(res, 200, { ok:true, data:adapter.getPendingOrders(String(req.query?.auth_session_id || "")) });
+      if (action === "catalog") return send(res, 200, { ok:true, data:adapter.getCatalog(String(req.query?.auth_session_id || ""), String(req.query?.query || "")) });
       if (action === "accessSession") return send(res, 200, { ok:true, data:adapter.getAccessSession(String(req.query?.id || "")) });
       if (action === "audit") return send(res, 200, { ok:true, data:adapter.listAudit() });
       if (action === "terminal") return send(res, 200, { ok:true, data:adapter.getTerminalDescriptor(String(req.query?.terminal_id || store.TERMINAL_ID)) });
