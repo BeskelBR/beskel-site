@@ -331,7 +331,9 @@ function bindDev(access){
 
 async function auditScreen(){
   try{
-    const audit=await apiGet({action:"audit"});
+    const auth=readJson(AUTH_KEY);
+    if(!auth?.auth_session_id||auth.expires_at<Date.now())return go("/");
+    const audit=await apiGet({action:"audit",auth_session_id:auth.auth_session_id});
     const rows=audit.length?audit.map(e=>`<div class="audit-row"><div class="time">${new Date(e.occurred_at).toLocaleString("pt-BR")}</div><strong>${esc(e.event_type)}</strong><div>${esc(e.employee?.name||"Sistema")} • ${esc(e.terminal_id||"—")}</div><div class="meta">${esc(e.access_session_id||e.auth_session_id||"sem sessão")}</div></div>`).join(""):`<div class="card"><p class="lead">Nenhum evento registrado nesta execução.</p></div>`;
     render(shell(`<div class="eyebrow">Somente leitura</div><h1>Auditoria do Terminal</h1><p class="lead">Eventos simulados de identidade, evidência e acesso físico.</p><div class="stack">${rows}</div><div class="actions"><button class="btn ghost" id="back">Voltar</button></div>`,"Auditoria"));
     document.getElementById("back").addEventListener("click",()=>go("/"));
