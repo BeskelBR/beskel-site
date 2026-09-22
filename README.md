@@ -9,7 +9,8 @@ Branch dedicada exclusivamente ao site público do Hospital Veterinário Brasíl
 ## Ambientes congelados
 
 - Site público DEV: `https://hvb-site-dev.beskel.com.br`
-- Sistema/terminal DEV: `https://hvb-dev.beskel.com.br`
+- Sistema DEV: `https://hvb-sistema-dev.beskel.com.br`
+- Terminal DEV: `https://hvb-dev.beskel.com.br`
 - Site público futuro: `https://www.hvb.com.br`
 - Sistema futuro: `https://sistema.hvb.com.br`
 
