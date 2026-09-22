@@ -29,8 +29,11 @@ module.exports = async function handler(req, res) {
       const action = String(req.query?.action || "");
       if (action === "pendingOrders") return send(res, 200, { ok:true, data:adapter.getPendingOrders(String(req.query?.auth_session_id || "")) });
       if (action === "catalog") return send(res, 200, { ok:true, data:adapter.getCatalog(String(req.query?.auth_session_id || ""), String(req.query?.query || "")) });
-      if (action === "accessSession") return send(res, 200, { ok:true, data:adapter.getAccessSession(String(req.query?.id || "")) });
-      if (action === "audit") return send(res, 200, { ok:true, data:adapter.listAudit() });
+      if (action === "accessSession") return send(res, 200, { ok:true, data:adapter.getAccessSession(
+        String(req.query?.id || ""),
+        String(req.query?.session_token || "")
+      ) });
+      if (action === "audit") return send(res, 200, { ok:true, data:adapter.listAudit(String(req.query?.auth_session_id || "")) });
       if (action === "terminal") return send(res, 200, { ok:true, data:adapter.getTerminalDescriptor(String(req.query?.terminal_id || store.TERMINAL_ID)) });
       return send(res, 400, { ok:false, error:"INVALID_ACTION" });
     }
@@ -75,6 +78,7 @@ module.exports = async function handler(req, res) {
       if (action === "registerAccessEvent") {
         return send(res, 200, { ok:true, data:adapter.registerAccessEvent({
           accessSessionId:String(body.access_session_id || ""),
+          sessionToken:String(body.session_token || ""),
           eventType:String(body.event_type || ""),
           metadata:body.metadata && typeof body.metadata === "object" ? body.metadata : {},
           commandId:String(body.command_id || ""),
@@ -86,19 +90,20 @@ module.exports = async function handler(req, res) {
       if (action === "registerPickingEvent") {
         return send(res, 200, { ok:true, data:adapter.registerPickingEvent({
           accessSessionId:String(body.access_session_id || ""),
+          sessionToken:String(body.session_token || ""),
           eventType:String(body.event_type || ""),
           metadata:body.metadata && typeof body.metadata === "object" ? body.metadata : {},
           commandId:String(body.command_id || ""),
-          sourceDeviceId:String(body.source_device_id || store.PICKING_DISPLAY_ID)
+          sourceDeviceId:String(body.source_device_id || "")
         }) });
       }
 
       if (action === "confirmWithdrawal") {
         return send(res, 200, { ok:true, data:adapter.confirmWithdrawal({
           accessSessionId:String(body.access_session_id || ""),
-          results:Array.isArray(body.results) ? body.results : [],
+          sessionToken:String(body.session_token || ""),
           commandId:String(body.command_id || ""),
-          sourceDeviceId:String(body.source_device_id || store.PICKING_DISPLAY_ID)
+          sourceDeviceId:String(body.source_device_id || "")
         }) });
       }
 
@@ -112,10 +117,10 @@ module.exports = async function handler(req, res) {
       "AUTH_EVIDENCE_EXPIRED","AUTH_EVIDENCE_MISMATCH","AUTH_EVIDENCE_UNTRUSTED",
       "BIOMETRIC_VERIFICATION_FAILED","AUTH_SESSION_EXPIRED","TERMINAL_MISMATCH",
       "UNTRUSTED_TERMINAL","UNTRUSTED_DEVICE","COMMAND_ID_REQUIRED","IDEMPOTENCY_CONFLICT",
-      "ORDER_REQUIRED","ORDER_NOT_AVAILABLE","LIVE_ITEM_INVALID","PRODUCT_NOT_FOUND","STOCK_INSUFFICIENT","SENSITIVE_ACCESS_DENIED",
-      "ACCESS_SESSION_NOT_FOUND","ACCESS_SESSION_INACTIVE","INVALID_ACCESS_SEQUENCE",
-      "INVALID_PICKING_EVENT","PICKING_NOT_ACTIVE","PICKING_GROUP_INVALID","PICKING_LOCATION_INVALID","PICKING_QUANTITY_INVALID",
-      "WITHDRAWAL_NOT_READY","WITHDRAWAL_RESULTS_INCOMPLETE","WITHDRAWAL_RESULTS_MISMATCH"
+      "ORDER_REQUIRED","ORDER_NOT_AVAILABLE","ORDER_ALREADY_RESERVED","ROOM_IN_USE","LIVE_ITEM_INVALID","PRODUCT_NOT_FOUND","STOCK_INSUFFICIENT","SENSITIVE_ACCESS_DENIED",
+      "ACCESS_SESSION_NOT_FOUND","ACCESS_SESSION_UNAUTHORIZED","ACCESS_SESSION_INACTIVE","INVALID_ACCESS_SEQUENCE",
+      "INVALID_PICKING_EVENT","PICKING_NOT_ACTIVE","PICKING_NOT_READY","PICKING_GROUP_INVALID","PICKING_LOCATION_INVALID","PICKING_QUANTITY_INVALID","PICKING_REALLOCATION_INSUFFICIENT",
+      "WITHDRAWAL_NOT_READY","WITHDRAWAL_RESULTS_INCOMPLETE","WITHDRAWAL_RESULTS_MISMATCH","AUDIT_ACCESS_DENIED"
     ];
     if (known.includes(error.message)) return send(res, 400, { ok:false, error:error.message });
     console.error(error);
