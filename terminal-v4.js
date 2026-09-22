@@ -28,7 +28,9 @@ function v4StateLabel(value){
   return ({
     DOOR_AUTHORIZED:"Acesso liberado",
     DOOR_OPEN:"Porta aberta",
-    ENTRY_CONFIRMED:"Presença detectada",
+    ENTRY_CONFIRMED:"Presença detectada • picking em andamento",
+    PICKING_READY:"Picking concluído • aguardando saída",
+    EXIT_CONFIRMED:"Saída detectada • aguardando fechamento",
     READY_TO_CONFIRM:"Porta fechada • aguardando confirmação",
     WITHDRAWAL_CONFIRMED:"Retirada confirmada",
     CLOSED:"Sessão encerrada",
@@ -160,6 +162,9 @@ authorizeAccess = async function(orderIds,liveItems=[]){
       command_id:commandId("access")
     });
     state.liveItems=[];
+    if(state.access?.session_token){
+      sessionStorage.setItem(`hvb_access_session_token_${state.access.access_session_id}`,state.access.session_token);
+    }
     go(`/acesso/${encodeURIComponent(state.access.access_session_id)}`);
   }catch(error){
     if(isConnectivityError(error))return failClosed();
@@ -180,11 +185,19 @@ function v4AccessOrders(access){
   return orders+live;
 }
 
+function v4SessionToken(accessSessionId){
+  return state.access?.access_session_id===accessSessionId&&state.access?.session_token
+    ? state.access.session_token
+    : sessionStorage.getItem(`hvb_access_session_token_${accessSessionId}`)||"";
+}
+
 accessScreen = async function(accessSessionId){
   try{
-    const access=await apiGet({action:"accessSession",id:accessSessionId});
+    const sessionToken=v4SessionToken(accessSessionId);
+    if(!sessionToken)return go("/");
+    const access=await apiGet({action:"accessSession",id:accessSessionId,session_token:sessionToken});
     if(!access)return go("/");
-    state.access=access;
+    state.access={...access,session_token:sessionToken};
     const totalItems=(access.orders||[]).reduce((sum,order)=>sum+(order.item_count||0),0)+(access.live_items||[]).length;
     const sensitive=access.sensitive_access
       ? `<div class="notice sensitive-notice"><b>Acesso sensível autorizado</b><span>Esta sessão contém material sensível e a permissão foi validada antes da abertura.</span></div>`
@@ -201,7 +214,10 @@ accessScreen = async function(accessSessionId){
       ${devControls(access)}
       <p class="footer-note">DEV: controladores, sensores, câmera e NFC estão simulados. Nenhum movimento real de estoque é realizado.</p>
     `,"Sessão de acesso"));
-    document.getElementById("openSeparation")?.addEventListener("click",()=>window.open(`/separacao/${encodeURIComponent(accessSessionId)}`,"hvb-separacao","noopener"));
+    document.getElementById("openSeparation")?.addEventListener("click",()=>{
+      const token=v4SessionToken(accessSessionId);
+      window.open(`/separacao/${encodeURIComponent(accessSessionId)}#${encodeURIComponent(token)}`,"hvb-separacao","noopener");
+    });
     bindDev(access);
     v4EnsureAccessPoll(accessSessionId);
   }catch(error){
@@ -214,11 +230,13 @@ devControls = function(access){
   let button="";
   if(access.state==="DOOR_AUTHORIZED")button=`<button class="btn secondary" data-event="DOOR_OPENED">${access.sensitive_access?"Simular abertura + acesso sensível":"Simular porta aberta"}</button>`;
   else if(access.state==="DOOR_OPEN")button=`<button class="btn secondary" data-event="PRESENCE_CONFIRMED">Simular presença detectada</button>`;
-  else if(access.state==="ENTRY_CONFIRMED")button=`<button class="btn secondary" data-event="DOOR_CLOSED">Simular fechamento da porta após picking</button>`;
-  else if(access.state==="READY_TO_CONFIRM")button=`<button class="btn secondary" disabled>Aguardando confirmação no Terminal de Retirada</button>`;
+  else if(access.state==="ENTRY_CONFIRMED")button=`<button class="btn secondary" disabled>Separação em andamento no Terminal de Retirada</button>`;
+  else if(access.state==="PICKING_READY")button=`<button class="btn secondary" data-event="PRESENCE_CLEARED">Simular saída da sala</button>`;
+  else if(access.state==="EXIT_CONFIRMED")button=`<button class="btn secondary" data-event="DOOR_CLOSED">Simular fechamento da porta</button>`;
+  else if(access.state==="READY_TO_CONFIRM")button=`<button class="btn" id="confirmWithdrawal">Confirmar retirada</button>`;
   else if(access.state==="WITHDRAWAL_CONFIRMED")button=`<button class="btn ghost" id="finish">Finalizar demonstração</button>`;
   else button=`<button class="btn ghost" id="finish">Voltar ao terminal</button>`;
-  return `<div class="dev-panel"><div class="eyebrow">Controles DEV</div><p>Simulação da sequência física aprovada. O Terminal de Retirada acompanha esta mesma AccessSession.</p><div class="actions">${button}</div></div>`;
+  return `<div class="dev-panel"><div class="eyebrow">Controles DEV</div><p>Simulação da sequência física aprovada. O picking deve ser concluído antes da saída e do fechamento da porta.</p><div class="actions">${button}</div></div>`;
 };
 
 bindDev = function(access){
@@ -228,6 +246,7 @@ bindDev = function(access){
       await apiPost({
         action:"registerAccessEvent",
         access_session_id:access.access_session_id,
+        session_token:v4SessionToken(access.access_session_id),
         event_type:btn.dataset.event,
         command_id:commandId("event"),
         source_occurred_at:new Date().toISOString(),
@@ -241,7 +260,30 @@ bindDev = function(access){
       alert("A sequência física simulada não permitiu este evento.");
     }
   }));
-  document.getElementById("finish")?.addEventListener("click",()=>{v4StopAccessPoll();go("/");});
+
+  document.getElementById("confirmWithdrawal")?.addEventListener("click",async()=>{
+    const btn=document.getElementById("confirmWithdrawal");
+    if(btn)btn.disabled=true;
+    try{
+      await apiPost({
+        action:"confirmWithdrawal",
+        access_session_id:access.access_session_id,
+        session_token:v4SessionToken(access.access_session_id),
+        command_id:commandId("confirm"),
+        source_device_id:TERMINAL_ID
+      });
+      accessScreen(access.access_session_id);
+    }catch(error){
+      if(btn)btn.disabled=false;
+      alert("A retirada ainda não pode ser confirmada: "+error.message);
+    }
+  });
+
+  document.getElementById("finish")?.addEventListener("click",()=>{
+    v4StopAccessPoll();
+    sessionStorage.removeItem(`hvb_access_session_token_${access.access_session_id}`);
+    go("/");
+  });
 };
 
 function v4ReplaceCredentialCopy(){
