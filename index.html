@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#0A3983">
+  <title>HVB Sistema | Área do colaborador</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/system.css">
+  <link rel="stylesheet" href="assets/system-v2.css">
+  <link rel="stylesheet" href="assets/system-v3.css">
+  <link rel="stylesheet" href="assets/system-v4.css">
+  <link rel="stylesheet" href="assets/system-v5.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Pular para o conteúdo</a>
+
+  <section class="auth-view" data-view="auth">
+    <div class="auth-brand">
+      <a href="https://hvb-site-dev.beskel.com.br" class="brand-link" aria-label="Voltar ao site do HVB">
+        <img src="https://hvb-site-dev.beskel.com.br/assets/hvb/brand/logo-hvb-horizontal.webp" alt="Hospital Veterinário Brasília — HVB">
+      </a>
+      <div class="auth-message">
+        <span class="eyebrow">Área do colaborador</span>
+        <h1>Operação hospitalar em um só ambiente.</h1>
+        <p>O HVB Sistema reúne as rotinas clínicas, administrativas e operacionais em uma interface única, com acesso controlado por perfil.</p>
+        <ul class="auth-benefits">
+          <li>Pacientes, episódios e prontuário longitudinal</li>
+          <li>Agenda, internação, exames e documentos</li>
+          <li>Estoque, compras, financeiro e rastreabilidade</li>
+        </ul>
+      </div>
+      <small>Ambiente DEV • dados reais não devem ser inseridos nesta etapa.</small>
+    </div>
+
+    <div class="auth-panel-wrap">
+      <div class="auth-panel">
+        <div class="auth-panel-head">
+          <span class="status-dot" aria-hidden="true"></span>
+          <div>
+            <strong>HVB Sistema</strong>
+            <span>Acesso restrito</span>
+          </div>
+        </div>
+        <h2>Entrar no sistema</h2>
+        <p class="muted">Nesta fase, o backend utiliza credencial opaca temporária. A autenticação operacional definitiva será integrada posteriormente.</p>
+        <form id="login-form">
+          <label for="access-token">Credencial de acesso</label>
+          <input id="access-token" name="access-token" type="password" inputmode="text" autocomplete="off" spellcheck="false" minlength="64" maxlength="64" placeholder="Credencial DEV de 64 caracteres" required>
+          <button class="primary-btn" type="submit">Acessar ambiente</button>
+        </form>
+        <details class="dev-settings">
+          <summary>Configuração técnica DEV</summary>
+          <label for="api-base">Endereço da API</label>
+          <input id="api-base" name="api-base" type="url" placeholder="http://127.0.0.1:3200">
+          <label for="unit-id">Unidade hospitalar (opcional)</label>
+          <input id="unit-id" name="unit-id" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="UUID da unidade DEV">
+          <small>O UUID só é necessário enquanto o contexto de unidade ainda não é resolvido automaticamente para todos os perfis. Em produção esta configuração não ficará exposta ao colaborador.</small>
+        </details>
+        <div class="auth-feedback" id="auth-feedback" role="status" aria-live="polite"></div>
+        <a class="back-link" href="https://hvb-site-dev.beskel.com.br/colaborador">← Voltar à página do colaborador</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="app-shell" data-view="app" hidden>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <img src="https://hvb-site-dev.beskel.com.br/assets/hvb/brand/logo-hvb-horizontal.webp" alt="Hospital Veterinário Brasília — HVB">
+        <span>Sistema</span>
+      </div>
+      <nav class="side-nav" aria-label="Módulos do sistema">
+        <button class="nav-item active" data-module="dashboard">Visão geral</button>
+        <button class="nav-item" data-module="pacientes">Pacientes</button>
+        <button class="nav-item" data-module="agenda">Agenda</button>
+        <button class="nav-item" data-module="internacao">Internação</button>
+        <button class="nav-item" data-module="prontuario">Prontuário</button>
+        <button class="nav-item" data-module="estoque">Estoque</button>
+        <button class="nav-item" data-module="exames">Exames</button>
+        <button class="nav-item" data-module="financeiro">Financeiro</button>
+        <button class="nav-item" data-module="compras">Compras</button>
+        <button class="nav-item" data-module="documentos">Documentos</button>
+        <button class="nav-item" data-module="preventivo">Preventivo</button>
+        <button class="nav-item" data-module="administracao">Administração</button>
+      </nav>
+      <div class="sidebar-foot">
+        <span class="environment-badge">DEV</span>
+        <button class="logout-btn" id="logout-btn">Encerrar sessão</button>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="topbar">
+        <button class="menu-btn" id="menu-btn" aria-label="Abrir menu" aria-controls="sidebar" aria-expanded="false">☰</button>
+        <div>
+          <span class="topbar-kicker">Hospital Veterinário Brasília</span>
+          <h2 id="page-title">Visão geral</h2>
+        </div>
+        <div class="topbar-status">
+          <span class="api-status" id="api-status">API verificando</span>
+          <div class="session-chip">
+            <span id="org-name">HVB</span>
+            <small id="unit-label">Sessão autenticada</small>
+          </div>
+        </div>
+      </header>
+
+      <main id="main" class="workspace" tabindex="-1">
+        <section class="module-view" data-module-view="dashboard">
+          <div class="welcome-card">
+            <div>
+              <span class="eyebrow">Operação integrada</span>
+              <h1>Bom trabalho.</h1>
+              <p>Use o menu para acessar as rotinas do hospital. Esta camada prioriza consulta segura e organização dos módulos já suportados pelo backend, sem antecipar regras que ainda dependem de validação do HVB.</p>
+            </div>
+            <div class="welcome-meta">
+              <span id="system-state">Sistema em validação DEV</span>
+              <small id="actor-id">Sessão não identificada</small>
+            </div>
+          </div>
+
+          <div class="status-grid">
+            <article class="status-card"><span>API</span><strong id="health-card">Verificando</strong><small>Disponibilidade do serviço</small></article>
+            <article class="status-card"><span>Banco</span><strong id="ready-card">Verificando</strong><small>Schema e conexão</small></article>
+            <article class="status-card"><span>Ambiente</span><strong>DEV</strong><small>Sem operação assistencial real</small></article>
+            <article class="status-card"><span>Frontend</span><strong>MVP 8</strong><small>Jornadas clínicas e administrativas</small></article>
+          </div>
+
+          <div class="section-head operations-head">
+            <div><span class="eyebrow">Painel operacional</span><h3>O que precisa de atenção agora</h3><p>Leitura consolidada das rotinas já suportadas pelo backend, limitada ao perfil autenticado.</p></div>
+            <button class="secondary-btn" id="refresh-operations" type="button">Atualizar painel</button>
+          </div>
+          <section class="operations-board" aria-label="Painel operacional do HVB">
+            <div class="operations-metrics">
+              <article class="ops-metric"><span>Agenda de hoje</span><strong id="ops-agenda-count">—</strong><small id="ops-agenda-state">Aguardando sessão</small></article>
+              <article class="ops-metric"><span>Episódios ativos</span><strong id="ops-episode-count">—</strong><small id="ops-episode-state">Aguardando sessão</small></article>
+              <article class="ops-metric"><span>Pendências clínicas</span><strong id="ops-pending-count">—</strong><small id="ops-pending-state">Aguardando sessão</small></article>
+            </div>
+            <div class="operations-columns">
+              <article class="ops-panel">
+                <div class="ops-panel-head"><div><span class="eyebrow">Hoje</span><h4>Agenda</h4></div><button type="button" class="ops-link" data-go="agenda">Abrir módulo</button></div>
+                <div id="ops-agenda-list" class="ops-list"><div class="ops-empty">Aguardando sessão autenticada.</div></div>
+              </article>
+              <article class="ops-panel">
+                <div class="ops-panel-head"><div><span class="eyebrow">Internação</span><h4>Episódios em andamento</h4></div><button type="button" class="ops-link" data-go="internacao">Abrir módulo</button></div>
+                <div id="ops-episode-list" class="ops-list"><div class="ops-empty">Aguardando sessão autenticada.</div></div>
+              </article>
+              <article class="ops-panel">
+                <div class="ops-panel-head"><div><span class="eyebrow">Atenção</span><h4>Pendências clínicas</h4></div><button type="button" class="ops-link" data-go="internacao">Abrir módulo</button></div>
+                <div id="ops-pending-list" class="ops-list"><div class="ops-empty">Aguardando sessão autenticada.</div></div>
+              </article>
+            </div>
+          </section>
+
+          <div class="section-head clinical-launch-head">
+            <div><span class="eyebrow">Jornada clínica</span><h3>Localizar paciente</h3><p>Abra o contexto longitudinal antes de navegar pelas rotinas relacionadas.</p></div>
+            <button class="secondary-btn" id="refresh-patient-hub" type="button">Atualizar pacientes</button>
+          </div>
+          <section class="patient-hub" aria-labelledby="patient-hub-title">
+            <div class="patient-hub-toolbar">
+              <label for="patient-hub-search"><span id="patient-hub-title">Busca rápida</span><input id="patient-hub-search" type="search" placeholder="Nome, espécie ou identificador"></label>
+              <span id="patient-hub-count">Aguardando sessão</span>
+            </div>
+            <div id="patient-hub-results" class="patient-hub-results" aria-live="polite">
+              <div class="patient-hub-empty">Entre no sistema para consultar pacientes disponíveis à sua credencial.</div>
+            </div>
+          </section>
+
+          <div class="section-head">
+            <div><span class="eyebrow">Atalhos</span><h3>Rotinas principais</h3></div>
+          </div>
+          <div class="shortcut-grid">
+            <button data-go="pacientes"><strong>Pacientes</strong><span>Cadastro, vínculos e episódios</span></button>
+            <button data-go="agenda"><strong>Agenda</strong><span>Recursos, horários e agendamentos</span></button>
+            <button data-go="estoque"><strong>Estoque</strong><span>Posições, lotes e movimentações</span></button>
+            <button data-go="internacao"><strong>Internação</strong><span>Ocupação, acompanhamento e diárias</span></button>
+          </div>
+
+          <div class="section-head"><div><span class="eyebrow">Arquitetura funcional</span><h3>Módulos do ecossistema</h3></div></div>
+          <div class="module-grid" id="module-grid"></div>
+        </section>
+
+        <section class="module-view" data-module-view="detail" hidden>
+          <div class="detail-head">
+            <div><span class="eyebrow" id="detail-eyebrow">Módulo</span><h1 id="detail-title">Módulo</h1><p id="detail-description"></p></div>
+            <span class="module-state" id="detail-state">Consulta DEV</span>
+          </div>
+          <div class="detail-layout">
+            <article class="panel">
+              <div class="panel-head"><h3>Visão operacional</h3><button class="secondary-btn" id="refresh-module">Atualizar</button></div>
+              <div class="module-toolbar" aria-label="Controles de consulta">
+                <div class="module-tabs" id="module-tabs" role="tablist" aria-label="Visões do módulo"></div>
+                <label class="table-search" for="module-search"><span>Filtrar resultados</span><input id="module-search" type="search" placeholder="Buscar nesta lista"></label>
+              </div>
+              <div class="module-meta"><span id="module-count">0 registros</span><span id="module-context">Consulta autenticada</span></div>
+              <div id="module-content" class="module-content"></div>
+              <div class="module-pagination"><button class="secondary-btn" id="load-more" hidden>Carregar mais</button></div>
+            </article>
+            <aside class="panel side-panel">
+              <h3>Próxima camada</h3>
+              <p id="detail-next"></p>
+              <div class="notice">A interface não deve antecipar regras hospitalares ainda não validadas. Ações de escrita serão liberadas por fluxo e por cargo após validação funcional.</div>
+            </aside>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="clinical-backdrop" id="clinical-backdrop" hidden></div>
+  <aside class="clinical-drawer" id="clinical-drawer" aria-hidden="true" aria-labelledby="clinical-patient-name">
+    <div class="clinical-drawer-head">
+      <div><span class="eyebrow">Contexto do paciente</span><h2 id="clinical-patient-name">Paciente</h2><p id="clinical-patient-meta">Carregando contexto clínico</p></div>
+      <button class="drawer-close" id="clinical-drawer-close" type="button" aria-label="Fechar contexto">×</button>
+    </div>
+    <div class="clinical-drawer-body">
+      <div class="clinical-summary" id="clinical-summary"></div>
+      <section class="clinical-section"><div class="clinical-section-head"><h3>Episódios</h3><span id="clinical-episode-count">0</span></div><div id="clinical-episodes" class="clinical-stack"></div></section>
+      <section class="clinical-section"><div class="clinical-section-head"><h3>Prontuário</h3><span id="clinical-record-count">0</span></div><div id="clinical-records" class="clinical-stack"></div></section>
+      <section class="clinical-section"><div class="clinical-section-head"><h3>Preventivo e documentos</h3></div><div id="clinical-support" class="clinical-support-grid"></div></section>
+      <section class="episode-context" id="episode-context" hidden>
+        <div class="clinical-section-head"><div><span class="eyebrow">Episódio selecionado</span><h3 id="episode-context-title">Contexto operacional</h3></div><button class="secondary-btn" id="episode-context-close" type="button">Fechar episódio</button></div>
+        <div id="episode-context-body" class="episode-context-grid"></div>
+      </section>
+    </div>
+  </aside>
+
+  <script src="assets/system-v2.js" defer></script>
+  <script src="assets/system-v3.js" defer></script>
+  <script src="assets/system-v4.js" defer></script>
+  <script src="assets/system-v5.js" defer></script>
+  <script src="assets/system-v6.js" defer></script>
+  <script src="assets/system-v7.js" defer></script>
+  <script src="assets/system-v8.js" defer></script>
+</body>
+</html>

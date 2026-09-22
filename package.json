@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "node --env-file=.env src/api/server.ts",
+    "frontend": "node scripts/frontend.mjs",
     "worker": "node --env-file=.env src/worker/main.ts",
     "db:local": "node scripts/local-postgres.mjs start",
     "db:stop": "node scripts/local-postgres.mjs stop",
