@@ -54,16 +54,16 @@ class MockAdapter extends IntegrationAdapter {
     return store.confirmWithdrawal(payload);
   }
 
-  getAccessSession(accessSessionId) {
-    return store.getAccessSessionDetail(accessSessionId);
+  getAccessSession(accessSessionId, sessionToken) {
+    return store.getAccessSessionDetail(accessSessionId, sessionToken);
   }
 
   getTerminalDescriptor(terminalId) {
     return store.terminalDescriptor(terminalId);
   }
 
-  listAudit() {
-    return store.listAudit();
+  listAudit(authSessionId) {
+    return store.listAudit(authSessionId);
   }
 }
 
