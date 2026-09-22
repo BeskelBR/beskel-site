@@ -991,6 +991,19 @@ function listAudit(authSessionId) {
   return events.map(x => ({ ...x, employee:publicEmployee(employee(x.employee_id)) }));
 }
 
+function resetDevState() {
+  challenges.clear();
+  biometricEvidence.clear();
+  authSessions.clear();
+  accessSessions.clear();
+  idempotency.clear();
+  events.splice(0,events.length);
+  withdrawalOrders.forEach(value => {
+    value.status = "AGUARDANDO_RETIRADA";
+    delete value.fulfillment_status;
+  });
+}
+
 function terminalDescriptor(terminalId = TERMINAL_ID) {
   const value = requireTrustedTerminal(terminalId);
   return {
@@ -1020,5 +1033,6 @@ module.exports = {
   confirmWithdrawal,
   getAccessSessionDetail,
   listAudit,
+  resetDevState,
   terminalDescriptor
 };
