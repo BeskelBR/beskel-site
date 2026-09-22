@@ -819,11 +819,21 @@ function registerAccessEvent({ accessSessionId, sessionToken, eventType, metadat
     });
 
     if (eventType === "DOOR_CLOSED") {
-      applyWithdrawalConfirmation(access,{
-        commandId:`auto-${commandId || id("confirm")}`,
-        sourceDeviceId,
-        automatic:true
-      });
+      try{
+        applyWithdrawalConfirmation(access,{
+          commandId:`auto-${commandId || id("confirm")}`,
+          sourceDeviceId,
+          automatic:true
+        });
+        access.auto_confirmation_error = null;
+      }catch(error){
+        access.auto_confirmation_error = error.message;
+        log(access,"WITHDRAWAL_AUTO_CONFIRM_FAILED",{
+          error:error.message,
+          command_id:commandId,
+          source_device_id:sourceDeviceId
+        });
+      }
     }
 
     return {
