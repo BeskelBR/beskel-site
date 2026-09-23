@@ -30,9 +30,9 @@ Prioridade 2 verificada no nível HTTP: três testes do servidor, TypeScript e 2
 
 Prioridade 3 implementada e testada no piloto DEV pelo MVP 9: entrada com credencial existente, localização/cadastro de paciente, abertura de episódio e registro/leitura de evolução. Percurso verificado no navegador, inclusive releitura após reload, recusa de escrita e layout móvel. [Evidência](evidencias/piloto-mvp9.json). Esta conclusão não equivale a autenticação operacional ou homologação dos papéis.
 
-Prioridade 4 parcial em 23/09: MVP 10 entrega sessão web local e consulta de unidades do próprio usuário. Credencial temporária inicial ainda necessária; login operacional, recuperação/MFA e ambiente hospedado continuam faltando. A pergunta sobre onde hospedar API/PostgreSQL permanece sem resposta; isso não autoriza provisionamento. Ver [ADR 0029](adr/0029-sessao-web-piloto.md).
+Prioridade 4 parcial em 23/09: MVP 10 entrega sessão web local e consulta de unidades do próprio usuário. Credencial temporária inicial ainda necessária; login operacional, recuperação/MFA e ambiente hospedado continuam faltando. O usuário informou que o banco está em outro chat vinculado ao Supabase; configuração aplicada, compatibilidade com a API e hospedagem da API ainda precisam de confirmação. Isso não autoriza provisionamento. Ver [ADR 0029](adr/0029-sessao-web-piloto.md).
 
-Próxima frente: preparação do acesso operacional e ambiente a partir da definição de hospedagem, mantendo a implementação independente possível e as pendências explícitas. Não refazer C18 nem ampliar o backend sem falta concreta da jornada.
+Próxima frente deste chat: integração do backend a partir dos contratos devolvidos pelos responsáveis por frontend e banco. A [coordenação entre chats](COORDENACAO-CHATS.md) define os limites e contém pedidos prontos para encaminhar. Frontend/sessão web pertencem ao outro chat, banco/Supabase ao respectivo responsável e Terminal permanece congelado. Não refazer C18 nem ampliar o backend sem falta concreta da jornada. Até receber os contratos, preservar os bloqueios DEV existentes e registrar as dependências; não presumir que apontar uma variável de ambiente basta para integrar o banco remoto.
 
 ## Uso de cota e coordenação
 

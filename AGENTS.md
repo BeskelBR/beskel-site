@@ -1,6 +1,7 @@
 # HVB Sistema — regras de continuidade
 
 - Trabalhar exclusivamente em SISTEMA e `hvb-sistema-dev`; preservar as outras pastas/branches do HVB e o trabalho não commitado.
+- Segregação definida pelo usuário em 23/09/2026: este chat de continuidade é responsável pelo backend do Sistema e documentação de integração; frontend/sessão web e banco/Supabase têm chats próprios, e Terminal está congelado. Seguir [docs/COORDENACAO-CHATS.md](docs/COORDENACAO-CHATS.md): não editar blocos de outro responsável; fornecer ao usuário um pedido copiável quando surgir dependência. Esta divisão não impede o trabalho autorizado dos respectivos chats em seus blocos.
 - Seguir a prioridade e os critérios de aceite em [docs/PLANO-ENTREGA-SEMANA.md](docs/PLANO-ENTREGA-SEMANA.md). O usuário prioriza uma jornada utilizável nesta semana e dedica a cota ao projeto; não expandir indefinidamente o backend.
 - Conferir branch, working tree, ponto de parada e, quando necessário à integração/publicação, o remoto. Reaproveitar entregas de outros chats; não supor ausência de interface com base em checkout desatualizado.
 - Distinguir implementado, testado, publicado e homologado. Publicação só está concluída após confirmar o SHA remoto. Não usar force push nem descartar mudanças para integrar.
