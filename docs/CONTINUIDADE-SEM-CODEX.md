@@ -58,6 +58,36 @@ O backend publicado antes da interrupção já contém:
 4. Não houve alteração de schema, C18 ou migrations.
 5. Não foi criada migration 077.
 
+### Fixture sintético para E2E remoto
+
+Foi criado um fixture mínimo, inspirado diretamente em `scripts/seed.ts`, sem executar o seed completo e sem dados reais.
+
+Escopo:
+- 2 organizações sintéticas isoladas (tenant A e tenant B);
+- 1 unidade por tenant;
+- 1 usuário admin sintético por tenant;
+- 1 papel admin por tenant;
+- cada papel recebeu as 118 permissões já catalogadas no banco;
+- 1 credencial opaca `api` por tenant, com expiração em 7 dias;
+- nenhum paciente, responsável, episódio, estoque ou dado clínico foi criado.
+
+Armazenamento privado dos identificadores/tokens do fixture:
+`OneDrive/HVB_RUNTIME_PRIVATE/e2e-fixture.json`
+
+Permissão do arquivo verificada: somente proprietário.
+
+QA:
+- 2 organizações sintéticas: OK;
+- 2 usuários sintéticos: OK;
+- 2 credenciais `api`: OK;
+- `hvb.autenticar` resolve tenant A para sua organização/usuário/credencial: OK;
+- `hvb.autenticar` resolve tenant B para sua organização/usuário/credencial: OK;
+- 118 permissões em cada papel admin: OK.
+
+Tentativa inicial de criação do fixture falhou por `NULL` não tipado em `usuario_papel.unidade_id`; a transação abortou integralmente e não persistiu dados. A segunda execução usou `NULL::uuid` e concluiu com sucesso.
+
+O fixture existe somente para testes DEV e deve ser removido/rotacionado após concluir a etapa de integração remota.
+
 ### Configuração privada do runtime
 
 Modalidade escolhida para o primeiro E2E: `direct`.
@@ -108,12 +138,15 @@ Este arquivo é o primeiro commit documental da branch de continuidade.
 - herança efetiva de `hvb_app`: PASS;
 - preservação de 76 migrations: PASS;
 - preservação de `hvb_app NOLOGIN`: PASS;
-- permissão do arquivo privado no OneDrive: somente proprietário.
+- permissão do arquivo privado no OneDrive: somente proprietário;
+- criação do fixture sintético remoto A/B: PASS;
+- autenticação SQL dos dois tokens via `hvb.autenticar`: PASS;
+- armazenamento privado do fixture: PASS.
 
 ### Ainda pendente
 - handshake TLS real executado pelo processo Node do backend;
 - `/ready` contra Supabase DEV;
-- E2E autenticado com fixture HVB sintética;
+- E2E autenticado via processo Node usando o fixture HVB sintético já preparado;
 - isolamento tenant A × tenant B através do backend remoto;
 - rollback/idempotência contra Supabase DEV.
 
