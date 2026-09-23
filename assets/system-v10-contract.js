@@ -10,7 +10,8 @@ export const operationalFlows = Object.freeze({
   stockEntry: Object.freeze({
     module: "estoque",
     globalPermissions: ["estoque:ler", "estoque:catalogar"],
-    unitPermissions: ["estoque:movimentar"],
+    commandUnitPermissions: ["estoque:movimentar"],
+    uiUnitPermissions: ["estoque:movimentar", "locais:ler"],
     purchaseUnitPermissions: ["compras:receber"],
     endpoints: Object.freeze({
       complete: "/v1/estoque/entradas-completas",
