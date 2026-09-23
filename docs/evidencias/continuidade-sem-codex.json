@@ -1,0 +1,83 @@
+{
+  "date": "2026-09-23",
+  "purpose": "Continuidade temporária do backend/banco enquanto Codex indisponível; evitar sobrescrita na retomada",
+  "repository": "BeskelBR/beskel-site",
+  "baseBranch": "hvb-sistema-dev",
+  "baseHead": "31c931d173095b6e9c82dc9e567f0ba5e3b55742",
+  "continuityBranch": "hvb-sistema-chat-continuity",
+  "continuityCommits": [
+    {
+      "sha": "810806e63c0a19cf419a27eefe29bc3368a58655",
+      "purpose": "checkpoint inicial"
+    },
+    {
+      "sha": "6af670a3fd28f093ccbba2c7946c507541468d52",
+      "purpose": "fixture remoto e QA"
+    }
+  ],
+  "frozen": [
+    "frontend",
+    "scripts/frontend.mjs",
+    "scripts/web-session.mjs",
+    "terminal",
+    "terminal-access",
+    "terminal-v1",
+    "C18",
+    "openapi",
+    "migrations/001-076"
+  ],
+  "supabase": {
+    "runtimeRole": {
+      "name": "hvb_api_dev",
+      "login": true,
+      "inherit": true,
+      "inherits": "hvb_app",
+      "superuser": false,
+      "bypassrls": false,
+      "createdb": false,
+      "createrole": false,
+      "replication": false,
+      "passwordStorage": "SCRAM-SHA-256"
+    },
+    "hvbAppNologin": true,
+    "migrationCount": 76,
+    "migration077": false,
+    "c18Changed": false,
+    "connectionMode": "direct",
+    "tls": "verify-full",
+    "runtimeSecretLocation": "OneDrive/HVB_RUNTIME_PRIVATE/.env.remote-dev",
+    "runtimeSecretLocationPermissions": "owner-only"
+  },
+  "e2eFixture": {
+    "realData": false,
+    "tenants": 2,
+    "units": 2,
+    "users": 2,
+    "apiCredentials": 2,
+    "permissionsPerAdminRole": 118,
+    "secretLocation": "OneDrive/HVB_RUNTIME_PRIVATE/e2e-fixture.json",
+    "secretLocationPermissions": "owner-only",
+    "authFunctionChecks": "PASS",
+    "firstAttempt": "ABORTED_NO_PERSISTENCE_NULL_TYPE_ERROR",
+    "secondAttempt": "PASS"
+  },
+  "codeChangesAfterBase": [
+    "docs/CONTINUIDADE-SEM-CODEX.md",
+    "docs/evidencias/continuidade-sem-codex.json"
+  ],
+  "pending": [
+    "Node runtime TLS handshake against Supabase DEV",
+    "/ready against Supabase DEV",
+    "authenticated backend E2E using private synthetic fixture",
+    "tenant A x tenant B isolation through backend",
+    "rollback/idempotency against Supabase DEV"
+  ],
+  "resumeProtocol": [
+    "Do not reset or rebuild continuity work",
+    "Inspect hvb-sistema-chat-continuity first",
+    "Compare against then-current hvb-sistema-dev",
+    "Integrate by conscious merge/rebase",
+    "Preserve frontend and other owner commits",
+    "Run only relevant regression tests before final push"
+  ]
+}
