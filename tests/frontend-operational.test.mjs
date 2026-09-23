@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import {
   canUse,
+  canUseGlobal,
   operationalFlows,
   permissionsFor,
   resolveUnit,
@@ -42,6 +43,11 @@ test("MVP 11: contexto próprio resolve unidade e permissões sem ampliar escopo
     canUse(context, unit, operationalFlows.employee.requiredPermissions),
     false,
   );
+  assert.equal(
+    canUseGlobal(context, operationalFlows.employee.requiredPermissions),
+    false,
+  );
+  assert.equal(canUseGlobal(context, ["estoque:ler"]), false);
 });
 
 test("MVP 11: contratos da interface não misturam Terminal nem banco direto", () => {
