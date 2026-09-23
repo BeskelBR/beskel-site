@@ -36,7 +36,9 @@ Retorno do banco recebido em 23/09: [delta de conexão do backend](DELTA-BACKEND
 
 Retorno do frontend recebido: [contratos backend MVP 11](CONTRATOS-BACKEND-MVP11.md) entregam permissões por papel, onboarding e entrada de lote novo atômicos, e busca paginada de pacientes; 46 testes locais aprovados. Catálogo mantém escopo global na organização; identidade futura é proposta, não login operacional entregue.
 
-Próxima frente: responsáveis integram os contratos na interface e configuram o runtime privado do banco; este chat trata incompatibilidades concretas do backend. A [coordenação entre chats](COORDENACAO-CHATS.md) define os limites. Frontend/sessão web pertencem ao outro chat, banco/Supabase ao respectivo responsável e Terminal permanece congelado. Não refazer C18 nem ampliar o backend sem falta concreta da jornada; proteção HTTP loopback e bloqueio de produção continuam vigentes.
+Runtime privado disponibilizado pelo chat do banco. Primeiro E2E remoto iniciado: cliente Node recusou a cadeia TLS antes de SQL, inclusive com CAs do Windows. [Resultado e retomada](E2E-REMOTO-DEV.md). Falta cadeia confiável no ambiente privado e credencial HVB sintética para a etapa autenticada; não reprovisionar o que já foi concluído pelo responsável.
+
+Próxima frente: responsável pelo banco resolve a confiança TLS e a fixture privada; responsável pelo frontend integra os contratos; este chat retoma a verificação remota e trata incompatibilidades concretas do backend. A [coordenação entre chats](COORDENACAO-CHATS.md) define os limites. Frontend/sessão web pertencem ao outro chat, banco/Supabase ao respectivo responsável e Terminal permanece congelado. Não refazer C18 nem ampliar o backend sem falta concreta da jornada; proteção HTTP loopback e bloqueio de produção continuam vigentes.
 
 ## Uso de cota e coordenação
 

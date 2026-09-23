@@ -1,0 +1,76 @@
+{
+  "date": "2026-09-23",
+  "branch": "hvb-sistema-dev",
+  "backendHead": "8ba6c2d2a18121f721e54c51d3e3d7caac9536ef",
+  "initialWorkingTree": "clean",
+  "environment": "Supabase DEV direct; identidade e grants conforme relato do responsável do banco",
+  "attempts": [
+    {
+      "command": "node scripts/verify-remote-dev.ts <ARQUIVO_PRIVADO_FORA_DO_WORKSPACE>",
+      "configuration": "PASS",
+      "tls": "FAIL",
+      "errorCode": "SELF_SIGNED_CERT_IN_CHAIN",
+      "sqlExecuted": false
+    },
+    {
+      "command": "node --use-system-ca scripts/verify-remote-dev.ts <ARQUIVO_PRIVADO_FORA_DO_WORKSPACE>",
+      "configuration": "PASS",
+      "tls": "FAIL",
+      "errorCode": "SELF_SIGNED_CERT_IN_CHAIN",
+      "sqlExecuted": false
+    }
+  ],
+  "privateConfigurationPresence": {
+    "customCa": false,
+    "syntheticHvbApiToken": false
+  },
+  "status": "BLOQUEADO POR CONFIGURAÇÃO EXTERNA",
+  "nextAction": "Responsável pelo banco fornecer cadeia CA oficial/verificada e credencial HVB sintética no ambiente privado; preservar verify-full",
+  "unexecuted": [
+    "capacidades SQL",
+    "transaction-local/rollback remoto",
+    "HTTP health/ready remoto",
+    "autenticação da API"
+  ],
+  "integrity": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "format": "PASS",
+    "diff": "PASS",
+    "documentationLinks": "PASS",
+    "protectedPathsUnchanged": [
+      "assets",
+      "index.html",
+      "scripts/frontend.mjs",
+      "scripts/web-session.mjs",
+      "migrations",
+      "src",
+      "openapi"
+    ]
+  },
+  "dataChanges": "NENHUMA — falha antes de SQL; nenhum seed ou migration",
+  "secrets": "não copiados nem exibidos",
+  "verifierLimit": "O código completo está tipado/lintado; fluxo pós-handshake não executado. GET autenticado preservará auditoria normal da API.",
+  "files": [
+    {
+      "file": "scripts/verify-remote-dev.ts",
+      "sha256": "c19e83606ee61702bb54c28c32d35a038282bc2bcebfbba166ae9750a0c639b5"
+    },
+    {
+      "file": "docs/E2E-REMOTO-DEV.md",
+      "sha256": "0b0e89dae171d01694be969e1820e8b4dc41407320b0e2a6e5e14cadd61f34a0"
+    },
+    {
+      "file": "docs/COORDENACAO-CHATS.md",
+      "sha256": "a196af5b5d8552d602bef8d2e7337177fc5c4fd1b0588d53aa0f3e4cc3bf0dcc"
+    },
+    {
+      "file": "docs/PENDENCIAS-HVB.md",
+      "sha256": "88ecb9815152acf65b4cca5f718bd50c2d9e509ec55c38b278e8ee6bebfad576"
+    },
+    {
+      "file": "docs/PLANO-ENTREGA-SEMANA.md",
+      "sha256": "e9a8ff62655d537a9f6580d6397fdb21f0424e1eab26b283ade1e00ad3653cc9"
+    }
+  ]
+}

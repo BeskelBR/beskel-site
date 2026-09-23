@@ -32,6 +32,8 @@ Não foram consultados nem modificados recursos Supabase nesta etapa. Configura�
 
 Retorno do frontend também recebido: contratos implementados e pedido atualizado de integração em [CONTRATOS-BACKEND-MVP11.md](CONTRATOS-BACKEND-MVP11.md). Os pedidos iniciais abaixo permanecem como histórico; não solicitar novamente inventários já devolvidos.
 
+Configuração privada de runtime recebida posteriormente. O pedido vigente ao banco passou a ser confiança TLS do cliente Node e credencial HVB sintética, conforme [E2E remoto](E2E-REMOTO-DEV.md); não repetir provisionamento do login PostgreSQL. O verificador interrompeu antes de SQL e preservou certificado/hostname verificados.
+
 ### Chat do banco/Supabase — pedido inicial respondido
 
 ```text
