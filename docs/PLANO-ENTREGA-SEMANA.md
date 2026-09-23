@@ -28,7 +28,9 @@ Prioridade 1 concluída: C8–C18 consolidados em `50200dd`, frontend remoto MVP
 
 Prioridade 2 verificada no nível HTTP: três testes do servidor, TypeScript e 24 verificações com API/PostgreSQL locais passaram. Evidência: [integração HTTP](evidencias/integracao-piloto-http.json). A jornada visual no navegador ainda precisa de validação; consultas aprovadas não comprovam a jornada de escrita.
 
-Próxima frente: prioridade 3, reaproveitando o frontend existente para localizar/cadastrar paciente, abrir episódio e registrar/consultar atendimento. Autenticação operacional, ambiente hospedado e validação no navegador permanecem abertos nas prioridades 3/4. Não refazer C18 nem ampliar o backend sem uma falta concreta da jornada.
+Prioridade 3 implementada e testada no piloto DEV pelo MVP 9: entrada com credencial existente, localização/cadastro de paciente, abertura de episódio e registro/leitura de evolução. Percurso verificado no navegador, inclusive releitura após reload, recusa de escrita e layout móvel. [Evidência](evidencias/piloto-mvp9.json). Esta conclusão não equivale a autenticação operacional ou homologação dos papéis.
+
+Próxima frente: prioridade 4, autenticação/contexto de unidade adequados ao piloto e preparação do ambiente de homologação. Ambiente hospedado ainda não configurado; manter autorização específica para infraestrutura. Não refazer C18 nem ampliar o backend sem uma falta concreta da jornada.
 
 ## Uso de cota e coordenação
 

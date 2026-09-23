@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="assets/system-v3.css">
   <link rel="stylesheet" href="assets/system-v4.css">
   <link rel="stylesheet" href="assets/system-v5.css">
+  <link rel="stylesheet" href="assets/pilot.css">
 </head>
 <body>
   <a class="skip-link" href="#main">Pular para o conteúdo</a>
@@ -110,6 +111,53 @@
 
       <main id="main" class="workspace" tabindex="-1">
         <section class="module-view" data-module-view="dashboard">
+          <section class="panel pilot" id="pilot" aria-labelledby="pilot-title">
+            <div class="panel-head"><div><span class="eyebrow">Piloto com dados fictícios</span><h2 id="pilot-title">Atendimento</h2></div><button type="button" class="secondary-btn" id="pilot-start">Carregar atendimento</button></div>
+            <p>Selecione o paciente, abra um episódio e registre a evolução. Cada ação respeita as permissões da sua credencial.</p>
+            <p id="pilot-status" role="status" aria-live="polite">Carregue o atendimento para começar.</p>
+            <button type="button" class="secondary-btn" id="pilot-retry" hidden>Reconsultar o envio com segurança</button>
+            <fieldset id="pilot-controls" disabled>
+              <label>Unidade do atendimento<select id="pilot-unit" aria-label="Unidade do atendimento"></select></label>
+              <div class="pilot-columns">
+                <section aria-labelledby="pilot-patient-title"><h3 id="pilot-patient-title">1. Paciente</h3>
+                  <label>Filtrar pacientes carregados<input id="pilot-search" type="search" maxlength="160"></label>
+                  <label>Paciente<select id="pilot-patient" aria-label="Paciente do atendimento"><option value="">Selecione um paciente</option></select></label>
+                  <p id="pilot-count"></p><button type="button" class="secondary-btn" id="pilot-more" hidden>Carregar mais pacientes</button>
+                  <details><summary>Cadastrar paciente fictício</summary>
+                    <form id="pilot-patient-form">
+                      <label>Nome<input name="nome" required maxlength="160" autocomplete="off"></label>
+                      <label>Espécie<select name="especie_codigo"><option value="canina">Canina</option><option value="felina">Felina</option><option value="outra">Outra</option><option value="desconhecida">Desconhecida</option></select></label>
+                      <label>Estado vital<select name="estado_vital"><option value="desconhecido">Desconhecido</option><option value="vivo">Vivo</option><option value="obito">Óbito</option></select></label>
+                      <label class="pilot-confirm"><input type="checkbox" required>Conferi a lista e confirmo o cadastro de um paciente fictício.</label>
+                      <button class="primary-btn" type="submit">Cadastrar paciente</button>
+                    </form>
+                  </details>
+                </section>
+                <section aria-labelledby="pilot-episode-title"><h3 id="pilot-episode-title">2. Episódio</h3>
+                  <label>Episódio<select id="pilot-episode" aria-label="Episódio do atendimento"><option value="">Selecione um paciente primeiro</option></select></label>
+                  <p id="pilot-context">Nenhum paciente selecionado.</p>
+                  <button type="button" class="secondary-btn" id="pilot-episodes-more" hidden>Carregar mais episódios</button>
+                  <form id="pilot-episode-form">
+                    <label>Tipo<select name="tipo"><option value="atendimento">Atendimento</option><option value="internacao">Internação</option></select></label>
+                    <label>Admissão (horário deste computador)<input name="admitido_em" type="datetime-local" required></label>
+                    <label class="pilot-confirm"><input type="checkbox" required>Conferi os episódios existentes e confirmo uma nova admissão fictícia.</label>
+                    <button class="primary-btn" type="submit">Abrir episódio</button>
+                  </form>
+                </section>
+                <section aria-labelledby="pilot-record-title"><h3 id="pilot-record-title">3. Registro do atendimento</h3>
+                  <form id="pilot-record-form">
+                    <label>Tipo de registro<select name="tipo"><option value="evolucao">Evolução</option><option value="anamnese">Anamnese</option><option value="observacao">Observação</option></select></label>
+                    <label>Ocorrência (horário deste computador)<input name="ocorrida_em" type="datetime-local" required></label>
+                    <label>Conteúdo<textarea name="conteudo" rows="5" required maxlength="8000"></textarea></label>
+                    <label>Motivo do registro<input name="motivo" required maxlength="160"></label>
+                    <label class="pilot-confirm"><input type="checkbox" required>Revisei paciente, episódio e conteúdo; confirmo esta simulação.</label>
+                    <button class="primary-btn" type="submit">Registrar evolução</button>
+                  </form>
+                </section>
+              </div>
+              <section aria-labelledby="pilot-history-title"><div class="panel-head"><h3 id="pilot-history-title">Registros do episódio selecionado</h3><button type="button" class="secondary-btn" id="pilot-refresh-records">Atualizar registros</button></div><div id="pilot-records" aria-live="polite"></div><button type="button" class="secondary-btn" id="pilot-records-more" hidden>Carregar mais registros</button></section>
+            </fieldset>
+          </section>
           <div class="welcome-card">
             <div>
               <span class="eyebrow">Operação integrada</span>
@@ -126,7 +174,7 @@
             <article class="status-card"><span>API</span><strong id="health-card">Verificando</strong><small>Disponibilidade do serviço</small></article>
             <article class="status-card"><span>Banco</span><strong id="ready-card">Verificando</strong><small>Schema e conexão</small></article>
             <article class="status-card"><span>Ambiente</span><strong>DEV</strong><small>Sem operação assistencial real</small></article>
-            <article class="status-card"><span>Frontend</span><strong>MVP 8</strong><small>Jornadas clínicas e administrativas</small></article>
+            <article class="status-card"><span>Frontend</span><strong>MVP 9</strong><small>Atendimento de piloto e consultas</small></article>
           </div>
 
           <div class="section-head operations-head">
@@ -235,5 +283,6 @@
   <script src="assets/system-v6.js" defer></script>
   <script src="assets/system-v7.js" defer></script>
   <script src="assets/system-v8.js" defer></script>
+  <script src="assets/pilot.js" type="module"></script>
 </body>
 </html>

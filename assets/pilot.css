@@ -1,0 +1,83 @@
+/* Author display rules must not override the native hidden state (login/logout). */
+[hidden] {
+  display: none !important;
+}
+.pilot {
+  margin-bottom: 24px;
+}
+.pilot fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.pilot-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin: 20px 0;
+}
+.pilot label {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0;
+  font-weight: 700;
+}
+.pilot input:not([type="checkbox"]),
+.pilot select,
+.pilot textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #aebdd0;
+  border-radius: 8px;
+  background: white;
+  color: #172b4d;
+  font: inherit;
+}
+.pilot textarea {
+  resize: vertical;
+}
+.pilot .pilot-confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-weight: 400;
+}
+.pilot input[type="checkbox"] {
+  margin-top: 4px;
+}
+.pilot summary {
+  cursor: pointer;
+  font-weight: 800;
+  margin-top: 16px;
+}
+.pilot p {
+  overflow-wrap: anywhere;
+}
+.pilot [data-error="true"] {
+  color: #9d2323;
+}
+.pilot .pilot-record {
+  padding: 14px 0;
+  border-bottom: 1px solid #dce3ed;
+}
+.pilot pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+}
+.pilot :disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+.pilot :focus-visible {
+  outline: 3px solid #2674d9;
+  outline-offset: 3px;
+}
+@media (max-width: 1100px) {
+  .pilot-columns {
+    grid-template-columns: 1fr;
+  }
+}

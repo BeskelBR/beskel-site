@@ -4,6 +4,8 @@ Atualização de publicação em 22/09/2026: C8–C18 e o frontend MVP 8 foram p
 
 M0/M1 foi limitado à fundação local com dados fictícios. As decisões abaixo não bloqueiam o desenvolvimento independente já validado.
 
+Atualização MVP 9 em 22/09/2026: resolvida a falta de interface de escrita para paciente → episódio → evolução no piloto DEV, com leitura do conteúdo e verificação no navegador. Registro histórico/evidência em [FRONTEND-MVP.md](FRONTEND-MVP.md). Permanecem autenticação operacional, contexto de unidade para perfis reais, hospedagem, responsáveis/vínculos e retificação pela interface, homologação e os demais fluxos. A disponibilidade do logotipo remoto também deve ser conferida no ambiente final. Nenhuma dessas faltas de software/configuração foi reclassificada como mera homologação.
+
 | Item | Classificação | Quando precisa fechar |
 |---|---|---|
 | Papéis, poderes e unidades reais | PENDENTE, configuração hospitalar | Antes de contas e operação reais; perfis do seed são PROPOSTOS |
@@ -511,7 +513,7 @@ O usuário esclareceu expressamente que o congelamento preserva baseline/histór
 | Infraestrutura real de identidade/controlador | Backend e vínculo de credencial entregues; servidor sem adaptador biométrico falha fechado | Escolher/homologar adaptador e provisionamento, sensores, atestação, renovação e operação do kiosk |
 | Offline/Edge e emergências | Nenhuma autorização offline permissiva; envelopes e replay preservam fatos; presença não expira destrutivamente | Decisão humana sobre continuidade física segura, alimentação/rede, saída de emergência e supervisão |
 | Evolução de configuração e correções logísticas | Configurações/fatos imutáveis no recorte; correção de último item antes da saída entregue | Revisões de política/provisionamento e compensação após sessão encerrada, incluindo retorno físico e tutor |
-| Interface e consumidores | Frontend administrativo MVP 8 integrado; proxy e consultas verificados em HTTP; contrato Terminal publicado | Completar jornada de escrita e validar navegador no Sistema; clientes físicos continuam em autorização própria |
+| Interface e consumidores | MVP 9 entrega jornada de escrita paciente/episódio/evolução e leitura, verificada no navegador e no TEST; contrato Terminal publicado | Preparar autenticação/ambiente do piloto e completar demais fluxos conforme prioridade; clientes físicos continuam em autorização própria |
 | Validação geral C8–C18 | Publicação resolvida; 78 testes pontuais C18 e 35 operações adicionadas preservando anteriores | Instalação vazia, carga, suíte geral e homologação continuam pendentes; priorizar verificação integrada da jornada da semana |
 | Continuidade do núcleo | Delta Terminal v1 backend encerrado e publicado | Prioridade atual: jornada utilizável do plano da semana; não declarar todo o núcleo concluído nem reabrir faltas técnicas comprovadamente resolvidas |
 

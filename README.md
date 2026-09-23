@@ -1,5 +1,7 @@
 # HVB Sistema
 
+MVP 9: jornada de piloto **paciente → episódio → evolução**, com escrita e leitura na Visão geral, testada no navegador com dados fictícios. Ver [operação local e limites](docs/FRONTEND-MVP.md). Autenticação operacional e ambiente hospedado permanecem pendentes; não há nova migration nem mudança do contrato Terminal nesta etapa.
+
 Estado em 22/09/2026: C8–C18 e o frontend administrativo MVP 8 publicados em `hvb-sistema-dev` (`bea6df2`, SHA remoto confirmado). Interface integrada ao backend local e consultas verificadas por HTTP; jornada de escrita, autenticação operacional e ambiente de homologação continuam em andamento. A prioridade vigente está no [plano da semana](docs/PLANO-ENTREGA-SEMANA.md). Descrições de lotes abaixo delimitam suas entregas históricas; a interface já existe e será reaproveitada.
 
 Fundação **M0 + M1**, estoque físico **M2**, clínica operacional **M3**, diárias configuráveis **M4**, recorte comercial/financeiro **M5**, exames/resultados **M6A**, protocolos preventivos **M6B** e documentos gerais **M6C**, em `hvb-sistema-dev`. API modular, PostgreSQL real local e worker. Dados exclusivamente fictícios. Produto: **HVB Sistema**; `Core` designa somente o domínio interno.

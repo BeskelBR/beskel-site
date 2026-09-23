@@ -1,5 +1,29 @@
 # Frontend MVP — HVB Sistema
 
+## MVP 9 — atendimento de piloto — 22/09/2026
+
+Evolução aditiva do MVP 8, conforme o plano da semana. Na **Visão geral**, a área **Atendimento** permite carregar o contexto, localizar pacientes nas páginas carregadas ou cadastrar um paciente fictício, selecionar/abrir episódio e registrar/ler evolução. Unidade, paciente e episódio ficam explícitos. A listagem de versões mantém autoria, horário, estado e histórico; o conteúdo é buscado separadamente com a permissão `prontuario:conteudo` e exibido como texto.
+
+As três escritas usam rotas existentes, RBAC/RLS e chave de idempotência por intenção. O formulário exige confirmação de simulação; não há execução clínica, consumo, cobrança ou alteração de migrations. Enquanto um envio está em andamento ou tem resultado incerto, os controles ficam bloqueados. **Reconsultar o envio com segurança** repete a mesma intenção/chave. Uma falha de atualização posterior à confirmação não reenvia a gravação. A intenção pendente fica apenas em memória; antes de recarregar/fechar há aviso. Se a sessão for encerrada durante uma incerteza, conferir os registros antes de iniciar novo cadastro.
+
+### Operação local
+
+1. Com PostgreSQL DEV preparado, executar `node --env-file=.env src/api/server.ts` e, em outro terminal, `node scripts/frontend.mjs`.
+2. Abrir `http://127.0.0.1:3200` e entrar com a credencial DEV já provisionada. Nenhuma credencial acompanha este documento.
+3. Em **Visão geral → Carregar atendimento**, selecionar a unidade e o paciente. O filtro busca apenas nas páginas carregadas; usar **Carregar mais pacientes** quando indicado.
+4. Conferir episódios existentes antes de abrir outro. Informar admissão e confirmar os dados fictícios. Selecionar o episódio, informar ocorrência, conteúdo e motivo, confirmar a simulação e registrar.
+5. Usar **Ler conteúdo** para verificar o registro; após recarregar, localizar o mesmo paciente/episódio. As versões têm paginação própria.
+
+Listar unidades exige `acesso:administrar` no contrato atual. Para perfis sem essa permissão, o piloto reutiliza a unidade informada na configuração técnica DEV do acesso; isso não concede acesso e todas as operações continuam autorizadas pela API. Cadastro exige `cadastros:ler/escrever`; episódio exige `episodios:ler/escrever`; prontuário exige `prontuario:ler/escrever/conteudo`, conforme a operação. Papéis hospitalares definitivos e seleção operacional de unidade continuam pendentes.
+
+### Verificação e limites
+
+`node --env-file=.env --test tests/pilot.test.mjs`: três testes com proxy/API/PostgreSQL TEST reais; percurso completo, perda de resposta após commit seguida de retry sem duplicação, sessão inválida, recusa RBAC/unidade e recibo inválido. Os três testes do servidor frontend continuam aprovados; TypeScript e lint pontual passaram. Evidência: [piloto MVP 9](evidencias/piloto-mvp9.json).
+
+No navegador foram conferidos cadastro, abertura, evolução, conteúdo literal, releitura após reload, recusa de gravação para perfil de consulta, logout e largura móvel sem rolagem horizontal. A correção global de `[hidden]` impede que regras CSS de layout exibam telas ocultas. A validação usa somente fixtures TEST e não constitui homologação hospitalar. Logotipo remoto não carregou no navegador de teste; revisar disponibilidade do asset no ambiente final, sem alterar a pasta do Site.
+
+Permanecem pendentes autenticação operacional, ambiente hospedado, responsáveis/vínculos na jornada de escrita, retificações na interface e validação dos demais módulos. O escopo MVP 8 abaixo permanece como histórico.
+
 ## Integração com C18 — 22/09/2026
 
 Frontend MVP 8 remoto preservado e integrado ao backend C8–C18. A estratégia atual está em [PLANO-ENTREGA-SEMANA.md](PLANO-ENTREGA-SEMANA.md): reaproveitar as telas existentes e priorizar uma jornada de piloto; isso não homologa cargos nem autoriza dados reais.

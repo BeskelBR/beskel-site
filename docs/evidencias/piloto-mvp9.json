@@ -1,0 +1,51 @@
+{
+  "date": "2026-09-22",
+  "scope": "MVP 9 local; fixtures sintéticas PostgreSQL TEST; nenhuma infraestrutura externa",
+  "automated": {
+    "pilot_tests": {
+      "passed": 3,
+      "failed": 0,
+      "command": "node --env-file=.env --test tests/pilot.test.mjs"
+    },
+    "frontend_tests": {
+      "passed": 3,
+      "failed": 0,
+      "command": "node --test tests/frontend-server.test.mjs"
+    },
+    "typescript": "passed",
+    "targeted_lint": "passed",
+    "scenarios": [
+      "login e consultas autenticadas",
+      "paciente -> episódio -> evolução -> conteúdo",
+      "resposta perdida após commit e retry sem duplicação",
+      "RBAC de escrita e leitura",
+      "unidade não autorizada",
+      "sessão inválida",
+      "intenção imutável e recibo inválido"
+    ]
+  },
+  "browser": {
+    "target": "http://127.0.0.1:3201",
+    "database": "hvb_sistema_test",
+    "passed": [
+      "entrada com credencial DEV",
+      "cadastro de paciente",
+      "abertura de episódio",
+      "registro de evolução",
+      "conteúdo multilinha e markup exibidos literalmente",
+      "releitura após reload",
+      "recusa de cadastro para perfil consulta",
+      "logout oculta e limpa área do piloto",
+      "layout móvel com largura de conteúdo igual ao viewport"
+    ],
+    "mobile_content_width": 375,
+    "mobile_viewport_width": 375,
+    "limitations": [
+      "logotipo remoto indisponível no navegador de teste",
+      "não valida autenticação operacional nem ambiente hospedado",
+      "não homologa dados ou cargos hospitalares"
+    ]
+  },
+  "migrations_changed": false,
+  "backend_contract_changed": false
+}
