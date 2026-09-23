@@ -1,7 +1,7 @@
 {
   "data": "2026-09-23",
   "branch": "hvb-sistema-dev",
-  "code_sha": "35f848c761bfed82eb9be222e2aa812bb797cc6c",
+  "code_sha": "03786838687e278453d482711b5d1cb9258c545b",
   "escopo": "frontend/sessao; backend, banco e Terminal preservados",
   "testes": {
     "execucao": "3 execucoes separadas: frontend-operational (4/4), frontend-server (3/3) e web-session (5/5)",
@@ -26,8 +26,8 @@
   },
   "verificacao_exata_no_branch": {
     "blobs": {
-      "assets/system-v9-contract.js": "fc4d39a9d24a8c459610d93fd93d0e88ddb169e0",
-      "assets/system-v9.js": "b8d628fb4a4a36f2b596c19afe9542f4aa90464c",
+      "assets/system-v9-contract.js": "e68becb1498a6f2149ad4c673bd9770d95fe156f",
+      "assets/system-v9.js": "d7621188b49a5d955bef693031674f910da501ac",
       "index.html": "35341b58b0c0826748eefef3ed3c1e21ae585773"
     },
     "sintaxe": [
@@ -40,6 +40,8 @@
       "nao contem header Authorization",
       "nao contem POST de gravacao",
       "nao referencia rota /terminal/",
+      "administracao exige acesso:administrar global conforme backend",
+      "catalogo de estoque reconhece estoque:ler global conforme contrato atual",
       "index carrega system-v9.js e system-v6.css"
     ]
   },
