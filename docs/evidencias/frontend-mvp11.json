@@ -4,8 +4,8 @@
   "code_sha": "35f848c761bfed82eb9be222e2aa812bb797cc6c",
   "escopo": "frontend/sessao; backend, banco e Terminal preservados",
   "testes": {
-    "comando": "node --test tests/frontend-operational.test.mjs tests/frontend-server.test.mjs tests/web-session.test.mjs",
-    "ambiente": "harness local isolado do frontend, sem PostgreSQL e sem Terminal",
+    "execucao": "3 execucoes separadas: frontend-operational (4/4), frontend-server (3/3) e web-session (5/5)",
+    "ambiente": "harness local isolado em Node v22.16.0, sem PostgreSQL e sem Terminal; o projeto declara Node 24",
     "total": 12,
     "aprovados": 12,
     "falhas": 0,
@@ -44,7 +44,7 @@
     ]
   },
   "limitacoes": [
-    "harness nao substitui teste visual em navegador real",
+    "harness nao substitui teste visual em navegador real nem o CI canonico em Node 24",
     "nao executou teste com PostgreSQL/API reais neste bloco",
     "nao valida ambiente hospedado/TLS",
     "formularios novos permanecem sem escrita ate contratos atomicos do backend"
