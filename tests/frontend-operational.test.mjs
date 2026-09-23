@@ -18,7 +18,7 @@ test("MVP 11 integrado: respeita escopos global e de unidade", () => {
       {
         id: "11111111-1111-4111-8111-111111111111",
         nome: "HVB fictício",
-        permissoes: ["estoque:movimentar", "compras:receber"],
+        permissoes: ["estoque:movimentar", "locais:ler", "compras:receber"],
       },
     ],
   };
@@ -29,7 +29,7 @@ test("MVP 11 integrado: respeita escopos global e de unidade", () => {
     true,
   );
   assert.equal(
-    canUseUnit(context, unit, operationalFlows.stockEntry.unitPermissions),
+    canUseUnit(context, unit, operationalFlows.stockEntry.uiUnitPermissions),
     true,
   );
   assert.equal(
@@ -143,6 +143,7 @@ test("MVP 11 integrado: interface usa apenas os contratos publicados", async () 
   assert.match(source, /\/v1\/papeis\/\$\{encodeURIComponent\(roleId\)\}\/permissoes/);
   assert.match(source, /\/v1\/usuarios\/onboarding/);
   assert.match(source, /\/v1\/estoque\/entradas-completas/);
+  assert.match(source, /locais:ler/);
   assert.match(source, /motivo:/);
   assert.match(source, /lote:\s*lot/);
   assert.match(source, /compra:/);
