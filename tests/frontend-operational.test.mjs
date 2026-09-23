@@ -84,6 +84,8 @@ test("MVP 11: camada visual usa sessão same-origin e não envia escrita provis�
   assert.doesNotMatch(source, /supabase|postgres|SELECT |INSERT |UPDATE /i);
   assert.match(source, /Aguardando contrato de cadastro completo/);
   assert.match(source, /Aguardando entrada transacional do backend/);
+  assert.doesNotMatch(source, /document\\.addEventListener\\(["\']click["\']/);
+  assert.match(source, /querySelectorAll\\(["\']\\[data-module\\], \\[data-go\\]["\']\\)/);
 });
 
 test("MVP 11: documento principal carrega a camada depois da sessão existente", async () => {
