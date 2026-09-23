@@ -333,10 +333,17 @@ export async function buildApp(
     async () => {
       try {
         const r = await db.query(
-          "SELECT EXISTS(SELECT 1 FROM public.schema_migration WHERE nome='076_terminal_v1_conservation.sql') AS ready, current_user AS role",
+          `SELECT EXISTS(SELECT 1 FROM public.schema_migration
+              WHERE nome='076_terminal_v1_conservation.sql')
+            AND pg_has_role(current_user,'hvb_app','USAGE')
+            AND has_schema_privilege(current_user,'hvb','USAGE')
+            AND has_function_privilege(current_user,'hvb.autenticar(text)','EXECUTE')
+            AND has_table_privilege(current_user,'hvb.credencial','SELECT')
+            AND has_table_privilege(current_user,'hvb.usuario','SELECT')
+            AND NOT (SELECT rolsuper OR rolbypassrls FROM pg_roles
+              WHERE rolname=current_user) AS ready`,
         );
-        if (!r.rows[0].ready || r.rows[0].role !== "hvb_app")
-          throw new Error("not ready");
+        if (!r.rows[0].ready) throw new Error("not ready");
         return { status: "ready" };
       } catch {
         throw new DomainError(503, "banco_ou_schema_indisponivel");

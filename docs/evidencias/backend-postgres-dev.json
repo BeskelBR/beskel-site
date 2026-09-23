@@ -1,0 +1,118 @@
+{
+  "date": "2026-09-23",
+  "branch": "hvb-sistema-dev",
+  "baseHead": "ca16d43b6b2d72f78ed66236b28278ea59acc479",
+  "initialWorkingTree": "clean",
+  "files": [
+    {
+      "file": "src/persistence/database.ts",
+      "reason": "Opt-in remoto DEV, TLS verificado, validação sem segredos e contexto transacional local",
+      "sha256": "be101ce3447edc53a07499571558d4fc4cffffb1fb830bb75b2a6c9b5a4eb569"
+    },
+    {
+      "file": "src/api/server.ts",
+      "reason": "Passagem explícita do ambiente apenas para o pool da API",
+      "sha256": "a75b796f1619c4dd8562a2e4e720255e91ef548643e53049743772ff85f86160"
+    },
+    {
+      "file": "src/api/app.ts",
+      "reason": "Readiness por herança efetiva e capacidades sem igualdade literal do login",
+      "sha256": "735549623a9e54d4e0eb1c89d4bc02ba799d4d66a44c523b1ce3218ec69fe13f"
+    },
+    {
+      "file": "tests/database-config.test.ts",
+      "reason": "Recusa de configurações inseguras, preservação TLS/CA e compatibilidade local",
+      "sha256": "14b1d25a1e1e5e7722d773c55557956e631ff3a04b532fa940c37fff1d83e7d2"
+    },
+    {
+      "file": "tests/database-runtime.test.ts",
+      "reason": "Regressão PostgreSQL local: readiness, autenticação, RLS e rollback",
+      "sha256": "b7bb154074f2f3aded8fe9acff416c1a70af1d6bdfddc164dde00f27ee3eae01"
+    },
+    {
+      "file": "docs/COORDENACAO-CHATS.md",
+      "reason": "Registrar retorno do banco e supersessão explícita das restrições anteriores",
+      "sha256": "40a727d433f52173ad804c97b8567f42214b0d6c3e9823d2cea624363595ce7d"
+    },
+    {
+      "file": "docs/PLANO-ENTREGA-SEMANA.md",
+      "reason": "Atualizar próxima etapa de integração e bloqueio externo",
+      "sha256": "4f2ab618d2c71141c355029c054beaa32af3a4e72ce41b321eeb870665d30352"
+    },
+    {
+      "file": "docs/PENDENCIAS-HVB.md",
+      "reason": "Encerrar parte implementada e manter E2E remoto pendente",
+      "sha256": "c55331e91e0e813ff353a21d95b5586f6d694b49c88c5e09f039c4814789e684"
+    },
+    {
+      "file": "docs/DELTA-BACKEND-POSTGRES-DEV.md",
+      "reason": "Contrato declarativo, evidências e pedido ao responsável pelo banco",
+      "sha256": "ff579391c9c090690a3a748522716c15ab141d6b113b5cbd73c02d5608387f02"
+    }
+  ],
+  "hashScope": "SHA-256 dos bytes no workspace Windows; este manifesto não inclui seu próprio hash (fornecido na entrega).",
+  "tests": [
+    {
+      "command": "node --test tests/database-config.test.ts tests/unit.test.ts",
+      "environment": "local/configuração",
+      "status": "PASS",
+      "passed": 11
+    },
+    {
+      "command": "node --env-file=.env --test tests/database-runtime.test.ts",
+      "environment": "PostgreSQL local hvb_sistema_test",
+      "status": "PASS",
+      "passed": 4
+    },
+    {
+      "command": "node --env-file=.env --test tests/integration.test.ts",
+      "environment": "PostgreSQL local hvb_sistema_test",
+      "status": "PASS",
+      "passed": 15
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "environment": "workspace",
+      "status": "PASS"
+    },
+    {
+      "command": "node node_modules/@biomejs/biome/bin/biome lint src/persistence/database.ts src/api/server.ts src/api/app.ts tests/database-config.test.ts tests/database-runtime.test.ts",
+      "environment": "workspace",
+      "status": "PASS"
+    }
+  ],
+  "checks": {
+    "openapiPathsUnchanged": true,
+    "openapiSecuritySchemesUnchanged": true,
+    "protectedPathsUnchanged": [
+      "assets",
+      "index.html",
+      "styles.css",
+      "scripts/frontend.mjs",
+      "scripts/web-session.mjs",
+      "migrations",
+      "src/domain/terminal",
+      "src/domain/terminal-access",
+      "src/domain/terminal-v1",
+      "openapi"
+    ],
+    "localDocumentationLinks": 20,
+    "namedRuntimeQueries": [],
+    "gitDiffCheck": "PASS"
+  },
+  "remote": {
+    "status": "BLOQUEADO POR CONFIGURAÇÃO EXTERNA",
+    "reason": "Identidade/secret PostgreSQL de runtime remoto ainda não configurados; não houve conexão Supabase.",
+    "tlsHandshake": "NÃO EXECUTADO",
+    "supavisorIntegration": "NÃO EXECUTADO",
+    "remoteStateSource": "Relato do usuário/chat do banco; não auditado por este chat"
+  },
+  "frontend": "SEM ALTERAÇÃO",
+  "terminal": "SEM ALTERAÇÃO — C18 congelado",
+  "schemaMigrations": "SEM ALTERAÇÃO — 001–076 preservadas",
+  "limitations": [
+    "CA testada somente como configuração, sem handshake",
+    "Papel herdeiro sintético NOLOGIN com SET LOCAL ROLE, não novo login remoto",
+    "Suite de integração usa fixtures e setup já existente no banco TEST local"
+  ]
+}

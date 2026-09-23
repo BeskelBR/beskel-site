@@ -5,7 +5,7 @@ if (process.env.NODE_ENV === "production")
 const host = process.env.HOST ?? "127.0.0.1";
 if (!["127.0.0.1", "::1", "localhost"].includes(host))
   throw new Error("API DEV restrita a loopback.");
-const db = pool(process.env.DATABASE_URL ?? "");
+const db = pool(process.env.DATABASE_URL ?? "", 5, process.env);
 const app = await buildApp(db, true);
 for (const signal of ["SIGINT", "SIGTERM"])
   process.on(signal, async () => {

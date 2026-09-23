@@ -32,7 +32,9 @@ Prioridade 3 implementada e testada no piloto DEV pelo MVP 9: entrada com creden
 
 Prioridade 4 parcial em 23/09: MVP 10 entrega sessão web local e consulta de unidades do próprio usuário. Credencial temporária inicial ainda necessária; login operacional, recuperação/MFA e ambiente hospedado continuam faltando. O usuário informou que o banco está em outro chat vinculado ao Supabase; configuração aplicada, compatibilidade com a API e hospedagem da API ainda precisam de confirmação. Isso não autoriza provisionamento. Ver [ADR 0029](adr/0029-sessao-web-piloto.md).
 
-Próxima frente deste chat: integração do backend a partir dos contratos devolvidos pelos responsáveis por frontend e banco. A [coordenação entre chats](COORDENACAO-CHATS.md) define os limites e contém pedidos prontos para encaminhar. Frontend/sessão web pertencem ao outro chat, banco/Supabase ao respectivo responsável e Terminal permanece congelado. Não refazer C18 nem ampliar o backend sem falta concreta da jornada. Até receber os contratos, preservar os bloqueios DEV existentes e registrar as dependências; não presumir que apontar uma variável de ambiente basta para integrar o banco remoto.
+Retorno do banco recebido em 23/09: [delta de conexão do backend](DELTA-BACKEND-POSTGRES-DEV.md) implementado, com opt-in remoto DEV, TLS verificado e regressão local aprovada. O relato de migrations/estrutura Supabase é evidência fornecida pelo responsável, não nova auditoria remota deste chat. Falta identidade/secret de runtime para E2E remoto. Hospedagem da API, login operacional e retorno do frontend continuam pendentes.
+
+Próxima frente deste chat: receber a configuração privada de runtime pelo fluxo seguro e o pedido do frontend; integrar apenas as dependências do backend. A [coordenação entre chats](COORDENACAO-CHATS.md) define os limites. Frontend/sessão web pertencem ao outro chat, banco/Supabase ao respectivo responsável e Terminal permanece congelado. Não refazer C18 nem ampliar o backend sem falta concreta da jornada; proteção HTTP loopback e bloqueio de produção continuam vigentes.
 
 ## Uso de cota e coordenação
 
