@@ -1,3 +1,40 @@
+# MVP 11 — contratos operacionais integrados — 23/09/2026
+
+Integração do contrato publicado pelo backend em `8ba6c2d2a18121f721e54c51d3e3d7caac9536ef`. Backend, banco/migrations e Terminal não foram alterados por esta etapa. A interface ativa passou de `assets/system-v9.js` para `assets/system-v10.js`; o MVP 10 de sessão/BFF permanece a base.
+
+## Entregue
+
+- **Papéis e permissões:** a seleção de papel consulta `GET /v1/papeis/{id}/permissoes` e mostra os códigos efetivos. Escopo global e por unidade são escolhas explícitas.
+- **Funcionários:** `POST /v1/usuarios/onboarding` está habilitado com nome, login, motivo e 1–50 atribuições. O corpo omite `unidade_id` quando o escopo é global. O fluxo não cria credencial, senha, NFC ou identidade humana.
+- **Entrada de estoque:** `POST /v1/estoque/entradas-completas` está habilitado para lote novo. `apresentacao_id` é enviado dentro de `lote`; quantidade/custo permanecem strings decimais.
+- **Origem por compra:** quando marcada, a mesma intenção inclui o objeto `compra` com referência, simulação e confirmação humana. A UI não envia `POST /v1/compras/recebimentos` depois.
+- **Retry:** cada intenção é preparada uma vez; erro 5xx, perda de recibo ou falha de rede ambígua preserva a mesma `Idempotency-Key` e o mesmo corpo. Falha HTTP definitiva libera uma nova intenção.
+- **Pacientes:** a busca rápida agora usa `GET /v1/pacientes?q=...` no servidor, mantém o mesmo `q` na paginação por cursor e limpa o cursor ao mudar a busca. A cópia visual foi corrigida para o contrato real: nome ou UUID completo.
+- **Identidade:** nenhuma rota de login humano foi inventada. A proposta de adaptador privado descrita pelo backend continua apenas como proposta do BFF.
+
+## Escopos de acesso da interface
+
+O catálogo de estoque continua global na organização, conforme a decisão do backend: a UI exige `estoque:ler` e `estoque:catalogar` globais. A movimentação continua por unidade.
+
+Há uma dependência concreta adicional da interface: para o operador escolher o local, o formulário consulta `GET /v1/locais`, que exige `locais:ler` na unidade. Assim, o POST de entrada completa pode ser autorizado pelo backend com `estoque:movimentar`, mas a interface não é operável naquela unidade sem `locais:ler`. A UI agora filtra unidades elegíveis por `estoque:movimentar + locais:ler`. Resta decidir se os papéis de estoque receberão `locais:ler` ou se haverá outro contrato de leitura de locais para esse fluxo.
+
+Quando a origem é compra, `compras:receber` também é exigido na unidade. Sem essa permissão, a opção de compra fica desabilitada.
+
+## Destino e sessão
+
+Sem mudança de arquitetura: DEV lógico em `https://hvb-sistema-dev.beskel.com.br`, futuro `https://sistema.hvb.com.br`, com interface e `/session` na mesma origem HTTPS. O servidor atual continua restrito a HTTP loopback; assets estáticos isolados não entregam a sessão. Hospedagem TLS/cookie Secure e login humano operacional permanecem pendentes.
+
+## Evidência
+
+- 36/36 verificações executáveis sobre os blobs exatos publicados na branch: sintaxe, escopos, endpoints, corpo, ausência de segundo recebimento, busca/paginação, isolamento de Terminal/Bearer e retry.
+- 3/3 testes Node executados com `node --test tests/frontend-operational-contract.test.mjs`: escopos/atribuição global; busca `q + cursor`; retry com a mesma chave e corpo.
+- Os hashes locais dos três artefatos executados coincidiram com os blobs GitHub correspondentes.
+- Evidência estruturada: [frontend-mvp11-integracao.json](evidencias/frontend-mvp11-integracao.json).
+
+Não houve navegador real nem API/PostgreSQL integrados nesta etapa. A evidência do backend para seus contratos permanece separada.
+
+---
+
 # MVP 11 — cadastros operacionais preparados — 23/09/2026
 
 Continuidade aditiva do MVP 10. Backend, migrations/banco e Terminal permanecem congelados nesta etapa. A interface passa a explicitar dois fluxos solicitados pelo HVB: **cadastro de funcionário com autorizações** e **entrada de estoque**, usando o contexto de identidade/unidades/permissões já fornecido por `GET /v1/me/contexto`. Nenhuma gravação nova foi improvisada no navegador quando o contrato atual exige múltiplas operações independentes.

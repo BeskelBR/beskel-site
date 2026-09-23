@@ -2,6 +2,8 @@
 
 23/09/2026. Backend avaliado: `8ba6c2d2a18121f721e54c51d3e3d7caac9536ef`, branch `hvb-sistema-dev`, working tree inicialmente limpo. Conexão e verificação expressamente autorizadas pelo usuário após retorno do responsável pelo banco.
 
+Na publicação, commits concorrentes do frontend até `56cd405adda2a226945fe8a181ecccea2c351c2e` foram integrados sem conflitos ou edições próprias nesses arquivos. A evidência do responsável registra integração MVP 11 e testes isolados, não E2E com API/PostgreSQL. Backend executado e blocos congelados permaneceram iguais.
+
 ## Resultado constatado
 
 O arquivo privado indicado pelo usuário foi encontrado e carregado exclusivamente em memória. Opt-in remoto DEV e TLS verify-full: PASS. A conexão PostgreSQL foi interrompida na validação da cadeia TLS, com `SELF_SIGNED_CERT_IN_CHAIN`, antes da autenticação PostgreSQL e de qualquer consulta SQL.

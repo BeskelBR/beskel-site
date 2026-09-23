@@ -27,6 +27,17 @@
   let patients = [];
   let loadedForToken = null;
   let selectedPatient = null;
+  let patientCursor = null;
+  let patientQuery = "";
+  let patientSearchTimer = null;
+  let patientRequestVersion = 0;
+
+  const patientMore = document.createElement("button");
+  patientMore.type = "button";
+  patientMore.className = "secondary-btn";
+  patientMore.textContent = "Carregar mais pacientes";
+  patientMore.hidden = true;
+  patientHub.insertAdjacentElement("afterend", patientMore);
 
   function apiBase() {
     return location.origin.replace(/\/$/, "");
@@ -97,21 +108,24 @@
   }
 
   function renderPatients() {
-    const query = (patientSearch.value || "").trim().toLocaleLowerCase("pt-BR");
-    const filtered = patients.filter((patient) => {
-      const haystack = [patient.nome, patient.especie_codigo, patient.estado_vital, patient.id].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR");
-      return !query || haystack.includes(query);
-    });
     patientHub.replaceChildren();
-    patientCount.textContent = `${filtered.length} de ${patients.length} pacientes`;
-    if (!filtered.length) {
+    const suffix = patientCursor ? "+" : "";
+    patientCount.textContent = patientQuery
+      ? `${patients.length}${suffix} resultado(s) para “${patientQuery}”`
+      : `${patients.length}${suffix} pacientes carregados`;
+    patientMore.hidden = !patientCursor;
+
+    if (!patients.length) {
       const box = document.createElement("div");
       box.className = "patient-hub-empty";
-      box.textContent = patients.length ? "Nenhum paciente corresponde ao filtro atual." : "Nenhum paciente disponível para esta credencial.";
+      box.textContent = patientQuery
+        ? "Nenhum paciente corresponde à busca atual."
+        : "Nenhum paciente disponível para esta credencial.";
       patientHub.append(box);
       return;
     }
-    filtered.slice(0, 18).forEach((patient) => {
+
+    patients.forEach((patient) => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "patient-card";
@@ -121,7 +135,10 @@
       const name = document.createElement("strong");
       name.textContent = patient.nome || "Paciente sem nome";
       const species = document.createElement("small");
-      species.textContent = [patient.especie_codigo || "Espécie não informada", patient.estado_vital || "Estado não informado"].join(" • ");
+      species.textContent = [
+        patient.especie_codigo || "Espécie não informada",
+        patient.estado_vital || "Estado não informado",
+      ].join(" • ");
       identity.append(name, species);
       const id = document.createElement("span");
       id.className = "patient-card-id";
@@ -133,28 +150,75 @@
     });
   }
 
-  async function loadPatients(force = false) {
+  async function loadPatients(force = false, more = false) {
     const currentToken = token();
+    const query = (patientSearch.value || "").trim();
+
     if (!currentToken) {
       loadedForToken = null;
       patients = [];
+      patientCursor = null;
+      patientQuery = "";
+      patientMore.hidden = true;
       patientCount.textContent = "Aguardando sessão";
-      empty(patientHub, "Entre no sistema para consultar pacientes disponíveis à sua credencial.");
+      empty(
+        patientHub,
+        "Entre no sistema para consultar pacientes disponíveis à sua credencial.",
+      );
       return;
     }
-    if (!force && loadedForToken === currentToken && patients.length) return;
-    loading(patientHub, "Carregando pacientes disponíveis");
-    patientCount.textContent = "Consultando";
+
+    if (
+      !force &&
+      !more &&
+      loadedForToken === currentToken &&
+      query === patientQuery &&
+      patients.length
+    )
+      return;
+
+    const version = ++patientRequestVersion;
+    if (!more) {
+      loading(
+        patientHub,
+        query ? "Buscando pacientes" : "Carregando pacientes disponíveis",
+      );
+      patientCount.textContent = "Consultando";
+      patientMore.hidden = true;
+    }
+
+    const params = new URLSearchParams({ limit: "25" });
+    if (query) params.set("q", query);
+    if (more && patientCursor) params.set("cursor", patientCursor);
+
     try {
-      const data = await request("/v1/pacientes?limit=100");
-      patients = data?.items || [];
+      const data = await request(`/v1/pacientes?${params}`);
+      if (version !== patientRequestVersion || currentToken !== token()) return;
+      const items = data?.items || [];
+      patients = more
+        ? [
+            ...new Map(
+              [...patients, ...items].map((patient) => [patient.id, patient]),
+            ).values(),
+          ]
+        : items;
+      patientCursor = data?.next_cursor || null;
+      patientQuery = query;
       loadedForToken = currentToken;
       renderPatients();
     } catch (err) {
-      patients = [];
+      if (version !== patientRequestVersion) return;
+      if (!more) patients = [];
+      patientCursor = null;
       loadedForToken = null;
+      patientMore.hidden = true;
       patientCount.textContent = "Consulta indisponível";
-      error(patientHub, err.status === 403 ? "Seu perfil não possui acesso à lista de pacientes." : "Não foi possível carregar os pacientes neste momento.");
+      error(
+        patientHub,
+        err.status === 403
+          ? "Seu perfil não possui acesso à lista de pacientes."
+          : "Não foi possível carregar os pacientes neste momento.",
+      );
     }
   }
 
@@ -352,8 +416,13 @@
     return block;
   }
 
-  patientSearch.addEventListener("input", renderPatients);
-  refreshPatients.addEventListener("click", () => loadPatients(true));
+  patientSearch.addEventListener("input", () => {
+    patientMore.hidden = true;
+    clearTimeout(patientSearchTimer);
+    patientSearchTimer = setTimeout(() => loadPatients(true, false), 250);
+  });
+  refreshPatients.addEventListener("click", () => loadPatients(true, false));
+  patientMore.addEventListener("click", () => loadPatients(true, true));
   closeDrawer.addEventListener("click", closeClinicalDrawer);
   backdrop.addEventListener("click", closeClinicalDrawer);
   episodeContextClose.addEventListener("click", () => { episodeContext.hidden = true; });

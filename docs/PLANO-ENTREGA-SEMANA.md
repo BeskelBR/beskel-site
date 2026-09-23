@@ -38,7 +38,9 @@ Retorno do frontend recebido: [contratos backend MVP 11](CONTRATOS-BACKEND-MVP11
 
 Runtime privado disponibilizado pelo chat do banco. Primeiro E2E remoto iniciado: cliente Node recusou a cadeia TLS antes de SQL, inclusive com CAs do Windows. [Resultado e retomada](E2E-REMOTO-DEV.md). Falta cadeia confiável no ambiente privado e credencial HVB sintética para a etapa autenticada; não reprovisionar o que já foi concluído pelo responsável.
 
-Próxima frente: responsável pelo banco resolve a confiança TLS e a fixture privada; responsável pelo frontend integra os contratos; este chat retoma a verificação remota e trata incompatibilidades concretas do backend. A [coordenação entre chats](COORDENACAO-CHATS.md) define os limites. Frontend/sessão web pertencem ao outro chat, banco/Supabase ao respectivo responsável e Terminal permanece congelado. Não refazer C18 nem ampliar o backend sem falta concreta da jornada; proteção HTTP loopback e bloqueio de produção continuam vigentes.
+Frontend integrou os contratos até `56cd405`, com verificações isoladas registradas pelo responsável; jornada integrada ainda pendente. A dependência de `locais:ler` para seleção de local foi registrada na lista central, sem ampliar RBAC.
+
+Próxima frente: responsável pelo banco resolve a confiança TLS e a fixture privada; este chat retoma a verificação remota e trata incompatibilidades concretas do backend, coordenando a jornada integrada com o frontend. A [coordenação entre chats](COORDENACAO-CHATS.md) define os limites. Frontend/sessão web pertencem ao outro chat, banco/Supabase ao respectivo responsável e Terminal permanece congelado. Não refazer C18 nem ampliar o backend sem falta concreta da jornada; proteção HTTP loopback e bloqueio de produção continuam vigentes.
 
 ## Uso de cota e coordenação
 

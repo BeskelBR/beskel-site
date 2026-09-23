@@ -58,7 +58,7 @@
     },
     {
       "file": "docs/E2E-REMOTO-DEV.md",
-      "sha256": "0b0e89dae171d01694be969e1820e8b4dc41407320b0e2a6e5e14cadd61f34a0"
+      "sha256": "a30e92eff1aa4efc65ad1d05ade6f909f8e16c2edf26b567621ceb1f1923ac5f"
     },
     {
       "file": "docs/COORDENACAO-CHATS.md",
@@ -66,11 +66,16 @@
     },
     {
       "file": "docs/PENDENCIAS-HVB.md",
-      "sha256": "88ecb9815152acf65b4cca5f718bd50c2d9e509ec55c38b278e8ee6bebfad576"
+      "sha256": "35ea5c901c1d615cccf259e6b8db04c4fe1f49586bfa121dcdc05b07dcabd067"
     },
     {
       "file": "docs/PLANO-ENTREGA-SEMANA.md",
-      "sha256": "e9a8ff62655d537a9f6580d6397fdb21f0424e1eab26b283ade1e00ad3653cc9"
+      "sha256": "b1a66336fc4d80349685291d5871523041344e66d778a9cb932dcbc6d8ea19cf"
     }
-  ]
+  ],
+  "gitIntegration": {
+    "frontendRemoteCommit": "56cd405adda2a226945fe8a181ecccea2c351c2e",
+    "frontendPreserved": true,
+    "backendTestedCodeUnchanged": true
+  }
 }
