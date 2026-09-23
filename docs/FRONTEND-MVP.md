@@ -48,6 +48,7 @@ Os controles consultam o próprio contexto e não expõem ações quando faltam 
 
 Existem separadamente `POST /v1/usuarios`, `POST /v1/atribuicoes`, `POST /v1/credenciais` e `GET /v1/papeis`. O backend também preserva revisão/revogação de atribuições. Porém:
 
+- os contratos de usuários/papéis/atribuições exigem `acesso:administrar` em escopo global; a interface agora respeita esse escopo e não trata uma permissão apenas de unidade como equivalente;
 - a listagem de papéis não devolve as permissões que compõem o papel, impedindo a interface de mostrar exatamente o que será autorizado;
 - não existe um comando transacional de onboarding que crie usuário + uma ou mais atribuições como uma única intenção;
 - não existe login humano operacional; a credencial DEV não deve virar senha do colaborador.
@@ -80,7 +81,7 @@ Resposta mínima esperada:
 
 ### Entrada de estoque
 
-`POST /v1/estoque/entradas` é compatível somente quando a posição já existe: recebe `posicao_id`, quantidade, instante e motivo. Lote e posição são criados por comandos separados. `POST /v1/compras/recebimentos` já integra recebimento de pedido ao ledger de estoque, mas também exige posições previamente existentes.
+`POST /v1/estoque/entradas` é compatível somente quando a posição já existe: recebe `posicao_id`, quantidade, instante e motivo. Lote e posição são criados por comandos separados. `POST /v1/compras/recebimentos` já integra recebimento de pedido ao ledger de estoque, mas também exige posições previamente existentes. As listas organizacionais de produto/apresentação/lote hoje chamam `authorize(..., estoque:ler)` sem `unidade_id`, portanto exigem `estoque:ler` global; a interface não amplia silenciosamente uma permissão de unidade para consultar esse catálogo.
 
 Para o formulário operacional de recebimento de um lote novo, falta um comando transacional que resolva/reutilize lote, custódia hospitalar e ocupação/posição e registre a entrada na mesma intenção idempotente. Quando houver pedido de compra, o contrato deve reaproveitar o recebimento existente em vez de duplicá-lo.
 
@@ -129,10 +130,10 @@ Resposta: o mesmo envelope paginado já usado por `GET /v1/pacientes`, sem novo 
 
 ## Pedidos objetivos ao backend
 
-1. Expor leitura das permissões efetivas de um papel existente, sem conceder novas permissões.
+1. Expor leitura das permissões efetivas de um papel existente, sem conceder novas permissões, preservando que `acesso:administrar` é global no contrato atual.
 2. Definir um comando idempotente/transacional para onboarding de usuário + atribuições, ou declarar explicitamente que a UI deve trabalhar em etapas e fornecer um estado recuperável de onboarding incompleto.
 3. Definir o contrato de login humano consumido pelo BFF `/session`; não expor Bearer persistente ao navegador.
-4. Definir entrada transacional de lote novo/posição/quantidade, preservando o ledger atual e reaproveitando `/compras/recebimentos` quando a origem for um pedido.
+4. Definir entrada transacional de lote novo/posição/quantidade, preservando o ledger atual e reaproveitando `/compras/recebimentos` quando a origem for um pedido. Confirmar também se a leitura do catálogo de estoque permanecerá global ou se haverá um contrato de catálogo legível por operadores com escopo de unidade.
 5. Acrescentar busca server-side a `GET /v1/pacientes` (`q` ou critério equivalente), preservando o envelope paginado e RBAC; a UI não deve precisar carregar todas as páginas para localizar um paciente.
 6. Não alterar o contrato congelado do Terminal para resolver nenhum desses itens.
 
