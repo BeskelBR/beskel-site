@@ -2,6 +2,8 @@
 
 Decisão do usuário em 23/09/2026. Referência de código inspecionada: `hvb-sistema-dev`, `dbf59f20fb0b8b009191b76b836e2ec8b6b58fcb` (MVP 10). Este documento organiza o trabalho futuro; não altera os baselines nem comprova o estado do Supabase ou das entregas dos outros chats.
 
+Esclarecimento posterior do usuário: os chats responsáveis já estão autorizados a executar testes. As restrições de testes anteriormente encaminhadas neste documento estão superadas para esses chats. Este chat mantém verificações de integridade por desenvolvimento, evitando repetir o trabalho dos responsáveis. Autorização não comprova execução ou aprovação; registrar evidências.
+
 ## Divisão
 
 | Responsável | Escopo | Limite |
@@ -29,13 +31,13 @@ Não foram consultados nem modificados recursos Supabase nesta etapa. Configura�
 ### Chat do banco/Supabase
 
 ```text
-HVB Sistema — alinhar contrato com o backend, sem alterar frontend nem Terminal congelado. Confira o estado atual e compare com hvb-sistema-dev, referência dbf59f20fb0b8b009191b76b836e2ec8b6b58fcb, reaproveitando o que já concluiu. Informe, sem segredos: migrations efetivamente aplicadas e divergências; disponibilidade do schema hvb, papel hvb_app, função hvb.autenticar e isolamento por hvb.org transacional; modalidade de conexão/pool, TLS e requisitos do driver pg. Diferencie configuração constatada de proposta. Esclareça se seu escopo inclui autenticação humana ou apenas banco; se houver provedor definido, descreva o vínculo de identidade com organização/usuário/permissões do HVB e a revogação, sem substituir RBAC/RLS implicitamente. Não aplique migrations ou reprovisione por causa deste pedido. Devolva contrato curto, arquivos/SHA quando houver e ações que cabem ao backend. Não envie senhas, tokens nem URLs com credenciais. Sem testes funcionais ou navegador nesta etapa.
+HVB Sistema — alinhar contrato com o backend, sem alterar frontend nem Terminal congelado. Confira o estado atual e compare com hvb-sistema-dev, referência dbf59f20fb0b8b009191b76b836e2ec8b6b58fcb, reaproveitando o que já concluiu. Informe, sem segredos: migrations efetivamente aplicadas e divergências; disponibilidade do schema hvb, papel hvb_app, função hvb.autenticar e isolamento por hvb.org transacional; modalidade de conexão/pool, TLS e requisitos do driver pg. Diferencie configuração constatada de proposta. Esclareça se seu escopo inclui autenticação humana ou apenas banco; se houver provedor definido, descreva o vínculo de identidade com organização/usuário/permissões do HVB e a revogação, sem substituir RBAC/RLS implicitamente. Este pedido não amplia autorizações de migração ou provisionamento já existentes no seu chat. Os testes do seu bloco já estão autorizados: execute os necessários, reaproveite evidências válidas e informe ambiente, escopo, resultados e SHA quando aplicável. Devolva contrato curto, arquivos/SHA e ações que cabem ao backend. Não envie senhas, tokens nem URLs com credenciais.
 ```
 
 ### Chat do frontend
 
 ```text
-HVB Sistema — continue sua interface preservando backend, banco e Terminal congelado. Confira working tree/branch e reaproveite MVP 10 de hvb-sistema-dev, referência dbf59f20fb0b8b009191b76b836e2ec8b6b58fcb, sem sobrescrever suas alterações posteriores. Considere /session como contrato do servidor de interface e /v1/me/contexto como API para identidade/unidades/permissões. A sessão/proxy atual depende de Node na mesma origem e só suporta HTTP loopback; assets estáticos isolados não entregam esse login. Informe o destino proposto do frontend/sessão, estratégia de login e endpoints realmente ausentes ou incompatíveis, com exemplo sintético mínimo de entrada/saída esperada. Sessão web e seu proxy ficam sob sua responsabilidade; não altere contratos do backend nem realize deploy por inferência. Devolva arquivos/SHA, dependências do backend e limitações. Verifique apenas integridade; deixe testes funcionais/navegador para a etapa posterior solicitada pelo usuário.
+HVB Sistema — continue sua interface preservando backend, banco e Terminal congelado. Confira working tree/branch e reaproveite MVP 10 de hvb-sistema-dev, referência dbf59f20fb0b8b009191b76b836e2ec8b6b58fcb, sem sobrescrever suas alterações posteriores. Considere /session como contrato do servidor de interface e /v1/me/contexto como API para identidade/unidades/permissões. A sessão/proxy atual depende de Node na mesma origem e só suporta HTTP loopback; assets estáticos isolados não entregam esse login. Informe o destino proposto do frontend/sessão, estratégia de login e endpoints realmente ausentes ou incompatíveis, com exemplo sintético mínimo de entrada/saída esperada. Sessão web e seu proxy ficam sob sua responsabilidade; não altere contratos do backend nem realize deploy por inferência. Os testes do seu bloco já estão autorizados: execute os necessários, reaproveite evidências válidas e informe ambiente, escopo, resultados e SHA. Devolva arquivos/SHA, dependências do backend e limitações.
 ```
 
 ### Chat comum
@@ -52,6 +54,6 @@ O usuário encaminha os pedidos e traz as respostas; este chat não envia mensag
 
 Com os retornos, este chat implementa somente a adaptação necessária do backend, preserva contratos legados e registra supersessão quando aplicável. Até lá, mantém as proteções locais: não inventa mapeamento de identidade, não escolhe hospedagem e não reabre módulos completos para gerar atividade.
 
-A cada mudança executar apenas integridade pertinente (tipos, sintaxe/lint dos arquivos afetados, diff e consistência de contrato). Não usar `scripts/check.mjs` como se fosse apenas verificação estática: ele agrega outras etapas. Não rodar testes funcionais nem navegador por padrão. Documentação sem alteração de código requer conferir links/diff, não repetir a suíte.
+A cada mudança deste chat executar integridade pertinente (tipos, sintaxe/lint dos arquivos afetados, diff e consistência de contrato). Os outros chats executam os testes já autorizados em seus blocos e devolvem evidências; evitar duplicação. Não usar `scripts/check.mjs` como se fosse apenas verificação estática: ele agrega outras etapas. Documentação sem alteração de código requer conferir links/diff, não repetir a suíte.
 
 Revisões textuais e preparação de roteiros podem ser feitas no chat comum. Executar testes exige ferramentas e acesso ao ambiente apropriado; esta divisão não garante ausência de consumo de cota. Resultados funcionais anteriores permanecem históricos e a validação final segue pendente em [PENDENCIAS-HVB.md](PENDENCIAS-HVB.md).
