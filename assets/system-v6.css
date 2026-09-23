@@ -23,3 +23,20 @@
 .operational-contract summary{cursor:pointer;font-weight:900;color:var(--blue)}
 .operational-contract code{font-size:.72rem}
 @media(max-width:760px){.operational-head{flex-direction:column}.operational-grid{grid-template-columns:1fr}.operational-grid .wide{grid-column:auto}.operational-actions{padding:1rem}}
+
+.operational-fieldset{border:0;padding:0;margin:0;display:grid;gap:1rem;min-width:0}
+.operational-fieldset:disabled{opacity:.78}
+.operational-feedback{min-height:1.3rem;font-size:.8rem;color:var(--muted);font-weight:800}
+.operational-feedback.error{color:var(--red)}
+.operational-feedback.success{color:var(--green)}
+.operational-check{display:flex!important;grid-template-columns:auto 1fr!important;align-items:flex-start;gap:.6rem!important;padding:.75rem .85rem;border:1px solid var(--line);border-radius:10px;background:#fbfdff}
+.operational-check input{width:auto!important;margin:.15rem 0 0}
+.operational-assignment-list{display:grid;gap:.55rem}
+.operational-assignment{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;padding:.8rem;border:1px solid #e7edf4;border-radius:10px;background:#fbfdff}
+.operational-assignment>div{display:grid;gap:.18rem;min-width:0}
+.operational-assignment strong{font-size:.82rem;color:#263955}
+.operational-assignment span,.operational-assignment small{font-size:.72rem;color:var(--muted);line-height:1.4}
+.operational-assignment small{overflow-wrap:anywhere}
+.operational-purchase{display:grid;gap:.8rem;padding:.85rem;border:1px solid #dfe8f2;border-radius:11px;background:#f8fbfe}
+.operational-purchase[hidden]{display:none!important}
+@media(max-width:760px){.operational-assignment{flex-direction:column}.operational-assignment .secondary-btn{width:max-content}}
