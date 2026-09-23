@@ -1,10 +1,10 @@
 {
   "data": "2026-09-23",
   "branch": "hvb-sistema-dev",
-  "code_sha": "03786838687e278453d482711b5d1cb9258c545b",
+  "code_sha": "607379bf588a52a916e4bac035b50bdc3bb85257",
   "escopo": "frontend/sessao; backend, banco e Terminal preservados",
   "testes": {
-    "execucao": "3 execucoes separadas: frontend-operational (4/4), frontend-server (3/3) e web-session (5/5)",
+    "execucao": "frontend-operational (4/4), frontend-server (3/3) e web-session (5/5), reexecutados apos o ajuste de preservacao do estado dos formularios",
     "ambiente": "harness local isolado em Node v22.16.0, sem PostgreSQL e sem Terminal; o projeto declara Node 24",
     "total": 12,
     "aprovados": 12,
@@ -27,8 +27,9 @@
   "verificacao_exata_no_branch": {
     "blobs": {
       "assets/system-v9-contract.js": "e68becb1498a6f2149ad4c673bd9770d95fe156f",
-      "assets/system-v9.js": "d7621188b49a5d955bef693031674f910da501ac",
-      "index.html": "35341b58b0c0826748eefef3ed3c1e21ae585773"
+      "assets/system-v9.js": "e652f6187318294a7a983755562303f88c103b64",
+      "index.html": "35341b58b0c0826748eefef3ed3c1e21ae585773",
+      "tests/frontend-operational.test.mjs": "fd4df504f2462544ae689d6adeb3f76061ad83f6"
     },
     "sintaxe": [
       "system-v9-contract.js",
@@ -42,7 +43,9 @@
       "nao referencia rota /terminal/",
       "administracao exige acesso:administrar global conforme backend",
       "catalogo de estoque reconhece estoque:ler global conforme contrato atual",
-      "index carrega system-v9.js e system-v6.css"
+      "index carrega system-v9.js e system-v6.css",
+      "nao usa listener global de click para rerenderizar formularios",
+      "rerender operacional reage somente a navegacao [data-module]/[data-go]"
     ]
   },
   "limitacoes": [
