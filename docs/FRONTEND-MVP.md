@@ -1,5 +1,11 @@
 # Frontend MVP — HVB Sistema
 
+## Integração com C18 — 22/09/2026
+
+Frontend MVP 8 remoto preservado e integrado ao backend C8–C18. A estratégia atual está em [PLANO-ENTREGA-SEMANA.md](PLANO-ENTREGA-SEMANA.md): reaproveitar as telas existentes e priorizar uma jornada de piloto; isso não homologa cargos nem autoriza dados reais.
+
+O servidor local agora serve apenas index/robots e assets públicos, bloqueando .env, .local, fontes do servidor e caminhos arbitrários. O proxy preserva autorização/status da API, limita o corpo e usa timeout. Três testes de regressão passam com `node --test tests/frontend-server.test.mjs`. A [verificação HTTP integrada](evidencias/integracao-piloto-http.json) confirmou assets, identidade DEV, consultas da jornada e rotas Terminal v1 com API/PostgreSQL reais locais. Não substitui validação visual no navegador nem aprovação da jornada de escrita.
+
 ## Objetivo
 
 Construir a camada visual do **HVB Sistema** sem antecipar regras operacionais ainda pendentes de validação hospitalar.

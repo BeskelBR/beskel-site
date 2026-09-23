@@ -1,0 +1,128 @@
+{
+  "executed_at": "2026-09-22T20:22:45.061Z",
+  "scope": "Interface existente -> proxy loopback -> API C18 -> PostgreSQL DEV; somente leitura sintética",
+  "browser_visual_verification": false,
+  "results": [
+    {
+      "path": "assets/system.css",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "assets/system-v2.css",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "assets/system-v3.css",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "assets/system-v4.css",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "assets/system-v5.css",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "assets/system-v2.js",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "assets/system-v3.js",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "assets/system-v4.js",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "assets/system-v5.js",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "assets/system-v6.js",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "assets/system-v7.js",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "assets/system-v8.js",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/health",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/ready",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/v1/me",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/v1/organizacao",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/v1/unidades?limit=1",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/v1/pacientes?limit=1",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/v1/episodios?unidade_id=:unit&limit=1",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/v1/prontuario/evolucoes?unidade_id=:unit&limit=1",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/v1/estoque/posicoes?unidade_id=:unit&limit=1",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/v1/terminal/v1/withdrawal-orders?unidade_id=:unit&limit=1",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/.env",
+      "status": 404,
+      "expected": 404
+    },
+    {
+      "path": "/.local/dev-access.json",
+      "status": 404,
+      "expected": 404
+    }
+  ],
+  "passed": true
+}
