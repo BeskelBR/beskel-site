@@ -152,12 +152,23 @@ Este arquivo é o primeiro commit documental da branch de continuidade.
 
 Não declarar esses itens como PASS até execução real.
 
+### Tentativa de execução fora do Codex
+
+Foi verificado o runtime isolado disponível neste chat:
+- Node disponível: sim;
+- Git disponível: sim;
+- `pg` disponível: não;
+- `psql` disponível: não;
+- acesso DNS/rede externa do container: indisponível (teste de resolução para GitHub falhou antes de conexão).
+
+Resultado: handshake TLS e E2E pelo processo Node permanecem `NÃO EXECUTADO — limitação do executor deste chat`, e não `FAIL` do Sistema/Supabase.
+
 ## Regra de registro daqui em diante
 
 Para cada novo delta realizado enquanto o Codex estiver indisponível, atualizar este documento com:
 1. arquivos alterados;
 2. motivo;
-3. commit SHA da branch de continuidade;
+3. mudança registrada em commit próprio na branch de continuidade; o histórico Git da branch é a fonte autoritativa dos SHAs e será extraído integralmente no handoff ao Codex;
 4. testes executados e resultado;
 5. alterações de banco/configuração;
 6. pendências;
