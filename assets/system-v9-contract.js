@@ -51,8 +51,12 @@ export const operationalFlows = Object.freeze({
   }),
 });
 
+export function globalPermissions(context) {
+  return new Set(context?.permissoes_globais || []);
+}
+
 export function permissionsFor(context, unitId) {
-  const permissions = new Set(context?.permissoes_globais || []);
+  const permissions = globalPermissions(context);
   const unit = (context?.unidades || []).find((item) => item.id === unitId);
   for (const permission of unit?.permissoes || []) permissions.add(permission);
   return permissions;
@@ -60,6 +64,11 @@ export function permissionsFor(context, unitId) {
 
 export function canUse(context, unitId, requiredPermissions) {
   const permissions = permissionsFor(context, unitId);
+  return requiredPermissions.every((permission) => permissions.has(permission));
+}
+
+export function canUseGlobal(context, requiredPermissions) {
+  const permissions = globalPermissions(context);
   return requiredPermissions.every((permission) => permissions.has(permission));
 }
 
