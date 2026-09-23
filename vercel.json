@@ -39,6 +39,46 @@
   ],
   "rewrites": [
     {
+      "source": "/sobre",
+      "destination": "/pages/sobre.html"
+    },
+    {
+      "source": "/sobre/",
+      "destination": "/pages/sobre.html"
+    },
+    {
+      "source": "/servicos",
+      "destination": "/pages/servicos.html"
+    },
+    {
+      "source": "/servicos/",
+      "destination": "/pages/servicos.html"
+    },
+    {
+      "source": "/portfolio",
+      "destination": "/pages/portfolio.html"
+    },
+    {
+      "source": "/portfolio/",
+      "destination": "/pages/portfolio.html"
+    },
+    {
+      "source": "/contato",
+      "destination": "/pages/contato.html"
+    },
+    {
+      "source": "/contato/",
+      "destination": "/pages/contato.html"
+    },
+    {
+      "source": "/privacidade",
+      "destination": "/pages/privacidade.html"
+    },
+    {
+      "source": "/privacidade/",
+      "destination": "/pages/privacidade.html"
+    },
+    {
       "source": "/case-hvb",
       "destination": "/pages/case-hvb.html"
     },
