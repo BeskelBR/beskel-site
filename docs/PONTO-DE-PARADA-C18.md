@@ -1,5 +1,7 @@
 # Ponto de parada — C18 Terminal v1
 
+Atualização de continuidade em 22/09/2026: a situação Git abaixo é histórica e foi superada. C8–C18 e o frontend MVP 8 estão publicados em `hvb-sistema-dev`, SHA confirmado `bea6df2c8c1d4d6f741e965fe6a1726c62bda4fa`. Retomar pelo [plano de entrega da semana](PLANO-ENTREGA-SEMANA.md), prioridade 3; preservar o registro original abaixo.
+
 Data: 22/09/2026. Workspace SISTEMA; branch `hvb-sistema-dev`; versão 0.27.0.
 
 Delta N1 backend concluído no recorte documentado: migrations 073–076 aplicadas DEV/TEST e verificadas por hash; 78 testes pontuais aprovados; OpenAPI 451 operações/288 caminhos; 220 tabelas/77 views/128 permissões. Evidências e relatórios C18 estão em docs. Não existe adaptador biométrico real nem cliente novo em outra pasta/branch.

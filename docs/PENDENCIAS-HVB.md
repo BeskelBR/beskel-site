@@ -1,5 +1,7 @@
 # Pendências — HVB Sistema M0/M1 + M2 + M3 + M4 + M5 + M6A + M6B + M6C
 
+Atualização de publicação em 22/09/2026: C8–C18 e o frontend MVP 8 foram publicados em `hvb-sistema-dev`, SHA remoto confirmado `bea6df2c8c1d4d6f741e965fe6a1726c62bda4fa`. As menções anteriores a lotes locais/bloqueio Git são registros históricos superados, não pendências ativas. Evidência e baixa específica em [PENDENCIAS-RESOLVIDAS-C18.md](PENDENCIAS-RESOLVIDAS-C18.md). Validações operacionais continuam pendentes. A sequência vigente está no [plano da semana](PLANO-ENTREGA-SEMANA.md).
+
 M0/M1 foi limitado à fundação local com dados fictícios. As decisões abaixo não bloqueiam o desenvolvimento independente já validado.
 
 | Item | Classificação | Quando precisa fechar |
@@ -509,8 +511,8 @@ O usuário esclareceu expressamente que o congelamento preserva baseline/histór
 | Infraestrutura real de identidade/controlador | Backend e vínculo de credencial entregues; servidor sem adaptador biométrico falha fechado | Escolher/homologar adaptador e provisionamento, sensores, atestação, renovação e operação do kiosk |
 | Offline/Edge e emergências | Nenhuma autorização offline permissiva; envelopes e replay preservam fatos; presença não expira destrutivamente | Decisão humana sobre continuidade física segura, alimentação/rede, saída de emergência e supervisão |
 | Evolução de configuração e correções logísticas | Configurações/fatos imutáveis no recorte; correção de último item antes da saída entregue | Revisões de política/provisionamento e compensação após sessão encerrada, incluindo retorno físico e tutor |
-| Interface e consumidores | Contrato/OpenAPI/eventos prontos no backend; nenhuma outra pasta/branch foi alterada | Implementar e homologar clientes em autorização própria, substituindo fluxo C5/C14 sem apagar histórico |
-| Publicação e validação geral C8–C18 | 78 testes pontuais C18; 35 operações adicionadas sem mudar/remover as anteriores; lotes locais | Resolver bloqueio Git adiado; instalação vazia, carga, suíte geral e homologação continuam na fase prevista |
-| Continuidade do núcleo | Delta Terminal v1 backend encerrado | Retomar inventário restante do sistema; não declarar todo o núcleo concluído nem reabrir faltas técnicas já comprovadamente resolvidas |
+| Interface e consumidores | Frontend administrativo MVP 8 integrado; proxy e consultas verificados em HTTP; contrato Terminal publicado | Completar jornada de escrita e validar navegador no Sistema; clientes físicos continuam em autorização própria |
+| Validação geral C8–C18 | Publicação resolvida; 78 testes pontuais C18 e 35 operações adicionadas preservando anteriores | Instalação vazia, carga, suíte geral e homologação continuam pendentes; priorizar verificação integrada da jornada da semana |
+| Continuidade do núcleo | Delta Terminal v1 backend encerrado e publicado | Prioridade atual: jornada utilizável do plano da semana; não declarar todo o núcleo concluído nem reabrir faltas técnicas comprovadamente resolvidas |
 
 Nenhuma decisão de hardware, infraestrutura paga, Supabase, Vercel, Cloudflare, migração real ou publicação foi tomada por inferência.

@@ -22,6 +22,14 @@ Dados e perfis continuam sintéticos até autorização de uso real. Escritas de
 
 Primeiro resolver impedimentos da jornada. Correções clínicas adicionais, fusões, transferências entre contextos, integrações bancárias, fiscal, hardware, offline permissivo e demais ampliações permanecem no backlog. Não eliminar pendências nem reinterpretar baselines para caber no prazo.
 
+## Retomada confirmada — 22/09/2026
+
+Prioridade 1 concluída: C8–C18 consolidados em `50200dd`, frontend remoto MVP 8 preservado no merge `1a1a404` e correção do servidor/proxy em `bea6df2`. O push para `hvb-sistema-dev` foi confirmado por `git ls-remote`: `bea6df2c8c1d4d6f741e965fe6a1726c62bda4fa`. O bloqueio anterior de publicação está resolvido; nenhuma outra branch foi alterada.
+
+Prioridade 2 verificada no nível HTTP: três testes do servidor, TypeScript e 24 verificações com API/PostgreSQL locais passaram. Evidência: [integração HTTP](evidencias/integracao-piloto-http.json). A jornada visual no navegador ainda precisa de validação; consultas aprovadas não comprovam a jornada de escrita.
+
+Próxima frente: prioridade 3, reaproveitando o frontend existente para localizar/cadastrar paciente, abrir episódio e registrar/consultar atendimento. Autenticação operacional, ambiente hospedado e validação no navegador permanecem abertos nas prioridades 3/4. Não refazer C18 nem ampliar o backend sem uma falta concreta da jornada.
+
 ## Uso de cota e coordenação
 
 - A cota disponível será dedicada a este projeto, conforme o usuário. Reservar aproximadamente 25% da disponibilidade restante para integração, regressões e correções finais; isso é uma regra de planejamento, não limite automático da plataforma.

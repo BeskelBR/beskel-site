@@ -12,3 +12,9 @@ Retiradas da descrição ativa somente as faltas técnicas comprovadamente resol
 | Efetivação parcial/lease da reserva sem mecanismo no Terminal | Tarefa parcial usa quantidade de uma oferta derivada do servidor; confirmação substitui reserva vencida sob lock sem reescrever o prazo | Expiração automática e efetivação parcial genérica fora do Terminal continuam no M2 |
 
 Evidências: [verificação com 78 testes](evidencias/checks-c18-focused.json), [integridade](evidencias/c18-integridade.json), [ADR 0028](adr/0028-terminal-v1-canonico.md). A verificação usa dados sintéticos, não valida hardware nem política hospitalar.
+
+## Publicação desbloqueada — 22/09/2026
+
+Descrição anterior: C8–C18 apenas locais, sem commit/push por bloqueio de revisão automática. Parte resolvida: commit consolidado `50200dd`, merge do frontend remoto `1a1a404` e correção/prova HTTP `bea6df2`, publicados exclusivamente em `hvb-sistema-dev`. `git ls-remote origin refs/heads/hvb-sistema-dev` confirmou `bea6df2c8c1d4d6f741e965fe6a1726c62bda4fa`, igual ao HEAD local da publicação. Nenhum force push foi usado.
+
+A correção do servidor impede acesso HTTP aos arquivos privados; três testes de regressão e [24 verificações HTTP](evidencias/integracao-piloto-http.json) passaram. Não encerra autenticação operacional, jornada de escrita, validação visual, instalação vazia, carga, homologação nem configuração de ambiente externo. Relatórios anteriores permanecem como evidência do estado à época.
