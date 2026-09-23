@@ -1,0 +1,83 @@
+{
+  "date": "2026-09-23",
+  "baseHead": "31c931d173095b6e9c82dc9e567f0ba5e3b55742",
+  "branch": "hvb-sistema-dev",
+  "initialWorkingTree": "clean",
+  "files": [
+    {
+      "file": "src/domain/operational-registration.ts",
+      "sha256": "614211e43c71cfe7ddfb458c3b28ecbe5ba9fd0cfe298d8c17b5f98ef2f8c156"
+    },
+    {
+      "file": "src/api/app.ts",
+      "sha256": "0a1f85fa79fbeb97b28b2896e8a4a48320a7a792d3acb629eaffc92a8286a07c"
+    },
+    {
+      "file": "tests/operational-registration.test.ts",
+      "sha256": "30c00a16fe6725e9a723a0cd8695cfe73f9f9739c1cc0ceda3cbccac673c92a2"
+    },
+    {
+      "file": "openapi/hvb-sistema.json",
+      "sha256": "8ddb2a13d569752aa51e4e719e6f4771a4db93b5656ab3b6ab402da76a4a0266"
+    },
+    {
+      "file": "docs/CONTRATOS-BACKEND-MVP11.md",
+      "sha256": "ebd5b55490f118e7eb38b2762874da9d56a15c5e4412449c76547345b9ba93e4"
+    },
+    {
+      "file": "docs/PLANO-ENTREGA-SEMANA.md",
+      "sha256": "a548668dc5324682567ec2407d5731aba4f6f755dbc9d477757630392096421c"
+    },
+    {
+      "file": "docs/PENDENCIAS-HVB.md",
+      "sha256": "53ae218f99e1bba123a6d479c56440fff7b7ccf77cf2d4fc2653a92c57402cf6"
+    },
+    {
+      "file": "docs/COORDENACAO-CHATS.md",
+      "sha256": "638b56c9cc415656ba36e5ae19c18ca09a9f7ada6bb24de7684e9244e2e3bd9a"
+    }
+  ],
+  "tests": {
+    "environment": "PostgreSQL local hvb_sistema_test, dados sintéticos",
+    "command": "node --env-file=.env --test --test-concurrency=1 tests/operational-registration.test.ts tests/integration.test.ts tests/inventory.test.ts tests/purchases.test.ts",
+    "status": "PASS",
+    "passed": 46,
+    "failed": 0,
+    "initialTestCorrection": "Quantidade zero retorna 400 no serviço existente; expectativa inicial 409 corrigida."
+  },
+  "checks": {
+    "typescript": "PASS",
+    "lint": "PASS",
+    "diff": "PASS",
+    "documentationLinks": "PASS",
+    "legacyOpenApiPaths": 289,
+    "legacyChange": "Apenas q opcional no GET /v1/pacientes; os demais contratos anteriores idênticos",
+    "newPaths": [
+      "/v1/papeis/{id}/permissoes",
+      "/v1/usuarios/onboarding",
+      "/v1/estoque/entradas-completas"
+    ],
+    "securitySchemes": "PRESERVADOS",
+    "protectedPathsUnchanged": [
+      "assets",
+      "index.html",
+      "scripts/frontend.mjs",
+      "scripts/web-session.mjs",
+      "migrations",
+      "src/domain/terminal",
+      "src/domain/terminal-access",
+      "src/domain/terminal-v1",
+      "src/persistence/database.ts"
+    ]
+  },
+  "limitations": {
+    "humanIdentity": "PROPOSTA de interface privada; NÃO IMPLEMENTADA",
+    "frontendIntegration": "PENDENTE no chat responsável",
+    "remoteSupabase": "NÃO EXECUTADO; configuração de runtime pendente conforme delta anterior",
+    "browser": "NÃO EXECUTADO",
+    "existingLot": "Fluxos antigos preservados; entrada completa é lote novo",
+    "catalog": "Global na organização; sem concessão implícita a operadores unitários"
+  },
+  "databaseDDL": "NENHUM",
+  "terminal": "SEM ALTERAÇÃO — CONGELADO"
+}

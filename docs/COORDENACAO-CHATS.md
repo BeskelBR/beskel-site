@@ -30,13 +30,15 @@ Não foram consultados nem modificados recursos Supabase nesta etapa. Configura�
 
 ## Pedidos prontos para encaminhar
 
+Retorno do frontend também recebido: contratos implementados e pedido atualizado de integração em [CONTRATOS-BACKEND-MVP11.md](CONTRATOS-BACKEND-MVP11.md). Os pedidos iniciais abaixo permanecem como histórico; não solicitar novamente inventários já devolvidos.
+
 ### Chat do banco/Supabase — pedido inicial respondido
 
 ```text
 HVB Sistema — alinhar contrato com o backend, sem alterar frontend nem Terminal congelado. Confira o estado atual e compare com hvb-sistema-dev, referência dbf59f20fb0b8b009191b76b836e2ec8b6b58fcb, reaproveitando o que já concluiu. Informe, sem segredos: migrations efetivamente aplicadas e divergências; disponibilidade do schema hvb, papel hvb_app, função hvb.autenticar e isolamento por hvb.org transacional; modalidade de conexão/pool, TLS e requisitos do driver pg. Diferencie configuração constatada de proposta. Esclareça se seu escopo inclui autenticação humana ou apenas banco; se houver provedor definido, descreva o vínculo de identidade com organização/usuário/permissões do HVB e a revogação, sem substituir RBAC/RLS implicitamente. Este pedido não amplia autorizações de migração ou provisionamento já existentes no seu chat. Os testes do seu bloco já estão autorizados: execute os necessários, reaproveite evidências válidas e informe ambiente, escopo, resultados e SHA quando aplicável. Devolva contrato curto, arquivos/SHA e ações que cabem ao backend. Não envie senhas, tokens nem URLs com credenciais.
 ```
 
-### Chat do frontend
+### Chat do frontend — pedido inicial respondido
 
 ```text
 HVB Sistema — continue sua interface preservando backend, banco e Terminal congelado. Confira working tree/branch e reaproveite MVP 10 de hvb-sistema-dev, referência dbf59f20fb0b8b009191b76b836e2ec8b6b58fcb, sem sobrescrever suas alterações posteriores. Considere /session como contrato do servidor de interface e /v1/me/contexto como API para identidade/unidades/permissões. A sessão/proxy atual depende de Node na mesma origem e só suporta HTTP loopback; assets estáticos isolados não entregam esse login. Informe o destino proposto do frontend/sessão, estratégia de login e endpoints realmente ausentes ou incompatíveis, com exemplo sintético mínimo de entrada/saída esperada. Sessão web e seu proxy ficam sob sua responsabilidade; não altere contratos do backend nem realize deploy por inferência. Os testes do seu bloco já estão autorizados: execute os necessários, reaproveite evidências válidas e informe ambiente, escopo, resultados e SHA. Devolva arquivos/SHA, dependências do backend e limitações.
@@ -54,7 +56,7 @@ Terminal não recebe tarefa neste momento. Se aparecer incompatibilidade, regist
 
 O usuário encaminha os pedidos e traz as respostas; este chat não envia mensagens aos demais. Cada retorno deve conter: bloco, branch/SHA ou diff ainda local, contrato alterado, integridade conferida, pendências e ação necessária de outro responsável. Não compartilhar credenciais nem dados reais.
 
-Com os retornos, este chat implementa somente a adaptação necessária do backend, preserva contratos legados e registra supersessão quando aplicável. O retorno do banco já originou o delta de conexão; aguarda-se o retorno do frontend. Não inventar mapeamento de identidade, escolher hospedagem nem reabrir módulos completos para gerar atividade. Os testes específicos do backend foram expressamente autorizados pelo usuário nesse delta.
+Com os retornos, este chat implementa somente a adaptação necessária do backend, preserva contratos legados e registra supersessão quando aplicável. O retorno do banco originou o delta de conexão; o retorno do frontend originou os contratos backend MVP 11. Aguardar evidências de integração e configuração privada de runtime, sem repetir inventários. Não inventar mapeamento de identidade, escolher hospedagem nem reabrir módulos completos para gerar atividade. Os testes pertinentes do backend foram executados no recorte autorizado.
 
 A cada mudança deste chat executar integridade pertinente (tipos, sintaxe/lint dos arquivos afetados, diff e consistência de contrato). Os outros chats executam os testes já autorizados em seus blocos e devolvem evidências; evitar duplicação. Não usar `scripts/check.mjs` como se fosse apenas verificação estática: ele agrega outras etapas. Documentação sem alteração de código requer conferir links/diff, não repetir a suíte.
 

@@ -1,5 +1,11 @@
 import { terminalV1Actions } from "../domain/terminal-v1/service.ts";
 import { registerWebContext } from "../domain/web-context.ts";
+import {
+  operationalInputs,
+  operationalActions,
+  operationalResponses,
+  registerOperationalReads,
+} from "../domain/operational-registration.ts";
 import { terminalV1Inputs } from "../domain/terminal-v1/schemas.ts";
 import { registerTerminalV1 } from "../domain/terminal-v1/routes.ts";
 import type { V1EvidenceAdapter } from "../domain/terminal-v1/evidence.ts";
@@ -306,6 +312,7 @@ export async function buildApp(
     });
   }
   registerWebContext(app, authenticated, errors);
+  registerOperationalReads(app, authenticated, errors);
   registerPortal(app, db, errors);
   registerMedicalRecord(app, authenticated, errors);
   registerMedicalComplements(app, authenticated, errors);
@@ -413,6 +420,7 @@ export async function buildApp(
     ...medicalComplementInputs,
     ...linksInputs,
     ...registryInputs,
+    ...operationalInputs,
   };
   for (const action of [
     ...actions,
@@ -442,6 +450,7 @@ export async function buildApp(
     ...medicalComplementActions,
     ...linksActions,
     ...registryActions,
+    ...operationalActions,
   ]) {
     app.post(
       `/v1${action.path}`,
@@ -478,6 +487,7 @@ export async function buildApp(
                 ordem_id: uuid,
                 ordem_versao_id: uuid,
                 agendamento_versao_id: uuid,
+                ...operationalResponses[action.path],
                 evolucao_versao_id: uuid,
                 resultado: {
                   type: "string",
@@ -673,6 +683,7 @@ export async function buildApp(
       {
         limit: { type: "integer", minimum: 1, maximum: 100, default: 25 },
         cursor: uuid,
+        ...(list.table === "paciente" ? { q: text } : {}),
         ...(list.unit ? { unidade_id: uuid } : {}),
         ...(stockPosition
           ? {
@@ -843,6 +854,12 @@ export async function buildApp(
             q.limit + 1,
           ];
           const where = ["organizacao_id=$1", "($2::uuid IS NULL OR id>$2)"];
+          if (list.table === "paciente" && typeof q.q === "string") {
+            values.push(q.q.trim());
+            where.push(
+              `(strpos(lower(nome),lower($${values.length}))>0 OR id::text=lower($${values.length}))`,
+            );
+          }
           if (list.unit) {
             values.push(q.unidade_id);
             where.push(`unidade_id=$${values.length}`);
