@@ -1,5 +1,6 @@
 import {
   canUse,
+  canUseGlobal,
   operationalFlows,
   permissionsFor,
   resolveUnit,
@@ -138,9 +139,9 @@ if (detailView && detailHead) {
     const ctx = await ownContext();
     if (version !== renderVersion || activeModule() !== "administracao") return;
     const unitId = resolveUnit(ctx, localStorage.getItem("hvb-unit-id"));
-    if (!canUse(ctx, unitId, operationalFlows.employee.requiredPermissions)) {
+    if (!canUseGlobal(ctx, operationalFlows.employee.requiredPermissions)) {
       disabledMessage(
-        "Seu contexto atual não possui a permissão acesso:administrar.",
+        "Seu contexto atual não possui a permissão global acesso:administrar exigida pelos contratos de usuários, papéis e atribuições.",
       );
       return;
     }
@@ -228,11 +229,16 @@ if (detailView && detailHead) {
     if (version !== renderVersion || activeModule() !== "estoque") return;
     const unitId = resolveUnit(ctx, localStorage.getItem("hvb-unit-id"));
     const required = operationalFlows.stockEntry.requiredPermissions;
-    if (!unitId || !canUse(ctx, unitId, required)) {
-      const present = permissionsFor(ctx, unitId);
-      const missing = required.filter((permission) => !present.has(permission));
+    const present = permissionsFor(ctx, unitId);
+    const missing = required.filter((permission) => !present.has(permission));
+    const catalogReadable = canUseGlobal(ctx, ["estoque:ler"]);
+    if (!unitId || missing.length || !catalogReadable) {
+      const details = [
+        ...missing,
+        ...(!catalogReadable ? ["estoque:ler (global, exigido hoje pelas listas de catálogo)"] : []),
+      ];
       disabledMessage(
-        `A unidade atual não possui todas as permissões necessárias para preparar uma entrada completa: ${missing.join(", ") || "unidade não identificada"}.`,
+        `O contexto atual não satisfaz o contrato necessário para preparar uma entrada completa: ${details.join(", ") || "unidade não identificada"}.`,
       );
       return;
     }
