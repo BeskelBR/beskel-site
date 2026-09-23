@@ -2,6 +2,8 @@
 
 23/09/2026. Base local `ca16d43b6b2d72f78ed66236b28278ea59acc479`, branch `hvb-sistema-dev`, working tree inicialmente limpo. Delta solicitado pelo usuário após retorno do chat do banco; inclui autorização explícita para testes do backend. Não houve trabalho local anterior a sobrescrever.
 
+Commit próprio do delta: `4f9d237`. Na publicação foi detectado avanço remoto do frontend até `b51889d99e7aac8c15853da8bfd872f8d75f7b50` (MVP 11). Essa entrega foi integrada por merge sem conflitos, preservando integralmente os arquivos do responsável. Nenhuma correção ou teste do frontend foi executado por este chat. Hashes deste relatório e do manifesto foram atualizados após registrar a integração; hashes do código testado permaneceram iguais.
+
 ## Resultado e limites
 
 O backend mantém PostgreSQL local como padrão e aceita configuração explícita de PostgreSQL remoto DEV com TLS validado. `/ready` verifica herança efetiva de `hvb_app`, capacidades e migration 076; não exige nome literal de login. `search_path`, timeouts e `hvb.org` são locais à transação.

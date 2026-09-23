@@ -47,7 +47,7 @@
     {
       "file": "docs/DELTA-BACKEND-POSTGRES-DEV.md",
       "reason": "Contrato declarativo, evidências e pedido ao responsável pelo banco",
-      "sha256": "ff579391c9c090690a3a748522716c15ab141d6b113b5cbd73c02d5608387f02"
+      "sha256": "f1c589328a4ee355bed0509c83923821595f14017eaab9a25d8bb4dd2671ce75"
     }
   ],
   "hashScope": "SHA-256 dos bytes no workspace Windows; este manifesto não inclui seu próprio hash (fornecido na entrega).",
@@ -114,5 +114,13 @@
     "CA testada somente como configuração, sem handshake",
     "Papel herdeiro sintético NOLOGIN com SET LOCAL ROLE, não novo login remoto",
     "Suite de integração usa fixtures e setup já existente no banco TEST local"
-  ]
+  ],
+  "gitIntegration": {
+    "deltaCommit": "4f9d237b76734b471ce9ea4f234c831e755bac98",
+    "frontendRemoteCommit": "b51889d99e7aac8c15853da8bfd872f8d75f7b50",
+    "method": "merge sem conflitos; sem reescrever commits",
+    "frontendIdenticalToOwner": true,
+    "frozenIdenticalToBase": true,
+    "priorLocalUncommittedChanges": false
+  }
 }

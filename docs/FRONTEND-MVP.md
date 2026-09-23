@@ -1,3 +1,150 @@
+# MVP 11 — cadastros operacionais preparados — 23/09/2026
+
+Continuidade aditiva do MVP 10. Backend, migrations/banco e Terminal permanecem congelados nesta etapa. A interface passa a explicitar dois fluxos solicitados pelo HVB: **cadastro de funcionário com autorizações** e **entrada de estoque**, usando o contexto de identidade/unidades/permissões já fornecido por `GET /v1/me/contexto`. Nenhuma gravação nova foi improvisada no navegador quando o contrato atual exige múltiplas operações independentes.
+
+## Destino da interface e da sessão
+
+- Hoje, validado somente em loopback: `http://127.0.0.1:3200`, com API em `http://127.0.0.1:3100`.
+- Destino DEV proposto: `https://hvb-sistema-dev.beskel.com.br`.
+- Destino futuro: `https://sistema.hvb.com.br`.
+- Em ambos, a interface e `/session` devem permanecer na **mesma origem HTTPS**. O navegador fala com o servidor Node da interface; o Bearer da API fica no servidor e não é devolvido ao browser.
+- A API pode permanecer privada atrás desse servidor/BFF. Hospedar somente os assets estáticos não satisfaz o contrato do MVP 10.
+- O código atual continua deliberadamente restrito a HTTP/loopback. TLS, cookie `Secure`, host externo e armazenamento compartilhado de sessão ainda não foram habilitados nem implantados.
+
+## Estratégia de login
+
+O contrato do navegador continua sendo `POST/GET/DELETE /session` no servidor da interface. No DEV local, `POST /session` ainda recebe a credencial opaca temporária de 64 caracteres uma única vez; o servidor valida a identidade na API e cria cookie HttpOnly/SameSite. Isso é transição de desenvolvimento, não login humano definitivo.
+
+Para ambiente hospedado, a interface deve conservar o mesmo padrão BFF: credencial humana é entregue ao servidor de interface por HTTPS, o servidor negocia/recebe uma credencial curta da API ou do provedor de identidade aprovado e mantém o segredo fora do navegador. Não implementar senha, recuperação, MFA ou provedor de identidade no frontend por inferência.
+
+## Novo recorte visual
+
+`assets/system-v9.js` adiciona, sem substituir os módulos existentes:
+
+1. **Administração → Cadastro de funcionário e autorizações**
+   - nome;
+   - login;
+   - papel/perfil;
+   - unidade;
+   - autorização derivada do papel e do escopo devolvido pela API.
+   - A gravação permanece bloqueada até existir contrato seguro para onboarding completo.
+
+2. **Estoque → Registrar entrada de estoque**
+   - unidade;
+   - produto/apresentação;
+   - fabricante e código do lote;
+   - situação/data de validade;
+   - localização física;
+   - quantidade em apresentações;
+   - custo base opcional;
+   - data/hora e motivo.
+   - Preserva `produto → lote → ocupação física → coordenada`; não cria coordenada fixa por produto e não chama o Terminal.
+
+Os controles consultam o próprio contexto e não expõem ações quando faltam permissões relevantes.
+
+## Gaps confirmados do backend
+
+### Funcionário / autorizações
+
+Existem separadamente `POST /v1/usuarios`, `POST /v1/atribuicoes`, `POST /v1/credenciais` e `GET /v1/papeis`. O backend também preserva revisão/revogação de atribuições. Porém:
+
+- os contratos de usuários/papéis/atribuições exigem `acesso:administrar` em escopo global; a interface agora respeita esse escopo e não trata uma permissão apenas de unidade como equivalente;
+- a listagem de papéis não devolve as permissões que compõem o papel, impedindo a interface de mostrar exatamente o que será autorizado;
+- não existe um comando transacional de onboarding que crie usuário + uma ou mais atribuições como uma única intenção;
+- não existe login humano operacional; a credencial DEV não deve virar senha do colaborador.
+
+Exemplo sintético de contrato desejado, com nome de rota a decidir pelo backend:
+
+```json
+{
+  "nome": "Funcionário Fictício",
+  "login": "funcionario.dev",
+  "atribuicoes": [
+    {
+      "papel_id": "11111111-1111-4111-8111-111111111111",
+      "unidade_id": "22222222-2222-4222-8222-222222222222"
+    }
+  ]
+}
+```
+
+Resposta mínima esperada:
+
+```json
+{
+  "usuario_id": "33333333-3333-4333-8333-333333333333",
+  "atribuicao_ids": ["44444444-4444-4444-8444-444444444444"],
+  "estado": "confirmado",
+  "repetido": false
+}
+```
+
+### Entrada de estoque
+
+`POST /v1/estoque/entradas` é compatível somente quando a posição já existe: recebe `posicao_id`, quantidade, instante e motivo. Lote e posição são criados por comandos separados. `POST /v1/compras/recebimentos` já integra recebimento de pedido ao ledger de estoque, mas também exige posições previamente existentes. As listas organizacionais de produto/apresentação/lote hoje chamam `authorize(..., estoque:ler)` sem `unidade_id`, portanto exigem `estoque:ler` global; a interface não amplia silenciosamente uma permissão de unidade para consultar esse catálogo.
+
+Para o formulário operacional de recebimento de um lote novo, falta um comando transacional que resolva/reutilize lote, custódia hospitalar e ocupação/posição e registre a entrada na mesma intenção idempotente. Quando houver pedido de compra, o contrato deve reaproveitar o recebimento existente em vez de duplicá-lo.
+
+Exemplo sintético mínimo:
+
+```json
+{
+  "unidade_id": "22222222-2222-4222-8222-222222222222",
+  "apresentacao_id": "55555555-5555-4555-8555-555555555555",
+  "lote": {
+    "fabricante": "Fabricante Fictício",
+    "codigo": "LOTE-DEV-001",
+    "situacao_validade": "conhecida",
+    "validade": "2028-10-31"
+  },
+  "local_id": "66666666-6666-4666-8666-666666666666",
+  "quantidade_apresentacoes": "20",
+  "ocorrido_em": "2026-09-23T15:00:00-03:00",
+  "motivo": "Recebimento sintético"
+}
+```
+
+Resposta mínima esperada:
+
+```json
+{
+  "lote_id": "77777777-7777-4777-8777-777777777777",
+  "posicao_id": "88888888-8888-4888-8888-888888888888",
+  "transacao_id": "99999999-9999-4999-8999-999999999999",
+  "estado": "confirmado",
+  "repetido": false
+}
+```
+
+### Busca de pacientes
+
+A busca rápida existente filtra apenas os pacientes já carregados pela paginação. Para operação real, falta busca server-side por nome/identificador, preservando RBAC e paginação.
+
+Exemplo compatível desejado:
+
+```text
+GET /v1/pacientes?q=luna&limit=25
+```
+
+Resposta: o mesmo envelope paginado já usado por `GET /v1/pacientes`, sem novo formato paralelo.
+
+## Pedidos objetivos ao backend
+
+1. Expor leitura das permissões efetivas de um papel existente, sem conceder novas permissões, preservando que `acesso:administrar` é global no contrato atual.
+2. Definir um comando idempotente/transacional para onboarding de usuário + atribuições, ou declarar explicitamente que a UI deve trabalhar em etapas e fornecer um estado recuperável de onboarding incompleto.
+3. Definir o contrato de login humano consumido pelo BFF `/session`; não expor Bearer persistente ao navegador.
+4. Definir entrada transacional de lote novo/posição/quantidade, preservando o ledger atual e reaproveitando `/compras/recebimentos` quando a origem for um pedido. Confirmar também se a leitura do catálogo de estoque permanecerá global ou se haverá um contrato de catálogo legível por operadores com escopo de unidade.
+5. Acrescentar busca server-side a `GET /v1/pacientes` (`q` ou critério equivalente), preservando o envelope paginado e RBAC; a UI não deve precisar carregar todas as páginas para localizar um paciente.
+6. Não alterar o contrato congelado do Terminal para resolver nenhum desses itens.
+
+## Evidência desta etapa
+
+A regressão local isolada executou 5/5 cenários de sessão web e 3/3 cenários do servidor/proxy. O contrato novo teve 4/4 verificações locais; adicionalmente, a versão efetivamente publicada na branch foi relida e passou verificações de sintaxe e invariantes: usa `/v1/me/contexto`, não envia `Authorization`, não executa POST provisório, não chama Terminal e está carregada depois de `web-session.js`.
+
+O harness disponível neste ambiente usa Node 22.16.0, enquanto o projeto declara Node 24; portanto esses resultados são evidência dirigida da interface/sessão, não substituem o CI canônico nem os testes PostgreSQL. `pilot.test.mjs` não foi repetido porque este delta não alterou o piloto nem o backend e o ambiente completo PostgreSQL não está materializado aqui. Evidência estruturada: [frontend-mvp11.json](evidencias/frontend-mvp11.json).
+
+---
+
 # Frontend MVP — HVB Sistema
 
 ## MVP 10 — sessão web do piloto — 23/09/2026
