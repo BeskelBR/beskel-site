@@ -1,0 +1,52 @@
+{
+  "data": "2026-09-23",
+  "branch": "hvb-sistema-dev",
+  "code_sha": "35f848c761bfed82eb9be222e2aa812bb797cc6c",
+  "escopo": "frontend/sessao; backend, banco e Terminal preservados",
+  "testes": {
+    "comando": "node --test tests/frontend-operational.test.mjs tests/frontend-server.test.mjs tests/web-session.test.mjs",
+    "ambiente": "harness local isolado do frontend, sem PostgreSQL e sem Terminal",
+    "total": 12,
+    "aprovados": 12,
+    "falhas": 0,
+    "casos": [
+      "contexto proprio resolve unidade/permissoes sem ampliar escopo",
+      "contratos operacionais nao misturam Terminal nem banco direto",
+      "camada operacional usa sessao same-origin e nao envia escrita provisoria",
+      "documento carrega camada MVP 11 depois da sessao",
+      "servidor serve interface/assets com no-store e HEAD sem corpo",
+      "servidor bloqueia arquivos privados/traversal",
+      "proxy preserva identidade/conteudo/query, 403 e limite de corpo",
+      "cookie HttpOnly/SameSite, logout e replay",
+      "origem/host/contexto de aba",
+      "inatividade, limite absoluto e revogacao",
+      "rotacao de cookie e limite de tentativas",
+      "recusa destino externo/URL com credencial"
+    ]
+  },
+  "verificacao_exata_no_branch": {
+    "blobs": {
+      "assets/system-v9-contract.js": "fc4d39a9d24a8c459610d93fd93d0e88ddb169e0",
+      "assets/system-v9.js": "b8d628fb4a4a36f2b596c19afe9542f4aa90464c",
+      "index.html": "35341b58b0c0826748eefef3ed3c1e21ae585773"
+    },
+    "sintaxe": [
+      "system-v9-contract.js",
+      "system-v9.js"
+    ],
+    "invariantes": [
+      "usa window.HVBSession.fetch",
+      "consulta /v1/me/contexto",
+      "nao contem header Authorization",
+      "nao contem POST de gravacao",
+      "nao referencia rota /terminal/",
+      "index carrega system-v9.js e system-v6.css"
+    ]
+  },
+  "limitacoes": [
+    "harness nao substitui teste visual em navegador real",
+    "nao executou teste com PostgreSQL/API reais neste bloco",
+    "nao valida ambiente hospedado/TLS",
+    "formularios novos permanecem sem escrita ate contratos atomicos do backend"
+  ]
+}
