@@ -190,7 +190,9 @@ if (detailView && detailHead) {
         pending = null;
         await onSuccess(result);
       } catch (error) {
-        if (!error.uncertain) pending = null;
+        // Falha HTTP definitiva libera nova intenção. Erro sem status (rede/recibo
+        // perdido) é ambíguo e mantém exatamente a mesma chave/corpo para retry.
+        if (error.status && !error.uncertain) pending = null;
         setFeedback(
           feedback,
           `${pilotError(error)}${pending ? " O resultado pode ter sido gravado; use Repetir com a mesma chave." : ""}`,
