@@ -384,7 +384,9 @@ if (detailView && detailHead) {
     }
   }
 
-  document.querySelectorAll("[data-module], [data-go]").forEach((button) =>\n    button.addEventListener("click", () => setTimeout(renderCurrent, 0)),\n  );
+  document.querySelectorAll("[data-module], [data-go]").forEach((button) =>
+    button.addEventListener("click", () => setTimeout(renderCurrent, 0)),
+  );
   window.addEventListener("hvb-session-ended", () => {
     context = null;
     contextView = "";
