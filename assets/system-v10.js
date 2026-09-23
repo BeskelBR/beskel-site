@@ -338,8 +338,7 @@ if (detailView && detailHead) {
       });
     }
 
-    async function loadPermissions() {
-      const roleId = role.value;
+    async function loadPermissions(roleId = role.value) {
       if (!roleId) {
         permissionPreview.querySelector("span").textContent =
           "Selecione um papel para consultar os códigos efetivos.";
@@ -352,10 +351,11 @@ if (detailView && detailHead) {
         permissionsCache.set(roleId, data.permissoes || []);
       }
       const permissions = permissionsCache.get(roleId) || [];
-      permissionPreview.querySelector("span").textContent =
-        permissions.length
-          ? permissions.join(" • ")
-          : "O backend retornou este papel sem permissões.";
+      if (role.value === roleId)
+        permissionPreview.querySelector("span").textContent =
+          permissions.length
+            ? permissions.join(" • ")
+            : "O backend retornou este papel sem permissões.";
       return permissions;
     }
 
@@ -385,8 +385,18 @@ if (detailView && detailHead) {
         return;
       }
       try {
-        const permissions = await loadPermissions();
-        const payload = assignmentPayload(role.value, scope.value, unit.value);
+        if (assignments.length >= 50) {
+          permissionPreview.querySelector("span").textContent =
+            "O onboarding aceita no máximo 50 autorizações.";
+          return;
+        }
+        const selectedRoleId = role.value;
+        const permissions = await loadPermissions(selectedRoleId);
+        const payload = assignmentPayload(
+          selectedRoleId,
+          scope.value,
+          unit.value,
+        );
         const key = `${payload.papel_id}:${payload.unidade_id || "global"}`;
         if (
           assignments.some(
