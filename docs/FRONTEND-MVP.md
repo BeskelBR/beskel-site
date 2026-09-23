@@ -115,19 +115,32 @@ Resposta mínima esperada:
 }
 ```
 
+### Busca de pacientes
+
+A busca rápida existente filtra apenas os pacientes já carregados pela paginação. Para operação real, falta busca server-side por nome/identificador, preservando RBAC e paginação.
+
+Exemplo compatível desejado:
+
+```text
+GET /v1/pacientes?q=luna&limit=25
+```
+
+Resposta: o mesmo envelope paginado já usado por `GET /v1/pacientes`, sem novo formato paralelo.
+
 ## Pedidos objetivos ao backend
 
 1. Expor leitura das permissões efetivas de um papel existente, sem conceder novas permissões.
 2. Definir um comando idempotente/transacional para onboarding de usuário + atribuições, ou declarar explicitamente que a UI deve trabalhar em etapas e fornecer um estado recuperável de onboarding incompleto.
 3. Definir o contrato de login humano consumido pelo BFF `/session`; não expor Bearer persistente ao navegador.
 4. Definir entrada transacional de lote novo/posição/quantidade, preservando o ledger atual e reaproveitando `/compras/recebimentos` quando a origem for um pedido.
-5. Não alterar o contrato congelado do Terminal para resolver nenhum desses itens.
+5. Acrescentar busca server-side a `GET /v1/pacientes` (`q` ou critério equivalente), preservando o envelope paginado e RBAC; a UI não deve precisar carregar todas as páginas para localizar um paciente.
+6. Não alterar o contrato congelado do Terminal para resolver nenhum desses itens.
 
 ## Evidência desta etapa
 
 A regressão local isolada executou 5/5 cenários de sessão web e 3/3 cenários do servidor/proxy. O contrato novo teve 4/4 verificações locais; adicionalmente, a versão efetivamente publicada na branch foi relida e passou verificações de sintaxe e invariantes: usa `/v1/me/contexto`, não envia `Authorization`, não executa POST provisório, não chama Terminal e está carregada depois de `web-session.js`.
 
-O harness disponível neste ambiente usa Node 22.16.0, enquanto o projeto declara Node 24; portanto esses resultados são evidência dirigida da interface/sessão, não substituem o CI canônico nem os testes PostgreSQL. `pilot.test.mjs` não foi repetido porque este delta não alterou o piloto nem o backend e o ambiente completo PostgreSQL não está materializado aqui.
+O harness disponível neste ambiente usa Node 22.16.0, enquanto o projeto declara Node 24; portanto esses resultados são evidência dirigida da interface/sessão, não substituem o CI canônico nem os testes PostgreSQL. `pilot.test.mjs` não foi repetido porque este delta não alterou o piloto nem o backend e o ambiente completo PostgreSQL não está materializado aqui. Evidência estruturada: [frontend-mvp11.json](evidencias/frontend-mvp11.json).
 
 ---
 
