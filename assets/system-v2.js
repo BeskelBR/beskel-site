@@ -81,17 +81,15 @@
   const moduleContext = $("#module-context"); const moduleContent = $("#module-content"); const refreshModule = $("#refresh-module"); const loadMoreButton = $("#load-more");
 
   const localDefault = location.origin;
-  let apiBase = localStorage.getItem("hvb-api-base") || localDefault;
-  let token = sessionStorage.getItem("hvb-access-token") || "";
+  const apiBase = localDefault;
   let actor = null; let organization = null; let activeUnit = localStorage.getItem("hvb-unit-id") || null;
   let activeModule = "dashboard"; let activeView = null; let currentItems = []; let nextCursor = null; let loading = false;
-  apiInput.value = apiBase; unitInput.value = activeUnit || "";
+  apiInput.value = apiBase; apiInput.readOnly = true; unitInput.value = activeUnit || "";
 
-  function normalizeBase(value) { return (value || localDefault).trim().replace(/\/$/, ""); }
-  async function request(path, options = {}, auth = true) {
+  async function request(path, options = {}) {
     const headers = new Headers(options.headers || {}); headers.set("Accept", "application/json");
-    if (auth && token) headers.set("Authorization", `Bearer ${token}`);
-    const response = await fetch(`${apiBase}${path}`, { ...options, headers });
+    // Cookie authentication is handled by the local session server.
+    const response = await window.HVBSession.fetch(`${apiBase}${path}`, { ...options, headers });
     const type = response.headers.get("content-type") || ""; const body = type.includes("application/json") ? await response.json() : null;
     if (!response.ok) { const error = new Error(body?.erro || `HTTP ${response.status}`); error.status = response.status; error.payload = body; throw error; }
     return body;
@@ -105,9 +103,11 @@
     catch { readyCard.textContent = "Pendente"; }
   }
   async function loadContext() {
-    actor = await request("/v1/me");
+    actor = await request("/v1/me/contexto");
     try { organization = await request("/v1/organizacao"); } catch { organization = { nome: "Hospital Veterinário Brasília" }; }
-    if (!activeUnit) { try { const units = await request("/v1/unidades?limit=10"); activeUnit = units?.items?.[0]?.id || null; if (activeUnit) localStorage.setItem("hvb-unit-id", activeUnit); } catch { activeUnit = null; } }
+    const units = actor.unidades || [];
+    activeUnit = units.some(u => u.id === activeUnit) ? activeUnit : units[0]?.id || null;
+    if (activeUnit) localStorage.setItem("hvb-unit-id", activeUnit); else localStorage.removeItem("hvb-unit-id");
   }
   function showApp() {
     authView.hidden = true; appView.hidden = false; orgName.textContent = organization?.nome || "HVB";
@@ -116,21 +116,22 @@
     renderModuleGrid(); navigate("dashboard"); checkInfrastructure();
   }
   function showAuth() { appView.hidden = true; authView.hidden = false; }
-  async function authenticate(candidate) { token = candidate; sessionStorage.setItem("hvb-access-token", token); await loadContext(); showApp(); }
+  async function authenticate(candidate) { await window.HVBSession.login(candidate); tokenInput.value = ""; await loadContext(); showApp(); }
 
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault(); const submit = loginForm.querySelector('button[type="submit"]'); const candidate = tokenInput.value.trim().toLowerCase();
-    apiBase = normalizeBase(apiInput.value); activeUnit = unitInput.value.trim() || null; localStorage.setItem("hvb-api-base", apiBase);
+    activeUnit = null;
     if (activeUnit) localStorage.setItem("hvb-unit-id", activeUnit); else localStorage.removeItem("hvb-unit-id");
     if (!/^[a-f0-9]{64}$/.test(candidate)) { setFeedback("A credencial DEV deve conter exatamente 64 caracteres hexadecimais.", "error"); return; }
     if (activeUnit && !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(activeUnit)) { setFeedback("O identificador da unidade deve ser um UUID válido.", "error"); return; }
     submit.disabled = true; setFeedback("Validando credencial…");
     try { await authenticate(candidate); setFeedback(""); }
-    catch (error) { sessionStorage.removeItem("hvb-access-token"); token = ""; if (error.status === 401) setFeedback("Credencial inválida, revogada ou expirada.", "error"); else if (error.status === 403) setFeedback("A credencial é válida, mas não possui acesso a este ambiente.", "error"); else setFeedback("Não foi possível conectar ao backend configurado. Verifique a API e o ambiente DEV.", "error"); }
-    finally { submit.disabled = false; }
+    catch (error) { sessionStorage.removeItem("hvb-session-view"); if (error.status === 401) setFeedback("Credencial inválida, revogada ou expirada.", "error"); else if (error.status === 403) setFeedback("A credencial é válida, mas não possui acesso a este ambiente.", "error"); else setFeedback("Não foi possível conectar ao backend configurado. Verifique a API e o ambiente DEV.", "error"); }
+    finally { tokenInput.value = ""; submit.disabled = false; }
   });
 
-  $("#logout-btn").addEventListener("click", () => { sessionStorage.removeItem("hvb-access-token"); token = ""; actor = null; organization = null; currentItems = []; nextCursor = null; showAuth(); tokenInput.value = ""; });
+  window.addEventListener("hvb-session-ended", () => { actor = null; organization = null; currentItems = []; nextCursor = null; showAuth(); tokenInput.value = ""; setFeedback("Sessão encerrada ou alterada. Entre novamente.", "error"); });
+  $("#logout-btn").addEventListener("click", async () => { try { await window.HVBSession.logout(); setFeedback("Sessão encerrada."); } catch { setFeedback("A saída não foi confirmada. Verifique a conexão e tente novamente.", "error"); alert("A saída não foi confirmada. Tente Encerrar sessão novamente."); } });
   menuBtn.addEventListener("click", () => { const open = sidebar.classList.toggle("open"); menuBtn.setAttribute("aria-expanded", String(open)); });
   document.querySelectorAll(".nav-item").forEach((button) => button.addEventListener("click", () => navigate(button.dataset.module)));
   document.querySelectorAll("[data-go]").forEach((button) => button.addEventListener("click", () => navigate(button.dataset.go)));
@@ -202,5 +203,5 @@
     items.forEach((item) => { const row = document.createElement("tr"); columns.forEach((key) => { const cell = document.createElement("td"); cell.dataset.key = key; const formatted = formatValue(item[key], key); if (key === "id" || key.endsWith("_id")) { cell.classList.add("cell-id"); cell.title = String(item[key] ?? ""); cell.textContent = formatted; } else if (["situacao","estado","resultado"].includes(key) && formatted !== "—") { const pill = document.createElement("span"); pill.className = `status-pill ${statusClass(formatted)}`.trim(); pill.textContent = formatted; cell.append(pill); } else cell.textContent = formatted; row.append(cell); }); tbody.append(row); }); table.append(thead, tbody); wrap.append(table); moduleContent.append(wrap);
   }
 
-  (async function bootstrap() { await checkInfrastructure(); if (!token) { showAuth(); return; } try { await loadContext(); showApp(); } catch { sessionStorage.removeItem("hvb-access-token"); token = ""; showAuth(); setFeedback("A sessão anterior não é mais válida. Entre novamente.", "error"); } })();
+  (async function bootstrap() { const submit = loginForm.querySelector('button[type="submit"]'); submit.disabled = true; await checkInfrastructure(); try { await window.HVBSession.restore(); await loadContext(); showApp(); } catch { sessionStorage.removeItem("hvb-session-view"); showAuth(); } finally { submit.disabled = false; } })();
 })();

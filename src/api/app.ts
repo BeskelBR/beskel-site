@@ -1,4 +1,5 @@
 import { terminalV1Actions } from "../domain/terminal-v1/service.ts";
+import { registerWebContext } from "../domain/web-context.ts";
 import { terminalV1Inputs } from "../domain/terminal-v1/schemas.ts";
 import { registerTerminalV1 } from "../domain/terminal-v1/routes.ts";
 import type { V1EvidenceAdapter } from "../domain/terminal-v1/evidence.ts";
@@ -197,7 +198,7 @@ export async function buildApp(
     openapi: {
       info: {
         title: "HVB Sistema — Clínica, Financeiro e Exames",
-        version: "0.27.0",
+        version: "0.28.0",
       },
       servers: [{ url: "http://127.0.0.1:3100" }],
       components: {
@@ -304,6 +305,7 @@ export async function buildApp(
       return work(tx, actor);
     });
   }
+  registerWebContext(app, authenticated, errors);
   registerPortal(app, db, errors);
   registerMedicalRecord(app, authenticated, errors);
   registerMedicalComplements(app, authenticated, errors);

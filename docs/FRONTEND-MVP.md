@@ -1,5 +1,17 @@
 # Frontend MVP — HVB Sistema
 
+## MVP 10 — sessão web do piloto — 23/09/2026
+
+Entrada por credencial temporária existente, agora trocada por sessão no servidor da interface. Cookie HttpOnly/SameSite Strict, expiração por inatividade e limite absoluto, logout no servidor, controle de origem e contexto de aba. A credencial deixou de ser guardada no navegador. **Ainda não há login operacional com senha/SSO, MFA ou recuperação de conta.**
+
+O contexto próprio `/v1/me/contexto` fornece as unidades autorizadas sem exigir administração. A escolha da unidade no atendimento vem dessa consulta; o UUID manual do MVP 9 e a configuração de API no navegador foram superados. Todas as operações mantêm autorização no backend. [Decisão, fronteiras e evidências](adr/0029-sessao-web-piloto.md).
+
+Para executar localmente, manter os comandos de API e frontend descritos abaixo e acessar `http://127.0.0.1:3200`. O frontend precisa do processo Node, que guarda as sessões em memória; abrir apenas o HTML ou publicar assets estáticos não entrega sessão/proxy. Reinício exige nova entrada. Ambiente externo/TLS não foi configurado.
+
+Antes da nova orientação de verificações, passaram 13 testes direcionados (frontend, sessão e piloto), e o navegador confirmou entrada/unidades/cadastro sintético. A verificação visual restante do MVP 10 foi adiada. Alterações finais de timeout/descarte de respostas de sessão anterior recebem somente análise de integridade nesta etapa, conforme o pedido do usuário. Quando autorizado, executar `node --test tests/frontend-server.test.mjs tests/web-session.test.mjs` e `node --env-file=.env --test tests/pilot.test.mjs`, seguidos de restauração/logout/troca de abas e jornada completa no navegador.
+
+Os registros MVP 8/9 abaixo são históricos e não substituem este estado atual.
+
 ## MVP 9 — atendimento de piloto — 22/09/2026
 
 Evolução aditiva do MVP 8, conforme o plano da semana. Na **Visão geral**, a área **Atendimento** permite carregar o contexto, localizar pacientes nas páginas carregadas ou cadastrar um paciente fictício, selecionar/abrir episódio e registrar/ler evolução. Unidade, paciente e episódio ficam explícitos. A listagem de versões mantém autoria, horário, estado e histórico; o conteúdo é buscado separadamente com a permissão `prontuario:conteudo` e exibido como texto.

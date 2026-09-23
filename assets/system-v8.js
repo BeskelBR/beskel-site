@@ -6,8 +6,8 @@
   let activeModule = '';
   let requestVersion = 0;
 
-  const apiBase = () => (localStorage.getItem('hvb-api-base') || location.origin).replace(/\/$/, '');
-  const token = () => sessionStorage.getItem('hvb-access-token') || '';
+  const apiBase = () => location.origin.replace(/\/$/, '');
+  const token = () => sessionStorage.getItem('hvb-session-view') || '';
   const unit = () => localStorage.getItem('hvb-unit-id') || '';
   const shortId = (value) => value ? `${String(value).slice(0, 8)}…` : '—';
   const fmtDate = (value) => { if (!value) return '—'; const d = new Date(value); return Number.isNaN(d.getTime()) ? String(value) : new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(d); };
@@ -16,7 +16,7 @@
   async function request(path) {
     const current = token();
     if (!current) throw Object.assign(new Error('sessao_ausente'), { status: 401 });
-    const response = await fetch(`${apiBase()}${path}`, { headers: { Accept: 'application/json', Authorization: `Bearer ${current}` } });
+    const response = await window.HVBSession.fetch(`${apiBase()}${path}`, { headers: { Accept: 'application/json' } });
     const type = response.headers.get('content-type') || '';
     const body = type.includes('application/json') ? await response.json() : null;
     if (!response.ok) throw Object.assign(new Error(body?.erro || `HTTP ${response.status}`), { status: response.status });

@@ -29,11 +29,11 @@
   let selectedPatient = null;
 
   function apiBase() {
-    return (localStorage.getItem("hvb-api-base") || location.origin).replace(/\/$/, "");
+    return location.origin.replace(/\/$/, "");
   }
 
   function token() {
-    return sessionStorage.getItem("hvb-access-token") || "";
+    return sessionStorage.getItem("hvb-session-view") || "";
   }
 
   function activeUnit() {
@@ -43,8 +43,8 @@
   async function request(path) {
     const currentToken = token();
     if (!currentToken) throw Object.assign(new Error("sessao_ausente"), { status: 401 });
-    const response = await fetch(`${apiBase()}${path}`, {
-      headers: { Accept: "application/json", Authorization: `Bearer ${currentToken}` },
+    const response = await window.HVBSession.fetch(`${apiBase()}${path}`, {
+      headers: { Accept: "application/json" },
     });
     const body = (response.headers.get("content-type") || "").includes("application/json") ? await response.json() : null;
     if (!response.ok) throw Object.assign(new Error(body?.erro || `HTTP ${response.status}`), { status: response.status, payload: body });

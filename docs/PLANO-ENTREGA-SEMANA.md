@@ -30,7 +30,9 @@ Prioridade 2 verificada no nível HTTP: três testes do servidor, TypeScript e 2
 
 Prioridade 3 implementada e testada no piloto DEV pelo MVP 9: entrada com credencial existente, localização/cadastro de paciente, abertura de episódio e registro/leitura de evolução. Percurso verificado no navegador, inclusive releitura após reload, recusa de escrita e layout móvel. [Evidência](evidencias/piloto-mvp9.json). Esta conclusão não equivale a autenticação operacional ou homologação dos papéis.
 
-Próxima frente: prioridade 4, autenticação/contexto de unidade adequados ao piloto e preparação do ambiente de homologação. Ambiente hospedado ainda não configurado; manter autorização específica para infraestrutura. Não refazer C18 nem ampliar o backend sem uma falta concreta da jornada.
+Prioridade 4 parcial em 23/09: MVP 10 entrega sessão web local e consulta de unidades do próprio usuário. Credencial temporária inicial ainda necessária; login operacional, recuperação/MFA e ambiente hospedado continuam faltando. A pergunta sobre onde hospedar API/PostgreSQL permanece sem resposta; isso não autoriza provisionamento. Ver [ADR 0029](adr/0029-sessao-web-piloto.md).
+
+Próxima frente: preparação do acesso operacional e ambiente a partir da definição de hospedagem, mantendo a implementação independente possível e as pendências explícitas. Não refazer C18 nem ampliar o backend sem falta concreta da jornada.
 
 ## Uso de cota e coordenação
 
@@ -40,7 +42,7 @@ Próxima frente: prioridade 4, autenticação/contexto de unidade adequados ao p
 - Não criar subagentes ou novos chats sem autorização explícita. Aproveitar os trabalhos já existentes através dos commits/contratos, sem enviar mensagens em nome do usuário.
 - Antes de auditoria em outro chat, informar branch, SHA publicado, arquivos de contrato, teste executado e limitações. Nunca dizer “no GitHub” quando houver apenas working tree local.
 - Fazer pesquisa e leitura pontuais; consultar primeiro evidências e arquivos relevantes. Evitar varreduras amplas de logs, reimpressão de OpenAPI e reconstrução de contexto já documentado.
-- Executar testes direcionados por mudança. Repetir somente por alteração, falha ou risco concreto. Uma verificação integrada na versão candidata antecede a entrega; não refazer a suíte geral a cada turno.
+- Atualização explícita do usuário em 23/09: a cada desenvolvimento conferir apenas integridade (sintaxe, tipos, lint, diff e contratos). Adiar testes funcionais e automação de navegador/mouse para etapa posterior solicitada pelo usuário. Preservar scripts e resultados anteriores; não declarar verificação funcional de alterações posteriores à última execução. A validação integrada continua necessária antes de declarar homologação.
 - Sem upgrades de dependências, troca de arquitetura ou instalação de ferramentas por conveniência se as ferramentas existentes resolvem o trabalho.
 - Documentar de forma curta no artefato existente. Novos relatórios somente quando acrescentam evidência, decisão ou contrato necessário.
 

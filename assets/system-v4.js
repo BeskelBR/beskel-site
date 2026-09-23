@@ -20,11 +20,11 @@
   let loading = false;
 
   function apiBase() {
-    return (localStorage.getItem("hvb-api-base") || location.origin).replace(/\/$/, "");
+    return location.origin.replace(/\/$/, "");
   }
 
   function token() {
-    return sessionStorage.getItem("hvb-access-token") || "";
+    return sessionStorage.getItem("hvb-session-view") || "";
   }
 
   function unit() {
@@ -34,8 +34,8 @@
   async function request(path) {
     const currentToken = token();
     if (!currentToken) throw Object.assign(new Error("sessao_ausente"), { status: 401 });
-    const response = await fetch(`${apiBase()}${path}`, {
-      headers: { Accept: "application/json", Authorization: `Bearer ${currentToken}` },
+    const response = await window.HVBSession.fetch(`${apiBase()}${path}`, {
+      headers: { Accept: "application/json" },
     });
     const type = response.headers.get("content-type") || "";
     const body = type.includes("application/json") ? await response.json() : null;
@@ -262,8 +262,8 @@
 
   let renderSequence = 0;
 
-  const apiBase = () => (localStorage.getItem('hvb-api-base') || location.origin).replace(/\/$/, '');
-  const token = () => sessionStorage.getItem('hvb-access-token') || '';
+  const apiBase = () => location.origin.replace(/\/$/, '');
+  const token = () => sessionStorage.getItem('hvb-session-view') || '';
   const unit = () => localStorage.getItem('hvb-unit-id') || '';
   const shortId = (value) => value ? `${String(value).slice(0, 8)}…` : '—';
   const timeOnly = (value) => {
@@ -278,8 +278,8 @@
   };
 
   async function request(path) {
-    const response = await fetch(`${apiBase()}${path}`, {
-      headers: { Accept: 'application/json', Authorization: `Bearer ${token()}` },
+    const response = await window.HVBSession.fetch(`${apiBase()}${path}`, {
+      headers: { Accept: 'application/json' },
     });
     const type = response.headers.get('content-type') || '';
     const body = type.includes('application/json') ? await response.json() : null;

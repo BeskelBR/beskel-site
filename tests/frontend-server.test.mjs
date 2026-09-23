@@ -2,7 +2,8 @@ import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { createServer, request } from "node:http";
 import { createFrontendServer } from "../scripts/frontend.mjs";
-let server, api, origin;
+import { loginWeb } from "./web-session-helper.mjs";
+let server, api, origin, session;
 const requests = [];
 const listen = (s) => new Promise((done) => s.listen(0, "127.0.0.1", done));
 const close = (s) =>
@@ -23,12 +24,19 @@ before(async () => {
       "Content-Type": "application/json",
       "Cache-Control": "public",
     });
-    res.end(JSON.stringify({ ok: true }));
+    res.end(
+      JSON.stringify(
+        req.url === "/v1/me"
+          ? { usuario_id: "usuario-ficticio", organizacao_id: "org-ficticia" }
+          : { ok: true },
+      ),
+    );
   });
   await listen(api);
   server = createFrontendServer(`http://127.0.0.1:${api.address().port}`);
   await listen(server);
   origin = `http://127.0.0.1:${server.address().port}`;
+  session = await loginWeb(origin, "a".repeat(64));
 });
 after(async () => {
   if (server) await close(server);
@@ -77,7 +85,7 @@ test("não expõe arquivos privados, fonte do servidor, caminhos arbitrários ou
   assert.equal((await fetch(origin)).status, 200);
 });
 test("proxy preserva identidade, conteúdo, query e recusa; limita corpo", async () => {
-  const r = await fetch(`${origin}/v1/pacientes?limit=1`, {
+  const r = await session.fetcher(`${origin}/v1/pacientes?limit=1`, {
     method: "POST",
     headers: {
       authorization: "Bearer TESTE_FICTICIO",
@@ -89,15 +97,15 @@ test("proxy preserva identidade, conteúdo, query e recusa; limita corpo", async
   assert.equal(r.headers.get("cache-control"), "no-store");
   assert.deepEqual(requests.at(-1), {
     url: "/v1/pacientes?limit=1",
-    authorization: "Bearer TESTE_FICTICIO",
+    authorization: `Bearer ${"a".repeat(64)}`,
     body: '{"nome":"Paciente fictício"}',
   });
-  assert.equal((await fetch(`${origin}/v1/negado`)).status, 403);
+  assert.equal((await session.fetcher(`${origin}/v1/negado`)).status, 403);
   assert.equal((await fetch(`${origin}/ready`)).status, 200);
   const before = requests.length;
   assert.equal(
     (
-      await fetch(`${origin}/v1/grande`, {
+      await session.fetcher(`${origin}/v1/grande`, {
         method: "POST",
         body: "x".repeat(512001),
       })

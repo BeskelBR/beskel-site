@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import { readFile, realpath } from "node:fs/promises";
 import { extname, join, normalize, relative, isAbsolute } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { createWebSessions } from "./web-session.mjs";
 
 const root = normalize(fileURLToPath(new URL("../", import.meta.url)));
 const port = Number(process.env.HVB_FRONTEND_PORT || 3200);
@@ -29,7 +30,7 @@ function securityHeaders(res) {
   res.setHeader("Cache-Control", "no-store");
 }
 
-async function proxy(req, res, api) {
+async function proxy(req, res, api, token, onUnauthorized) {
   const chunks = [];
   let size = 0;
   for await (const chunk of req) {
@@ -47,13 +48,19 @@ async function proxy(req, res, api) {
   for (const [key, value] of Object.entries(req.headers)) {
     if (
       !value ||
-      ["host", "content-length", "connection", "transfer-encoding"].includes(
-        key,
-      )
+      [
+        "host",
+        "content-length",
+        "connection",
+        "transfer-encoding",
+        "authorization",
+        "cookie",
+      ].includes(key)
     )
       continue;
     headers.set(key, Array.isArray(value) ? value.join(", ") : value);
   }
+  if (token) headers.set("Authorization", `Bearer ${token}`);
   const url = new URL(req.url || "/", "http://local");
   const target = `${api}${url.pathname}${url.search}`;
   try {
@@ -73,12 +80,14 @@ async function proxy(req, res, api) {
           "content-length",
           "transfer-encoding",
           "connection",
+          "set-cookie",
         ].includes(key)
       ) {
         res.setHeader(key, value);
       }
     });
     securityHeaders(res);
+    if (response.status === 401) onUnauthorized();
     const payload = Buffer.from(await response.arrayBuffer());
     res.end(req.method === "HEAD" ? undefined : payload);
   } catch {
@@ -146,13 +155,49 @@ async function staticFile(req, res) {
   }
 }
 
-export function createFrontendServer(api = apiBase) {
-  return createServer(async (req, res) => {
+export function createFrontendServer(api = apiBase, sessionOptions) {
+  const target = new URL(api);
+  if (
+    target.protocol !== "http:" ||
+    !["127.0.0.1", "localhost", "[::1]"].includes(target.hostname) ||
+    target.username ||
+    target.password ||
+    target.pathname !== "/" ||
+    target.search ||
+    target.hash
+  )
+    throw new Error(
+      "API do piloto restrita a HTTP loopback, sem credenciais na URL.",
+    );
+  const sessions = createWebSessions(api, sessionOptions);
+  const server = createServer(async (req, res) => {
     securityHeaders(res);
     try {
       const path = new URL(req.url || "/", "http://local").pathname;
-      if (path === "/health" || path === "/ready" || path.startsWith("/v1/")) {
-        await proxy(req, res, api);
+      if (path === "/session" || path.startsWith("/v1/")) {
+        if (!sessions.allowed(req, res)) return;
+        if (path === "/session") {
+          await sessions.handle(req, res);
+          return;
+        }
+        const session = sessions.get(req);
+        if (!session) {
+          sessions.remove(req, res);
+          sessions.json(res, 401, { erro: "sessao_expirada" });
+          return;
+        }
+        if (req.headers["x-hvb-view"] !== session.view) {
+          res.setHeader("X-HVB-Session-Reset", "1");
+          sessions.json(res, 409, { erro: "sessao_alterada_entre_novamente" });
+          return;
+        }
+        await proxy(req, res, api, session.token, () =>
+          sessions.remove(req, res),
+        );
+        return;
+      }
+      if (path === "/health" || path === "/ready") {
+        await proxy(req, res, api, null, () => {});
         return;
       }
       await staticFile(req, res);
@@ -161,6 +206,8 @@ export function createFrontendServer(api = apiBase) {
       res.end("Invalid request");
     }
   });
+  server.on("close", sessions.clear);
+  return server;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)

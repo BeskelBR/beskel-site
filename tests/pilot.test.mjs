@@ -6,8 +6,9 @@ import { createFrontendServer } from "../scripts/frontend.mjs";
 import { buildApp } from "../src/api/app.ts";
 import { pool } from "../src/persistence/database.ts";
 import { seedFixture } from "../scripts/seed.ts";
+import { loginWeb } from "./web-session-helper.mjs";
 
-let fixture, db, app, server, client, base, patient, episode;
+let fixture, db, app, server, client, base, patient, episode, session;
 before(async () => {
   const url = process.env.TEST_MIGRATION_DATABASE_URL;
   assert.equal(new URL(url).pathname, "/hvb_sistema_test");
@@ -20,7 +21,8 @@ before(async () => {
   );
   await new Promise((done) => server.listen(0, "127.0.0.1", done));
   base = `http://127.0.0.1:${server.address().port}`;
-  client = createPilotClient({ base, token: fixture.adminToken });
+  session = await loginWeb(base, fixture.adminToken);
+  client = createPilotClient({ base, fetcher: session.fetcher });
 });
 after(async () => {
   if (server)
@@ -72,7 +74,7 @@ test("piloto: paciente, episódio, evolução e leitura protegida pelo proxy rea
     base,
     token: fixture.adminToken,
     fetcher: async (...args) => {
-      const response = await fetch(...args);
+      const response = await session.fetcher(...args);
       if (!dropped) {
         dropped = true;
         await response.text();
@@ -95,7 +97,10 @@ test("piloto: paciente, episódio, evolução e leitura protegida pelo proxy rea
   assert.equal(content.autor_id, fixture.admin);
 });
 test("piloto: RBAC, unidade e sessão inválida são preservados", async () => {
-  const reader = createPilotClient({ base, token: fixture.readerToken });
+  const reader = createPilotClient({
+    base,
+    fetcher: (await loginWeb(base, fixture.readerToken)).fetcher,
+  });
   await assert.rejects(
     reader.send(
       reader.prepare("/v1/pacientes", {
@@ -110,7 +115,10 @@ test("piloto: RBAC, unidade e sessão inválida são preservados", async () => {
     reader.read(`/v1/prontuario/versoes?unidade_id=${fixture.unit}`),
     { status: 403 },
   );
-  const operator = createPilotClient({ base, token: fixture.nurseToken });
+  const operator = createPilotClient({
+    base,
+    fetcher: (await loginWeb(base, fixture.nurseToken)).fetcher,
+  });
   await assert.rejects(
     operator.send(
       operator.prepare("/v1/episodios", {
@@ -139,4 +147,66 @@ test("piloto: intenção é imutável e resposta não confirmada não vira suces
     fetcher: async () => new Response("{}", { status: 200 }),
   });
   await assert.rejects(invalid.send(intent), { uncertain: true });
+});
+
+test("contexto próprio: escopos, organizações e revogação sem permissão administrativa", async () => {
+  const operatorSession = await loginWeb(base, fixture.nurseToken);
+  const operator = createPilotClient({
+    base,
+    fetcher: operatorSession.fetcher,
+  });
+  let context = await operator.read("/v1/me/contexto");
+  assert.equal(context.usuario_id, fixture.nurse);
+  assert.deepEqual(context.permissoes_globais, []);
+  assert.deepEqual(
+    context.unidades.map((u) => u.id),
+    [fixture.unit],
+  );
+  assert.ok(context.unidades[0].permissoes.includes("episodios:escrever"));
+  assert.ok(!context.unidades[0].permissoes.includes("acesso:administrar"));
+  await assert.rejects(operator.read("/v1/unidades"), { status: 403 });
+  const foreign = await seedFixture(process.env.TEST_MIGRATION_DATABASE_URL);
+  const foreignClient = createPilotClient({
+    base,
+    fetcher: (await loginWeb(base, foreign.adminToken)).fetcher,
+  });
+  const foreignContext = await foreignClient.read("/v1/me/contexto");
+  assert.ok(
+    foreignContext.unidades.every(
+      (u) => ![fixture.unit, fixture.otherUnit].includes(u.id),
+    ),
+  );
+  const assignment = (
+    await client.read("/v1/atribuicoes?limit=100")
+  ).items.find((a) => a.usuario_id === fixture.nurse);
+  await client.send(
+    client.prepare(`/v1/atribuicoes/${assignment.id}/revisoes`, {
+      versao_esperada: 0,
+      ativo: false,
+      motivo: "Teste de revogação do contexto",
+      simulacao: true,
+      confirmacao_humana: true,
+    }),
+  );
+  context = await operator.read("/v1/me/contexto");
+  assert.deepEqual(context.unidades, []);
+  await assert.rejects(
+    operator.read(`/v1/episodios?unidade_id=${fixture.unit}`),
+    { status: 403 },
+  );
+});
+
+test("sessão web respeita revogação real da credencial e contrato Bearer direto", async () => {
+  const direct = await app.inject({
+    url: "/v1/me",
+    headers: { Authorization: `Bearer ${fixture.adminToken}` },
+  });
+  assert.equal(direct.statusCode, 200);
+  await client.send(
+    client.prepare(`/v1/credenciais/${fixture.credential}/revogar`, {
+      motivo: "Encerramento de teste sintético",
+    }),
+  );
+  await assert.rejects(client.read("/v1/me"), { status: 401 });
+  assert.equal((await session.fetcher(`${base}/session`)).status, 401);
 });

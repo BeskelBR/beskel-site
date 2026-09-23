@@ -5,7 +5,7 @@ export function createPilotClient({ base, token, fetcher = fetch }) {
       ...options,
       headers: {
         Accept: "application/json",
-        Authorization: `Bearer ${token}`,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options.headers,
       },
       signal: AbortSignal.timeout(15000),

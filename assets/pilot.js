@@ -16,11 +16,8 @@ let epoch = 0,
   busy = false,
   ready = false;
 const credentials = () => ({
-  base: (localStorage.getItem("hvb-api-base") || location.origin).replace(
-    /\/$/,
-    "",
-  ),
-  token: sessionStorage.getItem("hvb-access-token") || "",
+  base: location.origin,
+  view: sessionStorage.getItem("hvb-session-view") || "",
 });
 const identity = () => JSON.stringify(credentials());
 const localNow = () => {
@@ -216,38 +213,19 @@ $("start").addEventListener("click", () => {
   reset();
   run(async (v) => {
     const auth = credentials();
-    if (!auth.token)
+    if (!auth.view)
       throw Object.assign(new Error("sessao_ausente"), { status: 401 });
     context = identity();
-    client = createPilotClient(auth);
+    client = createPilotClient({
+      base: auth.base,
+      fetcher: (...args) => window.HVBSession.fetch(...args),
+    });
     status("Carregando contexto…");
-    await client.read("/v1/me");
+    const access = await client.read("/v1/me/contexto");
     const saved = localStorage.getItem("hvb-unit-id");
-    let cursor = null;
-    do {
-      let result;
-      try {
-        result = await client.read(
-          query("/v1/unidades", { limit: 100, cursor }),
-        );
-      } catch (error) {
-        // Listing units is administrative. The existing DEV login may supply
-        // a unit; every subsequent read/write still authorizes it on the API.
-        if (error.status !== 403 || !saved || !/^[0-9a-f-]{36}$/i.test(saved))
-          throw error;
-        if (!current(v)) return;
-        option(
-          $("unit"),
-          saved,
-          `Unidade configurada no acesso DEV · ${saved}`,
-        );
-        break;
-      }
-      if (!current(v)) return;
-      for (const u of result.items)
-        option($("unit"), u.id, `${u.nome} · ${u.id}`);
-      cursor = result.next_cursor;
-    } while (cursor);
+    if (!current(v)) return;
+    for (const u of access.unidades)
+      option($("unit"), u.id, `${u.nome} · ${u.id}`);
     if ([...$("unit").options].some((o) => o.value === saved))
       $("unit").value = saved;
     forms.episode.elements.admitido_em.value = localNow();
@@ -415,7 +393,7 @@ $("retry").addEventListener("click", async () => {
     }
   }
 });
-document.getElementById("logout-btn").addEventListener("click", reset);
+window.addEventListener("hvb-session-ended", reset);
 window.addEventListener("beforeunload", (event) => {
   if (pending) {
     event.preventDefault();

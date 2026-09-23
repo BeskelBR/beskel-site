@@ -6,8 +6,8 @@
   let activeModule = '';
   let requestVersion = 0;
 
-  function apiBase() { return (localStorage.getItem('hvb-api-base') || location.origin).replace(/\/$/, ''); }
-  function token() { return sessionStorage.getItem('hvb-access-token') || ''; }
+  function apiBase() { return location.origin.replace(/\/$/, ''); }
+  function token() { return sessionStorage.getItem('hvb-session-view') || ''; }
   function unit() { return localStorage.getItem('hvb-unit-id') || ''; }
   function shortId(value) { return value ? `${String(value).slice(0, 8)}…` : '—'; }
   function fmtDate(value) {
@@ -23,7 +23,7 @@
   async function request(path) {
     const current = token();
     if (!current) throw Object.assign(new Error('sessao_ausente'), { status: 401 });
-    const response = await fetch(`${apiBase()}${path}`, { headers: { Accept: 'application/json', Authorization: `Bearer ${current}` } });
+    const response = await window.HVBSession.fetch(`${apiBase()}${path}`, { headers: { Accept: 'application/json' } });
     const type = response.headers.get('content-type') || '';
     const body = type.includes('application/json') ? await response.json() : null;
     if (!response.ok) throw Object.assign(new Error(body?.erro || `HTTP ${response.status}`), { status: response.status });

@@ -47,13 +47,13 @@
           </div>
         </div>
         <h2>Entrar no sistema</h2>
-        <p class="muted">Nesta fase, o backend utiliza credencial opaca temporária. A autenticação operacional definitiva será integrada posteriormente.</p>
+        <p class="muted">Entre com a credencial temporária do piloto. A sessão expira após 15 minutos sem uso ou uma hora de duração. Login operacional e recuperação de conta continuam em preparação.</p>
         <form id="login-form">
           <label for="access-token">Credencial de acesso</label>
           <input id="access-token" name="access-token" type="password" inputmode="text" autocomplete="off" spellcheck="false" minlength="64" maxlength="64" placeholder="Credencial DEV de 64 caracteres" required>
           <button class="primary-btn" type="submit">Acessar ambiente</button>
         </form>
-        <details class="dev-settings">
+        <details class="dev-settings" hidden>
           <summary>Configuração técnica DEV</summary>
           <label for="api-base">Endereço da API</label>
           <input id="api-base" name="api-base" type="url" placeholder="http://127.0.0.1:3200">
@@ -174,7 +174,7 @@
             <article class="status-card"><span>API</span><strong id="health-card">Verificando</strong><small>Disponibilidade do serviço</small></article>
             <article class="status-card"><span>Banco</span><strong id="ready-card">Verificando</strong><small>Schema e conexão</small></article>
             <article class="status-card"><span>Ambiente</span><strong>DEV</strong><small>Sem operação assistencial real</small></article>
-            <article class="status-card"><span>Frontend</span><strong>MVP 9</strong><small>Atendimento de piloto e consultas</small></article>
+            <article class="status-card"><span>Frontend</span><strong>MVP 10</strong><small>Sessão web e atendimento de piloto</small></article>
           </div>
 
           <div class="section-head operations-head">
@@ -276,6 +276,7 @@
     </div>
   </aside>
 
+  <script src="assets/web-session.js" defer></script>
   <script src="assets/system-v2.js" defer></script>
   <script src="assets/system-v3.js" defer></script>
   <script src="assets/system-v4.js" defer></script>

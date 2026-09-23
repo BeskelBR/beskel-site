@@ -1,0 +1,23 @@
+{
+  "date": "2026-09-23",
+  "version": "0.28.0",
+  "scope": "MVP 10, somente SISTEMA/hvb-sistema-dev",
+  "integrity": {
+    "typescript": "passed",
+    "javascript_syntax": "passed",
+    "lint_new_modules_and_tests": "passed",
+    "legacy_frontend_lint": { "baseline_diagnostics": 21, "current_diagnostics": 21, "new_diagnostics": 0 },
+    "openapi_previous_paths_unchanged": true,
+    "openapi_added_path": "/v1/me/contexto",
+    "migrations_changed": false
+  },
+  "before_user_changed_verification_policy": {
+    "frontend_tests_passed": 3,
+    "web_session_tests_passed": 5,
+    "pilot_and_context_tests_passed": 5,
+    "browser_confirmed": ["entrada com sessão web", "unidades do contexto próprio", "cadastro de paciente sintético"]
+  },
+  "final_functional_verification": "Adiada por orientação explícita; nenhum teste funcional/navegador executado após a mudança de política",
+  "later_changes_integrity_only": ["timeout do cliente web", "descarte de resposta de sessão anterior", "bloqueio temporário do botão durante restauração inicial", "remoção de variáveis sem uso", "versão e documentação"],
+  "remaining": ["restauração/logout/troca de abas no navegador", "jornada integral na revisão final", "login operacional e recuperação/MFA", "ambiente hospedado/TLS e operação"]
+}

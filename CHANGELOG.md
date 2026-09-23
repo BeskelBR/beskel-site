@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.28.0 — 23/09/2026
+
+- MVP 10: sessão web local com cookie HttpOnly/SameSite Strict, limite absoluto/inatividade, logout no servidor, controle de origem e contexto de aba. Credencial API retirada do armazenamento do navegador.
+- Consulta aditiva `/v1/me/contexto` com unidades/permissões do próprio usuário, preservando RBAC/RLS e revogação; API Bearer e Terminal v1 inalterados. OpenAPI: 452 operações/289 caminhos, contratos anteriores preservados; sem migration nova.
+- Antes da nova orientação de validação: 13 testes direcionados aprovados; navegador conferiu entrada/unidades/cadastro. Após a orientação: apenas integridade, sem novos testes funcionais/navegador. Validação funcional final adiada, incluindo ajustes de timeout, resposta atrasada e restauração de sessão.
+- Autenticação operacional e ambiente externo continuam pendentes. ADR 0029 e lista central atualizadas; regras de economia de cota registradas em AGENTS.md.
+
 ## 0.27.0 — 22/09/2026
 
 - C18, delta N1 Terminal v1: NFC revogável, biometria DEV verificada, dispositivos provisionados distintos e sessões exclusivas por sala.
