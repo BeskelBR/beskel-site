@@ -516,15 +516,19 @@ if (detailView && detailHead) {
 
     const ctx = await ownContext();
     if (version !== renderVersion || activeModule() !== "estoque") return;
-    const unitId = resolveUnit(ctx, localStorage.getItem("hvb-unit-id"));
     const flow = operationalFlows.stockEntry;
+    const savedUnit = localStorage.getItem("hvb-unit-id");
+    const eligibleUnits = (ctx.unidades || []).filter((item) =>
+      canUseUnit(ctx, item.id, flow.uiUnitPermissions),
+    );
+    const unitId = eligibleUnits.some((item) => item.id === savedUnit)
+      ? savedUnit
+      : eligibleUnits[0]?.id || null;
 
     const globalOk = canUseGlobal(ctx, flow.globalPermissions);
-    const unitOk =
-      unitId && canUseUnit(ctx, unitId, flow.unitPermissions);
-    if (!unitId || !globalOk || !unitOk) {
+    if (!unitId || !globalOk) {
       disabledMessage(
-        "A entrada completa exige estoque:ler e estoque:catalogar globais, além de estoque:movimentar na unidade.",
+        "A entrada completa exige estoque:ler e estoque:catalogar globais. Para selecionar o local, a interface também precisa de estoque:movimentar e locais:ler na unidade.",
       );
       return;
     }
@@ -548,10 +552,14 @@ if (detailView && detailHead) {
     const grid = el("div", "operational-grid");
 
     const unit = select("unidade_id");
-    for (const item of ctx.unidades || [])
+    for (const item of eligibleUnits)
       option(unit, item.id, item.nome || item.id);
     unit.value = unitId;
-    unit.disabled = true;
+    unit.disabled = eligibleUnits.length < 2;
+    unit.addEventListener("change", () => {
+      localStorage.setItem("hvb-unit-id", unit.value);
+      setTimeout(renderCurrent, 0);
+    });
 
     const presentation = select("apresentacao_id");
     presentation.required = true;
@@ -603,10 +611,18 @@ if (detailView && detailHead) {
     reason.required = true;
     reason.maxLength = 160;
 
+    const purchaseAuthorized = canUseUnit(
+      ctx,
+      unitId,
+      flow.purchaseUnitPermissions,
+    );
     const purchase = checkbox(
       "origem_compra",
-      "Esta entrada corresponde a um item de pedido de compra já aprovado.",
+      purchaseAuthorized
+        ? "Esta entrada corresponde a um item de pedido de compra já aprovado."
+        : "Origem por compra indisponível: falta compras:receber nesta unidade.",
     );
+    purchase.control.disabled = !purchaseAuthorized;
 
     const purchaseBox = el("div", "operational-purchase wide");
     purchaseBox.hidden = true;
