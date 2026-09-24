@@ -1,3 +1,39 @@
+# MVP 11 — aderência do onboarding/ADM: escopo, paginação e NFC — 23/09/2026
+
+Delta iniciado sobre `b507038fa3c95a697e1571fd1819b7acc5c7b68d`. Backend, banco/Supabase, BFF `/session`, Terminal/C18 e autenticação humana permaneceram congelados.
+
+## Concluído no frontend
+
+1. **Escopo explícito no onboarding.** O seletor inicia em `Selecione o escopo...` e é obrigatório. Atribuição por unidade exige seleção de unidade; atribuição global exibe `Todas as unidades da organização` e omite `unidade_id` do corpo. Após adicionar uma atribuição, escopo/unidade voltam ao estado não decidido para impedir reaproveitamento implícito na próxima atribuição.
+2. **Paginação completa de papéis.** A leitura única `GET /v1/papeis?limit=100` foi substituída por um leitor paginado que segue `next_cursor`, preserva a ordem da primeira ocorrência e elimina duplicatas por `id`. O estado é local a cada renderização do onboarding, portanto nova sessão/recarga refaz a leitura. A UI continua mostrando nomes, nunca exigindo UUID do papel.
+3. **Permissões do papel.** A seleção continua consultando `GET /v1/papeis/{id}/permissoes` e exibindo as permissões efetivas.
+4. **Idempotência.** O cliente aprovado não foi alterado: retry reutiliza a mesma intenção, `Idempotency-Key` e corpo.
+
+## Bloqueio objetivo do delta NFC
+
+O backend/OpenAPI publicado no `HEAD` consultado **não contém os dois contratos descritos como já disponíveis no pedido**:
+
+- o schema atual de `POST /v1/usuarios/onboarding` possui somente `nome`, `login`, `atribuicoes` e `motivo`, com `additionalProperties:false`; portanto enviar `nfc` hoje violaria o contrato;
+- `GET /v1/usuarios/{id}/nfc?limit=25&cursor=...` não existe no OpenAPI nem em `src/domain/operational-registration.ts`.
+
+O modelo correto `tv1_nfc` existe e os comandos canônicos atuais `POST /v1/terminal/v1/employee-nfc` e `POST /v1/terminal/v1/employee-nfc/{id}/revoke` permanecem publicados, com tag de 8–256 caracteres. Eles **não substituem** o requisito de onboarding atômico: o frontend não enviou um segundo POST após o cadastro e não usou `credencial(tipo=nfc)` como atalho.
+
+Por isso a UI NFC não foi simulada. Faltam no backend publicado:
+- extensão opcional `nfc:{unidade_id,tag}` no onboarding, executada na mesma transação de usuário + atribuições;
+- consulta administrativa paginada dos vínculos NFC do funcionário, incluindo ativos/revogados, sem expor tag ou digest.
+
+Assim que esses contratos estiverem efetivamente publicados no branch/OpenAPI, a integração de NFC pode ser feita sem redesenho: o cadastro continua em um único onboarding; a manutenção reutiliza os comandos canônicos `tv1_nfc`.
+
+## Verificação deste delta
+
+Foram executadas **29/29 verificações, 0 falhas**, sobre os blobs exatos da branch e o OpenAPI atual: escopo obrigatório, omissão/inclusão de `unidade_id`, paginação por cursor, preservação de ordem, deduplicação, nomes na UI, preview de permissões, idempotência, BFF sem Bearer no navegador, ausência de login humano e confirmação da incompatibilidade NFC publicada.
+
+Os testes de repositório `tests/frontend-operational-contract.test.mjs` e `tests/frontend-operational.test.mjs` foram atualizados. O workflow `verify.yml` não foi disparado porque é manual e consumiria runner/cota sem autorização explícita. E2E remoto não foi repetido.
+
+Evidência: [frontend-onboarding-nfc-delta.json](evidencias/frontend-onboarding-nfc-delta.json).
+
+---
+
 # MVP 11 — gestão manual de funcionários no DEV/ADM — 23/09/2026
 
 Delta sobre `f14cb9537468fa9bff443a4032137f7bdad27008`. Backend, banco/migrations e Terminal permaneceram congelados. O cadastro inicial do MVP 11 foi preservado e recebeu uma camada administrativa aditiva em `assets/system-v11-admin.js`.
