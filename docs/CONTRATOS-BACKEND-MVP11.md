@@ -17,6 +17,12 @@ POSTs exigem os headers Bearer e `Idempotency-Key` já existentes. Uma intençã
 
 ## Funcionário e atribuições
 
+Requisito explícito do usuário após a integração: cadastro e manutenção de funcionários/autorizações serão feitos manualmente pelo administrador na interface DEV/ADM, sem depender do chat, SQL ou edição de arquivos para cada operação. O cadastro inicial já está integrado no frontend; a manutenção posterior pela tela ainda precisa ser implementada/verificada pelo responsável. A instalação inicial de acesso administrativo e a credencial sintética de E2E não substituem essa jornada do produto.
+
+Aceite do painel administrativo: localizar funcionário, consultar seus dados/papéis/unidades, cadastrar, editar nome/login, acrescentar atribuição e revogar/restaurar atribuições existentes com motivo e histórico. Usar nomes compreensíveis, seleção de papéis/unidades e confirmação do escopo global, sem exigir digitação de UUIDs ou códigos de API. Preservar `acesso:administrar` global; não habilitar esse painel para qualquer usuário do DEV.
+
+Contratos de manutenção disponíveis: GET `/v1/usuarios`, GET/POST `/v1/usuarios/{id}/revisoes`, GET `/v1/atribuicoes`, POST `/v1/atribuicoes`, GET/POST `/v1/atribuicoes/{id}/revisoes`. Consultar schemas completos no OpenAPI; revisões exigem versão esperada e motivo. Alterar os componentes de um papel existente ou trocar múltiplas atribuições atomicamente não deve ser simulado com sucesso parcial: registrar a necessidade de contrato específico caso a UX solicite isso. Cadastro de funcionário continua separado de emissão de senha/login humano operacional.
+
 Corpo mínimo (UUIDs substituídos por placeholders):
 
 ```json
