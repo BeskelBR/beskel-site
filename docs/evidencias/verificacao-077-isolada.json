@@ -1,0 +1,85 @@
+{
+  "date": "2026-09-24",
+  "initialHead": "ccb935adc182da76aaf7e2ea1ce8006af81e3e9e",
+  "branch": "hvb-sistema-dev",
+  "local": {
+    "engine": "PostgreSQL 17.10",
+    "loopbackPort": 55434,
+    "autenticarDefinitionPreserved": true,
+    "privateConfiguration": "test.env outside workspace, owner-only ACL",
+    "directory": "C:/Users/Admin/AppData/Local/HVB/postgres-test-20260924/data",
+    "hotfixSource": "pg_get_functiondef from Supabase DEV",
+    "observedHotfixSha256": "2b8b856f7a772bb6b96cfb806cb04d994ef864ae185498d2a579c4d7e2f08017",
+    "migrations": 77,
+    "verifier": {
+      "passed": 14,
+      "credentialRevoked": true,
+      "blocked": 0,
+      "sessionClosed": true,
+      "previousTokenRefused": true,
+      "rollback": true,
+      "failed": 0
+    },
+    "regressions": {
+      "failed": 0,
+      "passed": 14,
+      "environmentOverride": "TEST variables inherited from new private test.env",
+      "command": "node --env-file=.env --test --test-concurrency=1 tests/database-runtime.test.ts tests/operational-registration.test.ts",
+      "includes": [
+        "health/ready",
+        "opaque Bearer/autenticar",
+        "RLS/transaction context/rollback",
+        "onboarding without NFC",
+        "onboarding with NFC"
+      ]
+    },
+    "existingClusterTouched": false,
+    "canonical077": "a7030dde974cf5072d0c9af0eedcb8502664f85fd09aae3c9a43da4f5d494eac"
+  },
+  "remote": {
+    "ddlApplied": false,
+    "catalogOrRolesChanged": false,
+    "humanProbe": {
+      "recovery": "BLOQUEADO POR CONFIGURACAO EXTERNA",
+      "consumption": "BLOQUEADO POR CONFIGURACAO EXTERNA",
+      "independentCatalogCheck": "acesso:administrar absent",
+      "passed": 5,
+      "existingOpaqueBearer": "PASS",
+      "failed": 1,
+      "failure": "fixture_admin_permission",
+      "rollback": true
+    },
+    "transport": "Node/pg verify-full",
+    "existingRemoteVerifier": {
+      "httpHealth": "PASS",
+      "blocked": 1,
+      "transactionContextRollback": "PASS",
+      "httpReady": "PASS",
+      "passed": 11,
+      "blocker": "HVB_E2E_API_TOKEN absent in env; token exists in separate private fixture used by human probe",
+      "runtimeCapabilities": "PASS",
+      "tls": "TLSv1.3",
+      "failed": 0
+    }
+  },
+  "integrity": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "format": "PASS"
+  },
+  "files": [
+    {
+      "sha256": "d0936a02e5b39f279c009afeb70cd65e11e5bc6633bbc4d83c8afd6f837a68ec",
+      "path": "scripts/verify-human-access-077.ts"
+    },
+    {
+      "sha256": "9289b2209afec187194f19de9b739e85024cd77cfe7496948cbc7477484cf014",
+      "path": "scripts/verify-human-access-remote.ts"
+    }
+  ],
+  "newHumanHttpHandlers": false,
+  "frontendChanged": false,
+  "terminalC18Changed": false,
+  "migrations001to077Changed": false,
+  "migration078Created": false
+}

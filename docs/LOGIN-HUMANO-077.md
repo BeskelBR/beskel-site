@@ -1,5 +1,37 @@
 # Login humano CPF — incorporação canônica e bloqueios
 
+## Atualização vigente — instância isolada e hotfix observado, 24/09/2026
+
+HEAD inicial: `ccb935adc182da76aaf7e2ea1ce8006af81e3e9e`, árvore limpa. Autorização específica do usuário: criar banco local fora de OneDrive, instalar 001–077 literalmente e reproduzir o hotfix já aplicado pelo banco, sem migration 078. Nenhum arquivo do cluster anterior foi movido/apagado, nem seu serviço interrompido.
+
+Nova instância PostgreSQL 17.10: `C:/Users/Admin/AppData/Local/HVB/postgres-test-20260924/data`, apenas loopback, porta 55434. Pasta com ACL restrita ao usuário; segredos em `test.env` privado nessa pasta, fora do repositório. O `.env` existente não foi alterado: `TEST_MIGRATION_DATABASE_URL` e `TEST_DATABASE_URL` privados são carregados no ambiente do processo, prevalecendo sobre `--env-file=.env`. `hvb_app` é NOLOGIN; runtime LOGIN herda seus privilégios sem poderes elevados.
+
+As 77 migrations foram aplicadas pelo runner existente. Depois, apenas as definições observadas de `acesso_humano_consumir_senha_temporaria` e `acesso_humano_emitir_senha_temporaria`, obtidas por `pg_get_functiondef` no Supabase, foram reproduzidas localmente. Sem reconstrução inferida, edição de 077 ou novo registro 078. Snapshot local ignorado pelo Git: `.local/human-access-hotfix-observed.sql`, SHA-256 `2b8b856f7a772bb6b96cfb806cb04d994ef864ae185498d2a579c4d7e2f08017`. Definição de `hvb.autenticar` idêntica antes/depois.
+
+| Verificação deste recorte | Resultado |
+|---|---|
+| `node --env-file=.env scripts/verify-human-access-077.ts`, com variáveis privadas herdadas via `.local/run-isolated-checks.mjs` | **14 PASS / 0 FAIL / 0 BLOCKED**, rollback; credencial revogada, sessão encerrada e token anterior recusado |
+| `node --env-file=.env --test --test-concurrency=1 tests/database-runtime.test.ts tests/operational-registration.test.ts`, mesmo ambiente isolado | **14 PASS / 0 FAIL**: health/ready, Bearer, herança, RLS/contexto/rollback, onboarding com e sem NFC e regressões operacionais |
+| TypeScript e lint/formato dos arquivos afetados | **PASS** |
+| `node scripts/verify-human-access-remote.ts <arquivo-privado>` | **5 PASS / 1 FAIL de preparação**, rollback: TLS real, 077 canônica e Bearer da fixture funcionam; fixture não tem `acesso:administrar` |
+| Consulta independente do catálogo remoto | `acesso:administrar` **ausente**; não foi inserida por este chat |
+| `node scripts/verify-remote-dev.ts <arquivo-privado>` | **11 PASS**, incluindo TLS 1.3, runtime, contexto/rollback e HTTP health/ready; etapa HTTP autenticada BLOCKED porque esse script lê `HVB_E2E_API_TOKEN`, ausente no env, enquanto a fixture fornecida guarda o token em arquivo separado. O novo verificador já lê essa fixture e confirmou o Bearer via `hvb.autenticar` |
+| Consumo/recuperação humanos pelo Node/pg remoto | **BLOQUEADO POR CONFIGURAÇÃO EXTERNA**, antes da emissão, pela preparação RBAC da fixture |
+| Endpoints HTTP humanos e email real | **NÃO IMPLEMENTADOS/NÃO EXECUTADOS neste recorte**, aguardando aprovação também da jornada remota |
+
+O defeito 42702 e a falta de revogação estão resolvidos **no estado reproduzido e testado localmente**, com funções recuperadas do remoto. Isso não substitui a execução completa pelo runtime remoto. A prova de sessão encerrada foi leitura administrativa no teste local; o runtime remoto não recebe leitura das tabelas privadas.
+
+Pedido atual ao banco:
+
+```text
+O novo teste isolado passou 14/0/0, e as 14 regressões existentes passaram. Node/pg Supabase verify-full, /ready e Bearer da fixture estão funcionando.
+A jornada humana remota parou antes da emissão: hvb.permissao não contém acesso:administrar e o administrador sintético tenant_a do e2e-fixture.json não dispõe dessa permissão global.
+Prepare o catálogo/permissão e a atribuição global SOMENTE para o administrador sintético dessa fixture, conforme o contrato já existente. Não alterar migrations 001–077, não criar 078, não conceder acesso direto às tabelas privadas nem poderes de superusuário. Nenhum segredo precisa ser reenviado; os arquivos privados atuais estão acessíveis.
+Informe quando a fixture estiver pronta para repetir scripts/verify-human-access-remote.ts. Nenhuma mudança no frontend/NFC é necessária para este bloqueio.
+```
+
+Evidência: [verificacao-077-isolada.json](evidencias/verificacao-077-isolada.json). As seções seguintes preservam o histórico anterior; pedidos de criar novo cluster/corrigir funções já foram atendidos neste recorte.
+
 ## Atualização vigente — preparação do verificador e TLS, 24/09/2026
 
 HEAD inicial deste recorte: `ff9e178325bc7ac5534930076aada44fc83f7583`, árvore inicialmente limpa. Os resultados históricos abaixo permanecem como evidência da execução anterior; não são resultados do verificador atualizado.
