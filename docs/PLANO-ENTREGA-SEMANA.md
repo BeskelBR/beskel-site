@@ -44,6 +44,23 @@ Próxima frente: responsável pelo banco resolve a confiança TLS e a fixture pr
 
 ## Uso de cota e coordenação
 
+### Fechamento do backend — estimativa de planejamento
+
+Revisão em 23/09, após o primeiro E2E remoto. O núcleo básico e os contratos backend MVP 11 estão implementados e verificados localmente. A leitura da configuração privada confirmou que CA explícita e credencial HVB sintética ainda não foram disponibilizadas; por isso não se repetiu a conexão TLS que já falhou. O estado remoto relatado pelo banco não substitui a validação pelo cliente da API.
+
+| Marco restante | Critério de fechamento | Responsável/dependência |
+|---|---|---|
+| Conexão e identidade DEV | TLS validado, /ready remoto e identidade/contexto HVB confirmados | Banco disponibiliza CA e credencial sintética no arquivo privado; backend executa o verificador |
+| Jornada integrada do piloto | Paciente/episódio/evolução e contratos operacionais funcionam entre interface, API e banco, com permissões e retry preservados | Backend e frontend verificam seus blocos; dados sintéticos preparados pelo responsável, sem seed remoto por inferência |
+| Correções de entrega | Defeitos bloqueadores reproduzidos corrigidos; evidências vinculadas à versão; pendências restantes explícitas | Cada chat altera apenas seu bloco; não refazer suítes já válidas sem mudança ou falha |
+| Backend para ambiente hospedado | Login humano/credenciais operacionais definidos e implementados, API adequada ao destino escolhido, configuração e integração validadas | Provedor de identidade e hospedagem da API ainda precisam de definição; sessão/BFF e configuração do banco continuam com seus responsáveis |
+
+Estimativa condicional para **fechar o backend do piloto DEV**: 2–4 sessões focadas, tipicamente distribuídas em 1–2 dias úteis após receber a configuração privada completa, se não aparecerem defeitos estruturais. Isso não é uma contagem de mensagens, execuções de cota ou garantia de prazo.
+
+Para **backend utilizável em ambiente hospedado com login humano**, reservar adicionalmente 3–5 dias úteis de trabalho coordenado após definir identidade e hospedagem, supondo provedor existente e sem arquitetura de autenticação própria. É uma faixa preliminar de baixa confiança; revisar ao receber essas escolhas. Tempo de espera por configuração/decisões e implementação dos outros blocos não está embutido como se fosse programação deste chat. Não prometer entrega operacional nesta semana com essas dependências abertas.
+
+O backlog hospitalar completo (fusão de cadastros, correções adicionais, integrações externas, políticas reais, hardware etc.) não faz parte dessa estimativa e permanece registrado. Fechar o piloto não significa concluir todo esse backlog. Próxima ação executável é a retomada do verificador remoto após o retorno do banco; não abrir novos módulos para ocupar o período de espera.
+
 - A cota disponível será dedicada a este projeto, conforme o usuário. Reservar aproximadamente 25% da disponibilidade restante para integração, regressões e correções finais; isso é uma regra de planejamento, não limite automático da plataforma.
 - Medir cota em marcos relevantes, não a cada comando. Não prometer uma conversão fixa entre porcentagem de cota e número de execuções.
 - Trabalhar em entregas agrupadas e verificáveis. Evitar alternância repetida entre refinamentos sem concluir a jornada.
