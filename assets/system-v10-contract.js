@@ -49,8 +49,10 @@ export function resolveUnit(context, savedUnitId) {
 
 export function assignmentPayload(roleId, scope, unitId) {
   if (!roleId) throw new Error("papel_obrigatorio");
+  if (!scope) throw new Error("escopo_obrigatorio");
   if (scope === "global") return { papel_id: roleId };
-  if (scope !== "unidade" || !unitId) throw new Error("unidade_obrigatoria");
+  if (scope !== "unidade") throw new Error("escopo_invalido");
+  if (!unitId) throw new Error("unidade_obrigatoria");
   return { papel_id: roleId, unidade_id: unitId };
 }
 
