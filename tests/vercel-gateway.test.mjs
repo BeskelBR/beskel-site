@@ -35,9 +35,10 @@ test("Vercel gateway preserves DEV-only database constraints", async () => {
     new URL("../api/gateway.ts", import.meta.url),
     "utf8",
   );
-  assert.match(gateway, /HVB_DATABASE_MODE !== "remote-dev"/);
-  assert.match(gateway, /HVB_DATABASE_TLS !== "verify-full"/);
-  assert.match(gateway, /HVB_DATABASE_CONNECTION/);
+  assert.match(gateway, /HVB_DATABASE_MODE: "remote-dev"/);
+  assert.match(gateway, /HVB_DATABASE_TLS: "verify-full"/);
+  assert.match(gateway, /HVB_DATABASE_CONNECTION:/);
+  assert.match(gateway, /process\.env\.DATABASE_URL/);
   assert.doesNotMatch(gateway, /rejectUnauthorized\s*:\s*false/);
   assert.doesNotMatch(gateway, /NODE_TLS_REJECT_UNAUTHORIZED\s*=\s*"0"/);
 });
