@@ -1,3 +1,19 @@
+# DEV hospedado — BFF /session + API same-origin — 24/09/2026
+
+Correção de hospedagem do ambiente `https://hvb-sistema-dev.beskel.com.br` aplicada sem alterar domínio backend, banco/Supabase, migrations, Terminal/C18 ou login humano.
+
+O Vercel agora encaminha `/session`, `/ready`, `/health` e `/v1/*` para `api/gateway.ts`. O gateway instancia o Fastify existente no servidor e usa o Supabase DEV via configuração privada. O navegador continua acessando somente a mesma origem e nunca recebe o Bearer da API.
+
+Para evitar depender de memória de processo em funções serverless, a sessão HTTPS hospedada é selada com AES-256-GCM em cookie `HttpOnly; Secure; SameSite=Strict`. O conteúdo do Bearer permanece cifrado e é reconstituído apenas no servidor. A sessão mantém 15 minutos de inatividade e uma hora de duração absoluta; 401 da API limpa o cookie.
+
+`scripts/frontend.mjs`, `scripts/web-session.mjs` e `assets/web-session.js` foram preservados. O fluxo local continua disponível sem mudanças.
+
+O gateway exige `HVB_DATABASE_MODE=remote-dev`, `HVB_DATABASE_TLS=verify-full` e uma conexão declarada `direct|session|transaction`. Não existe relaxamento de TLS. `HVB_WEB_SESSION_SECRET` pode ser usado como chave dedicada; no DEV, quando ausente, a chave é derivada de forma separada da `DATABASE_URL` privada para manter estabilidade entre instâncias sem versionar segredo.
+
+Verificação: 20/20 checks estruturais, 3/3 testes Node da sessão selada e deployment Vercel concluído com sucesso no commit `51a2b1b41109b8a588cd43ff784238a1efdc6b89`. A conexão Vercel disponível neste chat não possui autorização ao team `beskel`, portanto runtime logs e uma chamada HTTP pós-deploy ainda não puderam ser observados por esta sessão. Nenhum segredo foi copiado para Git. Evidência: [dev-hosting-bff.json](evidencias/dev-hosting-bff.json).
+
+---
+
 # MVP 11 — NFC integrado ao cadastro e manutenção — 24/09/2026
 
 Base integrada: `d4d63315b259d93605e5003f734d21dfe2a3e1f8`, que já continha o delta backend de NFC. Backend, banco/Supabase, BFF `/session`, Terminal/C18 e login humano permaneceram sem edição neste bloco.
