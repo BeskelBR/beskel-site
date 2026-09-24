@@ -3,6 +3,8 @@ import {
   assignmentPayload,
   canUseGlobal,
   canUseUnit,
+  hasTerminalAccess,
+  onboardingNfc,
   operationalFlows,
   readAllPages,
   resolveUnit,
@@ -293,8 +295,84 @@ if (detailView && detailHead) {
 
     const assignmentList = el("div", "operational-assignment-list wide");
 
+    const nfcChoice = select("vincular_nfc");
+    option(nfcChoice, "nao", "Não");
+    option(nfcChoice, "sim", "Sim");
+
+    const nfcUnit = select("nfc_unidade_id");
+    option(nfcUnit, "", "Selecione a unidade do cartão");
+    for (const item of ctx.unidades || [])
+      option(nfcUnit, item.id, item.nome || "Unidade sem nome");
+    nfcUnit.disabled = true;
+
+    const nfcTag = input("nfc_tag", "Identificador recebido do cartão");
+    nfcTag.minLength = 8;
+    nfcTag.maxLength = 256;
+    nfcTag.disabled = true;
+    nfcTag.autocapitalize = "off";
+    nfcTag.autocorrect = "off";
+    nfcTag.spellcheck = false;
+
+    const nfcStatus = note(
+      "Cartão NFC",
+      "Nenhum cartão será vinculado neste cadastro.",
+    );
+    nfcStatus.classList.add("wide");
+
+    const nfcBox = el("div", "operational-nfc wide");
+    nfcBox.hidden = true;
+    nfcBox.append(
+      field("Unidade do cartão", nfcUnit),
+      field("Tag NFC", nfcTag),
+      nfcStatus,
+    );
+
+    function updateNfcStatus() {
+      nfcTag.setCustomValidity("");
+      if (nfcChoice.value !== "sim") {
+        nfcStatus.className = "operational-note wide";
+        nfcStatus.querySelector("span").textContent =
+          "Nenhum cartão será vinculado neste cadastro.";
+        return;
+      }
+      if (!nfcUnit.value) {
+        nfcStatus.className = "operational-note warn wide";
+        nfcStatus.querySelector("span").textContent =
+          "Selecione a unidade em que este cartão será usado.";
+        return;
+      }
+      if (!hasTerminalAccess(assignments, nfcUnit.value)) {
+        nfcStatus.className = "operational-note warn wide";
+        nfcStatus.querySelector("span").textContent =
+          "As autorizações adicionadas não concedem terminal:acessar nesta unidade nem globalmente. O cadastro pode continuar sem NFC.";
+        nfcTag.setCustomValidity(
+          "O funcionário precisa receber terminal:acessar nesta unidade ou globalmente para vincular NFC.",
+        );
+        return;
+      }
+      nfcStatus.className = "operational-note wide";
+      nfcStatus.querySelector("span").textContent =
+        "terminal:acessar confirmado para esta unidade pelas autorizações adicionadas.";
+    }
+
+    nfcChoice.addEventListener("change", () => {
+      const enabled = nfcChoice.value === "sim";
+      nfcBox.hidden = !enabled;
+      nfcUnit.disabled = !enabled;
+      nfcUnit.required = enabled;
+      nfcTag.disabled = !enabled;
+      nfcTag.required = enabled;
+      if (!enabled) {
+        nfcUnit.value = "";
+        nfcTag.value = "";
+      }
+      updateNfcStatus();
+    });
+    nfcUnit.addEventListener("change", updateNfcStatus);
+
     function renderAssignments() {
       assignmentList.replaceChildren();
+      updateNfcStatus();
       if (!assignments.length) {
         assignmentList.append(
           el(
@@ -436,6 +514,8 @@ if (detailView && detailHead) {
       permissionPreview,
       addAssignment,
       assignmentList,
+      field("Vincular cartão NFC agora?", nfcChoice, true),
+      nfcBox,
     );
 
     const confirm = checkbox(
@@ -452,7 +532,7 @@ if (detailView && detailHead) {
       el(
         "small",
         "",
-        "O onboarding não cria senha, NFC, credencial API ou identidade humana.",
+        "O onboarding pode vincular NFC na mesma transação, mas não cria senha, credencial web ou identidade humana.",
       ),
     );
 
@@ -497,6 +577,12 @@ if (detailView && detailHead) {
           throw Object.assign(new Error("adicione_uma_autorizacao"), {
             status: 400,
           });
+        const nfc = onboardingNfc(
+          nfcChoice.value === "sim",
+          nfcUnit.value,
+          nfcTag.value,
+          assignments,
+        );
         return {
           nome: name.value.trim(),
           login: login.value.trim(),
@@ -505,13 +591,14 @@ if (detailView && detailHead) {
             papel_id,
             ...(unidade_id ? { unidade_id } : {}),
           })),
+          ...(nfc ? { nfc } : {}),
         };
       },
       onSuccess: async (result) => {
         const count = result.atribuicao_ids?.length || 0;
         setFeedback(
           feedback,
-          `Funcionário cadastrado: ${result.usuario_id || result.id}. ${count} autorização(ões). Nenhuma credencial foi criada.`,
+          `Funcionário cadastrado: ${result.usuario_id || result.id}. ${count} autorização(ões). ${result.nfc_id ? "Cartão NFC vinculado." : "Sem cartão NFC."}`,
           "success",
         );
         form.reset();
@@ -521,6 +608,15 @@ if (detailView && detailHead) {
         unit.value = "";
         unit.disabled = true;
         unit.required = false;
+        nfcChoice.value = "nao";
+        nfcUnit.value = "";
+        nfcUnit.disabled = true;
+        nfcUnit.required = false;
+        nfcTag.value = "";
+        nfcTag.disabled = true;
+        nfcTag.required = false;
+        nfcBox.hidden = true;
+        updateNfcStatus();
         permissionPreview.querySelector("span").textContent =
           "Selecione um papel para consultar os códigos efetivos.";
       },
