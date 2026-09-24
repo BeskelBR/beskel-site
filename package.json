@@ -19,9 +19,9 @@
     "db:seed:clinical": "node --env-file=.env scripts/seed-clinical.ts",
     "db:seed:daily": "node --env-file=.env scripts/seed-daily.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "biome lint src scripts tests",
-    "format": "biome format --write src scripts tests package.json tsconfig.json biome.json",
-    "format:check": "biome format src scripts tests package.json tsconfig.json biome.json",
+    "lint": "biome lint src scripts api tests",
+    "format": "biome format --write src scripts api tests package.json tsconfig.json biome.json",
+    "format:check": "biome format src scripts api tests package.json tsconfig.json biome.json",
     "test": "node --test tests/unit.test.ts",
     "test:frontend": "node --test tests/frontend-server.test.mjs",
     "test:web-session": "node --test tests/web-session.test.mjs",
@@ -79,7 +79,8 @@
     "db:seed:daily-corrections": "node --env-file=.env scripts/seed-daily-corrections.ts",
     "check:terminal-v1": "node scripts/check.mjs --terminal-v1",
     "check:financial-corrections": "node scripts/check.mjs --financial-corrections",
-    "db:seed:financial-corrections": "node --env-file=.env scripts/seed-financial-corrections.ts"
+    "db:seed:financial-corrections": "node --env-file=.env scripts/seed-financial-corrections.ts",
+    "test:hosted-session": "node --test tests/hosted-session.test.ts"
   },
   "dependencies": {
     "@fastify/swagger": "9.8.1",
