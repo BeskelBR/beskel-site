@@ -41,6 +41,30 @@ if (detailView && detailHead) {
     return context;
   }
 
+  async function readAllPages(path, limit = 100) {
+    const items = [];
+    const seen = new Set();
+    let cursor = null;
+    let pages = 0;
+    do {
+      const url = new URL(path, location.origin);
+      url.searchParams.set("limit", String(limit));
+      if (cursor) url.searchParams.set("cursor", cursor);
+      else url.searchParams.delete("cursor");
+      const response = await client.read(`${url.pathname}${url.search}`);
+      for (const item of response.items || []) {
+        if (!item?.id || seen.has(item.id)) continue;
+        seen.add(item.id);
+        items.push(item);
+      }
+      cursor = response.next_cursor || null;
+      pages += 1;
+      if (pages > 1000)
+        throw Object.assign(new Error("paginacao_excedida"), { status: 503 });
+    } while (cursor);
+    return items;
+  }
+
   function el(tag, className, text) {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -242,7 +266,7 @@ if (detailView && detailHead) {
       return;
     }
 
-    const roles = (await client.read("/v1/papeis?limit=100")).items || [];
+    const roles = await readAllPages("/v1/papeis", 100);
     if (version !== renderVersion || activeModule() !== "administracao") return;
 
     const roleById = new Map(roles.map((item) => [item.id, item]));
@@ -274,15 +298,18 @@ if (detailView && detailHead) {
     for (const item of roles) option(role, item.id, item.nome || item.id);
 
     const scope = select("escopo");
+    scope.required = true;
+    option(scope, "", "Selecione o escopo...");
     option(scope, "unidade", "Somente uma unidade");
     option(scope, "global", "Todas as unidades da organização");
 
     const unit = select("unidade_id");
     option(unit, "", "Selecione uma unidade");
     for (const item of ctx.unidades || [])
-      option(unit, item.id, item.nome || item.id);
+      option(unit, item.id, item.nome || "Unidade sem nome");
+    unit.disabled = true;
+    unit.required = false;
     const activeUnit = resolveUnit(ctx, localStorage.getItem("hvb-unit-id"));
-    if (activeUnit) unit.value = activeUnit;
 
     const permissionPreview = note(
       "Permissões do papel",
@@ -367,17 +394,21 @@ if (detailView && detailHead) {
     });
 
     scope.addEventListener("change", () => {
-      const global = scope.value === "global";
-      unit.disabled = global;
-      unit.required = !global;
+      const byUnit = scope.value === "unidade";
+      unit.disabled = !byUnit;
+      unit.required = byUnit;
+      if (!byUnit) unit.value = "";
     });
-    unit.required = true;
 
     const addAssignment = el("button", "secondary-btn", "Adicionar autorização");
     addAssignment.type = "button";
     addAssignment.addEventListener("click", async () => {
       if (!role.value) {
         role.reportValidity();
+        return;
+      }
+      if (!scope.value) {
+        scope.reportValidity();
         return;
       }
       if (scope.value === "unidade" && !unit.value) {
@@ -507,9 +538,10 @@ if (detailView && detailHead) {
         form.reset();
         assignments.splice(0);
         renderAssignments();
-        if (activeUnit) unit.value = activeUnit;
-        unit.disabled = false;
-        unit.required = true;
+        scope.value = "";
+        unit.value = "";
+        unit.disabled = true;
+        unit.required = false;
         permissionPreview.querySelector("span").textContent =
           "Selecione um papel para consultar os códigos efetivos.";
       },
