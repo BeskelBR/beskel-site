@@ -11,6 +11,7 @@ import {
 } from "../assets/system-v10-contract.js";
 
 test("MVP 11 contrato: escopos e atribuição global", () => {
+  assert.throws(() => assignmentPayload("papel", "", ""), /escopo_obrigatorio/);
   const context = {
     permissoes_globais: ["estoque:ler", "estoque:catalogar"],
     unidades: [
