@@ -1,5 +1,28 @@
 {
   "cleanUrls": true,
+  "functions": {
+    "api/gateway.ts": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/session",
+      "destination": "/api/gateway?hvb_path=/session"
+    },
+    {
+      "source": "/health",
+      "destination": "/api/gateway?hvb_path=/health"
+    },
+    {
+      "source": "/ready",
+      "destination": "/api/gateway?hvb_path=/ready"
+    },
+    {
+      "source": "/v1/:path*",
+      "destination": "/api/gateway?hvb_path=/v1/:path*"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
