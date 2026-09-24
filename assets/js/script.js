@@ -7,7 +7,7 @@ const PHONE_HREF = CONFIG.phoneHref || "tel:61991668921";
 const CONTACT_EMAIL = CONFIG.email || "contato@beskel.com.br";
 const INSTAGRAM_USER = CONFIG.instagramUser || "beskelbr";
 const INSTAGRAM_URL = CONFIG.instagramUrl || "https://instagram.com/beskelbr";
-const IS_LIGHT_SURFACE = document.body.classList.contains("home-light") || document.body.classList.contains("lab-light");
+const IS_LIGHT_SURFACE = document.body.classList.contains("home-light") || document.body.classList.contains("lab-light") || document.body.classList.contains("site-light");
 const BRAND_SYMBOL = IS_LIGHT_SURFACE ? "/assets/img/beskel-symbol-master-light.svg" : "/assets/img/beskel-symbol-master-dark.svg";
 const BRAND_LOGO = IS_LIGHT_SURFACE ? "/assets/img/beskel-logo-master-light.svg" : "/assets/img/beskel-logo-master-dark.svg";
 
