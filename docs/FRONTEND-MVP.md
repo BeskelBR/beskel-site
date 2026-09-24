@@ -1,3 +1,42 @@
+# MVP 11 — gestão manual de funcionários no DEV/ADM — 23/09/2026
+
+Delta sobre `f14cb9537468fa9bff443a4032137f7bdad27008`. Backend, banco/migrations e Terminal permaneceram congelados. O cadastro inicial do MVP 11 foi preservado e recebeu uma camada administrativa aditiva em `assets/system-v11-admin.js`.
+
+## Operação entregue
+
+O painel **Administração** agora permite localizar funcionários por nome ou login, selecionar um cadastro existente, editar nome/login por revisão versionada, consultar papéis e permissões, visualizar a unidade vinculada a cada atribuição, adicionar atribuições, revogar/restaurar atribuições e consultar o histórico das revisões.
+
+A interface pagina integralmente `GET /v1/usuarios`, `GET /v1/papeis`, `GET /v1/unidades` e `GET /v1/atribuicoes`, apresentando ao operador apenas nomes e rótulos compreensíveis. Nenhum UUID precisa ser digitado. Atribuição global exige escolha explícita entre **uma unidade específica** e **todas as unidades da organização**; `unidade_id` é omitido quando o escopo é global.
+
+Edição de funcionário usa `GET/POST /v1/usuarios/{id}/revisoes` com `versao_esperada`, `motivo`, `simulacao:true` e `confirmacao_humana:true`. Revogação/restauração usa `GET/POST /v1/atribuicoes/{id}/revisoes` com os mesmos controles de versão/justificativa. O estado é recarregado após confirmação; conflito de versão não é tratado como sucesso.
+
+A criação de novas atribuições usa `POST /v1/atribuicoes`. Se a mesma combinação papel + escopo já estiver ativa, a UI recusa duplicação. Se existir revogada, orienta a restaurar a atribuição existente em vez de criar outra.
+
+O histórico combina revisões cadastrais e revisões de atribuições, mostrando papel, unidade/escopo global, autor por nome quando disponível, data, versão e motivo.
+
+## Sessão e idempotência
+
+A camada ADM usa exclusivamente `window.HVBSession.fetch`. O Bearer continua no BFF `/session` e não aparece no navegador.
+
+Cada escrita é preparada uma única vez via cliente idempotente existente. Em falha ambígua, a mesma intenção — portanto a mesma `Idempotency-Key` e o mesmo corpo — é preservada para retry. Uma confirmação remove imediatamente o retry pendente.
+
+## Limites contratuais constatados
+
+1. `POST /v1/atribuicoes` **não aceita `motivo`** no schema atual. Assim, a concessão inicial pode ser criada e auditada pelo comando normal, mas não possui motivo estruturado no histórico de revisões. Revogação/restauração têm motivo normalmente. Se o produto exigir motivo explícito também na concessão inicial, falta contrato de backend.
+2. `GET /v1/usuarios` não oferece `q` e `GET /v1/atribuicoes` não oferece filtro por `usuario_id`. O painel DEV percorre todas as páginas e filtra localmente. Isso não bloqueia a operação atual, mas é uma limitação de escala real.
+
+Nenhuma permissão foi ampliada por inferência. A dependência `locais:ler` do fluxo de estoque permanece como já registrada e não foi alterada neste delta.
+
+## Verificação
+
+Foram executadas **35/35 verificações** no runtime isolado do conector sobre os blobs exatos do branch: sintaxe, busca, escopo global explícito, schemas de revisão, versão/motivo/confirmação humana, endpoints, BFF, ausência de Bearer/SQL/UUID manual, operações de atribuição, histórico, retry e contratos efetivos do backend.
+
+Também foram adicionados os testes de repositório `tests/frontend-admin-contract.test.mjs` e `tests/frontend-admin.test.mjs`. O workflow GitHub `verify.yml` é manual; ele não foi disparado porque isso consumiria runner/cota sem autorização explícita. O E2E remoto também não foi repetido: permanecem os bloqueios externos já registrados (`SELF_SIGNED_CERT_IN_CHAIN` e ausência da credencial HVB sintética).
+
+Evidência: [frontend-admin-mvp11.json](evidencias/frontend-admin-mvp11.json).
+
+---
+
 # MVP 11 — contratos operacionais integrados — 23/09/2026
 
 Integração do contrato publicado pelo backend em `8ba6c2d2a18121f721e54c51d3e3d7caac9536ef`. Backend, banco/migrations e Terminal não foram alterados por esta etapa. A interface ativa passou de `assets/system-v9.js` para `assets/system-v10.js`; o MVP 10 de sessão/BFF permanece a base.
