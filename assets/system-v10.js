@@ -295,7 +295,7 @@ if (detailView && detailHead) {
     const role = select("papel_id");
     role.required = true;
     option(role, "", "Selecione um papel");
-    for (const item of roles) option(role, item.id, item.nome || item.id);
+    for (const item of roles) option(role, item.id, item.nome || "Papel sem nome");
 
     const scope = select("escopo");
     scope.required = true;
@@ -309,8 +309,6 @@ if (detailView && detailHead) {
       option(unit, item.id, item.nome || "Unidade sem nome");
     unit.disabled = true;
     unit.required = false;
-    const activeUnit = resolveUnit(ctx, localStorage.getItem("hvb-unit-id"));
-
     const permissionPreview = note(
       "Permissões do papel",
       "Selecione um papel para consultar os códigos efetivos.",
@@ -343,7 +341,7 @@ if (detailView && detailHead) {
             "span",
             "",
             item.unidade_id
-              ? `Unidade: ${unitById.get(item.unidade_id)?.nome || item.unidade_id}`
+              ? `Unidade: ${unitById.get(item.unidade_id)?.nome || "Unidade não disponível"}`
               : "Escopo: todas as unidades da organização",
           ),
           el(
@@ -441,6 +439,10 @@ if (detailView && detailHead) {
         }
         assignments.push({ ...payload, permissoes: permissions });
         renderAssignments();
+        scope.value = "";
+        unit.value = "";
+        unit.disabled = true;
+        unit.required = false;
       } catch {
         permissionPreview.querySelector("span").textContent =
           "Não foi possível adicionar a autorização.";
