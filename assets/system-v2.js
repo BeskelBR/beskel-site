@@ -126,7 +126,7 @@
     if (activeUnit && !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(activeUnit)) { setFeedback("O identificador da unidade deve ser um UUID válido.", "error"); return; }
     submit.disabled = true; setFeedback("Validando credencial…");
     try { await authenticate(candidate); setFeedback(""); }
-    catch (error) { sessionStorage.removeItem("hvb-session-view"); if (error.status === 401) setFeedback("Credencial inválida, revogada ou expirada.", "error"); else if (error.status === 403) setFeedback("A credencial é válida, mas não possui acesso a este ambiente.", "error"); else setFeedback("Não foi possível conectar ao backend configurado. Verifique a API e o ambiente DEV.", "error"); }
+    catch (error) { sessionStorage.removeItem("hvb-session-view"); if (error.status === 401) setFeedback("Credencial inválida, revogada ou expirada.", "error"); else if (error.status === 403) setFeedback("A credencial é válida, mas não possui acesso a este ambiente.", "error"); else if (error.status === 502 || error.status === 503) setFeedback("O BFF DEV respondeu, mas a API/banco remoto ainda não está pronta no runtime hospedado.", "error"); else setFeedback("Não foi possível conectar ao backend configurado. Verifique a API e o ambiente DEV.", "error"); }
     finally { tokenInput.value = ""; submit.disabled = false; }
   });
 
