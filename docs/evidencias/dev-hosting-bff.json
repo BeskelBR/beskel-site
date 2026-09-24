@@ -1,0 +1,68 @@
+{
+  "data": "2026-09-24",
+  "branch": "hvb-sistema-dev",
+  "base_sha": "a24bf2bdce2615a35120c969b345fae9f8ba1f04",
+  "implementation_head": "51a2b1b41109b8a588cd43ff784238a1efdc6b89",
+  "objetivo": "publicar BFF /session + /v1/* same-origin no DEV sem expor Bearer no navegador",
+  "arquivos": [
+    "api/gateway.ts",
+    "scripts/hosted-session.ts",
+    "vercel.json",
+    "tsconfig.json",
+    "package.json",
+    "tests/hosted-session.test.ts",
+    "tests/vercel-gateway.test.mjs"
+  ],
+  "arquitetura": {
+    "browser": "https://hvb-sistema-dev.beskel.com.br",
+    "session": "/session -> Vercel gateway",
+    "api": "/v1/* -> Vercel gateway -> Fastify interno -> Supabase DEV",
+    "bearer": "somente no servidor; cookie contem sessao autenticada cifrada, HttpOnly/Secure/SameSite=Strict",
+    "local_bff": "scripts/frontend.mjs e scripts/web-session.mjs preservados sem alteracao"
+  },
+  "seguranca": {
+    "host_dev": "hvb-sistema-dev.beskel.com.br",
+    "origin": "same-origin HTTPS exigido para metodos mutaveis",
+    "tls_database": "HVB_DATABASE_TLS=verify-full obrigatorio",
+    "database_mode": "remote-dev obrigatorio",
+    "session_key": "HVB_WEB_SESSION_SECRET quando configurado; no DEV, fallback domain-separated derivado de DATABASE_URL privada",
+    "browser_storage": "nenhum Bearer em localStorage/sessionStorage/IndexedDB",
+    "session_limits": "15 min inatividade; 60 min absoluta",
+    "logout": "cookie removido no servidor",
+    "api_401": "cookie removido e sessao encerrada"
+  },
+  "verificacoes": {
+    "static_runtime_v8": {
+      "pass": 20,
+      "fail": 0
+    },
+    "node_exact_blobs": {
+      "command": "node --experimental-strip-types --test tests/hosted-session.test.ts",
+      "node": "v22.16.0",
+      "pass": 3,
+      "fail": 0,
+      "blob_match": {
+        "scripts/hosted-session.ts": "8a70bb9725ab2bc6de0674157c8b2b9b34b091db",
+        "tests/hosted-session.test.ts": "a692100816bd262d606fe12f63cb715d07c7e866"
+      }
+    },
+    "vercel": {
+      "status": "success",
+      "description": "Deployment has completed",
+      "commit": "51a2b1b41109b8a588cd43ff784238a1efdc6b89"
+    }
+  },
+  "limites_de_evidencia": [
+    "A conexao Vercel deste chat nao tem autorizacao ao team beskel; runtime logs e fetch autenticado do deployment nao puderam ser lidos.",
+    "O deploy/build foi confirmado pelo status Vercel no GitHub, mas /session com banco remoto ainda precisa de verificacao HTTP no dominio publicado.",
+    "Nenhum segredo foi copiado para Git ou para o frontend."
+  ],
+  "preservado": [
+    "src/ backend de dominio sem alteracao",
+    "banco/Supabase e migrations sem alteracao",
+    "Terminal/C18 sem alteracao",
+    "assets/web-session.js sem alteracao",
+    "scripts/frontend.mjs e scripts/web-session.mjs locais sem alteracao",
+    "login humano sem implementacao"
+  ]
+}
