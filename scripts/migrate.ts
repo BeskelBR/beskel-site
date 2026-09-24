@@ -51,6 +51,22 @@ export async function migrate(url: string) {
       GRANT INSERT ON hvb.inbox TO hvb_worker;
       GRANT UPDATE(concluida_em,lease_ate,lease_token,pendente_em,ultimo_erro,disponivel_em) ON hvb.outbox TO hvb_worker;
     `);
+    // The 077 functions are the only runtime access to human proof material.
+    // Do not let the historical blanket SELECT grant reopen these tables.
+    for (const table of [
+      "acesso_humano",
+      "senha_temporaria_humana",
+      "sessao_humana",
+      "limite_acesso_humano",
+      "evento_identidade_humana",
+    ]) {
+      const present = await tx.query(
+        "SELECT to_regclass($1) IS NOT NULL AS present",
+        [`hvb.${table}`],
+      );
+      if (present.rows[0].present)
+        await tx.query(`REVOKE ALL ON hvb.${table} FROM hvb_app,hvb_worker`);
+    }
     await tx.query("COMMIT");
   } catch (error) {
     await tx.query("ROLLBACK");

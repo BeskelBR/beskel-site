@@ -1,0 +1,68 @@
+{
+  "date": "2026-09-24",
+  "initialHead": "d4d63315b259d93605e5003f734d21dfe2a3e1f8",
+  "migration": {
+    "source": "Supabase migration history 20260924020043 statements[1]",
+    "sha256": "a7030dde974cf5072d0c9af0eedcb8502664f85fd09aae3c9a43da4f5d494eac",
+    "remoteLedgerMatch": true,
+    "remoteCount": 77,
+    "literalCopy": true
+  },
+  "results": {
+    "passwordAndDeliveryUnit": {
+      "status": "PASS",
+      "tests": 5
+    },
+    "localExistingApiAndNfcRegression": {
+      "status": "PASS",
+      "tests": 14
+    },
+    "localCanonicalSqlProbe": {
+      "status": "FAIL",
+      "passed": 12,
+      "failed": 2,
+      "rollback": true,
+      "failures": [
+        "consumir_senha_temporaria:42702",
+        "recuperacao mantém sessão ao emitir"
+      ]
+    },
+    "remoteSqlProbe": {
+      "status": "FAIL",
+      "code": "42702",
+      "rollback": true,
+      "residualProbeOrganizations": 0,
+      "note": "Diagnóstico SQL pelo conector, não E2E da API; PHC estrutural sintético, não prova de Argon2"
+    },
+    "runtimeRemotePg": {
+      "status": "FAIL",
+      "code": "SELF_SIGNED_CERT_IN_CHAIN",
+      "sqlExecuted": false
+    },
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "humanHttpE2E": "NÃO EXECUTADO",
+    "realEmail": "NÃO EXECUTADO"
+  },
+  "humanBackend": "PENDENTE",
+  "frontendChanged": false,
+  "terminalChanged": false,
+  "migrations001to076Changed": false,
+  "migration078Created": false,
+  "sha256": {
+    "migrations/077_human_access_cpf.sql": "a7030dde974cf5072d0c9af0eedcb8502664f85fd09aae3c9a43da4f5d494eac",
+    "src/domain/human-access/password.ts": "fd2035aad6ef16ea85524c8d342afcb81c9469937daa4b9cb27d47168d6d5df4",
+    "src/domain/human-access/delivery.ts": "a4696717505aebe7441d49f637e11a018a34e79786d93208154eeed67e313413",
+    "scripts/migrate.ts": "52247c131d69d41e44ca3ec7320ee4b5bbccdb2d62327dcd7f156a58467b9a6d",
+    "scripts/verify-human-access-077.ts": "3adaaf529a550da650c5df1f17f1944d75e15e6ea88adf1c5c69e0c8eb5e4978",
+    "tests/human-access-password.test.ts": "bdb32851d7fbf6fdb46a36e3ff86dd974c32d0c5ef6ed1c873b30dd0dd3f5dac",
+    "docs/LOGIN-HUMANO-077.md": "4b1f6874db8791a89a8c6be561d78c00497f5d4c4a6ead30f5597706a4957d70",
+    "docs/CADASTRO-LOGIN-NFC.md": "2b4ee5a2b927c6bcca8240f846abb3314794fdda9b1190e6e84dc20e7f5f3c2b",
+    "docs/PENDENCIAS-HVB.md": "8b973ec0427dab8f6e613350a94ac5008ed12b0f19bad93a3048bcef97dad751"
+  },
+  "frontendIntegration": {
+    "ownerHead": "3c0abe13bf1fae94fcba4b66b5c03eb801f1edd5",
+    "modifiedByBackend": false,
+    "ownerReportedIsolatedChecks": 48
+  }
+}

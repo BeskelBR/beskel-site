@@ -1,5 +1,7 @@
 # Cadastro administrativo, login humano e NFC
 
+Atualização de 24/09/2026: decisão explícita de CPF em usuario.login, temporária por email e redefinição obrigatória, com 077 canônica incorporada. Essa decisão supera a proposta de ativação/conta corporativa abaixo, preservada como histórico. Estado, bloqueios executáveis e pedido ao banco em [LOGIN-HUMANO-077.md](LOGIN-HUMANO-077.md). NFC permanece como implementado neste documento.
+
 Delta autorizado pelo usuário em 23/09/2026. Base de integração: `354ac8833fa894616048eba4c5c2b23db7601482`. Responsabilidade deste chat: backend/contratos. Frontend/BFF e banco continuam com seus responsáveis. Terminal/C18 e migrations 001–076 preservados.
 
 ## Jornada a entregar
