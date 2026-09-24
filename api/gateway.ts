@@ -89,19 +89,18 @@ function sessionKey(): Buffer {
 
 async function app() {
   if (!appPromise) {
-    if (
-      process.env.HVB_DATABASE_MODE !== "remote-dev" ||
-      process.env.HVB_DATABASE_TLS !== "verify-full" ||
-      !["direct", "session", "transaction"].includes(
-        process.env.HVB_DATABASE_CONNECTION || "",
-      )
-    )
-      throw new Error("configuracao_dev_incompleta");
-    const db = pool(process.env.DATABASE_URL ?? "", 3, {
+    if (!process.env.DATABASE_URL)
+      throw new Error("database_url_dev_ausente");
+    const db = pool(process.env.DATABASE_URL, 3, {
       ...process.env,
-      // Vercel marks deployments as production even when this application is
-      // the isolated DEV surface. databaseConfig still receives DEV semantics.
+      // These are deployment invariants for this isolated DEV gateway, not
+      // secrets. Keep them explicit here so Preview does not depend on three
+      // extra Vercel variables just to express the already frozen architecture.
       NODE_ENV: "development",
+      HVB_DATABASE_MODE: "remote-dev",
+      HVB_DATABASE_TLS: "verify-full",
+      HVB_DATABASE_CONNECTION:
+        process.env.HVB_DATABASE_CONNECTION || "direct",
     });
     appPromise = buildApp(db, false).then(async (instance) => {
       await instance.ready();
