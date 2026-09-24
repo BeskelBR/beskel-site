@@ -17,6 +17,8 @@ POSTs exigem os headers Bearer e `Idempotency-Key` já existentes. Uma intençã
 
 ## Funcionário e atribuições
 
+Evolução autorizada posterior: [cadastro, login humano e NFC](CADASTRO-LOGIN-NFC.md). O onboarding aceita `nfc` opcional e retorna `nfc_id`; consulta administrativa GET `/v1/usuarios/{id}/nfc` disponível. Sem NFC, o exemplo e as regras originais abaixo permanecem. A tela de manutenção posterior foi entregue pelo frontend até `354ac88`; sua falta de implementação descrita no registro abaixo foi superada, permanecendo a verificação integrada. Login humano tem definição proposta e dependência de banco/BFF, ainda sem endpoint executável.
+
 Requisito explícito do usuário após a integração: cadastro e manutenção de funcionários/autorizações serão feitos manualmente pelo administrador na interface DEV/ADM, sem depender do chat, SQL ou edição de arquivos para cada operação. O cadastro inicial já está integrado no frontend; a manutenção posterior pela tela ainda precisa ser implementada/verificada pelo responsável. A instalação inicial de acesso administrativo e a credencial sintética de E2E não substituem essa jornada do produto.
 
 Aceite do painel administrativo: localizar funcionário, consultar seus dados/papéis/unidades, cadastrar, editar nome/login, acrescentar atribuição e revogar/restaurar atribuições existentes com motivo e histórico. Usar nomes compreensíveis, seleção de papéis/unidades e confirmação do escopo global, sem exigir digitação de UUIDs ou códigos de API. Preservar `acesso:administrar` global; não habilitar esse painel para qualquer usuário do DEV.

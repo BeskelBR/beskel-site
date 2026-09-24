@@ -1,0 +1,43 @@
+{
+  "date": "2026-09-24",
+  "branch": "hvb-sistema-dev",
+  "base": "354ac8833fa894616048eba4c5c2b23db7601482",
+  "scope": "C18 existente composto no onboarding MVP11; leitura administrativa externa ao modulo congelado",
+  "checks": [
+    {
+      "status": "PASS",
+      "environment": "Windows, Node 24, PostgreSQL local hvb_sistema_test",
+      "command": "node --env-file=.env --test --test-concurrency=1 tests/operational-registration.test.ts",
+      "tests": 10,
+      "fail": 0
+    },
+    {
+      "status": "PASS",
+      "command": "node node_modules/typescript/bin/tsc --noEmit"
+    },
+    {
+      "status": "PASS",
+      "command": "node node_modules/@biomejs/biome/bin/biome lint src/domain/operational-registration.ts tests/operational-registration.test.ts"
+    },
+    {
+      "status": "PASS",
+      "check": "OpenAPI: somente campos opcionais nfc/nfc_id no onboarding e nova leitura; demais paths e Bearer inalterados"
+    },
+    {
+      "status": "PASS",
+      "check": "Diff vazio em migrations, modulos Terminal, frontend e BFF frente a base incorporada"
+    },
+    {
+      "status": "NAO EXECUTADO",
+      "check": "Supabase, navegador, leitor NFC fisico e login humano"
+    }
+  ],
+  "sha256": {
+    "src/domain/operational-registration.ts": "b50f047665f0d98394e2f802ed25dfef69651f5016f8144b1615e9a465670134",
+    "tests/operational-registration.test.ts": "02861e731cb6bb19426f3bf9d51b374d423b7942daa8b3318d8fa59fee4f4c9d",
+    "openapi/hvb-sistema.json": "f504064040e5775d16e053118b4fc952270f9cc6ea1c23a06743ef84efe53b12",
+    "docs/CADASTRO-LOGIN-NFC.md": "2307ca68432ea31890f750a2f5e6d8cbe7896f7e98c3c96c7b3e5a758dfa8abd",
+    "docs/CONTRATOS-BACKEND-MVP11.md": "23eb80696dc16b568775a9bcd5bf22d76222ccda02a7318ce2c8a455ffd79f67",
+    "docs/PENDENCIAS-HVB.md": "7d15102c9e339c19dfe93d5d8a8bc97c8a8cf06859900ba62101d9fc703ddca3"
+  }
+}

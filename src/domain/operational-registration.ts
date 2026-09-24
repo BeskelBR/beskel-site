@@ -9,19 +9,28 @@ import { inputs, object, text, time, uuid } from "./schemas.ts";
 import { inventoryInputs, amount } from "./inventory/schemas.ts";
 import { inventoryActions } from "./inventory/service.ts";
 import { purchaseActions } from "./purchases/service.ts";
+import { terminalV1Actions } from "./terminal-v1/service.ts";
+import { terminalV1Inputs } from "./terminal-v1/schemas.ts";
 
 export const operationalInputs = {
-  userOnboarding: object({
-    ...inputs.usuario.properties,
-    atribuicoes: {
-      type: "array",
-      minItems: 1,
-      maxItems: 50,
-      uniqueItems: true,
-      items: object({ papel_id: uuid, unidade_id: uuid }, ["papel_id"]),
+  userOnboarding: object(
+    {
+      ...inputs.usuario.properties,
+      atribuicoes: {
+        type: "array",
+        minItems: 1,
+        maxItems: 50,
+        uniqueItems: true,
+        items: object({ papel_id: uuid, unidade_id: uuid }, ["papel_id"]),
+      },
+      motivo: text,
+      nfc: object({
+        unidade_id: uuid,
+        tag: terminalV1Inputs.tv1Nfc.properties.tag,
+      }),
     },
-    motivo: text,
-  }),
+    ["nome", "login", "atribuicoes", "motivo"],
+  ),
   completeStockEntry: object(
     {
       unidade_id: uuid,
@@ -55,6 +64,7 @@ export const operationalResponses: Record<string, Record<string, unknown>> = {
   "/usuarios/onboarding": {
     usuario_id: uuid,
     atribuicao_ids: { type: "array", items: uuid },
+    nfc_id: uuid,
   },
   "/estoque/entradas-completas": {
     lote_id: uuid,
@@ -101,7 +111,35 @@ export const operationalActions: Action[] = [
         );
         ids.push(result.id);
       }
-      return { id: user.id, usuario_id: user.id, atribuicao_ids: ids };
+      const nfc = body.nfc as Body | undefined;
+      let nfcId: string | undefined;
+      if (nfc) {
+        // Compose the frozen C18 service; its employee/permission checks remain.
+        const registerNfc = action(
+          terminalV1Actions(),
+          "/terminal/v1/employee-nfc",
+        );
+        await authorize(
+          tx,
+          actor,
+          registerNfc.permission,
+          nfc.unidade_id as string,
+        );
+        const result = await registerNfc.run(
+          tx,
+          actor,
+          { ...nfc, employee_id: user.id, motivo: body.motivo },
+          id,
+          commandId,
+        );
+        nfcId = result.id;
+      }
+      return {
+        id: user.id,
+        usuario_id: user.id,
+        atribuicao_ids: ids,
+        ...(nfcId ? { nfc_id: nfcId } : {}),
+      };
     },
   },
   {
@@ -223,6 +261,62 @@ export function registerOperationalReads(
   authenticated: Authenticated,
   errors: Record<string, unknown>,
 ) {
+  app.get(
+    "/v1/usuarios/:id/nfc",
+    {
+      schema: {
+        operationId: "nfc_do_funcionario",
+        security: [{ bearer: [] }],
+        params: object({ id: uuid }),
+        querystring: object(
+          {
+            limit: { type: "integer", minimum: 1, maximum: 100, default: 25 },
+            cursor: uuid,
+          },
+          [],
+        ),
+        response: {
+          200: object({
+            items: {
+              type: "array",
+              items: object({
+                id: uuid,
+                unidade_id: uuid,
+                revogado: { type: "boolean" },
+              }),
+            },
+            next_cursor: { anyOf: [uuid, { type: "null" }] },
+          }),
+          ...errors,
+        },
+      },
+    },
+    (req) =>
+      authenticated(req, async (tx, actor) => {
+        await authorize(tx, actor, "acesso:administrar");
+        const { id } = req.params as { id: string };
+        await one(
+          tx,
+          "SELECT id FROM usuario WHERE organizacao_id=$1 AND id=$2",
+          [actor.organizacao_id, id],
+        );
+        const { limit = 25, cursor } = req.query as {
+          limit?: number;
+          cursor?: string;
+        };
+        const result = await tx.query(
+          `SELECT n.id,n.unidade_id,EXISTS(SELECT 1 FROM tv1_nfc_revocation r WHERE r.organizacao_id=n.organizacao_id AND r.nfc_id=n.id) AS revogado
+         FROM tv1_nfc n WHERE n.organizacao_id=$1 AND n.employee_id=$2 AND ($3::uuid IS NULL OR n.id>$3::uuid)
+         ORDER BY n.id LIMIT $4`,
+          [actor.organizacao_id, id, cursor ?? null, limit + 1],
+        );
+        const items = result.rows.slice(0, limit);
+        return {
+          items,
+          next_cursor: result.rows.length > limit ? items.at(-1)?.id : null,
+        };
+      }),
+  );
   app.get(
     "/v1/papeis/:id/permissoes",
     {

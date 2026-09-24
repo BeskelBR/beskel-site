@@ -6,6 +6,7 @@ import type { FastifyInstance } from "fastify";
 import { buildApp } from "../src/api/app.ts";
 import { pool, localUrl } from "../src/persistence/database.ts";
 import { seedFixture } from "../scripts/seed.ts";
+import { digest } from "../src/domain/core.ts";
 
 let app: FastifyInstance, db: pg.Pool, admin: pg.Pool;
 let f: Awaited<ReturnType<typeof seedFixture>>, foreign: typeof f;
@@ -211,6 +212,161 @@ test("onboarding inválido reverte usuário/atribuições/comando; rejeita privi
     ).statusCode,
     403,
   );
+});
+
+test("onboarding com NFC é atômico, idempotente e mantém apenas digest da tag", async () => {
+  const role = await create("/papeis", {
+    nome: "Acesso Terminal",
+    permissoes: ["terminal:acessar"],
+  });
+  const body = {
+    nome: "Pessoa NFC",
+    login: `nfc.${randomUUID()}`,
+    motivo: "Teste sintético NFC",
+    atribuicoes: [{ papel_id: role, unidade_id: f.unit }],
+    nfc: { unidade_id: f.unit, tag: randomUUID() },
+  };
+  const key = randomUUID();
+  const responses = await Promise.all([
+    post("/usuarios/onboarding", body, key),
+    post("/usuarios/onboarding", body, key),
+  ]);
+  for (const r of responses) assert.equal(r.statusCode, 200, r.body);
+  assert.ok(responses[0] && responses[1]);
+  const a = responses[0].json(),
+    b = responses[1].json();
+  assert.equal(a.nfc_id, b.nfc_id);
+  assert.notEqual(a.repetido, b.repetido);
+  const row = (
+    await admin.query(
+      "SELECT employee_id,tag_digest,comando_id FROM hvb.tv1_nfc WHERE id=$1",
+      [a.nfc_id],
+    )
+  ).rows[0];
+  assert.equal(row.employee_id, a.usuario_id);
+  assert.equal(row.tag_digest, digest(body.nfc.tag));
+  assert.equal(row.comando_id, a.comando_id);
+  assert.equal(JSON.stringify(a).includes(body.nfc.tag), false);
+  const persisted = await admin.query(
+    "SELECT resultado FROM hvb.comando WHERE id=$1",
+    [a.comando_id],
+  );
+  assert.equal(JSON.stringify(persisted.rows).includes(body.nfc.tag), false);
+  assert.equal(
+    (
+      await admin.query("SELECT 1 FROM hvb.credencial WHERE usuario_id=$1", [
+        a.usuario_id,
+      ])
+    ).rowCount,
+    0,
+  );
+  // A tag already bound cannot leave a second employee or assignments behind.
+  const duplicate = { ...body, login: `nfc.${randomUUID()}` };
+  assert.equal((await post("/usuarios/onboarding", duplicate)).statusCode, 409);
+  assert.equal(
+    (
+      await admin.query(
+        "SELECT 1 FROM hvb.usuario WHERE organizacao_id=$1 AND login=$2",
+        [f.org, duplicate.login],
+      )
+    ).rowCount,
+    0,
+  );
+});
+
+test("consulta administrativa NFC pagina, acompanha revogação e isola identidade sem expor tag", async () => {
+  const body = {
+    nome: "Pessoa consulta NFC",
+    login: `nfc.${randomUUID()}`,
+    motivo: "Teste sintético",
+    atribuicoes: [{ papel_id: f.adminRole }],
+    nfc: { unidade_id: f.unit, tag: randomUUID() },
+  };
+  const r = await post("/usuarios/onboarding", body);
+  assert.equal(r.statusCode, 200, r.body);
+  const user = r.json();
+  await create("/terminal/v1/employee-nfc", {
+    employee_id: user.id,
+    unidade_id: f.unit,
+    tag: randomUUID(),
+    motivo: "Outro cartão",
+  });
+  await create(`/terminal/v1/employee-nfc/${user.nfc_id}/revoke`, {
+    unidade_id: f.unit,
+    motivo: "Cartão perdido",
+  });
+  const first = await get(`/usuarios/${user.id}/nfc?limit=1`);
+  assert.equal(first.statusCode, 200, first.body);
+  assert.equal(first.json().items.length, 1);
+  assert.ok(first.json().next_cursor);
+  const second = await get(
+    `/usuarios/${user.id}/nfc?limit=1&cursor=${first.json().next_cursor}`,
+  );
+  assert.equal(second.statusCode, 200);
+  assert.equal(second.json().next_cursor, null);
+  const cards = [...first.json().items, ...second.json().items];
+  assert.equal(new Set(cards.map((c) => c.id)).size, 2);
+  assert.equal(cards.find((c) => c.id === user.nfc_id).revogado, true);
+  assert.equal(cards.filter((c) => !c.revogado).length, 1);
+  for (const card of cards)
+    assert.deepEqual(Object.keys(card).sort(), [
+      "id",
+      "revogado",
+      "unidade_id",
+    ]);
+  assert.equal((await get(`/usuarios/${foreign.admin}/nfc`)).statusCode, 404);
+  assert.equal(
+    (await get(`/usuarios/${user.id}/nfc`, f.readerToken)).statusCode,
+    403,
+  );
+  assert.equal(
+    (await get(`/usuarios/${user.id}/nfc?limit=101`)).statusCode,
+    400,
+  );
+});
+
+test("NFC recusa falta de acesso ao Terminal e unidade de outra organização sem cadastro parcial", async () => {
+  const role = await create("/papeis", {
+    nome: "Terminal unitário",
+    permissoes: ["terminal:acessar"],
+  });
+  for (const sample of [
+    { papel: f.readerRole, unidade: f.unit, expected: 403 },
+    { papel: role, unidade: foreign.unit, expected: 403 },
+  ]) {
+    const login = `nfc.${randomUUID()}`,
+      key = randomUUID();
+    const r = await post(
+      "/usuarios/onboarding",
+      {
+        nome: "Pessoa rollback NFC",
+        login,
+        motivo: "Teste sintético",
+        atribuicoes: [{ papel_id: sample.papel, unidade_id: f.unit }],
+        nfc: { unidade_id: sample.unidade, tag: randomUUID() },
+      },
+      key,
+    );
+    assert.equal(r.statusCode, sample.expected, r.body);
+    assert.equal(
+      (
+        await admin.query(
+          "SELECT 1 FROM hvb.usuario WHERE organizacao_id=$1 AND login=$2",
+          [f.org, login],
+        )
+      ).rowCount,
+      0,
+    );
+    assert.equal(
+      (
+        await admin.query(
+          "SELECT 1 FROM hvb.comando WHERE organizacao_id=$1 AND chave=$2",
+          [f.org, key],
+        )
+      ).rowCount,
+      0,
+    );
+  }
 });
 
 test("entrada completa cria lote/custódia/posição/ledger atomicamente e reutiliza custódia", async () => {
