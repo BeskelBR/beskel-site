@@ -56,6 +56,24 @@ export function assignmentPayload(roleId, scope, unitId) {
   return { papel_id: roleId, unidade_id: unitId };
 }
 
+export function hasTerminalAccess(assignments, unitId) {
+  return assignments.some(
+    (item) =>
+      item.permissoes?.includes("terminal:acessar") &&
+      (!item.unidade_id || item.unidade_id === unitId),
+  );
+}
+
+export function onboardingNfc(enabled, unitId, tag, assignments) {
+  if (!enabled) return undefined;
+  if (!unitId) throw new Error("unidade_nfc_obrigatoria");
+  if (typeof tag !== "string" || tag.length < 8 || tag.length > 256)
+    throw new Error("tag_nfc_invalida");
+  if (!hasTerminalAccess(assignments, unitId))
+    throw new Error("terminal_acessar_ausente");
+  return { unidade_id: unitId, tag };
+}
+
 export async function readAllPages(read, path, limit = 100) {
   const items = [];
   const seen = new Set();

@@ -1,3 +1,55 @@
+# MVP 11 — NFC integrado ao cadastro e manutenção — 24/09/2026
+
+Base integrada: `d4d63315b259d93605e5003f734d21dfe2a3e1f8`, que já continha o delta backend de NFC. Backend, banco/Supabase, BFF `/session`, Terminal/C18 e login humano permaneceram sem edição neste bloco.
+
+## Onboarding
+
+O cadastro inicial preserva os deltas já aprovados de escopo explícito e paginação completa de papéis. Foi acrescentada a opção **Vincular cartão NFC agora? Não/Sim**.
+
+Com **Não**, o corpo de `POST /v1/usuarios/onboarding` permanece sem campo `nfc`.
+
+Com **Sim**, a UI exige unidade e tag de 8–256 caracteres e envia no **mesmo onboarding**:
+
+```json
+{"nfc":{"unidade_id":"...","tag":"..."}}
+```
+
+Não existe segundo POST de NFC após o cadastro. A tag é enviada exatamente como está no input: sem `trim`, uppercase/lowercase, prefixo ou conversão. Autocapitalização/autocorreção são desabilitadas no campo.
+
+Antes do envio, a interface confirma que alguma atribuição adicionada concede `terminal:acessar` globalmente ou exatamente na unidade escolhida. Ausência dessa permissão bloqueia o NFC, mas o operador pode selecionar **Não** e concluir o cadastro sem cartão. A UI nunca concede `terminal:acessar` automaticamente.
+
+Em sucesso, a tag é limpa do DOM. Em resultado ambíguo, a intenção congelada mantém corpo e `Idempotency-Key` somente em memória para retry.
+
+## Manutenção administrativa
+
+Ao selecionar um funcionário, o painel consulta todas as páginas de `GET /v1/usuarios/{id}/nfc` e exibe somente unidade e estado **ativo/revogado**. O identificador do vínculo é usado internamente para comandos; tag e digest nunca são mostrados.
+
+Novo cartão para funcionário existente usa o comando canônico:
+
+`POST /v1/terminal/v1/employee-nfc`
+
+Revogação usa:
+
+`POST /v1/terminal/v1/employee-nfc/{id}/revoke`
+
+A UI verifica novamente `terminal:acessar` nas atribuições ativas do funcionário antes de vincular. Vínculo revogado não oferece ação de restauração. Reutilização da mesma tag fica sujeita ao conflito canônico do backend; o frontend não implementa reciclagem silenciosa.
+
+Nenhuma rota `credencial(tipo=nfc)` foi criada.
+
+## Privacidade da tag
+
+A tag NFC não é persistida pelo frontend em `localStorage`, `sessionStorage`, IndexedDB, logs ou telemetria. O único estado durável do navegador continua sendo a infraestrutura preexistente de sessão/UX sem tag. Durante retry ambíguo, o corpo permanece apenas na intenção JavaScript em memória.
+
+## Verificação
+
+Foram executadas **48/48 verificações, 0 falhas** sobre os blobs exatos da branch e o OpenAPI atual: contratos NFC, escopos, tag sem normalização, verificação de `terminal:acessar`, onboarding atômico sem POST paralelo, consulta administrativa, vínculo/revogação canônicos, ausência de tag/digest na listagem, não persistência da tag, idempotência, BFF sem Bearer no browser e ausência de login humano.
+
+Os testes de repositório pertinentes foram atualizados, mas o workflow manual `verify.yml` não foi disparado. O E2E remoto não foi repetido porque continuam os bloqueios externos previamente registrados: `SELF_SIGNED_CERT_IN_CHAIN` e ausência de credencial HVB sintética. Leitor físico NFC também não foi homologado neste bloco.
+
+Evidência: [frontend-nfc-mvp11.json](evidencias/frontend-nfc-mvp11.json).
+
+---
+
 # MVP 11 — aderência do onboarding/ADM: escopo, paginação e NFC — 23/09/2026
 
 Delta iniciado sobre `b507038fa3c95a697e1571fd1819b7acc5c7b68d`. Backend, banco/Supabase, BFF `/session`, Terminal/C18 e autenticação humana permaneceram congelados.

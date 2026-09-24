@@ -1,4 +1,5 @@
 import { createPilotClient, pilotError } from "./pilot-api.js";
+import { hasTerminalAccess } from "./system-v10-contract.js";
 import {
   appendPage,
   assignmentKey,
@@ -400,7 +401,7 @@ if (detailView && detailHead) {
       const userAssignments = catalogs.assignments.filter(
         (item) => item.usuario_id === user.id,
       );
-      const [userHistory, assignmentHistories] = await Promise.all([
+      const [userHistory, assignmentHistories, nfcLinks] = await Promise.all([
         readRevisionHistory(
           `/v1/usuarios/${encodeURIComponent(user.id)}/revisoes`,
         ),
@@ -412,6 +413,7 @@ if (detailView && detailHead) {
             ),
           })),
         ),
+        readAll(`/v1/usuarios/${encodeURIComponent(user.id)}/nfc`),
       ]);
 
       const roleIds = [...new Set(userAssignments.map((item) => item.papel_id))];
@@ -421,6 +423,17 @@ if (detailView && detailHead) {
       const assignmentHistoryById = new Map(
         assignmentHistories.map((entry) => [entry.assignment.id, entry.history]),
       );
+      const effectiveAssignments = userAssignments.map((assignment) => {
+        const history = assignmentHistoryById.get(assignment.id);
+        return {
+          ...assignment,
+          ativo:
+            typeof history?.ativo === "boolean"
+              ? history.ativo
+              : Boolean(assignment.ativo),
+          permissoes: rolePermissionCache.get(assignment.papel_id) || [],
+        };
+      });
 
       detailNode.replaceChildren();
 
@@ -700,6 +713,177 @@ if (detailView && detailHead) {
 
       permissionsBlock.append(addForm);
       detailNode.append(permissionsBlock);
+
+      const nfcBlock = el("section", "admin-nfc");
+      nfcBlock.append(el("h4", "", "Cartões NFC"));
+
+      if (!nfcLinks.length) {
+        nfcBlock.append(
+          el(
+            "div",
+            "operational-disabled",
+            "Nenhum cartão NFC foi vinculado a este funcionário.",
+          ),
+        );
+      }
+
+      for (const link of nfcLinks) {
+        const card = el("article", "admin-nfc-card");
+        const head = el("div", "admin-assignment-head");
+        const copy = el("div");
+        copy.append(
+          el(
+            "strong",
+            "",
+            unitById.get(link.unidade_id)?.nome || "Unidade não disponível",
+          ),
+          el(
+            "small",
+            link.revogado ? "inactive" : "active",
+            link.revogado ? "Cartão revogado" : "Cartão ativo",
+          ),
+        );
+        head.append(copy);
+        card.append(head);
+
+        if (!link.revogado) {
+          const revokeForm = el("form", "admin-assignment-revision");
+          const reason = input("motivo", "Motivo da revogação");
+          reason.required = true;
+          reason.maxLength = 160;
+          const confirm = checkbox(
+            "confirmacao",
+            "Confirmo a revogação deste cartão NFC.",
+          );
+          confirm.control.required = true;
+          const action = el("button", "secondary-btn danger", "Revogar cartão");
+          action.type = "submit";
+          revokeForm.append(field("Motivo", reason), confirm.label, action);
+          revokeForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            if (!revokeForm.reportValidity()) return;
+            beginMutation(
+              `/v1/terminal/v1/employee-nfc/${encodeURIComponent(link.id)}/revoke`,
+              {
+                unidade_id: link.unidade_id,
+                motivo: reason.value.trim(),
+              },
+              () => "Cartão NFC revogado.",
+              statusNode,
+            );
+          });
+          card.append(revokeForm);
+        } else {
+          card.append(
+            el(
+              "div",
+              "operational-note",
+              "O histórico NFC não é reciclável. Um cartão revogado não é reativado silenciosamente.",
+            ),
+          );
+        }
+        nfcBlock.append(card);
+      }
+
+      const activeAssignments = effectiveAssignments.filter((item) => item.ativo);
+      const nfcForm = el("form", "operational-form admin-nfc-link");
+      const nfcGrid = el("div", "operational-grid");
+      const nfcUnit = select("unidade_id");
+      nfcUnit.required = true;
+      option(nfcUnit, "", "Selecione uma unidade");
+      for (const item of catalogs.units)
+        option(nfcUnit, item.id, item.nome || "Unidade sem nome");
+
+      const nfcTag = input("tag", "Identificador recebido do cartão");
+      nfcTag.required = true;
+      nfcTag.minLength = 8;
+      nfcTag.maxLength = 256;
+      nfcTag.autocapitalize = "off";
+      nfcTag.autocorrect = "off";
+      nfcTag.spellcheck = false;
+
+      const nfcReason = input("motivo", "Motivo da vinculação");
+      nfcReason.required = true;
+      nfcReason.maxLength = 160;
+
+      const nfcPermission = el(
+        "div",
+        "operational-note warn wide",
+        "Selecione a unidade para verificar terminal:acessar.",
+      );
+
+      function updateExistingNfcPermission() {
+        nfcTag.setCustomValidity("");
+        if (!nfcUnit.value) {
+          nfcPermission.className = "operational-note warn wide";
+          nfcPermission.textContent =
+            "Selecione a unidade para verificar terminal:acessar.";
+          return;
+        }
+        if (!hasTerminalAccess(activeAssignments, nfcUnit.value)) {
+          nfcPermission.className = "operational-note warn wide";
+          nfcPermission.textContent =
+            "Este funcionário não possui terminal:acessar nesta unidade nem globalmente. O cartão não pode ser vinculado.";
+          nfcTag.setCustomValidity(
+            "O funcionário precisa ter terminal:acessar nesta unidade ou globalmente.",
+          );
+          return;
+        }
+        nfcPermission.className = "operational-note wide";
+        nfcPermission.textContent =
+          "terminal:acessar confirmado para esta unidade.";
+      }
+
+      nfcUnit.addEventListener("change", updateExistingNfcPermission);
+      const nfcConfirm = checkbox(
+        "confirmacao",
+        "Conferi a unidade e confirmo a vinculação deste cartão NFC.",
+      );
+      nfcConfirm.control.required = true;
+      nfcGrid.append(
+        field("Unidade", nfcUnit),
+        field("Tag NFC", nfcTag),
+        field("Motivo", nfcReason, true),
+        nfcPermission,
+        nfcConfirm.label,
+      );
+      const nfcSubmit = el("button", "primary-btn", "Vincular novo NFC");
+      nfcSubmit.type = "submit";
+      nfcForm.append(
+        el("h4", "", "Vincular novo cartão"),
+        nfcGrid,
+        nfcSubmit,
+      );
+      nfcForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        updateExistingNfcPermission();
+        if (!nfcForm.reportValidity()) return;
+        if (!hasTerminalAccess(activeAssignments, nfcUnit.value)) {
+          setStatus(
+            statusNode,
+            "O funcionário precisa ter terminal:acessar nesta unidade ou globalmente.",
+            "error",
+          );
+          return;
+        }
+        beginMutation(
+          "/v1/terminal/v1/employee-nfc",
+          {
+            unidade_id: nfcUnit.value,
+            motivo: nfcReason.value.trim(),
+            employee_id: user.id,
+            tag: nfcTag.value,
+          },
+          () => {
+            nfcTag.value = "";
+            return "Cartão NFC vinculado.";
+          },
+          statusNode,
+        );
+      });
+
+      nfcBlock.append(nfcForm);
+      detailNode.append(nfcBlock);
       detailNode.append(
         await buildHistory(user, userHistory, assignmentHistories),
       );

@@ -91,3 +91,13 @@
 .admin-history-item span,.admin-history-item small,.admin-history-item p{font-size:.71rem;color:var(--muted);line-height:1.45;margin:0}
 @media(max-width:900px){.admin-management-layout{grid-template-columns:1fr}.admin-user-list{max-height:320px}.admin-assignment-revision{grid-template-columns:1fr}}
 @media(max-width:760px){.admin-management-head,.admin-detail-head{flex-direction:column}.admin-management{padding:1rem}}
+
+.operational-nfc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem;padding:.85rem;border:1px solid #dfe8f2;border-radius:11px;background:#f8fbfe}
+.operational-nfc[hidden]{display:none!important}
+.operational-nfc>.wide{grid-column:1/-1}
+.admin-nfc{display:grid;gap:.75rem}
+.admin-nfc>h4{margin:0;color:#263955}
+.admin-nfc-card{border:1px solid #e5ebf2;border-radius:11px;padding:.9rem;background:#fff;display:grid;gap:.75rem}
+.admin-nfc-link{border:1px solid #e5ebf2;border-radius:11px;padding:1rem;background:#fbfdff}
+.admin-nfc-link h4{margin:0 0 .8rem;color:#263955}
+@media(max-width:760px){.operational-nfc{grid-template-columns:1fr}.operational-nfc>.wide{grid-column:auto}}

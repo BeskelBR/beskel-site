@@ -142,6 +142,18 @@ test("MVP 11 integrado: interface usa apenas os contratos publicados", async () 
 
   assert.match(source, /\/v1\/papeis\/\$\{encodeURIComponent\(roleId\)\}\/permissoes/);
   assert.match(source, /\/v1\/usuarios\/onboarding/);
+  assert.match(source, /onboardingNfc/);
+  assert.match(source, /Vincular cartão NFC agora\?/);
+  assert.match(source, /nfcUnit\.required = enabled/);
+  assert.match(source, /nfcTag\.minLength = 8/);
+  assert.match(source, /nfcTag\.maxLength = 256/);
+  assert.match(source, /terminal:acessar/);
+  assert.match(source, /\.\.\.\(nfc \? \{ nfc \} : \{\}\)/);
+  assert.match(source, /result\.nfc_id/);
+  assert.doesNotMatch(source, /\/v1\/terminal\/v1\/employee-nfc/);
+  assert.doesNotMatch(source, /nfcTag\.value\.trim\(\)/);
+  assert.doesNotMatch(source, /nfcTag\.value\.to(?:Upper|Lower)Case/);
+  assert.doesNotMatch(source, /localStorage[^\n]*nfc|sessionStorage[^\n]*nfc|indexedDB[^\n]*nfc/i);
   assert.match(source, /readAllPages\(\(path\) => client\.read\(path\), "\/v1\/papeis", 100\)/);
   assert.match(source, /option\(scope, "", "Selecione o escopo\.\.\."\)/);
   assert.match(source, /scope\.required = true/);
