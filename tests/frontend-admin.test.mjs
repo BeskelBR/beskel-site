@@ -36,6 +36,15 @@ test("ADM: interface oferece operacoes manuais completas sem simular sucesso", a
   assert.match(source, /Revogar autorização/);
   assert.match(source, /Restaurar autorização/);
   assert.match(source, /Histórico de alterações/);
+  assert.match(source, /Cartões NFC/);
+  assert.match(source, /\/v1\/usuarios\/\$\{encodeURIComponent\(user\.id\)\}\/nfc/);
+  assert.match(source, /\/v1\/terminal\/v1\/employee-nfc/);
+  assert.match(source, /employee-nfc\/\$\{encodeURIComponent\(link\.id\)\}\/revoke/);
+  assert.match(source, /hasTerminalAccess/);
+  assert.match(source, /tag: nfcTag\.value/);
+  assert.doesNotMatch(source, /link\.tag|tag_digest/);
+  assert.doesNotMatch(source, /localStorage[^\n]*tag|sessionStorage[^\n]*tag|indexedDB[^\n]*tag/i);
+  assert.doesNotMatch(source, /\/v1\/credenciais/);
   assert.match(source, /Escolha explicitamente o escopo/);
   assert.match(source, /versao_esperada/);
   assert.match(source, /motivo/);
