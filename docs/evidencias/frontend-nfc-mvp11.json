@@ -106,8 +106,8 @@
     },
     {
       "id": 14,
-      "status": "PASS_PENDING_FINAL_DIFF",
-      "evidencia": "confirmar no diff final"
+      "status": "PASS",
+      "evidencia": "diff final desde d4d63315 contém somente assets frontend, testes e documentação; nenhum arquivo backend, banco/Supabase, BFF ou Terminal/C18 foi alterado"
     }
   ],
   "integracao_backend": {
@@ -122,5 +122,6 @@
     "E2E remoto não reexecutado: permanecem SELF_SIGNED_CERT_IN_CHAIN e ausência de credencial HVB sintética",
     "leitor físico NFC não está homologado por esta entrega",
     "login humano continua sem endpoint executável"
-  ]
+  ],
+  "final_head": "eca3420562d58110861873ff90068092f0480aee"
 }
