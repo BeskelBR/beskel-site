@@ -1,0 +1,61 @@
+{
+  "date": "2026-09-24",
+  "initialHead": "ff9e178325bc7ac5534930076aada44fc83f7583",
+  "branch": "hvb-sistema-dev",
+  "verifier": {
+    "path": "scripts/verify-human-access-077.ts",
+    "sha256": "d0936a02e5b39f279c009afeb70cd65e11e5bc6633bbc4d83c8afd6f837a68ec",
+    "installsDDL": false,
+    "functionalExecution": "NAO EXECUTADO",
+    "privateTableWrites": false,
+    "targetBlocked": 0,
+    "targetPass": 14,
+    "integrity": "PASS",
+    "targetFail": 0,
+    "requires": [
+      "Correcao canonica do banco aplicada",
+      "Schema provisionado em banco local de teste fora de OneDrive"
+    ]
+  },
+  "migration077": {
+    "canonicalMatch": true,
+    "sha256": "a7030dde974cf5072d0c9af0eedcb8502664f85fd09aae3c9a43da4f5d494eac",
+    "changed": false
+  },
+  "tls": {
+    "certificateSource": "https://supabase-downloads.s3-ap-southeast-1.amazonaws.com/prod/ssl/prod-ca-2021.crt",
+    "caVersioned": false,
+    "businessWrites": false,
+    "caConfiguredPrivately": true,
+    "result": "PASS",
+    "method": "Conexao real via pool do backend; socket encrypted/authorized e SELECT ssl,version FROM pg_stat_ssl WHERE pid=pg_backend_pid()",
+    "protocol": "TLSv1.3",
+    "verifyFull": true,
+    "environment": "Supabase DEV direct, Node/pg, identidade runtime",
+    "officialSource": "https://raw.githubusercontent.com/supabase/supabase/master/apps/studio/hooks/custom-content/custom-content.json",
+    "certificateAndHostnameValidated": true
+  },
+  "bankObservation": {
+    "consumptionStillUnqualified": true,
+    "recoveryIssuerRevokesCredential": false,
+    "recoveryIssuerClosesSession": false,
+    "correctionAppliedByBackend": false,
+    "method": "Leitura dos corpos das funcoes remotas"
+  },
+  "checks": [
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "status": "PASS"
+    },
+    {
+      "command": "node node_modules/@biomejs/biome/bin/biome lint scripts/verify-human-access-077.ts",
+      "status": "PASS"
+    }
+  ],
+  "humanE2E": "NAO EXECUTADO",
+  "newHttpHandlers": false,
+  "frontendChanged": false,
+  "terminalC18Changed": false,
+  "migrations001to077Changed": false,
+  "migration078Created": false
+}

@@ -1,5 +1,7 @@
 # Primeiro E2E remoto — execução parcial
 
+**Atualização em 24/09/2026:** confiança TLS resolvida. Node/pg realizou handshake real em TLS 1.3, validando certificado e hostname; `pg_stat_ssl` confirmou TLS. A CA pública da URL referenciada pelo dashboard oficial foi configurada exclusivamente no ambiente privado como `HVB_DATABASE_CA_PEM`. Nenhum relaxamento de TLS ou certificado versionado. Este recorte foi somente conexão/consulta de transporte: não prova login humano, `/ready` ou jornada autenticada. O pedido histórico de CA abaixo está superado; os demais testes continuam pendentes. Ver [LOGIN-HUMANO-077.md](LOGIN-HUMANO-077.md) e [evidência](evidencias/preparacao-077-tls.json).
+
 23/09/2026. Backend avaliado: `8ba6c2d2a18121f721e54c51d3e3d7caac9536ef`, branch `hvb-sistema-dev`, working tree inicialmente limpo. Conexão e verificação expressamente autorizadas pelo usuário após retorno do responsável pelo banco.
 
 Na publicação, commits concorrentes do frontend até `56cd405adda2a226945fe8a181ecccea2c351c2e` foram integrados sem conflitos ou edições próprias nesses arquivos. A evidência do responsável registra integração MVP 11 e testes isolados, não E2E com API/PostgreSQL. Backend executado e blocos congelados permaneceram iguais.

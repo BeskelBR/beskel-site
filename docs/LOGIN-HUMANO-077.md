@@ -1,5 +1,28 @@
 # Login humano CPF — incorporação canônica e bloqueios
 
+## Atualização vigente — preparação do verificador e TLS, 24/09/2026
+
+HEAD inicial deste recorte: `ff9e178325bc7ac5534930076aada44fc83f7583`, árvore inicialmente limpa. Os resultados históricos abaixo permanecem como evidência da execução anterior; não são resultados do verificador atualizado.
+
+- **TLS RESOLVIDO:** handshake real Node/pg pela identidade runtime em TLS 1.3, com socket autorizado, validação de certificado/hostname e confirmação em `pg_stat_ssl`. CA obtida da URL HTTPS referenciada pelo código oficial do dashboard Supabase, validada e disponibilizada exclusivamente como `HVB_DATABASE_CA_PEM` no arquivo privado indicado pelo usuário. Nenhum certificado/segredo foi versionado; `verify-full` e `rejectUnauthorized: true` preservados. Isso não constitui E2E humano ou teste de email.
+- **Verificador preparado:** exige schema previamente provisionado e registro canônico da 077; não instala migrations, não cria roles e não escreve diretamente nas tabelas privadas da 077. A antiga fixture de ativação direta foi removida. Consumo e recusa de reutilização precedem a criação de sessão. A recuperação deve produzir simultaneamente credencial revogada, sessão encerrada e recusa do token anterior por `hvb.autenticar`; a inspeção administrativa de estado é somente leitura. Dependências que falham bloqueiam os testes seguintes, sem produzir PASS artificial. Critério final: exatamente 14 PASS / 0 FAIL / 0 BLOCKED.
+- **Integridade PASS:** TypeScript e lint/formatação do arquivo alterado. **Execução funcional deste recorte: NÃO EXECUTADA**, aguardando correção canônica pelo responsável do banco. A leitura dos corpos das funções remotas ainda mostrou a referência não qualificada no consumo e ausência de revogação na emissão da recuperação; não houve aplicação de SQL corretivo por este chat.
+- **OneDrive:** testes locais com escrita continuam suspensos após o alerta relatado pelo usuário. O verificador recusa `data_directory` contendo OneDrive antes de iniciar sua transação. Não apaga, move nem reprovisiona arquivos. O responsável precisa disponibilizar banco de teste corrigido fora da sincronização antes da execução local. Não foi confirmada a origem exata dos mais de 1.100 arquivos do alerta.
+- **Próxima etapa condicionada:** após a correção do banco e ambiente de teste adequado, executar o verificador, regressões API/banco e onboarding com/sem NFC. Somente depois iniciar os handlers HTTP humanos. Nenhum contorno do 42702 em TypeScript, alteração de `hvb.autenticar`, Bearer, C18/NFC ou migration 001–077; nenhuma 078 criada.
+
+Pedido vigente ao responsável pelo banco (substitui apenas as ações já resolvidas no pedido histórico abaixo):
+
+```text
+HVB banco — CA já configurada privadamente e handshake Node/pg verify-full PASS em TLS 1.3. Não é necessário reenviar credenciais ou certificados no chat.
+Concluir a correção autorizada do consumo (42702) e da revogação na emissão de recuperação, preservando literalmente 001–077; não inferir autorização para 078. Informar quando aplicada e fornecer sua evidência/artefato autorizado.
+Para a regressão local, preparar uma instância de teste com o schema corrigido, fora de OneDrive, e disponibilizar TEST_MIGRATION_DATABASE_URL por configuração privada. Não apagar/mover o cluster existente por inferência. O verificador não instala DDL nem ativa contas por escrita direta.
+Após isso o backend executará a meta de 14 PASS, as regressões e, só então, os endpoints humanos. Email real continua dependência de integração/configuração aprovada.
+```
+
+Evidência deste recorte: [preparacao-077-tls.json](evidencias/preparacao-077-tls.json).
+
+## Registro histórico da incorporação inicial
+
 Delta de 24/09/2026. HEAD inicial: `d4d63315b259d93605e5003f734d21dfe2a3e1f8`, branch `hvb-sistema-dev`, árvore inicialmente limpa. CPF em `usuario.login`, senha temporária por email e redefinição obrigatória são a decisão vigente do usuário; superam a proposta de ativação/conta corporativa de CADASTRO-LOGIN-NFC.md. Não existe coluna CPF paralela nem adoção de Supabase Auth.
 
 ## Migration sincronizada
