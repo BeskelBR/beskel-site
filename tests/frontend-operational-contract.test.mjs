@@ -6,6 +6,8 @@ import {
   buildPatientSearchPath,
   canUseGlobal,
   canUseUnit,
+  hasTerminalAccess,
+  onboardingNfc,
   operationalFlows,
   readAllPages,
   resolveUnit,
@@ -38,6 +40,41 @@ test("MVP 11 contrato: escopos e atribuição global", () => {
       "11111111-1111-4111-8111-111111111111",
     ),
     { papel_id: "22222222-2222-4222-8222-222222222222" },
+  );
+});
+
+test("MVP 11 contrato: NFC opcional preserva tag e exige terminal:acessar", () => {
+  const assignments = [
+    {
+      papel_id: "papel-global",
+      permissoes: ["terminal:acessar"],
+    },
+    {
+      papel_id: "papel-local",
+      unidade_id: "unit-b",
+      permissoes: ["estoque:ler"],
+    },
+  ];
+  assert.equal(hasTerminalAccess(assignments, "unit-a"), true);
+  assert.equal(onboardingNfc(false, "", "", assignments), undefined);
+  const tag = "aB-12:xy";
+  assert.deepEqual(onboardingNfc(true, "unit-a", tag, assignments), {
+    unidade_id: "unit-a",
+    tag,
+  });
+  assert.throws(
+    () =>
+      onboardingNfc(
+        true,
+        "unit-a",
+        "12345678",
+        [{ papel_id: "p", permissoes: ["cadastros:ler"] }],
+      ),
+    /terminal_acessar_ausente/,
+  );
+  assert.throws(
+    () => onboardingNfc(true, "unit-a", "short", assignments),
+    /tag_nfc_invalida/,
   );
 });
 
