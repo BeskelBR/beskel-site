@@ -1,0 +1,126 @@
+{
+  "data": "2026-09-24",
+  "branch": "hvb-sistema-dev",
+  "backend_integration_base": "d4d63315b259d93605e5003f734d21dfe2a3e1f8",
+  "frontend_code_sha": "ae56c65c480549d46f6e1eb60c92f712727a7683",
+  "escopo": "frontend onboarding/ADM NFC; backend, banco/Supabase, BFF /session, Terminal/C18 preservados",
+  "arquivos_codigo": {
+    "assets/system-v10-contract.js": "c9c0cf3ab25ac262a230476ab43c4e777b3ee756",
+    "assets/system-v10.js": "e9c846462704b469f30cd759af0c0d8cbd9d170d",
+    "assets/system-v11-admin.js": "474a85150ad1468e8422ad9d965a6e2c0538bb0f",
+    "assets/system-v6.css": "35a7e05079c18c58b71015c1d5b621e763ef5152",
+    "tests/frontend-operational-contract.test.mjs": "f810926324911dc8410579e5d11897f64767ac6b",
+    "tests/frontend-operational.test.mjs": "914ab20a3444eb9d3fd5a2b121771219adada35d",
+    "tests/frontend-admin.test.mjs": "9537d5ca349a10184db44669519312479b2deae0"
+  },
+  "verificacoes": {
+    "mecanismo": "48 verificações executáveis em V8 sobre blobs exatos da branch + inspeção do OpenAPI atual",
+    "pass": 48,
+    "fail": 0,
+    "cobre": [
+      "escopo explícito global/unidade preservado",
+      "paginação completa de papéis preservada",
+      "NFC omitido quando Não",
+      "NFC incluído no mesmo POST /v1/usuarios/onboarding quando Sim",
+      "tag preservada sem trim/case/prefixo e validada em 8–256 caracteres",
+      "terminal:acessar validado visualmente para unidade ou global",
+      "ausência de POST NFC paralelo durante onboarding",
+      "tag limpa do DOM após sucesso",
+      "ausência de persistência da tag em localStorage/sessionStorage/IndexedDB/logs",
+      "consulta administrativa GET /v1/usuarios/{id}/nfc paginada",
+      "lista ativo/revogado sem tag nem digest",
+      "vinculação de funcionário existente pelo comando tv1_nfc canônico",
+      "revogação pelo comando tv1_nfc canônico",
+      "cartão revogado sem ação de restauração",
+      "retry preserva intent.key e intent.body",
+      "nenhuma rota de credencial NFC genérica",
+      "nenhum endpoint de login humano criado",
+      "Bearer continua ausente do frontend"
+    ]
+  },
+  "criterios_aceite": [
+    {
+      "id": 1,
+      "status": "PASS",
+      "evidencia": "seletor de escopo continua obrigatório e sem decisão inicial"
+    },
+    {
+      "id": 2,
+      "status": "PASS",
+      "evidencia": "global omite unidade_id"
+    },
+    {
+      "id": 3,
+      "status": "PASS",
+      "evidencia": "unidade envia unidade_id"
+    },
+    {
+      "id": 4,
+      "status": "PASS",
+      "evidencia": "readAllPages segue next_cursor, preserva ordem e deduplica"
+    },
+    {
+      "id": 5,
+      "status": "PASS",
+      "evidencia": "GET /v1/papeis/{id}/permissoes preservado"
+    },
+    {
+      "id": 6,
+      "status": "PASS",
+      "evidencia": "NFC=Não omite o campo nfc do onboarding"
+    },
+    {
+      "id": 7,
+      "status": "PASS",
+      "evidencia": "NFC=Sim inclui nfc:{unidade_id,tag} no mesmo corpo do onboarding"
+    },
+    {
+      "id": 8,
+      "status": "PASS",
+      "evidencia": "hasTerminalAccess bloqueia visualmente vínculo sem terminal:acessar no escopo aplicável"
+    },
+    {
+      "id": 9,
+      "status": "PASS",
+      "evidencia": "tag só permanece em memória/DOM durante operação; é limpa no sucesso e não é escrita em armazenamento/logs"
+    },
+    {
+      "id": 10,
+      "status": "PASS",
+      "evidencia": "GET /v1/usuarios/{id}/nfc lista vínculos e a UI exibe unidade + ativo/revogado"
+    },
+    {
+      "id": 11,
+      "status": "PASS",
+      "evidencia": "revogação usa POST /v1/terminal/v1/employee-nfc/{id}/revoke"
+    },
+    {
+      "id": 12,
+      "status": "PASS",
+      "evidencia": "pilot-api mantém a mesma Idempotency-Key e o mesmo body da intenção"
+    },
+    {
+      "id": 13,
+      "status": "PASS",
+      "evidencia": "nenhuma rota de login humano/JWT/auth exchange criada"
+    },
+    {
+      "id": 14,
+      "status": "PASS_PENDING_FINAL_DIFF",
+      "evidencia": "confirmar no diff final"
+    }
+  ],
+  "integracao_backend": {
+    "onboarding_nfc": "publicado",
+    "nfc_admin_read": "publicado",
+    "link_command": "POST /v1/terminal/v1/employee-nfc",
+    "revoke_command": "POST /v1/terminal/v1/employee-nfc/{id}/revoke",
+    "tag_schema": "string 8–256, sem normalização no frontend",
+    "history_recycling": "backend mantém conflito inclusive para tag revogada"
+  },
+  "limitacoes": [
+    "E2E remoto não reexecutado: permanecem SELF_SIGNED_CERT_IN_CHAIN e ausência de credencial HVB sintética",
+    "leitor físico NFC não está homologado por esta entrega",
+    "login humano continua sem endpoint executável"
+  ]
+}
