@@ -165,3 +165,134 @@ code,.tech,.eyebrow,.solution-index,.case-badge,.system-label,.system-node small
 .process-four p{margin:0;color:#B8BEC7;font-size:.9rem;line-height:1.55}
 @media(max-width:920px){.process-four{grid-template-columns:repeat(2,1fr)}.process-four article:nth-child(2){border-right:0}.process-four article:nth-child(-n+2){border-bottom:1px solid #2A2F36}}
 @media(max-width:620px){.process-four{grid-template-columns:1fr}.process-four article{border-right:0!important;border-bottom:1px solid #2A2F36!important;min-height:0}.process-four article:last-child{border-bottom:0!important}}
+
+
+/* Site claro padrão — páginas institucionais */
+.site-light{
+  background:#FFFFFF!important;
+  color:#0D1117!important;
+}
+.site-light .site-header{
+  background:rgba(255,255,255,.97)!important;
+  border-bottom:1px solid #E3E6EA!important;
+  backdrop-filter:blur(12px);
+}
+.site-light .brand span,
+.site-light .main-nav a:not(.btn){
+  color:#0D1117!important;
+}
+.site-light .main-nav a.active,
+.site-light .main-nav a:hover{
+  color:#FF7A00!important;
+}
+.site-light .menu-toggle{color:#0D1117!important}
+
+.site-light .page-hero{
+  background:
+    radial-gradient(circle at 80% 20%,rgba(255,122,0,.07),transparent 32%),
+    linear-gradient(180deg,#FFFFFF 0%,#FAFAFB 100%)!important;
+  border-bottom:1px solid #ECEFF2!important;
+  color:#0D1117!important;
+}
+.site-light .page-hero h1{color:#0D1117!important}
+.site-light .page-hero p:not(.eyebrow){color:#5F6873!important}
+
+.site-light .section{
+  background:#FFFFFF;
+  color:#0D1117;
+}
+.site-light .section h1,
+.site-light .section h2,
+.site-light .section h3{color:#0D1117}
+.site-light .section p{color:#5F6873}
+
+.site-light .section-dark{
+  background:#0D1117!important;
+  color:#FFFFFF!important;
+}
+.site-light .section-dark h1,
+.site-light .section-dark h2,
+.site-light .section-dark h3{color:#FFFFFF!important}
+.site-light .section-dark p{color:#BEC4CC!important}
+
+.site-light .cta-band{
+  background:#F6F7F8!important;
+  color:#0D1117!important;
+  border-top:1px solid #E3E6EA!important;
+  border-bottom:1px solid #E3E6EA!important;
+}
+.site-light .cta-band h2{color:#0D1117!important}
+.site-light .cta-band p{color:#5F6873!important}
+.site-light .cta-band .btn-ghost{
+  background:#FFFFFF!important;
+  color:#0D1117!important;
+  border-color:#C8CDD4!important;
+}
+.site-light .cta-band .btn-ghost:hover{
+  background:#FFFFFF!important;
+  color:#0D1117!important;
+  border-color:#FF7A00!important;
+}
+
+.site-light .quote-form{
+  background:#F6F7F8!important;
+  border-color:#E1E4E8!important;
+}
+.site-light .quote-form label{color:#0D1117!important}
+.site-light .quote-form input,
+.site-light .quote-form select,
+.site-light .quote-form textarea{
+  background:#FFFFFF!important;
+  border-color:#D7DBE0!important;
+  color:#0D1117!important;
+}
+.site-light .quote-form input::placeholder,
+.site-light .quote-form textarea::placeholder{color:#8A929C}
+.site-light .form-note,
+.site-light .form-help{color:#6B737D!important}
+.site-light .contact-list>a,
+.site-light .contact-list>div{border-color:#E3E6EA!important}
+.site-light .contact-list b{color:#0D1117}
+.site-light .contact-list span{color:#5F6873}
+
+.site-light .site-footer{
+  background:#FFFFFF!important;
+  color:#0D1117!important;
+  border-top:1px solid #E3E6EA!important;
+}
+.site-light .site-footer p,
+.site-light .site-footer span,
+.site-light .site-footer a{color:#5D6570!important}
+.site-light .site-footer b,
+.site-light .site-footer strong{color:#0D1117!important}
+.site-light .site-footer .footer-grid a:hover{color:#FF7A00!important}
+.site-light .footer-bottom{
+  border-color:#E3E6EA!important;
+  color:#737B85!important;
+}
+
+/* Portfólio mantém uma única faixa escura como contraste visual intencional. */
+.site-light .case-section{
+  background:#0D1117!important;
+  color:#FFFFFF!important;
+}
+.site-light .case-section h2,
+.site-light .case-section h3{color:#FFFFFF!important}
+.site-light .case-section p{color:#BEC4CC!important}
+.site-light .case-section .case-stages span{
+  color:#E0E3E7;
+  border-color:#353C45;
+}
+.site-light .case-section .case-gallery figure,
+.site-light .case-section .case-process-panel{
+  background:#111820;
+  border-color:#353C45;
+}
+
+@media(max-width:920px){
+  .site-light .main-nav{
+    background:#FFFFFF!important;
+    border-color:#E3E6EA!important;
+  }
+  .site-light .main-nav a:not(.btn){color:#0D1117!important}
+}
