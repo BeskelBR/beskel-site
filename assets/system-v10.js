@@ -230,7 +230,7 @@ if (detailView && detailHead) {
       heading(
         "Administração",
         "Cadastro de funcionário e autorizações",
-        "Cria o usuário e suas atribuições em uma única intenção idempotente. Credencial e login humano continuam fora deste fluxo.",
+        "Cria usuário, atribuições e NFC opcional em uma única intenção idempotente. Login humano continua fora deste fluxo.",
       ),
     );
 
