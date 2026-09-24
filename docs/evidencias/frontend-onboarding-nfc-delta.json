@@ -1,0 +1,132 @@
+{
+  "data": "2026-09-23",
+  "branch": "hvb-sistema-dev",
+  "base_sha": "b507038fa3c95a697e1571fd1819b7acc5c7b68d",
+  "implementation_sha": "cd18bd9e5210de1202f416ce1a142c86e9c8b3ed",
+  "escopo": "frontend onboarding/ADM; backend, banco/Supabase, BFF /session, Terminal/C18 preservados",
+  "arquivos_alterados": [
+    "assets/system-v10.js",
+    "assets/system-v10-contract.js",
+    "tests/frontend-operational-contract.test.mjs",
+    "tests/frontend-operational.test.mjs"
+  ],
+  "verificacoes_runtime": {
+    "mecanismo": "V8 isolado sobre blobs exatos publicados + inspeção do OpenAPI atual",
+    "aprovadas": 29,
+    "falhas": 0,
+    "cobre": [
+      "escopo obrigatório antes de criar atribuição",
+      "global omite unidade_id",
+      "unidade envia unidade_id",
+      "paginação segue next_cursor",
+      "paginação preserva ordem e elimina duplicatas por id",
+      "onboarding usa leitor paginado de papéis",
+      "seletor inicia sem escopo",
+      "unidade só é obrigatória quando escopo=unidade",
+      "escopo é limpo após adicionar cada atribuição",
+      "papel é exibido por nome sem fallback para UUID",
+      "permissões continuam consultadas por GET /v1/papeis/{id}/permissoes",
+      "retry usa mesma intenção, Idempotency-Key e corpo",
+      "Bearer não é criado no navegador",
+      "nenhum endpoint de login humano foi criado",
+      "manutenção existente continua exigindo escopo explícito"
+    ]
+  },
+  "criterios_aceite": [
+    {
+      "id": 1,
+      "status": "PASS",
+      "evidencia": "scope required + opção inicial vazia + bloqueio antes de adicionar atribuição"
+    },
+    {
+      "id": 2,
+      "status": "PASS",
+      "evidencia": "assignmentPayload global omite unidade_id"
+    },
+    {
+      "id": 3,
+      "status": "PASS",
+      "evidencia": "assignmentPayload por unidade envia unidade_id"
+    },
+    {
+      "id": 4,
+      "status": "PASS",
+      "evidencia": "readAllPages percorre next_cursor, preserva primeira ocorrência e evita duplicatas"
+    },
+    {
+      "id": 5,
+      "status": "PASS",
+      "evidencia": "GET /v1/papeis/{id}/permissoes preservado e preview mantido"
+    },
+    {
+      "id": 6,
+      "status": "PASS",
+      "evidencia": "fluxo atual sem NFC permanece no único POST /v1/usuarios/onboarding"
+    },
+    {
+      "id": 7,
+      "status": "BLOCKED_BACKEND",
+      "evidencia": "OpenAPI atual de POST /v1/usuarios/onboarding não contém propriedade nfc e usa additionalProperties:false"
+    },
+    {
+      "id": 8,
+      "status": "BLOCKED_BACKEND",
+      "evidencia": "não foi criada UI NFC porque o onboarding publicado não aceita nfc atomicamente"
+    },
+    {
+      "id": 9,
+      "status": "BLOCKED_NOT_IMPLEMENTED",
+      "evidencia": "nenhuma tag NFC foi introduzida no frontend; política de não persistência será testada quando o contrato estiver publicado"
+    },
+    {
+      "id": 10,
+      "status": "BLOCKED_BACKEND",
+      "evidencia": "OpenAPI atual não contém GET /v1/usuarios/{id}/nfc"
+    },
+    {
+      "id": 11,
+      "status": "BLOCKED_INTEGRATION",
+      "evidencia": "POST /v1/terminal/v1/employee-nfc/{id}/revoke existe, mas a consulta administrativa necessária para obter vínculos não está publicada"
+    },
+    {
+      "id": 12,
+      "status": "PASS",
+      "evidencia": "pilot-api preserva intent.key e intent.body nos retries"
+    },
+    {
+      "id": 13,
+      "status": "PASS",
+      "evidencia": "nenhuma rota de login humano/JWT/auth exchange criada"
+    },
+    {
+      "id": 14,
+      "status": "PASS_PENDING_FINAL_DIFF",
+      "evidencia": "nenhum arquivo backend/banco/Terminal editado até esta evidência; confirmar no diff final"
+    }
+  ],
+  "incompatibilidades_backend": [
+    {
+      "contrato": "POST /v1/usuarios/onboarding",
+      "estado_publicado": "request body = nome, login, atribuicoes, motivo; additionalProperties=false",
+      "necessario": "propriedade opcional nfc:{unidade_id,tag}, executada na mesma transação de usuário+atribuições"
+    },
+    {
+      "contrato": "GET /v1/usuarios/{id}/nfc?limit=25&cursor=...",
+      "estado_publicado": "rota ausente no OpenAPI e em operational-registration.ts",
+      "necessario": "consulta administrativa paginada de vínculos tv1_nfc ativos e revogados, sem expor tag nem digest"
+    }
+  ],
+  "contratos_nfc_existentes_preservados": [
+    "POST /v1/terminal/v1/employee-nfc",
+    "POST /v1/terminal/v1/employee-nfc/{id}/revoke",
+    "schema tv1Nfc tag 8–256 caracteres"
+  ],
+  "testes_repositorio": {
+    "alterados": [
+      "tests/frontend-operational-contract.test.mjs",
+      "tests/frontend-operational.test.mjs"
+    ],
+    "workflow_ci": "não disparado; verify.yml é manual e consumiria runner/cota sem autorização explícita",
+    "e2e_remoto": "não executado; bloqueios externos previamente registrados permanecem"
+  }
+}
