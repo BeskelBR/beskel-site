@@ -1,3 +1,78 @@
+# MVP 11 — aderência do onboarding/ADM: escopo, paginação e NFC — 23/09/2026
+
+Delta iniciado sobre `b507038fa3c95a697e1571fd1819b7acc5c7b68d`. Backend, banco/Supabase, BFF `/session`, Terminal/C18 e autenticação humana permaneceram congelados.
+
+## Concluído no frontend
+
+1. **Escopo explícito no onboarding.** O seletor inicia em `Selecione o escopo...` e é obrigatório. Atribuição por unidade exige seleção de unidade; atribuição global exibe `Todas as unidades da organização` e omite `unidade_id` do corpo. Após adicionar uma atribuição, escopo/unidade voltam ao estado não decidido para impedir reaproveitamento implícito na próxima atribuição.
+2. **Paginação completa de papéis.** A leitura única `GET /v1/papeis?limit=100` foi substituída por um leitor paginado que segue `next_cursor`, preserva a ordem da primeira ocorrência e elimina duplicatas por `id`. O estado é local a cada renderização do onboarding, portanto nova sessão/recarga refaz a leitura. A UI continua mostrando nomes, nunca exigindo UUID do papel.
+3. **Permissões do papel.** A seleção continua consultando `GET /v1/papeis/{id}/permissoes` e exibindo as permissões efetivas.
+4. **Idempotência.** O cliente aprovado não foi alterado: retry reutiliza a mesma intenção, `Idempotency-Key` e corpo.
+
+## Bloqueio objetivo do delta NFC
+
+O backend/OpenAPI publicado no `HEAD` consultado **não contém os dois contratos descritos como já disponíveis no pedido**:
+
+- o schema atual de `POST /v1/usuarios/onboarding` possui somente `nome`, `login`, `atribuicoes` e `motivo`, com `additionalProperties:false`; portanto enviar `nfc` hoje violaria o contrato;
+- `GET /v1/usuarios/{id}/nfc?limit=25&cursor=...` não existe no OpenAPI nem em `src/domain/operational-registration.ts`.
+
+O modelo correto `tv1_nfc` existe e os comandos canônicos atuais `POST /v1/terminal/v1/employee-nfc` e `POST /v1/terminal/v1/employee-nfc/{id}/revoke` permanecem publicados, com tag de 8–256 caracteres. Eles **não substituem** o requisito de onboarding atômico: o frontend não enviou um segundo POST após o cadastro e não usou `credencial(tipo=nfc)` como atalho.
+
+Por isso a UI NFC não foi simulada. Faltam no backend publicado:
+- extensão opcional `nfc:{unidade_id,tag}` no onboarding, executada na mesma transação de usuário + atribuições;
+- consulta administrativa paginada dos vínculos NFC do funcionário, incluindo ativos/revogados, sem expor tag ou digest.
+
+Assim que esses contratos estiverem efetivamente publicados no branch/OpenAPI, a integração de NFC pode ser feita sem redesenho: o cadastro continua em um único onboarding; a manutenção reutiliza os comandos canônicos `tv1_nfc`.
+
+## Verificação deste delta
+
+No QA final foram executadas **27/27 verificações, 0 falhas**, sobre os blobs exatos da branch e o OpenAPI atual: escopo obrigatório, omissão/inclusão de `unidade_id`, paginação por cursor, preservação de ordem, deduplicação, nomes na UI, preview de permissões, idempotência, BFF sem Bearer no navegador, ausência de login humano e confirmação da incompatibilidade NFC publicada.
+
+Os testes de repositório `tests/frontend-operational-contract.test.mjs` e `tests/frontend-operational.test.mjs` foram atualizados. O workflow `verify.yml` não foi disparado porque é manual e consumiria runner/cota sem autorização explícita. E2E remoto não foi repetido.
+
+Evidência: [frontend-onboarding-nfc-delta.json](evidencias/frontend-onboarding-nfc-delta.json).
+
+---
+
+# MVP 11 — gestão manual de funcionários no DEV/ADM — 23/09/2026
+
+Delta sobre `f14cb9537468fa9bff443a4032137f7bdad27008`. Backend, banco/migrations e Terminal permaneceram congelados. O cadastro inicial do MVP 11 foi preservado e recebeu uma camada administrativa aditiva em `assets/system-v11-admin.js`.
+
+## Operação entregue
+
+O painel **Administração** agora permite localizar funcionários por nome ou login, selecionar um cadastro existente, editar nome/login por revisão versionada, consultar papéis e permissões, visualizar a unidade vinculada a cada atribuição, adicionar atribuições, revogar/restaurar atribuições e consultar o histórico das revisões.
+
+A interface pagina integralmente `GET /v1/usuarios`, `GET /v1/papeis`, `GET /v1/unidades` e `GET /v1/atribuicoes`, apresentando ao operador apenas nomes e rótulos compreensíveis. Nenhum UUID precisa ser digitado. Atribuição global exige escolha explícita entre **uma unidade específica** e **todas as unidades da organização**; `unidade_id` é omitido quando o escopo é global.
+
+Edição de funcionário usa `GET/POST /v1/usuarios/{id}/revisoes` com `versao_esperada`, `motivo`, `simulacao:true` e `confirmacao_humana:true`. Revogação/restauração usa `GET/POST /v1/atribuicoes/{id}/revisoes` com os mesmos controles de versão/justificativa. O estado é recarregado após confirmação; conflito de versão não é tratado como sucesso.
+
+A criação de novas atribuições usa `POST /v1/atribuicoes`. Se a mesma combinação papel + escopo já estiver ativa, a UI recusa duplicação. Se existir revogada, orienta a restaurar a atribuição existente em vez de criar outra.
+
+O histórico combina revisões cadastrais e revisões de atribuições, mostrando papel, unidade/escopo global, autor por nome quando disponível, data, versão e motivo.
+
+## Sessão e idempotência
+
+A camada ADM usa exclusivamente `window.HVBSession.fetch`. O Bearer continua no BFF `/session` e não aparece no navegador.
+
+Cada escrita é preparada uma única vez via cliente idempotente existente. Em falha ambígua, a mesma intenção — portanto a mesma `Idempotency-Key` e o mesmo corpo — é preservada para retry. Uma confirmação remove imediatamente o retry pendente.
+
+## Limites contratuais constatados
+
+1. `POST /v1/atribuicoes` **não aceita `motivo`** no schema atual. Assim, a concessão inicial pode ser criada e auditada pelo comando normal, mas não possui motivo estruturado no histórico de revisões. Revogação/restauração têm motivo normalmente. Se o produto exigir motivo explícito também na concessão inicial, falta contrato de backend.
+2. `GET /v1/usuarios` não oferece `q` e `GET /v1/atribuicoes` não oferece filtro por `usuario_id`. O painel DEV percorre todas as páginas e filtra localmente. Isso não bloqueia a operação atual, mas é uma limitação de escala real.
+
+Nenhuma permissão foi ampliada por inferência. A dependência `locais:ler` do fluxo de estoque permanece como já registrada e não foi alterada neste delta.
+
+## Verificação
+
+Foram executadas **35/35 verificações** no runtime isolado do conector sobre os blobs exatos do branch: sintaxe, busca, escopo global explícito, schemas de revisão, versão/motivo/confirmação humana, endpoints, BFF, ausência de Bearer/SQL/UUID manual, operações de atribuição, histórico, retry e contratos efetivos do backend.
+
+Também foram adicionados os testes de repositório `tests/frontend-admin-contract.test.mjs` e `tests/frontend-admin.test.mjs`. O workflow GitHub `verify.yml` é manual; ele não foi disparado porque isso consumiria runner/cota sem autorização explícita. O E2E remoto também não foi repetido: permanecem os bloqueios externos já registrados (`SELF_SIGNED_CERT_IN_CHAIN` e ausência da credencial HVB sintética).
+
+Evidência: [frontend-admin-mvp11.json](evidencias/frontend-admin-mvp11.json).
+
+---
+
 # MVP 11 — contratos operacionais integrados — 23/09/2026
 
 Integração do contrato publicado pelo backend em `8ba6c2d2a18121f721e54c51d3e3d7caac9536ef`. Backend, banco/migrations e Terminal não foram alterados por esta etapa. A interface ativa passou de `assets/system-v9.js` para `assets/system-v10.js`; o MVP 10 de sessão/BFF permanece a base.

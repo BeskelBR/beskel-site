@@ -7,10 +7,12 @@ import {
   canUseGlobal,
   canUseUnit,
   operationalFlows,
+  readAllPages,
   resolveUnit,
 } from "../assets/system-v10-contract.js";
 
 test("MVP 11 contrato: escopos e atribuição global", () => {
+  assert.throws(() => assignmentPayload("papel", "", ""), /escopo_obrigatorio/);
   const context = {
     permissoes_globais: ["estoque:ler", "estoque:catalogar"],
     unidades: [
@@ -37,6 +39,36 @@ test("MVP 11 contrato: escopos e atribuição global", () => {
     ),
     { papel_id: "22222222-2222-4222-8222-222222222222" },
   );
+});
+
+test("MVP 11 contrato: pagina papeis por next_cursor sem duplicar", async () => {
+  const calls = [];
+  const pages = {
+    "/v1/papeis?limit=2": {
+      items: [
+        { id: "p1", nome: "Primeiro" },
+        { id: "p2", nome: "Segundo" },
+      ],
+      next_cursor: "p2",
+    },
+    "/v1/papeis?limit=2&cursor=p2": {
+      items: [
+        { id: "p2", nome: "Segundo repetido" },
+        { id: "p3", nome: "Terceiro" },
+      ],
+      next_cursor: null,
+    },
+  };
+  const result = await readAllPages(async (path) => {
+    calls.push(path);
+    return pages[path];
+  }, "/v1/papeis", 2);
+  assert.deepEqual(calls, [
+    "/v1/papeis?limit=2",
+    "/v1/papeis?limit=2&cursor=p2",
+  ]);
+  assert.deepEqual(result.map((item) => item.id), ["p1", "p2", "p3"]);
+  assert.equal(result[1].nome, "Segundo");
 });
 
 test("MVP 11 contrato: busca mantém q e cursor", () => {

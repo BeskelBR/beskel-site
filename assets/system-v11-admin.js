@@ -173,6 +173,7 @@ if (detailView && detailHead) {
     try {
       const result = await client.send(active.intent);
       pendingMutation = null;
+      renderRetry(statusNode);
       setStatus(statusNode, active.successMessage(result), "success");
       await loadCatalogs();
       await renderSelectedUser();

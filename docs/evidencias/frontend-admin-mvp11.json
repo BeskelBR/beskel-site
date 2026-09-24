@@ -1,0 +1,77 @@
+{
+  "data": "2026-09-23",
+  "branch": "hvb-sistema-dev",
+  "base_contract_sha": "f14cb9537468fa9bff443a4032137f7bdad27008",
+  "implementation_sha": "bda9e2edfb867871bbe2587879373dc3fc94f279",
+  "escopo": "frontend DEV/ADM; backend, banco/migrations e Terminal preservados",
+  "arquivos": {
+    "assets/system-v11-admin-contract.js": "830f4377210a59de790ad947dfea092417304c97",
+    "assets/system-v11-admin.js": "b2748444d817ceb79ad362d1fefb9be0a1981146",
+    "assets/system-v6.css": "d35dc9dc42f5a6ca838babb11da27ad95ff6387a",
+    "index.html": "4ed4fed4fe57387dd252eede3e37829e136c376f",
+    "tests/frontend-admin-contract.test.mjs": "1a6e58c81d29f496a8ad93888e12b28813e3ce2b",
+    "tests/frontend-admin.test.mjs": "2e8edad5f648571f50764c758ba281b3c3efd487"
+  },
+  "implementado": [
+    "localizacao por nome/login sobre todos os usuarios paginados",
+    "cadastro inicial reaproveita onboarding MVP 11 existente",
+    "edicao de nome/login por revisao com versao esperada, motivo e confirmacao humana",
+    "consulta de papeis, permissoes e unidades por nomes",
+    "criacao de atribuicao com escolha explicita entre unidade e escopo global",
+    "revogacao e restauracao por revisao versionada com motivo",
+    "historico combinado de revisoes cadastrais e revisoes de atribuicoes",
+    "BFF /session preservado; nenhum Bearer no browser",
+    "mutacoes idempotentes preparadas uma vez e retry com a mesma intencao"
+  ],
+  "verificacao_exata": {
+    "runtime": "V8 isolado do conector sobre blobs exatos da branch",
+    "aprovadas": 35,
+    "falhas": 0,
+    "cobre": [
+      "sintaxe da camada ADM e contrato puro",
+      "busca por nome/login",
+      "escopo global explicito e omissao de unidade no corpo",
+      "payloads de revisao de usuario e atribuicao",
+      "motivo, versao_esperada, simulacao e confirmacao_humana",
+      "endpoints publicados",
+      "same-origin via HVBSession.fetch",
+      "ausencia de Authorization, SQL e entrada manual de UUID no painel",
+      "labels de permissoes e unidades compreensiveis",
+      "adicionar, revogar, restaurar e consultar historico",
+      "retry reutiliza intencao e e removido apos confirmacao",
+      "ordem de carregamento system-v10 -> system-v11-admin",
+      "schemas reais de revisao no backend"
+    ]
+  },
+  "testes_repositorio": {
+    "adicionados": [
+      "tests/frontend-admin-contract.test.mjs",
+      "tests/frontend-admin.test.mjs"
+    ],
+    "execucao_ci": "nao disparada; workflow verify.yml e manual e consumir runner/cota exigiria autorizacao explicita",
+    "navegador_e2e": "nao executado; bloqueios remotos permanecem SELF_SIGNED_CERT_IN_CHAIN e ausencia de credencial HVB sintetica"
+  },
+  "contratos_ausentes": [
+    {
+      "impacto": "auditoria da concessao inicial",
+      "contrato": "POST /v1/atribuicoes",
+      "fato": "schema de atribuicao aceita usuario_id, papel_id e unidade_id; nao aceita motivo",
+      "efeito": "a interface pode criar a atribuicao com idempotencia, mas nao pode registrar motivo estruturado da concessao inicial nem exibi-lo pelo historico de revisoes",
+      "bloqueia_operacao": false
+    },
+    {
+      "impacto": "escala de consulta administrativa",
+      "contrato": "GET /v1/usuarios e GET /v1/atribuicoes",
+      "fato": "nao ha filtro q para usuarios nem usuario_id para atribuicoes",
+      "efeito": "o painel DEV pagina todos os registros e filtra localmente; funcional hoje, mas custo cresce com o volume",
+      "bloqueia_operacao": false
+    }
+  ],
+  "preservado": [
+    "backend sem alteracao",
+    "banco/migrations sem alteracao",
+    "Terminal sem alteracao",
+    "permissoes nao ampliadas por inferencia",
+    "trabalho local do usuario nao manipulado; operacoes foram apenas no remoto GitHub"
+  ]
+}

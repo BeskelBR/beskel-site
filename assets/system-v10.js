@@ -4,6 +4,7 @@ import {
   canUseGlobal,
   canUseUnit,
   operationalFlows,
+  readAllPages,
   resolveUnit,
 } from "./system-v10-contract.js";
 
@@ -242,7 +243,7 @@ if (detailView && detailHead) {
       return;
     }
 
-    const roles = (await client.read("/v1/papeis?limit=100")).items || [];
+    const roles = await readAllPages((path) => client.read(path), "/v1/papeis", 100);
     if (version !== renderVersion || activeModule() !== "administracao") return;
 
     const roleById = new Map(roles.map((item) => [item.id, item]));
@@ -271,19 +272,20 @@ if (detailView && detailHead) {
     const role = select("papel_id");
     role.required = true;
     option(role, "", "Selecione um papel");
-    for (const item of roles) option(role, item.id, item.nome || item.id);
+    for (const item of roles) option(role, item.id, item.nome || "Papel sem nome");
 
     const scope = select("escopo");
+    scope.required = true;
+    option(scope, "", "Selecione o escopo...");
     option(scope, "unidade", "Somente uma unidade");
     option(scope, "global", "Todas as unidades da organização");
 
     const unit = select("unidade_id");
     option(unit, "", "Selecione uma unidade");
     for (const item of ctx.unidades || [])
-      option(unit, item.id, item.nome || item.id);
-    const activeUnit = resolveUnit(ctx, localStorage.getItem("hvb-unit-id"));
-    if (activeUnit) unit.value = activeUnit;
-
+      option(unit, item.id, item.nome || "Unidade sem nome");
+    unit.disabled = true;
+    unit.required = false;
     const permissionPreview = note(
       "Permissões do papel",
       "Selecione um papel para consultar os códigos efetivos.",
@@ -316,7 +318,7 @@ if (detailView && detailHead) {
             "span",
             "",
             item.unidade_id
-              ? `Unidade: ${unitById.get(item.unidade_id)?.nome || item.unidade_id}`
+              ? `Unidade: ${unitById.get(item.unidade_id)?.nome || "Unidade não disponível"}`
               : "Escopo: todas as unidades da organização",
           ),
           el(
@@ -367,17 +369,21 @@ if (detailView && detailHead) {
     });
 
     scope.addEventListener("change", () => {
-      const global = scope.value === "global";
-      unit.disabled = global;
-      unit.required = !global;
+      const byUnit = scope.value === "unidade";
+      unit.disabled = !byUnit;
+      unit.required = byUnit;
+      if (!byUnit) unit.value = "";
     });
-    unit.required = true;
 
     const addAssignment = el("button", "secondary-btn", "Adicionar autorização");
     addAssignment.type = "button";
     addAssignment.addEventListener("click", async () => {
       if (!role.value) {
         role.reportValidity();
+        return;
+      }
+      if (!scope.value) {
+        scope.reportValidity();
         return;
       }
       if (scope.value === "unidade" && !unit.value) {
@@ -410,6 +416,10 @@ if (detailView && detailHead) {
         }
         assignments.push({ ...payload, permissoes: permissions });
         renderAssignments();
+        scope.value = "";
+        unit.value = "";
+        unit.disabled = true;
+        unit.required = false;
       } catch {
         permissionPreview.querySelector("span").textContent =
           "Não foi possível adicionar a autorização.";
@@ -507,9 +517,10 @@ if (detailView && detailHead) {
         form.reset();
         assignments.splice(0);
         renderAssignments();
-        if (activeUnit) unit.value = activeUnit;
-        unit.disabled = false;
-        unit.required = true;
+        scope.value = "";
+        unit.value = "";
+        unit.disabled = true;
+        unit.required = false;
         permissionPreview.querySelector("span").textContent =
           "Selecione um papel para consultar os códigos efetivos.";
       },

@@ -49,9 +49,33 @@ export function resolveUnit(context, savedUnitId) {
 
 export function assignmentPayload(roleId, scope, unitId) {
   if (!roleId) throw new Error("papel_obrigatorio");
+  if (!scope) throw new Error("escopo_obrigatorio");
   if (scope === "global") return { papel_id: roleId };
-  if (scope !== "unidade" || !unitId) throw new Error("unidade_obrigatoria");
+  if (scope !== "unidade") throw new Error("escopo_invalido");
+  if (!unitId) throw new Error("unidade_obrigatoria");
   return { papel_id: roleId, unidade_id: unitId };
+}
+
+export async function readAllPages(read, path, limit = 100) {
+  const items = [];
+  const seen = new Set();
+  let cursor = null;
+  let pages = 0;
+  do {
+    const params = new URLSearchParams({ limit: String(limit) });
+    if (cursor) params.set("cursor", cursor);
+    const response = await read(`${path}?${params}`);
+    for (const item of response.items || []) {
+      if (!item?.id || seen.has(item.id)) continue;
+      seen.add(item.id);
+      items.push(item);
+    }
+    cursor = response.next_cursor || null;
+    pages += 1;
+    if (pages > 1000)
+      throw Object.assign(new Error("paginacao_excedida"), { status: 503 });
+  } while (cursor);
+  return items;
 }
 
 export function buildPatientSearchPath(query, cursor = null, limit = 25) {

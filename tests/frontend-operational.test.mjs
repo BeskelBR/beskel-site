@@ -142,6 +142,12 @@ test("MVP 11 integrado: interface usa apenas os contratos publicados", async () 
 
   assert.match(source, /\/v1\/papeis\/\$\{encodeURIComponent\(roleId\)\}\/permissoes/);
   assert.match(source, /\/v1\/usuarios\/onboarding/);
+  assert.match(source, /readAllPages\(\(path\) => client\.read\(path\), "\/v1\/papeis", 100\)/);
+  assert.match(source, /option\(scope, "", "Selecione o escopo\.\.\."\)/);
+  assert.match(source, /scope\.required = true/);
+  assert.match(source, /if \(!scope\.value\)/);
+  assert.match(source, /scope\.value = ""/);
+  assert.doesNotMatch(source, /client\.read\("\/v1\/papeis\?limit=100"\)/);
   assert.match(source, /\/v1\/estoque\/entradas-completas/);
   assert.match(source, /locais:ler/);
   assert.match(source, /motivo:/);
