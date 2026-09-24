@@ -4,6 +4,7 @@ import {
   canUseGlobal,
   canUseUnit,
   operationalFlows,
+  readAllPages,
   resolveUnit,
 } from "./system-v10-contract.js";
 
@@ -39,30 +40,6 @@ if (detailView && detailHead) {
       contextView = view;
     }
     return context;
-  }
-
-  async function readAllPages(path, limit = 100) {
-    const items = [];
-    const seen = new Set();
-    let cursor = null;
-    let pages = 0;
-    do {
-      const url = new URL(path, location.origin);
-      url.searchParams.set("limit", String(limit));
-      if (cursor) url.searchParams.set("cursor", cursor);
-      else url.searchParams.delete("cursor");
-      const response = await client.read(`${url.pathname}${url.search}`);
-      for (const item of response.items || []) {
-        if (!item?.id || seen.has(item.id)) continue;
-        seen.add(item.id);
-        items.push(item);
-      }
-      cursor = response.next_cursor || null;
-      pages += 1;
-      if (pages > 1000)
-        throw Object.assign(new Error("paginacao_excedida"), { status: 503 });
-    } while (cursor);
-    return items;
   }
 
   function el(tag, className, text) {
@@ -266,7 +243,7 @@ if (detailView && detailHead) {
       return;
     }
 
-    const roles = await readAllPages("/v1/papeis", 100);
+    const roles = await readAllPages((path) => client.read(path), "/v1/papeis", 100);
     if (version !== renderVersion || activeModule() !== "administracao") return;
 
     const roleById = new Map(roles.map((item) => [item.id, item]));
