@@ -26,7 +26,7 @@ Assim que esses contratos estiverem efetivamente publicados no branch/OpenAPI, a
 
 ## Verificação deste delta
 
-Foram executadas **29/29 verificações, 0 falhas**, sobre os blobs exatos da branch e o OpenAPI atual: escopo obrigatório, omissão/inclusão de `unidade_id`, paginação por cursor, preservação de ordem, deduplicação, nomes na UI, preview de permissões, idempotência, BFF sem Bearer no navegador, ausência de login humano e confirmação da incompatibilidade NFC publicada.
+No QA final foram executadas **27/27 verificações, 0 falhas**, sobre os blobs exatos da branch e o OpenAPI atual: escopo obrigatório, omissão/inclusão de `unidade_id`, paginação por cursor, preservação de ordem, deduplicação, nomes na UI, preview de permissões, idempotência, BFF sem Bearer no navegador, ausência de login humano e confirmação da incompatibilidade NFC publicada.
 
 Os testes de repositório `tests/frontend-operational-contract.test.mjs` e `tests/frontend-operational.test.mjs` foram atualizados. O workflow `verify.yml` não foi disparado porque é manual e consumiria runner/cota sem autorização explícita. E2E remoto não foi repetido.
 
