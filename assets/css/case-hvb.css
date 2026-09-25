@@ -35,7 +35,7 @@ body.case-hvb::before{display:none!important}
 .case-text-card h3{font-size:clamp(1.6rem,2.5vw,2.5rem);line-height:1.04;margin:0 0 14px}.case-text-card p{color:#cbd1d8;margin:0}
 .architecture{display:grid;grid-template-columns:1.22fr .78fr;gap:18px;align-items:stretch}
 .insert-visual{margin:0;background:#fff;border:1px solid #dfe2e5;padding:18px;display:flex;flex-direction:column;justify-content:center}
-.insert-visual img{width:100%;height:auto;display:block;max-height:520px;object-fit:contain}
+.insert-visual img,.insert-visual video{width:100%;height:auto;display:block;max-height:520px;object-fit:contain}
 .insert-visual figcaption{font-size:.78rem;color:#7a8087;margin-top:10px;font-family:"IBM Plex Mono",monospace}
 .architecture-notes{display:grid;gap:10px}
 .note{border:1px solid #dfe2e5;background:#fff;padding:20px}.note strong{display:block;font-size:1rem}.note span{display:block;color:#6c7279;margin-top:5px;font-size:.92rem}
