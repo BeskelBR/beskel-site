@@ -229,7 +229,25 @@ test("responsável, unidade, dispositivo e usuário recebem revisão sem mudar i
   ] as const) {
     const r = await revise(path, dados);
     assert.equal(r.statusCode, 200, r.body);
-    assert.deepEqual((await read(`${path}/revisoes`)).json().atual, dados);
+    assert.deepEqual(
+      (await read(`${path}/revisoes`)).json().atual,
+      path.startsWith("/responsaveis/")
+        ? {
+            ...dados,
+            cpf: null,
+            telefone_whatsapp: null,
+            email: null,
+            data_nascimento: null,
+            cep: null,
+            logradouro: null,
+            numero: null,
+            complemento: null,
+            bairro: null,
+            cidade: null,
+            uf: null,
+          }
+        : dados,
+    );
   }
   assert.equal((await read("/me", token)).json().usuario_id, user);
   assert.equal(

@@ -342,7 +342,10 @@ export async function buildApp(
     {
       schema: {
         response: {
-          200: object({ status: { const: "ready", type: "string" } }),
+          200: object({
+            status: { const: "ready", type: "string" },
+            migration: { const: 111, type: "integer" },
+          }),
           ...errors,
         },
       },
@@ -351,19 +354,20 @@ export async function buildApp(
       try {
         const r = await db.query(
           `SELECT EXISTS(SELECT 1 FROM public.schema_migration
-              WHERE nome='102_assignment_read_scope.sql' AND hash='f4a5488800ce4be81458ab878390bca833bc46a4c2efb6d78495e66d4752987b')
+              WHERE nome='111_responsible_cpf_validator_runtime_grant.sql' AND hash='65138d010c53affb7532c964bfbb6014755c0a851b0f56e8a0ec52890b06d4bf')
             AND (SELECT count(DISTINCT substring(nome,1,3)) FROM public.schema_migration
-              WHERE nome ~ '^[0-9]{3}_' AND substring(nome,1,3)::integer BETWEEN 1 AND 102)=102
+              WHERE nome ~ '^[0-9]{3}_' AND substring(nome,1,3)::integer BETWEEN 1 AND 111)=111
             AND pg_has_role(current_user,'hvb_app','USAGE')
             AND has_schema_privilege(current_user,'hvb','USAGE')
             AND has_function_privilege(current_user,'hvb.autenticar(text)','EXECUTE')
+            AND has_function_privilege(current_user,'hvb.cpf_valido(text)','EXECUTE')
             AND has_table_privilege(current_user,'hvb.credencial','SELECT')
             AND has_table_privilege(current_user,'hvb.usuario','SELECT')
             AND NOT (SELECT rolsuper OR rolbypassrls FROM pg_roles
               WHERE rolname=current_user) AS ready`,
         );
         if (!r.rows[0].ready) throw new Error("not ready");
-        return { status: "ready" };
+        return { status: "ready", migration: 111 };
       } catch {
         throw new DomainError(503, "banco_ou_schema_indisponivel");
       }

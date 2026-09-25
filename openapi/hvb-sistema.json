@@ -10701,10 +10701,17 @@
                       "enum": [
                         "ready"
                       ]
+                    },
+                    "migration": {
+                      "type": "integer",
+                      "enum": [
+                        111
+                      ]
                     }
                   },
                   "required": [
-                    "status"
+                    "status",
+                    "migration"
                   ],
                   "additionalProperties": false
                 }

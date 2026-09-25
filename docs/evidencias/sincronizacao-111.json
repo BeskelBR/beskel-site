@@ -1,0 +1,762 @@
+{
+  "date": "2026-09-25",
+  "branch": "hvb-sistema-dev",
+  "initial_head": "1d748bebfbbd1ce05bb97149b7becca2ee1e389d",
+  "migrations": {
+    "count": 111,
+    "all_hashes_match": true,
+    "origin": [
+      {
+        "nome": "103_unit_timezone_integrity.sql",
+        "hash": "1c310dfcae531ce7e63996125117b2cbe01559c785fd33a497b7a666b385ba85",
+        "version": "20260925121715",
+        "literal_prefix_end_line": 28,
+        "history_sha256": "1c310dfcae531ce7e63996125117b2cbe01559c785fd33a497b7a666b385ba85"
+      },
+      {
+        "nome": "104_text_contract_bounds.sql",
+        "hash": "fe38a351982ebceeafe78f1d66be5b8547a471247300d32f430ebdc2c634e2b0",
+        "version": "20260925122020",
+        "literal_prefix_end_line": 22,
+        "history_sha256": "fe38a351982ebceeafe78f1d66be5b8547a471247300d32f430ebdc2c634e2b0"
+      },
+      {
+        "nome": "105_responsible_address_uf_domain.sql",
+        "hash": "c87040afd8060d0bffab06b27780134011df7b89218dad8087dc3141dce14c17",
+        "version": "20260925122203",
+        "literal_prefix_end_line": 12,
+        "history_sha256": "c87040afd8060d0bffab06b27780134011df7b89218dad8087dc3141dce14c17"
+      },
+      {
+        "nome": "106_monotonic_runtime_states.sql",
+        "hash": "2992db3039c488adff49c6d53c7a71fe804e462125d85948c3f5c0d04266ac75",
+        "version": "20260925122627",
+        "literal_prefix_end_line": 66,
+        "history_sha256": "2992db3039c488adff49c6d53c7a71fe804e462125d85948c3f5c0d04266ac75"
+      },
+      {
+        "nome": "107_inventory_session_monotonic_state.sql",
+        "hash": "86cca1ffd555bba5b083e82d4513435bd9f82a06efbec9c897a85562cf731801",
+        "version": "20260925122823",
+        "literal_prefix_end_line": 25,
+        "history_sha256": "86cca1ffd555bba5b083e82d4513435bd9f82a06efbec9c897a85562cf731801"
+      },
+      {
+        "nome": "108_outbox_lease_integrity.sql",
+        "hash": "0cd0d1d2985643069d3ed0177f4cda0e17a29d6f7065a280298d718a37bb6d18",
+        "version": "20260925154913",
+        "literal_prefix_end_line": 60,
+        "history_sha256": "87719e2182380d38532842864128f3b6d94de658950feda0350ea4dccca538a4"
+      },
+      {
+        "nome": "109_outbox_worker_lease_ownership.sql",
+        "hash": "7ba1e6f3ed9623e59fa7cc95de36c06eab92a6d20a7c78e4e98c44dd1b617349",
+        "version": "20260925170557",
+        "literal_prefix_end_line": 128,
+        "history_sha256": "fd510aee0c2e21c1e8a38eca3044956eb5979200f60e4cb47d06dcd8f7f32fc8"
+      },
+      {
+        "nome": "110_outbox_reservation_tenant_scope.sql",
+        "hash": "432811115700d550b732ce1b1a2b339f9dc282dcf6e8e1cd91dc0bd88f638a94",
+        "version": "20260925170741",
+        "literal_prefix_end_line": 70,
+        "history_sha256": "902e31d8aee1df5ac8a798d3f2bfde58c1b8585990a3c6400a2ea0377f51895f"
+      },
+      {
+        "nome": "111_responsible_cpf_validator_runtime_grant.sql",
+        "hash": "65138d010c53affb7532c964bfbb6014755c0a851b0f56e8a0ec52890b06d4bf",
+        "version": "20260925191337",
+        "literal_prefix_end_line": 5,
+        "history_sha256": "97f334cad1908aaf35c4c6ecb82658978aa87d02508ba2d22bea50d65e74e00f"
+      }
+    ],
+    "ledger": [
+      {
+        "nome": "001_foundation.sql",
+        "hash": "45f39be1822c09cd09c42c7e59fa13231b8a1830349b6409c4aa2d94a713f241"
+      },
+      {
+        "nome": "002_temporal_guards.sql",
+        "hash": "71856ef25f125ed141433e03c5086c417014a4ac97806db5214807f23e74d724"
+      },
+      {
+        "nome": "003_occupancy_concurrency.sql",
+        "hash": "4dc41ef01ba34e67ab0d2a54e2ed3db1251f67806dc477f45a3bc63366b72786"
+      },
+      {
+        "nome": "004_remove_redundant_indexes.sql",
+        "hash": "a0e0608a85c201c76eadd03a232b41793d7b7dfc705bb17bf06e4cfb6f630097"
+      },
+      {
+        "nome": "005_bounded_outbox_recovery.sql",
+        "hash": "3e51caed5550ec852e2432130df8b4062e7b7e0b3e5ddb40fe3bb7d21eff4308"
+      },
+      {
+        "nome": "006_inventory.sql",
+        "hash": "6cf69b587b1f5fe115d0ee7610ab15992fcb13665eeafcbcaa27911e3d611c78"
+      },
+      {
+        "nome": "007_inventory_integrity.sql",
+        "hash": "3d552e4cf78219d4769f4573d8e747c14515ad2753c83be9a825b36fbd14aeb0"
+      },
+      {
+        "nome": "008_position_lock_privilege.sql",
+        "hash": "1064f85382651b25b92ef27ba14f47709f286f4828c7e7422c3494754f31f05f"
+      },
+      {
+        "nome": "009_inventory_reads_and_counts.sql",
+        "hash": "0eab9f90c0f7e383c9ce74da4119e757d0dd0bbe62569fcb91145f63938f11a0"
+      },
+      {
+        "nome": "010_inventory_index_cleanup.sql",
+        "hash": "0f610ea527e68bb85f07c1f6d584b5bd0f3eb9abea0e7145d35e32f93c031c99"
+      },
+      {
+        "nome": "011_clinical.sql",
+        "hash": "d6bfbc6b171202e77c3d5fc1124fd60d53833130bf6d4a8729d9d911a2761704"
+      },
+      {
+        "nome": "012_clinical_integrity.sql",
+        "hash": "70e15492d7bc4bfe047afd2e78495348784ea05a3429642517c08a49f2013ecd"
+      },
+      {
+        "nome": "013_clinical_traceability.sql",
+        "hash": "6fb2637eda225ed044338964f23a5fa8d1b05c56dbb49284c302e6f984007eb2"
+      },
+      {
+        "nome": "014_daily_model.sql",
+        "hash": "2f32254acfc12114d3da2715199c2f44dbf97baa9a5d72d42cfb65a7db0da416"
+      },
+      {
+        "nome": "015_daily_integrity.sql",
+        "hash": "1992ddba823dc61428d4e26ae974a523b222118ca0ff827bbf8fd82d724f6c98"
+      },
+      {
+        "nome": "016_daily_links.sql",
+        "hash": "55f792d96012533658fa7ffd3902da595a5abe05a568ca64ae7613dd36e914de"
+      },
+      {
+        "nome": "017_financial_model.sql",
+        "hash": "d4e42f97d0201fd50609f2a0aaa1281ad2498e4125072356c363dec067685f34"
+      },
+      {
+        "nome": "018_financial_integrity.sql",
+        "hash": "f229c880f28727e6d6c4f26c1873a6ab1082e6d20ec4f7b31e138d95f066958a"
+      },
+      {
+        "nome": "019_financial_context.sql",
+        "hash": "78a9d9c55be43a121052397ddd4ed6a2698f2d3d15376dc2f517e3bb182f7ce7"
+      },
+      {
+        "nome": "020_financial_reversal.sql",
+        "hash": "0bbe56c16a9cdb9ee43c1ad4e140eb16227ca4bf28e73cd84cc8ba1a7fe5691e"
+      },
+      {
+        "nome": "021_financial_review.sql",
+        "hash": "03d2f60755c8c5fc7a82aab20c8340a5caed61377f65d44cf41ef6c80e995ad6"
+      },
+      {
+        "nome": "022_financial_physical_origin.sql",
+        "hash": "1699adc6728bfd93f1192dc35d886798c08a30624b73b0f4e9820a4ea94d4316"
+      },
+      {
+        "nome": "023_financial_lineage.sql",
+        "hash": "7a0ad805d66347d70d1f581c593ef6403cdc8ce71bcfff87e4b70b0f4487078d"
+      },
+      {
+        "nome": "024_exam_model.sql",
+        "hash": "27248b02edd93cb9126890c9777d1937d73854226d722e60d9284846b73e99a1"
+      },
+      {
+        "nome": "025_exam_integrity.sql",
+        "hash": "f1950f081cefb248d8f8c3478f78fac273c1fac0f89a4f633f976bc3f4dc0573"
+      },
+      {
+        "nome": "026_preventive_model.sql",
+        "hash": "8d73959f37b1f0625ed843adb3ea4fccb928bd159f720010db9e2874f3e81b11"
+      },
+      {
+        "nome": "027_preventive_integrity.sql",
+        "hash": "48b1c1edb87be47c06270125c3b5fa53a16114016a641e7fc2bb7a1858ca9526"
+      },
+      {
+        "nome": "028_preventive_trigger_dispatch.sql",
+        "hash": "5288f41c92af4210b02f545b9c9d856877849a4d00378d73cedf0dc4d5b47cab"
+      },
+      {
+        "nome": "029_preventive_lineage_bounds.sql",
+        "hash": "2f52cb1dee1cc06ba68fbc294080033e4f5d2fe411914d096e93ad42e9565387"
+      },
+      {
+        "nome": "030_document_model.sql",
+        "hash": "5b3d9f348f6eb5908ed49e026161e9658d19a6e300e456134c062ba78f417f3d"
+      },
+      {
+        "nome": "031_document_integrity.sql",
+        "hash": "e4d502be8f4a867365b2b8d45db216e94b3725cbc9bfc19b458d09caf8f6dc36"
+      },
+      {
+        "nome": "032_document_render_scope.sql",
+        "hash": "510a21e2b1bf8c5b95064d96a52061bc185e8021d53f84a969588a22424a519d"
+      },
+      {
+        "nome": "033_document_placeholder_binding.sql",
+        "hash": "19cef61b654fb7611d88a2fff953c26b7f888ffdd1a1f112ca44843c24fac4b0"
+      },
+      {
+        "nome": "034_schedule_model.sql",
+        "hash": "0dbe69b2fcc1d05c74a105e8cff5d326d7973d0b345a46e778e3534c9282bd4c"
+      },
+      {
+        "nome": "035_schedule_integrity.sql",
+        "hash": "c05d4c9555cc3ec39f2e845f3a3ed47f427f9b9e6708963d4a18099599755e67"
+      },
+      {
+        "nome": "036_portal_model.sql",
+        "hash": "beea8d6618d15f5afb01a831897059638cf4fe244f8604279337f9e42cf3a6e3"
+      },
+      {
+        "nome": "037_portal_integrity.sql",
+        "hash": "7328167881ceed3c2313c9234246afc7a29c96313b18a30d7d55bfa873b344fd"
+      },
+      {
+        "nome": "038_portal_predicate_plans.sql",
+        "hash": "3c8b083c0d42fd7985b79148e05fbc5a706b2348a8fb21f70250a8fb9c820f83"
+      },
+      {
+        "nome": "039_purchase_model.sql",
+        "hash": "2076b8f023dbb264c2606edbbe11f100385059062265dd6172b2c3b0a2ba5eb9"
+      },
+      {
+        "nome": "040_purchase_integrity.sql",
+        "hash": "624eefe19dc4717ae13aed96d417e3c66ec530656b495019630ee13c25fc229c"
+      },
+      {
+        "nome": "041_medical_record_model.sql",
+        "hash": "b21c60778442d6db11e9e5a6355627dc95cce7d72c8116ed917b335096e45cd7"
+      },
+      {
+        "nome": "042_medical_record_integrity.sql",
+        "hash": "9e716fba1fce066bec88f41fdaecd0464562a264c80b9c38333d86ceb4d31b0a"
+      },
+      {
+        "nome": "043_medical_record_temporal_review.sql",
+        "hash": "11954c05f6abcbbf7013997f8f7870395e3df7c4a1483e960224a545a8852c56"
+      },
+      {
+        "nome": "044_payables_model.sql",
+        "hash": "594cee645396eb5e0ba6fd29af829d587e4013aef9506f4545aae78c8fb0e051"
+      },
+      {
+        "nome": "045_payables_integrity.sql",
+        "hash": "93e9edf1b2486b04d394ef0978dbcacfbdecad7331a487be6b0cb4d84cd8b2d5"
+      },
+      {
+        "nome": "046_payables_corrections.sql",
+        "hash": "bc46ea835a6c1a4e174897dbe1aeeb865792529037928b1b1d40f26f0f0a8b93"
+      },
+      {
+        "nome": "047_terminal_model.sql",
+        "hash": "dadaeb3a28d419de8dc1e7004e9aa8d372c3eed53e335361df7fc5cf74d6a828"
+      },
+      {
+        "nome": "048_terminal_integrity.sql",
+        "hash": "2d49d9a438a8ea5b2ee878ed0d65b79d66e70d45cef671dd94ecd8b8cf6c926a"
+      },
+      {
+        "nome": "049_purchase_pricing_model.sql",
+        "hash": "544dea76330ea3dd2eb3c68638526ce586a0decb7de4b4da3654ddb1897187da"
+      },
+      {
+        "nome": "050_purchase_pricing_integrity.sql",
+        "hash": "9a11e42cca9d3c06e71129f7599ef9e16e1e3675f519d579d7e141679d279557"
+      },
+      {
+        "nome": "051_acquisition_cost_model.sql",
+        "hash": "49b8e0b7b27a2596c79e47222e74348b87f3b8235e05e46e6af033c9fb9d7551"
+      },
+      {
+        "nome": "052_acquisition_cost_integrity.sql",
+        "hash": "b2e51e56f77aefe14ce151433152c083748ef0a0ac7d840014db8fa396d81c81"
+      },
+      {
+        "nome": "053_supplier_installment_model.sql",
+        "hash": "00839acfd14251f3dd9daccfaab375bfbd13ce2a67c1b9d1473eb6ff13d0b1d0"
+      },
+      {
+        "nome": "054_supplier_installment_integrity.sql",
+        "hash": "7785642e7efb39d7bbcee0ab42497d6d19b33844563da21ec50986d35526d8c0"
+      },
+      {
+        "nome": "055_supplier_credit_model.sql",
+        "hash": "5f4b1673fd46dd845464fb85b36764d5de772e596e5f6faac65b64cc7f80d0d2"
+      },
+      {
+        "nome": "056_supplier_credit_integrity.sql",
+        "hash": "bc3240bafa3dfbe1b628efaea8549cbfcec012023b33fb7bd3b0541af74c1d60"
+      },
+      {
+        "nome": "057_supplier_outflow_model.sql",
+        "hash": "982fa694bb1f297fa073b9de824814e685f884b4ad20dcf2d62692fd21553113"
+      },
+      {
+        "nome": "058_supplier_outflow_integrity.sql",
+        "hash": "cdb15d3400419b3d0e87b126fe711fa4779f0d3465fd89f6764f550940998dcf"
+      },
+      {
+        "nome": "059_medical_complements_model.sql",
+        "hash": "328042f02d642ca683ea9617fad7a64f0e53d7734acba16751e1d2590fa01db3"
+      },
+      {
+        "nome": "060_medical_complements_integrity.sql",
+        "hash": "8acffcf792eaf0612c5e155e8cbe42989c8e7717a101880daca0ddf342159618"
+      },
+      {
+        "nome": "061_links_audit_model.sql",
+        "hash": "e2158a71403749e400517286c14d89dbe0217d8a5cbcf2b09212b3d735db55dc"
+      },
+      {
+        "nome": "062_links_audit_integrity.sql",
+        "hash": "0cb2f44076eaf1e2fd03a54c2f72d1063ac567550e6fb566de115591f72cb9de"
+      },
+      {
+        "nome": "063_registry_corrections_model.sql",
+        "hash": "40a520eb7c847e2c810e0cf3bce7ab216e7fc85203f493e66fc2f156b564f732"
+      },
+      {
+        "nome": "064_registry_corrections_integrity.sql",
+        "hash": "6c836264051ec83e0a6102e8d8f6fb3ee6935448a4b465c956f1761c922f7cdb"
+      },
+      {
+        "nome": "065_terminal_access_model.sql",
+        "hash": "39de3888299b1f5c2493ebfc19177a9687c819e2f08625e1af700287bfbbcc36"
+      },
+      {
+        "nome": "066_terminal_access_integrity.sql",
+        "hash": "df5d2f4e0f74a59494b1585616bae21330c427c43adf332f6abd90a2865b3f51"
+      },
+      {
+        "nome": "067_clinical_corrections_model.sql",
+        "hash": "ee7988ff729df9a788116490e443ce938b5952a9ab2ef36d9b79f1ae84d85c64"
+      },
+      {
+        "nome": "068_clinical_corrections_integrity.sql",
+        "hash": "e34499e8c71800a17d8e1ba8185785f7dff58e20dd941c01b951d25a85954c05"
+      },
+      {
+        "nome": "069_daily_corrections_model.sql",
+        "hash": "c06bee557ec93f0e58d1bcf49960c3c76a9e4ed52f617be689e1e6f10c5223cc"
+      },
+      {
+        "nome": "070_daily_corrections_integrity.sql",
+        "hash": "a06601ade10df6821f39851c642023e6be43f85e50b49d2a1835da73ac253914"
+      },
+      {
+        "nome": "071_financial_corrections_model.sql",
+        "hash": "de83c11c11497ff3e085092373de1de38a577ff206d32df96fcea0209d39b878"
+      },
+      {
+        "nome": "072_financial_corrections_integrity.sql",
+        "hash": "ab7b16f13e93fbf3df96475cc3a4031396bdf899c3768ad534ce619ff6620ce5"
+      },
+      {
+        "nome": "073_terminal_v1_model.sql",
+        "hash": "d7f14de9e0049141b4829682d5373f9882dcc683e3d89f521f82a6d927b44e03"
+      },
+      {
+        "nome": "074_terminal_v1_integrity.sql",
+        "hash": "4a066231426053906749cc42cafd56e2bffbad1c7118f46f8065f238c0f34bb6"
+      },
+      {
+        "nome": "075_terminal_v1_locking.sql",
+        "hash": "22f332411c986876283578ad45e699f45011108bc5c957321ba49ae4f57a0caf"
+      },
+      {
+        "nome": "076_terminal_v1_conservation.sql",
+        "hash": "99543aea29a3ea5d59d7d0e84466a27b2621ce58ab76d72cfb3b44583d725ddd"
+      },
+      {
+        "nome": "077_human_access_cpf.sql",
+        "hash": "a7030dde974cf5072d0c9af0eedcb8502664f85fd09aae3c9a43da4f5d494eac"
+      },
+      {
+        "nome": "078_human_access_recovery_fix.sql",
+        "hash": "045969b0b871d4b292f200f3d010bc66e0f585780b1287c84f22c494554a3520"
+      },
+      {
+        "nome": "079_clinical_patient_episode_integrity.sql",
+        "hash": "ef858457d854f23c355ead0d2fed4c46342ea5d89bbee6237b979ae6ff9c33a6"
+      },
+      {
+        "nome": "080_clinical_version_chain_integrity.sql",
+        "hash": "dfdf907e4fd338b5c125f218d1c09694237880d20fcd066df7e1a33f2b8a291e"
+      },
+      {
+        "nome": "081_exam_result_collection_integrity.sql",
+        "hash": "73a625440528dc9edc189afdc2fce90f6e36b757adbed97ef66f73463fe4e3fb"
+      },
+      {
+        "nome": "082_version_chain_identity_integrity.sql",
+        "hash": "2684b1c1a06da9c91e7c0814dcc0dd1b336e08efad468d33424a04fb680e9287"
+      },
+      {
+        "nome": "083_consumption_unit_integrity.sql",
+        "hash": "8ba55df9f82bd6fb50052a0f5e1f2dbf907ba6f93aa434345e0efaac82b73367"
+      },
+      {
+        "nome": "084_local_hierarchy_acyclic.sql",
+        "hash": "a597ef545ba2fe381a2f7fc917cd68253a76553a3ab747204e89c2cfb5f1eecb"
+      },
+      {
+        "nome": "085_patient_responsible_integrity.sql",
+        "hash": "4fe0cfaa7a8c38fd3988ca17c5752c6c1da83c1e84a3589ee8372da289e76fdc"
+      },
+      {
+        "nome": "086_restrict_rls_auto_enable_execute.sql",
+        "hash": "875b7226ebc01a731aa188d2336feef23719e06331a01f4eef2c3244c3814cfa"
+      },
+      {
+        "nome": "087_medical_record_episode_read_index.sql",
+        "hash": "66990b70435998aadd46437f50f931de5ca92b8b44aee765c99a8aeef7ef8ea5"
+      },
+      {
+        "nome": "088_schedule_patient_read_index.sql",
+        "hash": "a03c43bb57229144522462d6101b82b7f880d0b96f4b472cd3813ac3ca64fd9c"
+      },
+      {
+        "nome": "089_episode_read_indexes.sql",
+        "hash": "a7a7b1dedacf1d5aba0dcfc184d1fd2de1cae0dd03947a88dcef837da92c21b3"
+      },
+      {
+        "nome": "090_access_admin_permission_catalog.sql",
+        "hash": "33bc59ce83ae0464150053051ad72338067df9cd1222c0fe2a73acc6f6ec5ecb"
+      },
+      {
+        "nome": "091_core_permission_catalog.sql",
+        "hash": "3ec23908d35e01dd96a8fc9f126485a3341bb2f0b30b6b0d66ecb94c27bf9365"
+      },
+      {
+        "nome": "092_payer_financial_read_indexes.sql",
+        "hash": "789215f35319f9ccc05d509a05579cc82974f18b61e4d34e7d83ce1b070a0a95"
+      },
+      {
+        "nome": "093_document_request_episode_read_index.sql",
+        "hash": "e49eb79e9955ede875b508dcf986322a977d54ad83aeefcd89899d286802e6be"
+      },
+      {
+        "nome": "094_patient_protocol_read_index.sql",
+        "hash": "6f0add24b19f8d4a6c32804d78f910c8c043897127a8dcf965db06b2f0d181e6"
+      },
+      {
+        "nome": "095_portal_patient_read_index.sql",
+        "hash": "5d60abf64b711b184964c9085ac764c880bc35cdf8c6bd2c1c14e8e82f56f81b"
+      },
+      {
+        "nome": "096_responsible_patient_registration_fields.sql",
+        "hash": "36df8ce9ce27bda15d738de1f1fb2c24b7550fa5e74fc399fd639b1f7d6d1ebe"
+      },
+      {
+        "nome": "097_patient_registration_cleanup.sql",
+        "hash": "8996b50f89cbbecbcd5fdf096c62f7532a79c7f1d7792e82848ca1530593c11e"
+      },
+      {
+        "nome": "098_registration_normalization_relationships.sql",
+        "hash": "eaa413fe8733c69fd23ceac0a8f3ffb59b636c5585f1280c41d87fffcc72766c"
+      },
+      {
+        "nome": "099_episode_read_state.sql",
+        "hash": "f6ff8371e328537185a7b82d313a78fea5a19fb1e7b69e6045ab712aa28b0698"
+      },
+      {
+        "nome": "100_occupancy_read_state.sql",
+        "hash": "84b584b4460669c5f5911ae44aaab8aa615c10322ec7cb10ca69b196bb1601d9"
+      },
+      {
+        "nome": "101_responsible_lookup_indexes.sql",
+        "hash": "4111d3221ed5001055469e7bb5a7a62df86bbfaf770b89dcbf13213edbdf7bb8"
+      },
+      {
+        "nome": "102_assignment_read_scope.sql",
+        "hash": "f4a5488800ce4be81458ab878390bca833bc46a4c2efb6d78495e66d4752987b"
+      },
+      {
+        "nome": "103_unit_timezone_integrity.sql",
+        "hash": "1c310dfcae531ce7e63996125117b2cbe01559c785fd33a497b7a666b385ba85"
+      },
+      {
+        "nome": "104_text_contract_bounds.sql",
+        "hash": "fe38a351982ebceeafe78f1d66be5b8547a471247300d32f430ebdc2c634e2b0"
+      },
+      {
+        "nome": "105_responsible_address_uf_domain.sql",
+        "hash": "c87040afd8060d0bffab06b27780134011df7b89218dad8087dc3141dce14c17"
+      },
+      {
+        "nome": "106_monotonic_runtime_states.sql",
+        "hash": "2992db3039c488adff49c6d53c7a71fe804e462125d85948c3f5c0d04266ac75"
+      },
+      {
+        "nome": "107_inventory_session_monotonic_state.sql",
+        "hash": "86cca1ffd555bba5b083e82d4513435bd9f82a06efbec9c897a85562cf731801"
+      },
+      {
+        "nome": "108_outbox_lease_integrity.sql",
+        "hash": "0cd0d1d2985643069d3ed0177f4cda0e17a29d6f7065a280298d718a37bb6d18"
+      },
+      {
+        "nome": "109_outbox_worker_lease_ownership.sql",
+        "hash": "7ba1e6f3ed9623e59fa7cc95de36c06eab92a6d20a7c78e4e98c44dd1b617349"
+      },
+      {
+        "nome": "110_outbox_reservation_tenant_scope.sql",
+        "hash": "432811115700d550b732ce1b1a2b339f9dc282dcf6e8e1cd91dc0bd88f638a94"
+      },
+      {
+        "nome": "111_responsible_cpf_validator_runtime_grant.sql",
+        "hash": "65138d010c53affb7532c964bfbb6014755c0a851b0f56e8a0ec52890b06d4bf"
+      }
+    ]
+  },
+  "source_sha256": {
+    "src/api/app.ts": "4f42ca79ac61ef1b7881504914ebe5349d107f8962c614d9dca69a53ce24a3b2",
+    "openapi/hvb-sistema.json": "1f0e4bdd5c83ef9edbb71b5b0b86504203b66f3ce2c95f8e30ab62913089d781",
+    "scripts/verify-schema-111.ts": "37d70b0f455adc4183d4e3d38aa7777e2bbac3d33d14188b19a2f1945e59b0eb",
+    "tests/registry-corrections.test.ts": "0157f66ce843846f6cc04a77d69375cab581c3872fa166b6aff97908883511fd",
+    "docs/PENDENCIAS-HVB.md": "5db445abfdd2957f2e5fa7748597c6a68bacb107923c75466a1731910dfc8ba3",
+    "docs/SINCRONIZACAO-SUPABASE-111.md": "265fb68f35daf8dddf1981287f7758eb03af0506a18228d8f1532e4327a7cd3f"
+  },
+  "source_note": "Canonical app excludes human HTTP WIP; source hashes are bytes tested before Git EOL normalization.",
+  "local": {
+    "passed": 31,
+    "failed": 0,
+    "skipped": 0,
+    "suites": [
+      "database-runtime",
+      "operational-registration",
+      "registry-corrections",
+      "registration-102"
+    ],
+    "command": "node --import ./.local/canonical102-hooks.mjs --test --test-concurrency=1 tests/database-runtime.test.ts tests/operational-registration.test.ts tests/registry-corrections.test.ts tests/registration-102.test.ts",
+    "fixture_admin_remote_dev_a": "BLOCKED_BY_CONFIGURATION: absent in isolated TEST; no identities created or substituted",
+    "database": "isolated TEST outside OneDrive; canonical migrations 111"
+  },
+  "remote": {
+    "environment": "Supabase DEV, real Node/pg verify-full, API inject",
+    "command": "node --import ./.local/canonical102-hooks.mjs scripts/verify-schema-111.ts <private-env>",
+    "passed": 38,
+    "failed": 0,
+    "blocked": 0,
+    "rollback": true,
+    "constraints": "SET CONSTRAINTS ALL IMMEDIATE before savepoint release",
+    "authentication": "existing opaque Bearer; no human password/BFF login claimed",
+    "endpoints": [
+      {
+        "method": "GET",
+        "endpoint": "/ready",
+        "scenario": "reports migration 111",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "GET",
+        "endpoint": "/v1/me",
+        "scenario": "Bearer identity admin.remote.dev.a",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "GET",
+        "endpoint": "/v1/responsaveis",
+        "scenario": "list",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "GET",
+        "endpoint": "/v1/pacientes",
+        "scenario": "list",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "GET",
+        "endpoint": "/v1/vinculos",
+        "scenario": "list",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "GET",
+        "endpoint": "/v1/episodios?unidade_id={uuid}",
+        "scenario": "list",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "GET",
+        "endpoint": "/v1/ocupacoes?unidade_id={uuid}",
+        "scenario": "list",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "GET",
+        "endpoint": "/v1/atribuicoes?limit=100",
+        "scenario": "global assignment",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "POST",
+        "endpoint": "/v1/responsaveis",
+        "scenario": "CPF NULL",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "POST",
+        "endpoint": "/v1/responsaveis",
+        "scenario": "valid synthetic CPF",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "POST",
+        "endpoint": "/v1/responsaveis",
+        "scenario": "invalid CPF",
+        "expected_http": 409,
+        "observed_http": 409,
+        "sqlstate": "23514",
+        "status": "PASS"
+      },
+      {
+        "method": "POST",
+        "endpoint": "/v1/pacientes",
+        "scenario": "patient and initial relationship",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "GET",
+        "endpoint": "/v1/pacientes?q={uuid}",
+        "scenario": "created patient with microchip NULL",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "GET",
+        "endpoint": "/v1/vinculos?paciente_id={uuid}",
+        "scenario": "active relationship",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "GET",
+        "endpoint": "/v1/vinculos?responsavel_id={uuid}",
+        "scenario": "active relationship",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "POST",
+        "endpoint": "/v1/episodios",
+        "scenario": "admission",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "POST",
+        "endpoint": "/v1/locais",
+        "scenario": "synthetic box",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "POST",
+        "endpoint": "/v1/ocupacoes",
+        "scenario": "occupancy",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "GET",
+        "endpoint": "/v1/episodios?unidade_id={uuid}&paciente_id={uuid}",
+        "scenario": "created episode active",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      },
+      {
+        "method": "GET",
+        "endpoint": "/v1/ocupacoes?unidade_id={uuid}&episodio_id={uuid}",
+        "scenario": "created occupancy active",
+        "expected_http": 200,
+        "observed_http": 200,
+        "sqlstate": null,
+        "status": "PASS"
+      }
+    ],
+    "tenant_isolation": "A reads created patient; B cannot",
+    "autenticar": "definition unchanged before/after",
+    "limitations": [
+      "no browser",
+      "no network HTTP transport",
+      "no independent request commits",
+      "synthetic records rolled back"
+    ]
+  },
+  "integrity": {
+    "backend_typecheck": "PASS",
+    "lint": "PASS",
+    "global_typecheck": "FAIL: unchanged api/gateway.ts lines 180,186,187,191",
+    "openapi": "293 paths, only /ready response changed"
+  },
+  "pending": [
+    "TEST nominal fixture absent",
+    "outbox worker/runner compatibility with 109-110",
+    "human HTTP/BFF/email remains separate WIP",
+    "frontend global typecheck errors"
+  ],
+  "preserved": [
+    "001–102 migrations",
+    "Terminal/C18/NFC",
+    "frontend/BFF/session",
+    "opaque Bearer",
+    "uncommitted human login files"
+  ]
+}
