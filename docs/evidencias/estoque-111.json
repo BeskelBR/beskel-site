@@ -1,0 +1,596 @@
+{
+  "date": "2026-09-25",
+  "branch": "hvb-sistema-dev",
+  "tested_head": "ea90341870639b8e5d2826cb7ce2871872794bb5",
+  "script_sha256": "0cda13fc74c0404773a1fe79aa692a89762e9dee8313c59fa5435249422450cd",
+  "openapi_sha256": "1f0e4bdd5c83ef9edbb71b5b0b86504203b66f3ce2c95f8e30ab62913089d781",
+  "app_tested_source_sha256": "4f42ca79ac61ef1b7881504914ebe5349d107f8962c614d9dca69a53ce24a3b2",
+  "scope": "Published backend loaded via private hook excluding preserved human-login WIP; real loopback HTTP with Supabase Node/pg verify-full",
+  "first_attempt": {
+    "passed": 36,
+    "failed": 2,
+    "rollback": true,
+    "classification": "C - synthetic timestamps after transaction now(); fixed only in verifier"
+  },
+  "integrity": {
+    "backend_typecheck": "PASS",
+    "lint": "PASS",
+    "global_typecheck": "FAIL: unchanged api/gateway.ts lines 180,186,187,191",
+    "build": "No build script/native Node24 TS; actual HTTP server startup PASS",
+    "historical_inventory_clinical_suites": "NOT_EXECUTED: legacy migrate bootstrap incompatible with canonical worker grants; dedicated HTTP journey used"
+  },
+  "preserved": [
+    "schema 111",
+    "historical migrations",
+    "Terminal/C18/NFC",
+    "frontend",
+    "BFF/session",
+    "opaque Bearer",
+    "human-login WIP"
+  ],
+  "api_gaps": [],
+  "limits": [
+    "outer rollback and savepoints with immediate deferred-constraint checks",
+    "no independent request commits",
+    "no browser or deployment",
+    "only fixture A; temporary assignment revision reverted"
+  ],
+  "environment": "Supabase DEV Node/pg, real HTTP loopback + Supabase TLS, rollback savepoints",
+  "rollback": true,
+  "balances": [
+    {
+      "stage": "initial",
+      "saldo": "0.000000",
+      "reservado": "0.000000",
+      "disponivel": "0.000000"
+    },
+    {
+      "stage": "entry",
+      "saldo": "20.000000",
+      "reservado": "0.000000",
+      "disponivel": "20.000000"
+    },
+    {
+      "stage": "after_rejections",
+      "saldo": "20.000000",
+      "reservado": "0.000000",
+      "disponivel": "20.000000"
+    },
+    {
+      "stage": "consumption",
+      "saldo": "17.000000",
+      "reservado": "0.000000",
+      "disponivel": "17.000000"
+    },
+    {
+      "stage": "reversal",
+      "saldo": "20.000000",
+      "reservado": "0.000000",
+      "disponivel": "20.000000"
+    },
+    {
+      "stage": "after_duplicate_rejection",
+      "saldo": "20.000000",
+      "reservado": "0.000000",
+      "disponivel": "20.000000"
+    },
+    {
+      "stage": "after_rbac_rollback",
+      "saldo": "20.000000",
+      "reservado": "0.000000",
+      "disponivel": "20.000000"
+    }
+  ],
+  "passed": 73,
+  "failed": 0,
+  "blocked": 0,
+  "results": [
+    {
+      "check": "tls_verify_full",
+      "status": "PASS"
+    },
+    {
+      "check": "canonical_count_111",
+      "status": "PASS"
+    },
+    {
+      "check": "all_111_hashes",
+      "status": "PASS"
+    },
+    {
+      "check": "four_security_invoker_views",
+      "status": "PASS"
+    },
+    {
+      "check": "runtime_execute_cpf_valido",
+      "status": "PASS"
+    },
+    {
+      "check": "ready_111",
+      "method": "GET",
+      "endpoint": "/ready",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "ready_reports_111",
+      "status": "PASS"
+    },
+    {
+      "check": "fixture_authentication",
+      "method": "GET",
+      "endpoint": "/v1/me",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "fixture_a",
+      "status": "PASS"
+    },
+    {
+      "check": "fixture_natural_key",
+      "status": "PASS"
+    },
+    {
+      "check": "create_/responsaveis",
+      "method": "POST",
+      "endpoint": "/v1/responsaveis",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "create_/pacientes",
+      "method": "POST",
+      "endpoint": "/v1/pacientes",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "create_/episodios",
+      "method": "POST",
+      "endpoint": "/v1/episodios",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "create_/estoque/unidades",
+      "method": "POST",
+      "endpoint": "/v1/estoque/unidades",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "create_/estoque/produtos",
+      "method": "POST",
+      "endpoint": "/v1/estoque/produtos",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "create_/estoque/apresentacoes",
+      "method": "POST",
+      "endpoint": "/v1/estoque/apresentacoes",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "create_/estoque/lotes",
+      "method": "POST",
+      "endpoint": "/v1/estoque/lotes",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "list_/estoque/produtos",
+      "method": "GET",
+      "endpoint": "/v1/estoque/produtos?limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "catalog_product_found",
+      "status": "PASS"
+    },
+    {
+      "check": "list_/estoque/apresentacoes",
+      "method": "GET",
+      "endpoint": "/v1/estoque/apresentacoes?limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "catalog_presentation_found",
+      "status": "PASS"
+    },
+    {
+      "check": "list_/estoque/lotes",
+      "method": "GET",
+      "endpoint": "/v1/estoque/lotes?limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "catalog_lot_found",
+      "status": "PASS"
+    },
+    {
+      "check": "list_/estoque/custodias",
+      "method": "GET",
+      "endpoint": "/v1/estoque/custodias?limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "create_/estoque/custodias",
+      "method": "POST",
+      "endpoint": "/v1/estoque/custodias",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "create_/locais",
+      "method": "POST",
+      "endpoint": "/v1/locais",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "create_/estoque/posicoes",
+      "method": "POST",
+      "endpoint": "/v1/estoque/posicoes",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "list_/estoque/posicoes",
+      "method": "GET",
+      "endpoint": "/v1/estoque/posicoes?unidade_id={uuid}&produto_id={uuid}&limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "balance_initial",
+      "status": "PASS"
+    },
+    {
+      "check": "create_/estoque/entradas",
+      "method": "POST",
+      "endpoint": "/v1/estoque/entradas",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "list_/estoque/posicoes",
+      "method": "GET",
+      "endpoint": "/v1/estoque/posicoes?unidade_id={uuid}&produto_id={uuid}&limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "balance_entry",
+      "status": "PASS"
+    },
+    {
+      "check": "consumption_over_balance",
+      "method": "POST",
+      "endpoint": "/v1/clinica/consumos",
+      "expected_http": 409,
+      "observed_http": 409,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "reservation_over_available",
+      "method": "POST",
+      "endpoint": "/v1/estoque/reservas",
+      "expected_http": 409,
+      "observed_http": 409,
+      "sqlstate": "23514",
+      "status": "PASS"
+    },
+    {
+      "check": "list_/estoque/posicoes",
+      "method": "GET",
+      "endpoint": "/v1/estoque/posicoes?unidade_id={uuid}&produto_id={uuid}&limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "balance_after_rejections",
+      "status": "PASS"
+    },
+    {
+      "check": "consumption",
+      "method": "POST",
+      "endpoint": "/v1/clinica/consumos",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "consumption_idempotency",
+      "method": "POST",
+      "endpoint": "/v1/clinica/consumos",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "same_consumption_id",
+      "status": "PASS"
+    },
+    {
+      "check": "list_/estoque/posicoes",
+      "method": "GET",
+      "endpoint": "/v1/estoque/posicoes?unidade_id={uuid}&produto_id={uuid}&limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "balance_consumption",
+      "status": "PASS"
+    },
+    {
+      "check": "list_/clinica/consumos",
+      "method": "GET",
+      "endpoint": "/v1/clinica/consumos?unidade_id={uuid}&episodio_id={uuid}&limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "consumption_conciliado",
+      "status": "PASS"
+    },
+    {
+      "check": "list_/clinica/consumo-itens",
+      "method": "GET",
+      "endpoint": "/v1/clinica/consumo-itens?unidade_id={uuid}&consumo_id={uuid}&limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "consumption_item_reconciled",
+      "status": "PASS"
+    },
+    {
+      "check": "list_/estoque/transacoes",
+      "method": "GET",
+      "endpoint": "/v1/estoque/transacoes?unidade_id={uuid}&limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "physical_consumption_found",
+      "status": "PASS"
+    },
+    {
+      "check": "list_/estoque/lancamentos",
+      "method": "GET",
+      "endpoint": "/v1/estoque/lancamentos?unidade_id={uuid}&transacao_id={uuid}&limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "balanced_consumption_ledger",
+      "status": "PASS"
+    },
+    {
+      "check": "consumption_reversal",
+      "method": "POST",
+      "endpoint": "/v1/clinica/consumos/{uuid}/reverter",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "reversal_idempotency",
+      "method": "POST",
+      "endpoint": "/v1/clinica/consumos/{uuid}/reverter",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "same_reversal_id",
+      "status": "PASS"
+    },
+    {
+      "check": "list_/estoque/posicoes",
+      "method": "GET",
+      "endpoint": "/v1/estoque/posicoes?unidade_id={uuid}&produto_id={uuid}&limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "balance_reversal",
+      "status": "PASS"
+    },
+    {
+      "check": "list_/clinica/consumos",
+      "method": "GET",
+      "endpoint": "/v1/clinica/consumos?unidade_id={uuid}&episodio_id={uuid}&limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "consumption_estornado",
+      "status": "PASS"
+    },
+    {
+      "check": "list_/estoque/transacoes",
+      "method": "GET",
+      "endpoint": "/v1/estoque/transacoes?unidade_id={uuid}&limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "single_physical_reversal",
+      "status": "PASS"
+    },
+    {
+      "check": "list_/estoque/lancamentos",
+      "method": "GET",
+      "endpoint": "/v1/estoque/lancamentos?unidade_id={uuid}&transacao_id={uuid}&limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "balanced_reversal_ledger",
+      "status": "PASS"
+    },
+    {
+      "check": "second_reversal_different_key",
+      "method": "POST",
+      "endpoint": "/v1/clinica/consumos/{uuid}/reverter",
+      "expected_http": 409,
+      "observed_http": 409,
+      "sqlstate": "23505",
+      "status": "PASS"
+    },
+    {
+      "check": "list_/estoque/posicoes",
+      "method": "GET",
+      "endpoint": "/v1/estoque/posicoes?unidade_id={uuid}&produto_id={uuid}&limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "balance_after_duplicate_rejection",
+      "status": "PASS"
+    },
+    {
+      "check": "foreign_unit_read",
+      "method": "GET",
+      "endpoint": "/v1/estoque/posicoes?unidade_id={uuid}",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "foreign_unit_no_data",
+      "status": "PASS"
+    },
+    {
+      "check": "rls_b_cannot_read_a_position",
+      "status": "PASS"
+    },
+    {
+      "check": "list_/atribuicoes",
+      "method": "GET",
+      "endpoint": "/v1/atribuicoes?limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "temporary_assignment_revocation",
+      "method": "POST",
+      "endpoint": "/v1/atribuicoes/{uuid}/revisoes",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "no_stock_read_permission",
+      "method": "GET",
+      "endpoint": "/v1/estoque/produtos",
+      "expected_http": 403,
+      "observed_http": 403,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "no_stock_write_permission",
+      "method": "POST",
+      "endpoint": "/v1/estoque/entradas",
+      "expected_http": 403,
+      "observed_http": 403,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "list_/estoque/posicoes",
+      "method": "GET",
+      "endpoint": "/v1/estoque/posicoes?unidade_id={uuid}&produto_id={uuid}&limit=100",
+      "expected_http": 200,
+      "observed_http": 200,
+      "sqlstate": null,
+      "status": "PASS"
+    },
+    {
+      "check": "balance_after_rbac_rollback",
+      "status": "PASS"
+    },
+    {
+      "check": "autenticar_preserved",
+      "status": "PASS"
+    }
+  ]
+}
