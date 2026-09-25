@@ -3,6 +3,10 @@ import { DomainError, one } from "../core.ts";
 import type { Action } from "../foundation.ts";
 import { choice, object, text, uuid } from "../schemas.ts";
 import { examBoolean } from "../exams/schemas.ts";
+import {
+  patientExtraFields,
+  responsibleExtraFields,
+} from "../registration-fields.ts";
 export const registryDefinitions = [
   {
     path: "pacientes",
@@ -15,6 +19,7 @@ export const registryDefinitions = [
       nome: text,
       especie_codigo: choice("canina", "felina", "outra", "desconhecida"),
       estado_vital: choice("vivo", "obito", "desconhecido"),
+      ...patientExtraFields,
     },
   },
   {
@@ -24,7 +29,7 @@ export const registryDefinitions = [
     permission: "cadastros:retificar",
     read: "cadastros:ler",
     unit: false,
-    fields: { nome: text },
+    fields: { nome: text, ...responsibleExtraFields },
   },
   {
     path: "usuarios",
@@ -79,7 +84,14 @@ export const registryInputs: Record<string, unknown> = Object.fromEntries(
     object({
       ...common,
       ...(d.unit ? { unidade_id: uuid } : {}),
-      dados: object(d.fields),
+      dados: object(
+        d.fields,
+        d.type === "paciente"
+          ? ["nome", "especie_codigo", "estado_vital"]
+          : d.type === "responsavel"
+            ? ["nome"]
+            : Object.keys(d.fields),
+      ),
     }),
   ]),
 );

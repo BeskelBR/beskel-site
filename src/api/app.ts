@@ -1,4 +1,8 @@
 import { terminalV1Actions } from "../domain/terminal-v1/service.ts";
+import {
+  patientExtraFields,
+  responsibleExtraFields,
+} from "../domain/registration-fields.ts";
 import { registerWebContext } from "../domain/web-context.ts";
 import {
   operationalInputs,
@@ -133,6 +137,12 @@ import {
 
 function strictValues(schema: unknown, value: unknown): void {
   if (value === undefined) return;
+  if (
+    schema === patientExtraFields.castrado &&
+    value !== null &&
+    typeof value !== "boolean"
+  )
+    throw new DomainError(400, "booleanos_devem_ser_explicitos");
   if (schema === medicalContent && typeof value !== "string")
     throw new DomainError(400, "evolucao_exige_texto_explicito");
   if (
@@ -341,7 +351,9 @@ export async function buildApp(
       try {
         const r = await db.query(
           `SELECT EXISTS(SELECT 1 FROM public.schema_migration
-              WHERE nome='076_terminal_v1_conservation.sql')
+              WHERE nome='102_assignment_read_scope.sql' AND hash='f4a5488800ce4be81458ab878390bca833bc46a4c2efb6d78495e66d4752987b')
+            AND (SELECT count(DISTINCT substring(nome,1,3)) FROM public.schema_migration
+              WHERE nome ~ '^[0-9]{3}_' AND substring(nome,1,3)::integer BETWEEN 1 AND 102)=102
             AND pg_has_role(current_user,'hvb_app','USAGE')
             AND has_schema_privilege(current_user,'hvb','USAGE')
             AND has_function_privilege(current_user,'hvb.autenticar(text)','EXECUTE')
@@ -683,7 +695,15 @@ export async function buildApp(
       {
         limit: { type: "integer", minimum: 1, maximum: 100, default: 25 },
         cursor: uuid,
-        ...(list.table === "paciente" ? { q: text } : {}),
+        ...(["paciente", "responsavel"].includes(list.table)
+          ? { q: text }
+          : {}),
+        ...(list.table === "paciente_responsavel_consulta"
+          ? { paciente_id: uuid, responsavel_id: uuid }
+          : {}),
+        ...(list.table === "ocupacao_consulta"
+          ? { episodio_id: uuid, paciente_id: uuid }
+          : {}),
         ...(list.unit ? { unidade_id: uuid } : {}),
         ...(stockPosition
           ? {
@@ -714,7 +734,7 @@ export async function buildApp(
         list.columns.split(",").includes("paciente_id")
           ? { paciente_id: uuid }
           : {}),
-        ...(list.table === "episodio"
+        ...(list.table === "episodio_consulta"
           ? { paciente_id: uuid, ativos: { type: "boolean" } }
           : {}),
       },
@@ -734,86 +754,92 @@ export async function buildApp(
     const properties = Object.fromEntries(
       list.columns.split(",").map((column) => [
         column,
-        column === "id" || column.endsWith("_id")
-          ? {
-              ...uuid,
-              nullable: column !== "id",
-            }
-          : column === "numero" && list.table === "valor_resultado"
-            ? { type: "string", nullable: true }
-            : [
-                  "ativo",
-                  "simulacao",
-                  "origem_ativa",
-                  "execucao_integral",
-                  "material_tutor",
-                  "necessita_revisao",
-                  "etiqueta_ativa",
-                  "utilizada",
-                  "revisao_temporal",
-                  "revertido",
-                  "revertida",
-                  "obrigacao_revertida",
-                  "preco_atual",
-                  "recebimento_revertido",
-                  "fechada",
-                  "exige_coleta",
-                  "obrigatorio",
-                  "inclui_idade_min",
-                  "inclui_idade_max",
-                  "inclui_inferior",
-                  "inclui_superior",
-                  "booleano",
-                  "pendencias_confirmadas",
-                  "liberado",
-                  "substituido",
-                  "ha_versao_pendente",
-                  "faltam_obrigatorios",
-                  "tem_pendencias",
-                  "ativa",
-                  "material_revisao",
-                  "estornado",
-                  "acesso_vigente",
-                  "prazo_vencido",
-                  "aprovado",
-                  "ha_versao_posterior",
-                  "atual",
-                  "revogada",
-                  "vigente",
-                  "permitida",
-                ].includes(column)
-              ? { type: "boolean", nullable: column === "booleano" }
-              : [
-                    ...(list.table === "anexo_evolucao_consulta"
-                      ? ["tamanho"]
-                      : []),
-                    ...(list.table === "vinculo_agendamento_consulta"
-                      ? ["episodio_versao"]
-                      : []),
-                    "capacidade",
-                    "vaga",
-                    "versao",
-                    "tentativas",
-                    "versao_snapshot",
-                    "prioridade",
-                    "numero",
-                    "idade_dias",
-                    "idade_min_dias",
-                    "idade_max_dias",
-                    "ordem",
-                    "sequencia",
-                    "deslocamento_dias",
-                    "intervalo",
-                  ].includes(column)
-                ? {
-                    type: "integer",
-                    nullable: [
-                      "idade_dias",
-                      "idade_min_dias",
-                      "idade_max_dias",
-                    ].includes(column),
-                  }
-                : { type: "string", nullable: true },
+        list.table === "responsavel" && column in responsibleExtraFields
+          ? responsibleExtraFields[
+              column as keyof typeof responsibleExtraFields
+            ]
+          : list.table === "paciente" && column in patientExtraFields
+            ? patientExtraFields[column as keyof typeof patientExtraFields]
+            : column === "id" || column.endsWith("_id")
+              ? {
+                  ...uuid,
+                  nullable: column !== "id",
+                }
+              : column === "numero" && list.table === "valor_resultado"
+                ? { type: "string", nullable: true }
+                : [
+                      "ativo",
+                      "simulacao",
+                      "origem_ativa",
+                      "execucao_integral",
+                      "material_tutor",
+                      "necessita_revisao",
+                      "etiqueta_ativa",
+                      "utilizada",
+                      "revisao_temporal",
+                      "revertido",
+                      "revertida",
+                      "obrigacao_revertida",
+                      "preco_atual",
+                      "recebimento_revertido",
+                      "fechada",
+                      "exige_coleta",
+                      "obrigatorio",
+                      "inclui_idade_min",
+                      "inclui_idade_max",
+                      "inclui_inferior",
+                      "inclui_superior",
+                      "booleano",
+                      "pendencias_confirmadas",
+                      "liberado",
+                      "substituido",
+                      "ha_versao_pendente",
+                      "faltam_obrigatorios",
+                      "tem_pendencias",
+                      "ativa",
+                      "material_revisao",
+                      "estornado",
+                      "acesso_vigente",
+                      "prazo_vencido",
+                      "aprovado",
+                      "ha_versao_posterior",
+                      "atual",
+                      "revogada",
+                      "vigente",
+                      "permitida",
+                    ].includes(column)
+                  ? { type: "boolean", nullable: column === "booleano" }
+                  : [
+                        ...(list.table === "anexo_evolucao_consulta"
+                          ? ["tamanho"]
+                          : []),
+                        ...(list.table === "vinculo_agendamento_consulta"
+                          ? ["episodio_versao"]
+                          : []),
+                        "capacidade",
+                        "vaga",
+                        "versao",
+                        "tentativas",
+                        "versao_snapshot",
+                        "prioridade",
+                        "numero",
+                        "idade_dias",
+                        "idade_min_dias",
+                        "idade_max_dias",
+                        "ordem",
+                        "sequencia",
+                        "deslocamento_dias",
+                        "intervalo",
+                      ].includes(column)
+                    ? {
+                        type: "integer",
+                        nullable: [
+                          "idade_dias",
+                          "idade_min_dias",
+                          "idade_max_dias",
+                        ].includes(column),
+                      }
+                    : { type: "string", nullable: true },
       ]),
     );
     app.get(
@@ -857,7 +883,14 @@ export async function buildApp(
           if (list.table === "paciente" && typeof q.q === "string") {
             values.push(q.q.trim());
             where.push(
-              `(strpos(lower(nome),lower($${values.length}))>0 OR id::text=lower($${values.length}))`,
+              `(strpos(lower(nome),lower($${values.length}))>0 OR id::text=lower($${values.length}) OR microchip=upper(regexp_replace($${values.length},'[[:space:]]+','','g')))`,
+            );
+          }
+          if (list.table === "responsavel" && typeof q.q === "string") {
+            values.push(q.q.trim());
+            const index = values.length;
+            where.push(
+              `(strpos(lower(nome),lower($${index}))>0 OR id::text=lower($${index}) OR email=lower($${index}) OR (regexp_replace($${index},'[^0-9]','','g')<>'' AND (cpf=regexp_replace($${index},'[^0-9]','','g') OR telefone_whatsapp=regexp_replace($${index},'[^0-9]','','g'))))`,
             );
           }
           if (list.unit) {
@@ -867,6 +900,17 @@ export async function buildApp(
           if (q.paciente_id) {
             values.push(q.paciente_id);
             where.push(`paciente_id=$${values.length}`);
+          }
+          for (const field of ["responsavel_id", "episodio_id"] as const) {
+            if (
+              q[field] &&
+              ["paciente_responsavel_consulta", "ocupacao_consulta"].includes(
+                list.table,
+              )
+            ) {
+              values.push(q[field]);
+              where.push(`${field}=$${values.length}`);
+            }
           }
           if (q.ativos !== undefined)
             where.push(`encerrado_em IS ${q.ativos ? "" : "NOT "}NULL`);
@@ -921,8 +965,20 @@ export async function buildApp(
             values.push(q.situacao);
             where.push(`situacao=$${values.length}`);
           }
+          const source =
+            list.table === "paciente_responsavel_consulta"
+              ? "(SELECT vinculo_id AS id,v.* FROM paciente_responsavel_consulta v) vinculos"
+              : list.table;
+          const columns = list.columns
+            .split(",")
+            .map((c) =>
+              c === "data_nascimento"
+                ? "data_nascimento::text AS data_nascimento"
+                : c,
+            )
+            .join(",");
           const r = await tx.query(
-            `SELECT ${list.columns} FROM ${list.table} WHERE ${where.join(" AND ")} ORDER BY id LIMIT $3`,
+            `SELECT ${columns} FROM ${source} WHERE ${where.join(" AND ")} ORDER BY id LIMIT $3`,
             values,
           );
           const items = r.rows.slice(0, q.limit);

@@ -4459,6 +4459,55 @@
                             "obito",
                             "desconhecido"
                           ]
+                        },
+                        "data_nascimento": {
+                          "type": "string",
+                          "format": "date",
+                          "nullable": true
+                        },
+                        "sexo": {
+                          "type": "string",
+                          "maxLength": 30,
+                          "nullable": true
+                        },
+                        "raca": {
+                          "type": "string",
+                          "maxLength": 120,
+                          "nullable": true
+                        },
+                        "microchip": {
+                          "type": "string",
+                          "maxLength": 64,
+                          "nullable": true
+                        },
+                        "pelagem": {
+                          "type": "string",
+                          "maxLength": 120,
+                          "nullable": true
+                        },
+                        "castrado": {
+                          "type": "boolean",
+                          "nullable": true
+                        },
+                        "observacoes": {
+                          "type": "string",
+                          "maxLength": 4000,
+                          "nullable": true
+                        },
+                        "contato_emergencia_nome": {
+                          "type": "string",
+                          "maxLength": 160,
+                          "nullable": true
+                        },
+                        "contato_emergencia_telefone": {
+                          "type": "string",
+                          "maxLength": 40,
+                          "nullable": true
+                        },
+                        "contato_emergencia_vinculo": {
+                          "type": "string",
+                          "maxLength": 80,
+                          "nullable": true
                         }
                       },
                       "required": [
@@ -4528,6 +4577,55 @@
                                   "obito",
                                   "desconhecido"
                                 ]
+                              },
+                              "data_nascimento": {
+                                "type": "string",
+                                "format": "date",
+                                "nullable": true
+                              },
+                              "sexo": {
+                                "type": "string",
+                                "maxLength": 30,
+                                "nullable": true
+                              },
+                              "raca": {
+                                "type": "string",
+                                "maxLength": 120,
+                                "nullable": true
+                              },
+                              "microchip": {
+                                "type": "string",
+                                "maxLength": 64,
+                                "nullable": true
+                              },
+                              "pelagem": {
+                                "type": "string",
+                                "maxLength": 120,
+                                "nullable": true
+                              },
+                              "castrado": {
+                                "type": "boolean",
+                                "nullable": true
+                              },
+                              "observacoes": {
+                                "type": "string",
+                                "maxLength": 4000,
+                                "nullable": true
+                              },
+                              "contato_emergencia_nome": {
+                                "type": "string",
+                                "maxLength": 160,
+                                "nullable": true
+                              },
+                              "contato_emergencia_telefone": {
+                                "type": "string",
+                                "maxLength": 40,
+                                "nullable": true
+                              },
+                              "contato_emergencia_vinculo": {
+                                "type": "string",
+                                "maxLength": 80,
+                                "nullable": true
                               }
                             },
                             "required": [
@@ -4562,6 +4660,55 @@
                                   "obito",
                                   "desconhecido"
                                 ]
+                              },
+                              "data_nascimento": {
+                                "type": "string",
+                                "format": "date",
+                                "nullable": true
+                              },
+                              "sexo": {
+                                "type": "string",
+                                "maxLength": 30,
+                                "nullable": true
+                              },
+                              "raca": {
+                                "type": "string",
+                                "maxLength": 120,
+                                "nullable": true
+                              },
+                              "microchip": {
+                                "type": "string",
+                                "maxLength": 64,
+                                "nullable": true
+                              },
+                              "pelagem": {
+                                "type": "string",
+                                "maxLength": 120,
+                                "nullable": true
+                              },
+                              "castrado": {
+                                "type": "boolean",
+                                "nullable": true
+                              },
+                              "observacoes": {
+                                "type": "string",
+                                "maxLength": 4000,
+                                "nullable": true
+                              },
+                              "contato_emergencia_nome": {
+                                "type": "string",
+                                "maxLength": 160,
+                                "nullable": true
+                              },
+                              "contato_emergencia_telefone": {
+                                "type": "string",
+                                "maxLength": 40,
+                                "nullable": true
+                              },
+                              "contato_emergencia_vinculo": {
+                                "type": "string",
+                                "maxLength": 80,
+                                "nullable": true
                               }
                             },
                             "required": [
@@ -4906,6 +5053,55 @@
                           "obito",
                           "desconhecido"
                         ]
+                      },
+                      "data_nascimento": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                      },
+                      "sexo": {
+                        "type": "string",
+                        "maxLength": 30,
+                        "nullable": true
+                      },
+                      "raca": {
+                        "type": "string",
+                        "maxLength": 120,
+                        "nullable": true
+                      },
+                      "microchip": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "nullable": true
+                      },
+                      "pelagem": {
+                        "type": "string",
+                        "maxLength": 120,
+                        "nullable": true
+                      },
+                      "castrado": {
+                        "type": "boolean",
+                        "nullable": true
+                      },
+                      "observacoes": {
+                        "type": "string",
+                        "maxLength": 4000,
+                        "nullable": true
+                      },
+                      "contato_emergencia_nome": {
+                        "type": "string",
+                        "maxLength": 160,
+                        "nullable": true
+                      },
+                      "contato_emergencia_telefone": {
+                        "type": "string",
+                        "maxLength": 40,
+                        "nullable": true
+                      },
+                      "contato_emergencia_vinculo": {
+                        "type": "string",
+                        "maxLength": 80,
+                        "nullable": true
                       }
                     },
                     "required": [
@@ -5336,6 +5532,61 @@
                           "minLength": 1,
                           "maxLength": 160,
                           "pattern": "\\S"
+                        },
+                        "cpf": {
+                          "type": "string",
+                          "maxLength": 32,
+                          "nullable": true
+                        },
+                        "telefone_whatsapp": {
+                          "type": "string",
+                          "maxLength": 40,
+                          "nullable": true
+                        },
+                        "email": {
+                          "type": "string",
+                          "maxLength": 254,
+                          "nullable": true
+                        },
+                        "data_nascimento": {
+                          "type": "string",
+                          "format": "date",
+                          "nullable": true
+                        },
+                        "cep": {
+                          "type": "string",
+                          "maxLength": 20,
+                          "nullable": true
+                        },
+                        "logradouro": {
+                          "type": "string",
+                          "maxLength": 200,
+                          "nullable": true
+                        },
+                        "numero": {
+                          "type": "string",
+                          "maxLength": 30,
+                          "nullable": true
+                        },
+                        "complemento": {
+                          "type": "string",
+                          "maxLength": 120,
+                          "nullable": true
+                        },
+                        "bairro": {
+                          "type": "string",
+                          "maxLength": 120,
+                          "nullable": true
+                        },
+                        "cidade": {
+                          "type": "string",
+                          "maxLength": 120,
+                          "nullable": true
+                        },
+                        "uf": {
+                          "type": "string",
+                          "maxLength": 8,
+                          "nullable": true
                         }
                       },
                       "required": [
@@ -5386,6 +5637,61 @@
                                 "minLength": 1,
                                 "maxLength": 160,
                                 "pattern": "\\S"
+                              },
+                              "cpf": {
+                                "type": "string",
+                                "maxLength": 32,
+                                "nullable": true
+                              },
+                              "telefone_whatsapp": {
+                                "type": "string",
+                                "maxLength": 40,
+                                "nullable": true
+                              },
+                              "email": {
+                                "type": "string",
+                                "maxLength": 254,
+                                "nullable": true
+                              },
+                              "data_nascimento": {
+                                "type": "string",
+                                "format": "date",
+                                "nullable": true
+                              },
+                              "cep": {
+                                "type": "string",
+                                "maxLength": 20,
+                                "nullable": true
+                              },
+                              "logradouro": {
+                                "type": "string",
+                                "maxLength": 200,
+                                "nullable": true
+                              },
+                              "numero": {
+                                "type": "string",
+                                "maxLength": 30,
+                                "nullable": true
+                              },
+                              "complemento": {
+                                "type": "string",
+                                "maxLength": 120,
+                                "nullable": true
+                              },
+                              "bairro": {
+                                "type": "string",
+                                "maxLength": 120,
+                                "nullable": true
+                              },
+                              "cidade": {
+                                "type": "string",
+                                "maxLength": 120,
+                                "nullable": true
+                              },
+                              "uf": {
+                                "type": "string",
+                                "maxLength": 8,
+                                "nullable": true
                               }
                             },
                             "required": [
@@ -5401,6 +5707,61 @@
                                 "minLength": 1,
                                 "maxLength": 160,
                                 "pattern": "\\S"
+                              },
+                              "cpf": {
+                                "type": "string",
+                                "maxLength": 32,
+                                "nullable": true
+                              },
+                              "telefone_whatsapp": {
+                                "type": "string",
+                                "maxLength": 40,
+                                "nullable": true
+                              },
+                              "email": {
+                                "type": "string",
+                                "maxLength": 254,
+                                "nullable": true
+                              },
+                              "data_nascimento": {
+                                "type": "string",
+                                "format": "date",
+                                "nullable": true
+                              },
+                              "cep": {
+                                "type": "string",
+                                "maxLength": 20,
+                                "nullable": true
+                              },
+                              "logradouro": {
+                                "type": "string",
+                                "maxLength": 200,
+                                "nullable": true
+                              },
+                              "numero": {
+                                "type": "string",
+                                "maxLength": 30,
+                                "nullable": true
+                              },
+                              "complemento": {
+                                "type": "string",
+                                "maxLength": 120,
+                                "nullable": true
+                              },
+                              "bairro": {
+                                "type": "string",
+                                "maxLength": 120,
+                                "nullable": true
+                              },
+                              "cidade": {
+                                "type": "string",
+                                "maxLength": 120,
+                                "nullable": true
+                              },
+                              "uf": {
+                                "type": "string",
+                                "maxLength": 8,
+                                "nullable": true
                               }
                             },
                             "required": [
@@ -5726,6 +6087,61 @@
                         "minLength": 1,
                         "maxLength": 160,
                         "pattern": "\\S"
+                      },
+                      "cpf": {
+                        "type": "string",
+                        "maxLength": 32,
+                        "nullable": true
+                      },
+                      "telefone_whatsapp": {
+                        "type": "string",
+                        "maxLength": 40,
+                        "nullable": true
+                      },
+                      "email": {
+                        "type": "string",
+                        "maxLength": 254,
+                        "nullable": true
+                      },
+                      "data_nascimento": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                      },
+                      "cep": {
+                        "type": "string",
+                        "maxLength": 20,
+                        "nullable": true
+                      },
+                      "logradouro": {
+                        "type": "string",
+                        "maxLength": 200,
+                        "nullable": true
+                      },
+                      "numero": {
+                        "type": "string",
+                        "maxLength": 30,
+                        "nullable": true
+                      },
+                      "complemento": {
+                        "type": "string",
+                        "maxLength": 120,
+                        "nullable": true
+                      },
+                      "bairro": {
+                        "type": "string",
+                        "maxLength": 120,
+                        "nullable": true
+                      },
+                      "cidade": {
+                        "type": "string",
+                        "maxLength": 120,
+                        "nullable": true
+                      },
+                      "uf": {
+                        "type": "string",
+                        "maxLength": 8,
+                        "nullable": true
                       }
                     },
                     "required": [
@@ -9500,6 +9916,32 @@
                     "versao": {
                       "type": "integer"
                     },
+                    "usuario_nome": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "papel_nome": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S"
+                    },
+                    "escopo": {
+                      "type": "string",
+                      "enum": [
+                        "global",
+                        "unidade"
+                      ]
+                    },
+                    "unidade_nome": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160,
+                      "pattern": "\\S",
+                      "nullable": true
+                    },
                     "items": {
                       "type": "array",
                       "items": {
@@ -9565,6 +10007,10 @@
                     "unidade_id",
                     "ativo",
                     "versao",
+                    "usuario_nome",
+                    "papel_nome",
+                    "escopo",
+                    "unidade_nome",
                     "items",
                     "next_cursor"
                   ],
@@ -13176,6 +13622,61 @@
                     "minLength": 1,
                     "maxLength": 160,
                     "pattern": "\\S"
+                  },
+                  "cpf": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "nullable": true
+                  },
+                  "telefone_whatsapp": {
+                    "type": "string",
+                    "maxLength": 40,
+                    "nullable": true
+                  },
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254,
+                    "nullable": true
+                  },
+                  "data_nascimento": {
+                    "type": "string",
+                    "format": "date",
+                    "nullable": true
+                  },
+                  "cep": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "nullable": true
+                  },
+                  "logradouro": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "nullable": true
+                  },
+                  "numero": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "nullable": true
+                  },
+                  "complemento": {
+                    "type": "string",
+                    "maxLength": 120,
+                    "nullable": true
+                  },
+                  "bairro": {
+                    "type": "string",
+                    "maxLength": 120,
+                    "nullable": true
+                  },
+                  "cidade": {
+                    "type": "string",
+                    "maxLength": 120,
+                    "nullable": true
+                  },
+                  "uf": {
+                    "type": "string",
+                    "maxLength": 8,
+                    "nullable": true
                   }
                 },
                 "required": [
@@ -13543,6 +14044,17 @@
             "in": "query",
             "name": "cursor",
             "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160,
+              "pattern": "\\S"
+            },
+            "in": "query",
+            "name": "q",
+            "required": false
           }
         ],
         "security": [
@@ -13575,12 +14087,78 @@
                           "criado_em": {
                             "type": "string",
                             "nullable": true
+                          },
+                          "cpf": {
+                            "type": "string",
+                            "maxLength": 32,
+                            "nullable": true
+                          },
+                          "telefone_whatsapp": {
+                            "type": "string",
+                            "maxLength": 40,
+                            "nullable": true
+                          },
+                          "email": {
+                            "type": "string",
+                            "maxLength": 254,
+                            "nullable": true
+                          },
+                          "data_nascimento": {
+                            "type": "string",
+                            "format": "date",
+                            "nullable": true
+                          },
+                          "cep": {
+                            "type": "string",
+                            "maxLength": 20,
+                            "nullable": true
+                          },
+                          "logradouro": {
+                            "type": "string",
+                            "maxLength": 200,
+                            "nullable": true
+                          },
+                          "numero": {
+                            "type": "string",
+                            "maxLength": 30,
+                            "nullable": true
+                          },
+                          "complemento": {
+                            "type": "string",
+                            "maxLength": 120,
+                            "nullable": true
+                          },
+                          "bairro": {
+                            "type": "string",
+                            "maxLength": 120,
+                            "nullable": true
+                          },
+                          "cidade": {
+                            "type": "string",
+                            "maxLength": 120,
+                            "nullable": true
+                          },
+                          "uf": {
+                            "type": "string",
+                            "maxLength": 8,
+                            "nullable": true
                           }
                         },
                         "required": [
                           "id",
                           "nome",
-                          "criado_em"
+                          "criado_em",
+                          "cpf",
+                          "telefone_whatsapp",
+                          "email",
+                          "data_nascimento",
+                          "cep",
+                          "logradouro",
+                          "numero",
+                          "complemento",
+                          "bairro",
+                          "cidade",
+                          "uf"
                         ],
                         "additionalProperties": false
                       }
@@ -13878,12 +14456,75 @@
                       "obito",
                       "desconhecido"
                     ]
+                  },
+                  "data_nascimento": {
+                    "type": "string",
+                    "format": "date",
+                    "nullable": true
+                  },
+                  "sexo": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "nullable": true
+                  },
+                  "raca": {
+                    "type": "string",
+                    "maxLength": 120,
+                    "nullable": true
+                  },
+                  "microchip": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "nullable": true
+                  },
+                  "pelagem": {
+                    "type": "string",
+                    "maxLength": 120,
+                    "nullable": true
+                  },
+                  "castrado": {
+                    "type": "boolean",
+                    "nullable": true
+                  },
+                  "observacoes": {
+                    "type": "string",
+                    "maxLength": 4000,
+                    "nullable": true
+                  },
+                  "contato_emergencia_nome": {
+                    "type": "string",
+                    "maxLength": 160,
+                    "nullable": true
+                  },
+                  "contato_emergencia_telefone": {
+                    "type": "string",
+                    "maxLength": 40,
+                    "nullable": true
+                  },
+                  "contato_emergencia_vinculo": {
+                    "type": "string",
+                    "maxLength": 80,
+                    "nullable": true
+                  },
+                  "responsavel_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "papel_responsavel": {
+                    "type": "string",
+                    "enum": [
+                      "legal",
+                      "financeiro",
+                      "contato"
+                    ]
                   }
                 },
                 "required": [
                   "nome",
                   "especie_codigo",
-                  "estado_vital"
+                  "estado_vital",
+                  "responsavel_id",
+                  "papel_responsavel"
                 ],
                 "additionalProperties": false
               }
@@ -14298,6 +14939,55 @@
                           "criado_em": {
                             "type": "string",
                             "nullable": true
+                          },
+                          "data_nascimento": {
+                            "type": "string",
+                            "format": "date",
+                            "nullable": true
+                          },
+                          "sexo": {
+                            "type": "string",
+                            "maxLength": 30,
+                            "nullable": true
+                          },
+                          "raca": {
+                            "type": "string",
+                            "maxLength": 120,
+                            "nullable": true
+                          },
+                          "microchip": {
+                            "type": "string",
+                            "maxLength": 64,
+                            "nullable": true
+                          },
+                          "pelagem": {
+                            "type": "string",
+                            "maxLength": 120,
+                            "nullable": true
+                          },
+                          "castrado": {
+                            "type": "boolean",
+                            "nullable": true
+                          },
+                          "observacoes": {
+                            "type": "string",
+                            "maxLength": 4000,
+                            "nullable": true
+                          },
+                          "contato_emergencia_nome": {
+                            "type": "string",
+                            "maxLength": 160,
+                            "nullable": true
+                          },
+                          "contato_emergencia_telefone": {
+                            "type": "string",
+                            "maxLength": 40,
+                            "nullable": true
+                          },
+                          "contato_emergencia_vinculo": {
+                            "type": "string",
+                            "maxLength": 80,
+                            "nullable": true
                           }
                         },
                         "required": [
@@ -14305,7 +14995,17 @@
                           "nome",
                           "especie_codigo",
                           "estado_vital",
-                          "criado_em"
+                          "criado_em",
+                          "data_nascimento",
+                          "sexo",
+                          "raca",
+                          "microchip",
+                          "pelagem",
+                          "castrado",
+                          "observacoes",
+                          "contato_emergencia_nome",
+                          "contato_emergencia_telefone",
+                          "contato_emergencia_vinculo"
                         ],
                         "additionalProperties": false
                       }
@@ -16436,6 +17136,22 @@
                           "versao": {
                             "type": "integer",
                             "nullable": false
+                          },
+                          "usuario_nome": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "papel_nome": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "escopo": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "unidade_nome": {
+                            "type": "string",
+                            "nullable": true
                           }
                         },
                         "required": [
@@ -16444,7 +17160,11 @@
                           "papel_id",
                           "unidade_id",
                           "ativo",
-                          "versao"
+                          "versao",
+                          "usuario_nome",
+                          "papel_nome",
+                          "escopo",
+                          "unidade_nome"
                         ],
                         "additionalProperties": false
                       }
@@ -18934,6 +19654,24 @@
             "in": "query",
             "name": "cursor",
             "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "paciente_id",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "responsavel_id",
+            "required": false
           }
         ],
         "security": [
@@ -18959,14 +19697,27 @@
                             "format": "uuid",
                             "nullable": false
                           },
+                          "vinculo_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
                           "paciente_id": {
                             "type": "string",
                             "format": "uuid",
                             "nullable": true
                           },
+                          "paciente_nome": {
+                            "type": "string",
+                            "nullable": true
+                          },
                           "responsavel_id": {
                             "type": "string",
                             "format": "uuid",
+                            "nullable": true
+                          },
+                          "responsavel_nome": {
+                            "type": "string",
                             "nullable": true
                           },
                           "papel": {
@@ -18980,15 +19731,34 @@
                           "fim": {
                             "type": "string",
                             "nullable": true
+                          },
+                          "estado": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "registrado_em": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "autor_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "id",
+                          "vinculo_id",
                           "paciente_id",
+                          "paciente_nome",
                           "responsavel_id",
+                          "responsavel_nome",
                           "papel",
                           "inicio",
-                          "fim"
+                          "fim",
+                          "estado",
+                          "registrado_em",
+                          "autor_id"
                         ],
                         "additionalProperties": false
                       }
@@ -20089,6 +20859,10 @@
                             "format": "uuid",
                             "nullable": true
                           },
+                          "paciente_nome": {
+                            "type": "string",
+                            "nullable": true
+                          },
                           "tipo": {
                             "type": "string",
                             "nullable": true
@@ -20108,17 +20882,34 @@
                           "versao": {
                             "type": "integer",
                             "nullable": false
+                          },
+                          "estado": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "autor_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "registrado_em": {
+                            "type": "string",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "id",
                           "unidade_id",
                           "paciente_id",
+                          "paciente_nome",
                           "tipo",
                           "admitido_em",
                           "alta_clinica_em",
                           "encerrado_em",
-                          "versao"
+                          "versao",
+                          "estado",
+                          "autor_id",
+                          "registrado_em"
                         ],
                         "additionalProperties": false
                       }
@@ -21551,6 +22342,24 @@
               "format": "uuid"
             },
             "in": "query",
+            "name": "episodio_id",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "paciente_id",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
             "name": "unidade_id",
             "required": true
           }
@@ -21588,9 +22397,34 @@
                             "format": "uuid",
                             "nullable": true
                           },
+                          "paciente_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "paciente_nome": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "episodio_tipo": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "episodio_estado": {
+                            "type": "string",
+                            "nullable": true
+                          },
                           "local_id": {
                             "type": "string",
                             "format": "uuid",
+                            "nullable": true
+                          },
+                          "local_nome": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "local_tipo": {
+                            "type": "string",
                             "nullable": true
                           },
                           "vaga": {
@@ -21604,16 +22438,49 @@
                           "fim": {
                             "type": "string",
                             "nullable": true
+                          },
+                          "estado": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "autor_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "encerrada_por_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "motivo_fim": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "registrado_em": {
+                            "type": "string",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "id",
                           "unidade_id",
                           "episodio_id",
+                          "paciente_id",
+                          "paciente_nome",
+                          "episodio_tipo",
+                          "episodio_estado",
                           "local_id",
+                          "local_nome",
+                          "local_tipo",
                           "vaga",
                           "inicio",
-                          "fim"
+                          "fim",
+                          "estado",
+                          "autor_id",
+                          "encerrada_por_id",
+                          "motivo_fim",
+                          "registrado_em"
                         ],
                         "additionalProperties": false
                       }

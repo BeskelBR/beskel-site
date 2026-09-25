@@ -11,6 +11,7 @@ import { digest } from "../src/domain/core.ts";
 let app: FastifyInstance, db: pg.Pool, admin: pg.Pool;
 let f: Awaited<ReturnType<typeof seedFixture>>, foreign: typeof f;
 let presentation: string, local: string;
+let owner: string, foreignOwner: string;
 const post = (
   path: string,
   body: Record<string, unknown>,
@@ -20,7 +21,14 @@ const post = (
   app.inject({
     method: "POST",
     url: `/v1${path}`,
-    payload: body,
+    payload:
+      path === "/pacientes"
+        ? {
+            responsavel_id: token === foreign.adminToken ? foreignOwner : owner,
+            papel_responsavel: "legal",
+            ...body,
+          }
+        : body,
     headers: { authorization: `Bearer ${token}`, "idempotency-key": key },
   });
 const get = (path: string, token = f.adminToken) =>
@@ -62,6 +70,12 @@ before(async () => {
   db = pool(runtime, 5);
   admin = pool(url, 1);
   app = await buildApp(db);
+  owner = randomUUID();
+  foreignOwner = randomUUID();
+  await admin.query(
+    "INSERT INTO hvb.responsavel(id,organizacao_id,nome) VALUES($1,$2,'Responsavel sintetico'),($3,$4,'Responsavel sintetico B')",
+    [owner, f.org, foreignOwner, foreign.org],
+  );
   const measure = await create("/estoque/unidades", {
     simbolo: randomUUID(),
     dimensao: "contagem",

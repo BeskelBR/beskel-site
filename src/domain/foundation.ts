@@ -2,6 +2,10 @@ import { randomUUID } from "node:crypto";
 import type { PoolClient } from "pg";
 import { authorize, digest, DomainError, occurred, one } from "./core.ts";
 import type { Actor } from "./core.ts";
+import {
+  patientExtraFields,
+  responsibleExtraFields,
+} from "./registration-fields.ts";
 
 export type Body = Record<string, unknown>;
 export type Action = {
@@ -74,12 +78,44 @@ export const actions: Action[] = [
   ]),
   create("/responsaveis", "responsavel", "cadastros:escrever", "responsavel", [
     "nome",
+    ...Object.keys(responsibleExtraFields),
   ]),
-  create("/pacientes", "paciente", "cadastros:escrever", "paciente", [
-    "nome",
-    "especie_codigo",
-    "estado_vital",
-  ]),
+  {
+    path: "/pacientes",
+    input: "paciente",
+    permission: "cadastros:escrever",
+    async run(tx, a, b, id, cmd) {
+      await one(
+        tx,
+        "SELECT id FROM responsavel WHERE organizacao_id=$1 AND id=$2",
+        [a.organizacao_id, b.responsavel_id],
+      );
+      const created = await create(
+        "/pacientes",
+        "paciente",
+        "cadastros:escrever",
+        "paciente",
+        [
+          "nome",
+          "especie_codigo",
+          "estado_vital",
+          ...Object.keys(patientExtraFields),
+        ],
+      ).run(tx, a, b, id, cmd);
+      await tx.query(
+        "INSERT INTO paciente_responsavel(id,organizacao_id,paciente_id,responsavel_id,papel,inicio,autor_id) VALUES($1,$2,$3,$4,$5,clock_timestamp(),$6)",
+        [
+          randomUUID(),
+          a.organizacao_id,
+          created.id,
+          b.responsavel_id,
+          b.papel_responsavel,
+          a.usuario_id,
+        ],
+      );
+      return created;
+    },
+  },
   create(
     "/locais",
     "local",
@@ -389,7 +425,8 @@ export const lists = [
     path: "/atribuicoes",
     table: "atribuicao_consulta",
     permission: "acesso:administrar",
-    columns: "id,usuario_id,papel_id,unidade_id,ativo,versao",
+    columns:
+      "id,usuario_id,papel_id,unidade_id,ativo,versao,usuario_nome,papel_nome,escopo,unidade_nome",
   },
   {
     path: "/credenciais",
@@ -407,26 +444,27 @@ export const lists = [
     path: "/responsaveis",
     table: "responsavel",
     permission: "cadastros:ler",
-    columns: "id,nome,criado_em",
+    columns: `id,nome,criado_em,${Object.keys(responsibleExtraFields).join(",")}`,
   },
   {
     path: "/pacientes",
     table: "paciente",
     permission: "cadastros:ler",
-    columns: "id,nome,especie_codigo,estado_vital,criado_em",
+    columns: `id,nome,especie_codigo,estado_vital,criado_em,${Object.keys(patientExtraFields).join(",")}`,
   },
   {
     path: "/vinculos",
-    table: "paciente_responsavel",
+    table: "paciente_responsavel_consulta",
     permission: "cadastros:ler",
-    columns: "id,paciente_id,responsavel_id,papel,inicio,fim",
+    columns:
+      "id,vinculo_id,paciente_id,paciente_nome,responsavel_id,responsavel_nome,papel,inicio,fim,estado,registrado_em,autor_id",
   },
   {
     path: "/episodios",
-    table: "episodio",
+    table: "episodio_consulta",
     permission: "episodios:ler",
     columns:
-      "id,unidade_id,paciente_id,tipo,admitido_em,alta_clinica_em,encerrado_em,versao",
+      "id,unidade_id,paciente_id,paciente_nome,tipo,admitido_em,alta_clinica_em,encerrado_em,versao,estado,autor_id,registrado_em",
     unit: true,
   },
   {
@@ -438,9 +476,10 @@ export const lists = [
   },
   {
     path: "/ocupacoes",
-    table: "ocupacao",
+    table: "ocupacao_consulta",
     permission: "episodios:ler",
-    columns: "id,unidade_id,episodio_id,local_id,vaga,inicio,fim",
+    columns:
+      "id,unidade_id,episodio_id,paciente_id,paciente_nome,episodio_tipo,episodio_estado,local_id,local_nome,local_tipo,vaga,inicio,fim,estado,autor_id,encerrada_por_id,motivo_fim,registrado_em",
     unit: true,
   },
   {

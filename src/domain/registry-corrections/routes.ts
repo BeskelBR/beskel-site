@@ -27,6 +27,31 @@ export function registerRegistryCorrections(
   errors: Record<string, unknown>,
 ) {
   for (const d of registryDefinitions) {
+    const required = Object.keys(d.fields).filter(
+      (k) =>
+        ![
+          "cpf",
+          "telefone_whatsapp",
+          "email",
+          "data_nascimento",
+          "cep",
+          "logradouro",
+          "numero",
+          "complemento",
+          "bairro",
+          "cidade",
+          "uf",
+          "sexo",
+          "raca",
+          "microchip",
+          "pelagem",
+          "castrado",
+          "observacoes",
+          "contato_emergencia_nome",
+          "contato_emergencia_telefone",
+          "contato_emergencia_vinculo",
+        ].includes(k),
+    );
     app.get(
       `/v1/${d.path}/:id/revisoes`,
       {
@@ -42,13 +67,13 @@ export function registerRegistryCorrections(
             200: object({
               id: uuid,
               versao: { type: "integer" },
-              atual: object(d.fields),
+              atual: object(d.fields, required),
               items: {
                 type: "array",
                 items: object({
                   ...revision,
-                  antes: object(d.fields),
-                  depois: object(d.fields),
+                  antes: object(d.fields, required),
+                  depois: object(d.fields, required),
                 }),
               },
               next_cursor: { ...uuid, nullable: true },
@@ -72,7 +97,15 @@ export function registerRegistryCorrections(
           );
           const current = await one(
             tx,
-            `SELECT ${Object.keys(d.fields).join(",")}${d.unit ? ",unidade_id" : ""} FROM ${d.table} WHERE organizacao_id=$1 AND id=$2`,
+            `SELECT ${Object.keys(d.fields)
+              .map((c) =>
+                c === "data_nascimento"
+                  ? "data_nascimento::text AS data_nascimento"
+                  : c,
+              )
+              .join(
+                ",",
+              )}${d.unit ? ",unidade_id" : ""} FROM ${d.table} WHERE organizacao_id=$1 AND id=$2`,
             [a.organizacao_id, id],
           );
           if (d.unit && current.unidade_id !== q.unidade_id)
@@ -116,6 +149,10 @@ export function registerRegistryCorrections(
             unidade_id: { ...uuid, nullable: true },
             ativo: { type: "boolean" },
             versao: { type: "integer" },
+            usuario_nome: text,
+            papel_nome: text,
+            escopo: { type: "string", enum: ["global", "unidade"] },
+            unidade_nome: { ...text, nullable: true },
             items: {
               type: "array",
               items: object({ ...revision, ativo: { type: "boolean" } }),
@@ -142,7 +179,7 @@ export function registerRegistryCorrections(
         );
         const current = await one(
           tx,
-          "SELECT id,usuario_id,papel_id,unidade_id,ativo,versao FROM atribuicao_consulta WHERE organizacao_id=$1 AND id=$2",
+          "SELECT id,usuario_id,papel_id,unidade_id,ativo,versao,usuario_nome,papel_nome,escopo,unidade_nome FROM atribuicao_consulta WHERE organizacao_id=$1 AND id=$2",
           [a.organizacao_id, id],
         );
         const rows = (

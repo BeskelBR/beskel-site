@@ -1,3 +1,7 @@
+import {
+  patientExtraFields,
+  responsibleExtraFields,
+} from "./registration-fields.ts";
 export const uuid = { type: "string", format: "uuid" } as const;
 export const text = {
   type: "string",
@@ -48,12 +52,24 @@ export const inputs = {
   }),
   motivo: object({ motivo: text }),
   dispositivo: object({ nome: text, unidade_id: uuid }),
-  responsavel: object({ nome: text }),
-  paciente: object({
-    nome: text,
-    especie_codigo: choice("canina", "felina", "outra", "desconhecida"),
-    estado_vital: choice("vivo", "obito", "desconhecido"),
-  }),
+  responsavel: object({ nome: text, ...responsibleExtraFields }, ["nome"]),
+  paciente: object(
+    {
+      nome: text,
+      especie_codigo: choice("canina", "felina", "outra", "desconhecida"),
+      estado_vital: choice("vivo", "obito", "desconhecido"),
+      ...patientExtraFields,
+      responsavel_id: uuid,
+      papel_responsavel: choice("legal", "financeiro", "contato"),
+    },
+    [
+      "nome",
+      "especie_codigo",
+      "estado_vital",
+      "responsavel_id",
+      "papel_responsavel",
+    ],
+  ),
   vinculo: object({
     paciente_id: uuid,
     responsavel_id: uuid,

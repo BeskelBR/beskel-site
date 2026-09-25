@@ -14,6 +14,7 @@ let app: FastifyInstance,
   admin: pg.Pool,
   f: Awaited<ReturnType<typeof seedFixture>>,
   foreign: typeof f;
+let owner: string, foreignOwner: string;
 const post = (
   path: string,
   payload: Record<string, unknown>,
@@ -24,7 +25,14 @@ const post = (
     method: "POST",
     url: `/v1${path}`,
     headers: { authorization: `Bearer ${token}`, "idempotency-key": key },
-    payload,
+    payload:
+      path === "/pacientes"
+        ? {
+            responsavel_id: token === foreign.adminToken ? foreignOwner : owner,
+            papel_responsavel: "legal",
+            ...payload,
+          }
+        : payload,
   });
 const read = (path: string, token = f.adminToken) =>
   app.inject({
@@ -92,6 +100,12 @@ before(async () => {
   admin = pool(url, 1);
   db = pool(process.env.TEST_DATABASE_URL ?? "", 5);
   app = await buildApp(db);
+  owner = randomUUID();
+  foreignOwner = randomUUID();
+  await admin.query(
+    "INSERT INTO hvb.responsavel(id,organizacao_id,nome) VALUES($1,$2,'Responsavel sintetico'),($3,$4,'Responsavel sintetico B')",
+    [owner, f.org, foreignOwner, foreign.org],
+  );
 });
 after(async () => {
   await app?.close();
