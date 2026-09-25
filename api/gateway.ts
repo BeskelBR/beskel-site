@@ -14,6 +14,15 @@ type RequestWithBody = IncomingMessage & {
   body?: unknown;
 };
 
+type InjectMethod =
+  | "DELETE"
+  | "GET"
+  | "HEAD"
+  | "PATCH"
+  | "POST"
+  | "PUT"
+  | "OPTIONS";
+
 type Injected = {
   statusCode: number;
   headers: Record<string, string | string[] | number | undefined>;
@@ -172,7 +181,7 @@ async function injectApi(
   token?: string,
 ): Promise<Injected> {
   const instance = await app();
-  const method = req.method || "GET";
+  const method = (req.method || "GET") as InjectMethod;
   const payload = ["GET", "HEAD"].includes(method)
     ? undefined
     : await bodyBuffer(req, 512000);
