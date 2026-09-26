@@ -172,6 +172,20 @@ test("MVP 11 integrado: interface usa apenas os contratos publicados", async () 
 
   assert.match(searchSource, /params\.set\("q", query\)/);
   assert.match(searchSource, /params\.set\("cursor", patientCursor\)/);
+  for (const field of [
+    "data_nascimento",
+    "sexo",
+    "raca",
+    "microchip",
+    "pelagem",
+    "castrado",
+    "observacoes",
+    "contato_emergencia_nome",
+    "contato_emergencia_telefone",
+    "contato_emergencia_vinculo",
+  ]) {
+    assert.match(searchSource, new RegExp(`patient\\.${field}`));
+  }
   assert.match(searchSource, /limit: "25"/);
   assert.match(searchSource, /setTimeout\(\(\) => loadPatients\(true, false\), 250\)/);
   assert.doesNotMatch(searchSource, /haystack/);
