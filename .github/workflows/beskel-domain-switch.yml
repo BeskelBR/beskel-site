@@ -1,0 +1,93 @@
+name: BESKEL one-shot canonical domain switch
+
+on:
+  push:
+    paths:
+      - ".github/workflows/beskel-domain-switch.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  switch-domain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PROJECT_ID: prj_LfLTJIpS69Ov5kSWBeDuqicecFGO
+      TEAM_ID: team_l9315eenn2RPbBwriDHsOZru
+      APEX: beskel.com.br
+      WWW: www.beskel.com.br
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - name: Switch canonical host if Vercel API token is available
+        shell: bash
+        run: |
+          set +e
+          mkdir -p /tmp/beskel-domain
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "RESULT=NO_VERCEL_TOKEN"
+            exit 0
+          fi
+
+          auth=(-H "Authorization: Bearer $VERCEL_TOKEN" -H "Content-Type: application/json")
+          base="https://api.vercel.com/v9/projects/$PROJECT_ID/domains"
+          qs="?teamId=$TEAM_ID"
+
+          curl -sS "${auth[@]}" "$base/$APEX$qs" -o /tmp/beskel-domain/apex-before.json
+          curl -sS "${auth[@]}" "$base/$WWW$qs"  -o /tmp/beskel-domain/www-before.json
+
+          python - <<'PY'
+          import json
+          for name in ("apex-before","www-before"):
+              p=f"/tmp/beskel-domain/{name}.json"
+              try:
+                  d=json.load(open(p))
+              except Exception:
+                  print(f"{name}=INVALID_JSON")
+                  continue
+              safe={k:d.get(k) for k in ("name","apexName","projectId","redirect","redirectStatusCode","verified","error","message")}
+              print(name, json.dumps(safe, ensure_ascii=False))
+          PY
+
+          apex_code=$(curl -sS -o /tmp/beskel-domain/apex-after.json -w "%{http_code}" -X PATCH "${auth[@]}"             --data '{"redirect":null,"redirectStatusCode":null}' "$base/$APEX$qs")
+          echo "APEX_PATCH_HTTP=$apex_code"
+          if [ "$apex_code" != "200" ]; then
+            echo "RESULT=APEX_PATCH_FAILED"
+            cat /tmp/beskel-domain/apex-after.json
+            exit 0
+          fi
+
+          www_code=$(curl -sS -o /tmp/beskel-domain/www-after.json -w "%{http_code}" -X PATCH "${auth[@]}"             --data '{"redirect":"beskel.com.br","redirectStatusCode":308}' "$base/$WWW$qs")
+          echo "WWW_PATCH_HTTP=$www_code"
+          if [ "$www_code" != "200" ]; then
+            echo "RESULT=WWW_PATCH_FAILED"
+            cat /tmp/beskel-domain/www-after.json
+            exit 0
+          fi
+
+          python - <<'PY'
+          import json,sys
+          a=json.load(open("/tmp/beskel-domain/apex-after.json"))
+          w=json.load(open("/tmp/beskel-domain/www-after.json"))
+          ok=(a.get("redirect") in (None,"") and w.get("redirect")=="beskel.com.br" and int(w.get("redirectStatusCode") or 0)==308)
+          print("APEX_AFTER", {k:a.get(k) for k in ("name","redirect","redirectStatusCode","verified")})
+          print("WWW_AFTER", {k:w.get(k) for k in ("name","redirect","redirectStatusCode","verified")})
+          print("CONFIG_OK="+str(ok).lower())
+          sys.exit(0)
+          PY
+
+          sleep 5
+          apex_http=$(curl -sS -o /dev/null -D /tmp/beskel-domain/apex-headers.txt -w "%{http_code}" "https://$APEX/")
+          www_http=$(curl -sS -o /dev/null -D /tmp/beskel-domain/www-headers.txt -w "%{http_code}" "https://$WWW/")
+          prod_http=$(curl -sS -o /dev/null -D /tmp/beskel-domain/produtos-headers.txt -w "%{http_code}" "https://$APEX/pages/produtos.html")
+          echo "APEX_HTTP=$apex_http"
+          echo "WWW_HTTP=$www_http"
+          echo "PRODUTOS_HTTP=$prod_http"
+          grep -i '^location:' /tmp/beskel-domain/www-headers.txt || true
+          grep -i '^location:' /tmp/beskel-domain/produtos-headers.txt || true
+
+          if [ "$apex_http" = "200" ] && [ "$www_http" = "308" ] && [ "$prod_http" = "301" ]; then
+            echo "RESULT=SUCCESS"
+          else
+            echo "RESULT=CONFIG_CHANGED_QA_PENDING"
+          fi
