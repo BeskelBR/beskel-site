@@ -17,8 +17,15 @@ if (!favicon) {
   favicon.rel = "icon";
   document.head.appendChild(favicon);
 }
-favicon.type = "image/svg+xml";
-favicon.href = BRAND_SYMBOL;
+if (document.body.classList.contains("home-light")) {
+  favicon.type = "image/png";
+  favicon.setAttribute("sizes", "512x512");
+  favicon.href = "/assets/img/favicon-beskel-master-512.png";
+} else {
+  favicon.type = "image/svg+xml";
+  favicon.removeAttribute("sizes");
+  favicon.href = BRAND_SYMBOL;
+}
 
 document.querySelectorAll(".brand img").forEach(image => {
   image.src = BRAND_SYMBOL;
