@@ -1,3 +1,21 @@
+# Login humano — superfície preparada, integração bloqueada por contrato — 26/09/2026
+
+Base: `132e4ee53cc5511751a7b6108f77a1672fab9997`. OpenAPI observado: 3.0.3, versão `0.28.0`.
+
+A auditoria do contrato publicado não encontrou handlers HTTP para autenticação CPF+senha, senha temporária/redefinição obrigatória, recuperação de senha ou logout humano. O BFF `/session` hospedado permanece com o contrato vigente: `POST /session` recebe apenas token opaco técnico. Por isso CPF/senha não foram conectados ao BFF nem a qualquer rota inventada.
+
+O frontend agora apresenta CPF + senha como experiência normal, mas mantém senha e botão **Entrar** desabilitados enquanto o contrato humano HTTP não existir. CPF possui apenas validação visual/formatação local; nenhuma credencial humana é enviada. Não existe link de recuperação fictício.
+
+O acesso técnico DEV foi preservado em bloco separado `<details>`, fechado por padrão, e continua usando o fluxo canônico de token opaco no `POST /session`. `x-hvb-view`, reset de sessão, cookie HttpOnly e logout atual permanecem intactos.
+
+Verificação sobre blobs exatos: **24 PASS / 0 FAIL** para sintaxe, ausência de rota inventada, ausência de persistência de CPF/senha, token técnico isolado no bloco DEV, OpenAPI sem contrato humano, BFF token-only, Bearer fora do navegador, `x-hvb-view`, reset/logout, responsividade e validação de CPF. Deployment Vercel concluído com sucesso.
+
+O delta alterou somente HTML/CSS/JS e teste `.mjs`; não houve arquivo TypeScript alterado. O `pnpm lint` atual não inclui `assets/*.js`, portanto o escopo de lint não foi ampliado para misturar os diagnósticos históricos do frontend com este delta. E2E visual/runtime não foi executado nesta sessão porque a conexão Vercel do chat não possui acesso ao team `beskel`.
+
+Evidência: [frontend-login-humano-bloqueado.json](evidencias/frontend-login-humano-bloqueado.json).
+
+---
+
 # DEV hospedado — BFF /session + API same-origin — 24/09/2026
 
 Correção de hospedagem do ambiente `https://hvb-sistema-dev.beskel.com.br` aplicada sem alterar domínio backend, banco/Supabase, migrations, Terminal/C18 ou login humano.
