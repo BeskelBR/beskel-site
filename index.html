@@ -48,21 +48,35 @@
           </div>
         </div>
         <h2>Entrar no sistema</h2>
-        <p class="muted">Entre com a credencial temporária do piloto. A sessão expira após 15 minutos sem uso ou uma hora de duração. Login operacional e recuperação de conta continuam em preparação.</p>
-        <form id="login-form">
-          <label for="access-token">Credencial de acesso</label>
-          <input id="access-token" name="access-token" type="password" inputmode="text" autocomplete="off" spellcheck="false" minlength="64" maxlength="64" placeholder="Credencial DEV de 64 caracteres" required>
-          <button class="primary-btn" type="submit">Acessar ambiente</button>
+        <p class="muted">O acesso do colaborador será feito por CPF e senha, mantendo a sessão protegida no servidor.</p>
+        <form id="human-login-form" class="human-login-form" novalidate>
+          <label for="human-cpf">CPF</label>
+          <input id="human-cpf" name="cpf" type="text" inputmode="numeric" autocomplete="username" maxlength="14" placeholder="000.000.000-00" aria-describedby="human-login-feedback">
+          <label for="human-password">Senha</label>
+          <input id="human-password" name="senha" type="password" autocomplete="current-password" aria-describedby="human-login-feedback">
+          <button class="primary-btn" type="submit" disabled aria-disabled="true">Entrar</button>
         </form>
-        <details class="dev-settings" hidden>
-          <summary>Configuração técnica DEV</summary>
-          <label for="api-base">Endereço da API</label>
-          <input id="api-base" name="api-base" type="url" placeholder="http://127.0.0.1:3200">
-          <label for="unit-id">Unidade hospitalar (opcional)</label>
-          <input id="unit-id" name="unit-id" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="UUID da unidade DEV">
-          <small>O UUID só é necessário enquanto o contexto de unidade ainda não é resolvido automaticamente para todos os perfis. Em produção esta configuração não ficará exposta ao colaborador.</small>
+        <div class="human-login-feedback auth-blocked" id="human-login-feedback" role="status" aria-live="polite">
+          A integração de CPF e senha aguarda os endpoints HTTP humanos no contrato publicado do Backend. Nenhuma credencial é enviada por este formulário enquanto esse contrato não existir.
+        </div>
+
+        <div class="auth-separator" aria-hidden="true"><span>Ambiente DEV</span></div>
+        <details class="dev-settings dev-access">
+          <summary>Acesso técnico DEV</summary>
+          <p class="muted">Uso temporário para desenvolvimento enquanto o login humano não possui contrato HTTP executável.</p>
+          <form id="dev-login-form">
+            <label for="access-token">Credencial técnica DEV</label>
+            <input id="access-token" name="access-token" type="password" inputmode="text" autocomplete="off" spellcheck="false" minlength="64" maxlength="64" placeholder="Credencial DEV de 64 caracteres" required>
+            <button class="primary-btn" type="submit">Acessar ambiente DEV</button>
+          </form>
+          <div class="dev-runtime-config" hidden>
+            <label for="api-base">Endereço da API</label>
+            <input id="api-base" name="api-base" type="url" placeholder="http://127.0.0.1:3200">
+            <label for="unit-id">Unidade hospitalar (opcional)</label>
+            <input id="unit-id" name="unit-id" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="UUID da unidade DEV">
+          </div>
+          <div class="auth-feedback" id="auth-feedback" role="status" aria-live="polite"></div>
         </details>
-        <div class="auth-feedback" id="auth-feedback" role="status" aria-live="polite"></div>
         <a class="back-link" href="https://hvb-site-dev.beskel.com.br/colaborador">← Voltar à página do colaborador</a>
       </div>
     </div>
