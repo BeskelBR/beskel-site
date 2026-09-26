@@ -72,7 +72,8 @@
   };
 
   const $ = (selector) => document.querySelector(selector);
-  const authView = $('[data-view="auth"]'); const appView = $('[data-view="app"]'); const loginForm = $("#login-form");
+  const authView = $('[data-view="auth"]'); const appView = $('[data-view="app"]'); const humanLoginForm = $("#human-login-form"); const devLoginForm = $("#dev-login-form");
+  const cpfInput = $("#human-cpf"); const passwordInput = $("#human-password"); const humanFeedback = $("#human-login-feedback");
   const tokenInput = $("#access-token"); const apiInput = $("#api-base"); const unitInput = $("#unit-id"); const feedback = $("#auth-feedback");
   const apiStatus = $("#api-status"); const healthCard = $("#health-card"); const readyCard = $("#ready-card"); const orgName = $("#org-name");
   const actorId = $("#actor-id"); const unitLabel = $("#unit-label"); const pageTitle = $("#page-title"); const sidebar = $("#sidebar"); const menuBtn = $("#menu-btn");
@@ -95,6 +96,43 @@
     return body;
   }
   function setFeedback(message, kind = "") { feedback.textContent = message || ""; feedback.className = `auth-feedback ${kind}`.trim(); }
+  function setHumanFeedback(message, kind = "") { humanFeedback.textContent = message || ""; humanFeedback.className = `human-login-feedback ${kind}`.trim(); }
+  function cpfDigits(value) { return String(value || "").replace(/\D/g, "").slice(0, 11); }
+  function formatCpf(value) {
+    const digits = cpfDigits(value);
+    return digits
+      .replace(/^(\d{3})(\d)/, "$1.$2")
+      .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/\.(\d{3})(\d)/, ".$1-$2");
+  }
+  function validCpf(value) {
+    const digits = cpfDigits(value);
+    if (!/^\d{11}$/.test(digits) || /^(\d)\1{10}$/.test(digits)) return false;
+    const calc = (length) => {
+      let sum = 0;
+      for (let i = 0; i < length; i++) sum += Number(digits[i]) * (length + 1 - i);
+      const rest = (sum * 10) % 11;
+      return rest === 10 ? 0 : rest;
+    };
+    return calc(9) === Number(digits[9]) && calc(10) === Number(digits[10]);
+  }
+  function refreshHumanCpf() {
+    cpfInput.value = formatCpf(cpfInput.value);
+    const digits = cpfDigits(cpfInput.value);
+    if (!digits) {
+      cpfInput.removeAttribute("aria-invalid");
+      setHumanFeedback("A integração de CPF e senha aguarda os endpoints HTTP humanos no contrato publicado do Backend. Nenhuma credencial é enviada por este formulário enquanto esse contrato não existir.", "blocked");
+      return;
+    }
+    const valid = validCpf(cpfInput.value);
+    cpfInput.setAttribute("aria-invalid", String(!valid));
+    setHumanFeedback(
+      valid
+        ? "CPF em formato válido. O envio permanece bloqueado até a publicação do contrato HTTP de login humano."
+        : "Confira o CPF informado. Esta validação visual não substitui a validação do servidor.",
+      valid ? "blocked" : "error",
+    );
+  }
   function setInfrastructure(status, text) { apiStatus.textContent = text; apiStatus.className = `api-status ${status}`.trim(); }
   async function checkInfrastructure() {
     try { const health = await request("/health", {}, false); const ok = health?.status === "ok"; setInfrastructure(ok ? "ok" : "error", ok ? "API online" : "API instável"); healthCard.textContent = ok ? "Online" : "Instável"; }
@@ -118,19 +156,37 @@
   function showAuth() { appView.hidden = true; authView.hidden = false; }
   async function authenticate(candidate) { await window.HVBSession.login(candidate); tokenInput.value = ""; await loadContext(); showApp(); }
 
-  loginForm.addEventListener("submit", async (event) => {
-    event.preventDefault(); const submit = loginForm.querySelector('button[type="submit"]'); const candidate = tokenInput.value.trim().toLowerCase();
+  humanLoginForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    refreshHumanCpf();
+    passwordInput.value = "";
+    setHumanFeedback(
+      validCpf(cpfInput.value)
+        ? "Login humano ainda não possui endpoint HTTP executável no contrato publicado. Nenhuma senha foi enviada."
+        : "Confira o CPF informado. Nenhuma senha foi enviada.",
+      validCpf(cpfInput.value) ? "blocked" : "error",
+    );
+  });
+  cpfInput.addEventListener("input", refreshHumanCpf);
+  cpfInput.addEventListener("blur", refreshHumanCpf);
+  passwordInput.addEventListener("input", () => {
+    // A senha existe apenas no DOM enquanto o contrato humano está bloqueado.
+    // Não há persistência nem requisição de autenticação nesta etapa.
+  });
+
+  devLoginForm.addEventListener("submit", async (event) => {
+    event.preventDefault(); const submit = devLoginForm.querySelector('button[type="submit"]'); const candidate = tokenInput.value.trim().toLowerCase();
     activeUnit = null;
     if (activeUnit) localStorage.setItem("hvb-unit-id", activeUnit); else localStorage.removeItem("hvb-unit-id");
     if (!/^[a-f0-9]{64}$/.test(candidate)) { setFeedback("A credencial DEV deve conter exatamente 64 caracteres hexadecimais.", "error"); return; }
     if (activeUnit && !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(activeUnit)) { setFeedback("O identificador da unidade deve ser um UUID válido.", "error"); return; }
-    submit.disabled = true; setFeedback("Validando credencial…");
+    submit.disabled = true; setFeedback("Validando credencial técnica DEV…");
     try { await authenticate(candidate); setFeedback(""); }
-    catch (error) { sessionStorage.removeItem("hvb-session-view"); if (error.status === 401) setFeedback("Credencial inválida, revogada ou expirada.", "error"); else if (error.status === 403) setFeedback("A credencial é válida, mas não possui acesso a este ambiente.", "error"); else if (error.status === 502 || error.status === 503) setFeedback("O BFF DEV respondeu, mas a API/banco remoto ainda não está pronta no runtime hospedado.", "error"); else setFeedback("Não foi possível conectar ao backend configurado. Verifique a API e o ambiente DEV.", "error"); }
+    catch (error) { sessionStorage.removeItem("hvb-session-view"); if (error.status === 401) setFeedback("Credencial DEV inválida, revogada ou expirada.", "error"); else if (error.status === 403) setFeedback("A credencial DEV é válida, mas não possui acesso a este ambiente.", "error"); else if (error.status === 502 || error.status === 503) setFeedback("O BFF DEV respondeu, mas a API/banco remoto ainda não está pronta no runtime hospedado.", "error"); else setFeedback("Não foi possível conectar ao backend configurado. Verifique a API e o ambiente DEV.", "error"); }
     finally { tokenInput.value = ""; submit.disabled = false; }
   });
 
-  window.addEventListener("hvb-session-ended", () => { actor = null; organization = null; currentItems = []; nextCursor = null; showAuth(); tokenInput.value = ""; setFeedback("Sessão encerrada ou alterada. Entre novamente.", "error"); });
+  window.addEventListener("hvb-session-ended", () => { actor = null; organization = null; currentItems = []; nextCursor = null; showAuth(); tokenInput.value = ""; passwordInput.value = ""; setHumanFeedback("Sessão encerrada ou expirada. Entre novamente quando o login humano estiver disponível ou use o acesso técnico DEV.", "error"); });
   $("#logout-btn").addEventListener("click", async () => { try { await window.HVBSession.logout(); setFeedback("Sessão encerrada."); } catch { setFeedback("A saída não foi confirmada. Verifique a conexão e tente novamente.", "error"); alert("A saída não foi confirmada. Tente Encerrar sessão novamente."); } });
   menuBtn.addEventListener("click", () => { const open = sidebar.classList.toggle("open"); menuBtn.setAttribute("aria-expanded", String(open)); });
   document.querySelectorAll(".nav-item").forEach((button) => button.addEventListener("click", () => navigate(button.dataset.module)));
@@ -203,5 +259,5 @@
     items.forEach((item) => { const row = document.createElement("tr"); columns.forEach((key) => { const cell = document.createElement("td"); cell.dataset.key = key; const formatted = formatValue(item[key], key); if (key === "id" || key.endsWith("_id")) { cell.classList.add("cell-id"); cell.title = String(item[key] ?? ""); cell.textContent = formatted; } else if (["situacao","estado","resultado"].includes(key) && formatted !== "—") { const pill = document.createElement("span"); pill.className = `status-pill ${statusClass(formatted)}`.trim(); pill.textContent = formatted; cell.append(pill); } else cell.textContent = formatted; row.append(cell); }); tbody.append(row); }); table.append(thead, tbody); wrap.append(table); moduleContent.append(wrap);
   }
 
-  (async function bootstrap() { const submit = loginForm.querySelector('button[type="submit"]'); submit.disabled = true; await checkInfrastructure(); try { await window.HVBSession.restore(); await loadContext(); showApp(); } catch { sessionStorage.removeItem("hvb-session-view"); showAuth(); } finally { submit.disabled = false; } })();
+  (async function bootstrap() { const submit = devLoginForm.querySelector('button[type="submit"]'); submit.disabled = true; passwordInput.value = ""; await checkInfrastructure(); try { await window.HVBSession.restore(); await loadContext(); showApp(); } catch { sessionStorage.removeItem("hvb-session-view"); showAuth(); } finally { submit.disabled = false; } })();
 })();
