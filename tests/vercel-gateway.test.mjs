@@ -22,6 +22,10 @@ test("Vercel gateway keeps session and API same-origin", async () => {
         item.destination === "/api/gateway?hvb_path=/v1/:path*",
     ),
   );
+  assert.equal(
+    vercel.functions?.["api/gateway.ts"]?.includeFiles,
+    "{src/**,scripts/hosted-session.ts}",
+  );
   assert.match(gateway, /hvb-sistema-dev\.beskel\.com\.br/);
   assert.match(gateway, /Secure/);
   assert.match(gateway, /SameSite=Strict/);
