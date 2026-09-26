@@ -157,9 +157,13 @@ jobs:
           print("LIVE_MANIFEST_FAVICON_OK")
           PY
 
-          code=$(curl -sS -o /dev/null -D qa-output/produtos-headers.txt -w "%{http_code}" https://beskel.com.br/pages/produtos.html)
-          test "$code" = "301"
-          grep -iE '^location: (https://beskel\.com\.br)?/portfolio/?' qa-output/produtos-headers.txt
+          bare_code=$(curl -sS -o /dev/null -D qa-output/produtos-bare-headers.txt -w "%{http_code}" https://beskel.com.br/pages/produtos.html)
+          test "$bare_code" = "308"
+          grep -iE '^location: https://www\.beskel\.com\.br/pages/produtos\.html' qa-output/produtos-bare-headers.txt
+
+          www_code=$(curl -sS -o /dev/null -D qa-output/produtos-www-headers.txt -w "%{http_code}" https://www.beskel.com.br/pages/produtos.html)
+          test "$www_code" = "301"
+          grep -iE '^location: (https://www\.beskel\.com\.br)?/portfolio/?' qa-output/produtos-www-headers.txt
 
           curl -L -fsS "https://beskel.com.br/sitemap.xml?qa=$QA_REPO_SHA" -o qa-output/sitemap.xml
           python - <<'PY'
