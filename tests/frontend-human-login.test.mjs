@@ -21,6 +21,7 @@ test("login humano: UI normal usa CPF/senha sem endpoint ficticio", async () => 
   assert.match(html, /autocomplete="username"/);
   assert.match(html, /id="human-password"/);
   assert.match(html, /autocomplete="current-password"/);
+  assert.match(html, /id="human-password"[^>]*disabled aria-disabled="true"/);
   assert.match(html, /<button class="primary-btn" type="submit" disabled aria-disabled="true">Entrar<\/button>/);
   assert.match(html, /aguarda os endpoints HTTP humanos/);
 
