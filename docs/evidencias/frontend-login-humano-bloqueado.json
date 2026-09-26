@@ -1,0 +1,105 @@
+{
+  "data": "2026-09-26",
+  "branch": "hvb-sistema-dev",
+  "base_sha": "132e4ee53cc5511751a7b6108f77a1672fab9997",
+  "implementation_sha": "eab49ac64f583dd3f668f91f72d73b70e065f7b0",
+  "openapi": {
+    "version": "0.28.0",
+    "human_http_paths_found": [],
+    "conclusion": "Nenhum endpoint HTTP executável de autenticação CPF+senha, senha temporária/redefinição, recuperação ou logout humano está publicado no OpenAPI."
+  },
+  "session_observed": {
+    "browser_contract": [
+      "GET /session",
+      "POST /session",
+      "DELETE /session"
+    ],
+    "post_session_input": "token opaco de 64 hex",
+    "bearer": "mantido no servidor",
+    "browser_state": "cookie HttpOnly + view_id/expira_em; x-hvb-view preservado"
+  },
+  "executed": [
+    "Substituída a experiência normal de token técnico por superfície preparada de CPF + senha.",
+    "Senha e botão Entrar permanecem desabilitados enquanto não existe contrato humano HTTP, evitando falsa integração e coleta desnecessária de senha.",
+    "Validação visual local de CPF adicionada; não substitui validação do servidor.",
+    "Acesso técnico DEV preservado em details separado e fechado por padrão.",
+    "Fluxo técnico DEV continua usando o POST /session vigente baseado em token opaco.",
+    "Nenhum link fictício de recuperação/senha temporária foi criado.",
+    "Nenhum BFF/backend/banco/Terminal/NFC/contrato foi alterado."
+  ],
+  "verified": {
+    "exact_blob_checks": {
+      "pass": 24,
+      "fail": 0
+    },
+    "covers": [
+      "sintaxe dos JS afetados",
+      "CPF/senha presentes na UI normal",
+      "senha e submit humanos bloqueados",
+      "handler humano sem fetch/HVBSession.login/rota /v1",
+      "senha limpa e não persistida",
+      "token técnico apenas no bloco DEV",
+      "OpenAPI 0.28.0 sem contrato humano",
+      "POST /session vigente continua token-only",
+      "Bearer removido do browser",
+      "x-hvb-view/reset/logout preservados",
+      "ausência de recuperação fictícia",
+      "responsividade CSS em breakpoints 860/560",
+      "validação CPF: válido, checksum inválido, repetido inválido e formatação"
+    ],
+    "vercel_deploy": {
+      "status": "success",
+      "commit": "eab49ac64f583dd3f668f91f72d73b70e065f7b0",
+      "description": "Deployment has completed"
+    },
+    "typecheck": {
+      "status": "SEM NOVO ESCOPO TYPESCRIPT",
+      "detail": "O delta alterou somente HTML/CSS/JS e teste .mjs; nenhum arquivo .ts/.tsx, tsconfig ou contrato TypeScript foi alterado. O gateway permanece no blob já corrigido antes deste delta."
+    },
+    "lint": {
+      "status": "VERIFICAÇÃO ESTÁTICA DO DELTA",
+      "detail": "O script pnpm lint vigente não inclui assets/*.js; não foi ampliado para evitar misturar os diagnósticos históricos do frontend. Foram executadas verificações sintáticas/contratuais específicas sobre os blobs exatos."
+    },
+    "browser_e2e": {
+      "status": "NÃO EXECUTADO NESTA SESSÃO",
+      "reason": "A conexão Vercel disponível ao chat não tem autorização ao team beskel para fetch/runtime logs; deployment foi confirmado pelo status GitHub/Vercel."
+    }
+  },
+  "blocked": [
+    {
+      "classification": "BACKEND/CONTRATO",
+      "item": "Autenticação humana CPF + senha",
+      "reason": "Nenhum handler HTTP/OpenAPI publicado."
+    },
+    {
+      "classification": "BACKEND/CONTRATO",
+      "item": "Senha temporária e redefinição obrigatória",
+      "reason": "Infraestrutura interna/banco existe, mas não há contrato HTTP executável publicado."
+    },
+    {
+      "classification": "BACKEND/CONTRATO",
+      "item": "Recuperação de senha",
+      "reason": "Nenhum contrato HTTP executável publicado."
+    },
+    {
+      "classification": "BFF/INTEGRAÇÃO",
+      "item": "POST /session humano",
+      "reason": "POST /session atual aceita somente token opaco; não deve receber CPF/senha até existir contrato backend humano."
+    }
+  ],
+  "files_changed": [
+    "index.html",
+    "assets/system-v2.js",
+    "assets/system.css",
+    "tests/frontend-human-login.test.mjs"
+  ],
+  "preserved": [
+    "PostgreSQL/Supabase canônico 111",
+    "backend e OpenAPI",
+    "migrations",
+    "BFF /session",
+    "RBAC",
+    "Terminal/C18/NFC",
+    "demais páginas e jornadas autenticadas"
+  ]
+}
