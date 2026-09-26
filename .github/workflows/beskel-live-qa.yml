@@ -1,4 +1,4 @@
-name: BESKEL live favicon + SEO QA
+name: BESKEL repair + live favicon SEO QA
 
 on:
   push:
@@ -6,14 +6,17 @@ on:
       - ".github/workflows/beskel-live-qa.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  qa:
+  repair-and-qa:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -24,19 +27,17 @@ jobs:
           python -m pip install --disable-pip-version-check cairosvg==2.7.1 pillow==10.4.0 playwright==1.47.0
           python -m playwright install --with-deps chromium
 
-      - name: Verify repository favicon is a literal raster application of MASTER
+      - name: Rebuild favicon literally from MASTER
         run: |
           python - <<'PY'
           from pathlib import Path
           from PIL import Image, ImageChops
-          import cairosvg, io
+          import cairosvg, io, hashlib
 
           master = Path("assets/img/beskel-symbol-master-light.svg")
-          actual_path = Path("assets/img/favicon-beskel-master-512.png")
+          favicon = Path("assets/img/favicon-beskel-master-512.png")
           assert master.exists(), "MASTER ausente"
-          assert actual_path.exists(), "favicon raster ausente"
 
-          # Preserva integralmente a proporção do MASTER (493×552) dentro de canvas 512×512.
           target_h = 512
           target_w = round(493 * target_h / 552)
           rendered = cairosvg.svg2png(
@@ -47,30 +48,86 @@ jobs:
           symbol = Image.open(io.BytesIO(rendered)).convert("RGBA")
           expected = Image.new("RGBA", (512, 512), (0, 0, 0, 0))
           expected.alpha_composite(symbol, ((512 - target_w)//2, 0))
+          expected.save(favicon, format="PNG", optimize=True)
 
-          actual = Image.open(actual_path).convert("RGBA")
-          assert actual.size == (512, 512), actual.size
-          diff = ImageChops.difference(actual, expected)
-          if diff.getbbox() is not None:
-              expected.save("qa-expected-favicon.png")
-              actual.save("qa-actual-favicon.png")
-              diff.save("qa-favicon-diff.png")
-              raise SystemExit("favicon não coincide pixel a pixel com aplicação literal proporcional do MASTER")
-
-          print("FAVICON_REPO_LITERAL_OK")
+          actual = Image.open(favicon).convert("RGBA")
+          assert actual.size == (512,512)
+          assert ImageChops.difference(actual, expected).getbbox() is None
+          print("FAVICON_REBUILT_OK", hashlib.sha256(favicon.read_bytes()).hexdigest())
           PY
 
-      - name: Verify live HTTP metadata, manifest, favicon and 301
+      - name: Verify repository SEO configuration
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json, re
+          from xml.etree import ElementTree as ET
+
+          home = Path("index.html").read_text(encoding="utf-8")
+          assert '<meta name="viewport" content="width=device-width,initial-scale=1">' in home
+          assert '<link rel="canonical" href="https://beskel.com.br/">' in home
+          assert '<meta property="og:image" content="https://beskel.com.br/assets/cases/hvb/portfolio-oficina.jpg">' in home
+          assert 'rty:og:image' not in home
+          assert '<link rel="manifest" href="/site.webmanifest">' in home
+          assert '<link rel="icon" type="image/png" sizes="512x512" href="/assets/img/favicon-beskel-master-512.png">' in home
+          assert 'favicon-beskel-v2.svg' not in home
+
+          manifest=json.loads(Path("site.webmanifest").read_text(encoding="utf-8"))
+          assert manifest["icons"] == [{
+              "src":"/assets/img/favicon-beskel-master-512.png",
+              "sizes":"512x512",
+              "type":"image/png"
+          }]
+
+          redirects=Path("_redirects").read_text(encoding="utf-8")
+          assert "/pages/produtos.html /portfolio/ 301" in redirects
+
+          vercel=json.loads(Path("vercel.json").read_text(encoding="utf-8"))
+          r=next(x for x in vercel["redirects"] if x.get("source")=="/pages/produtos.html")
+          assert r["destination"]=="/portfolio/"
+          assert r.get("statusCode")==301
+
+          root=ET.parse("sitemap.xml").getroot()
+          ns={"s":"http://www.sitemaps.org/schemas/sitemap/0.9"}
+          data={}
+          for u in root.findall("s:url",ns):
+              loc=u.find("s:loc",ns).text
+              lm=u.find("s:lastmod",ns)
+              data[loc]=lm.text if lm is not None else None
+          assert data["https://beskel.com.br/"]=="2026-09-26"
+          assert all(v=="2026-09-23" for k,v in data.items() if k!="https://beskel.com.br/")
+          print("REPO_SEO_QA_OK")
+          PY
+
+      - name: Commit repaired favicon and remove one-shot workflow
+        run: |
+          rm .github/workflows/beskel-live-qa.yml
+          git config user.name "BeskelBR"
+          git config user.email "mateus.fis.unb@gmail.com"
+          git add -A
+          git diff --cached --check
+          git diff --cached --name-only
+          git commit -m "Finaliza favicon MASTER e remove QA temporário"
+          git push origin main
+
+      - name: Wait for live deployment and verify HTTP
         run: |
           set -euo pipefail
           mkdir -p qa-output
-
-          for i in $(seq 1 18); do
-            code=$(curl -L -sS -o qa-output/home.html -w "%{http_code}" https://beskel.com.br/ || true)
-            if [ "$code" = "200" ]; then break; fi
+          expected_sha=$(sha256sum assets/img/favicon-beskel-master-512.png | awk '{print $1}')
+          ok=0
+          for i in $(seq 1 36); do
+            code=$(curl -sS -o qa-output/home.html -w "%{http_code}" https://beskel.com.br/ || true)
+            if [ "$code" = "200" ]; then
+              curl -sS -f https://beskel.com.br/assets/img/favicon-beskel-master-512.png -o qa-output/favicon-live.png || true
+              if [ -s qa-output/favicon-live.png ]; then
+                live_sha=$(sha256sum qa-output/favicon-live.png | awk '{print $1}')
+                if [ "$live_sha" = "$expected_sha" ]; then ok=1; break; fi
+              fi
+            fi
             sleep 5
           done
-          test "$code" = "200"
+          test "$ok" = "1"
 
           grep -F '<meta name="viewport" content="width=device-width,initial-scale=1">' qa-output/home.html
           grep -F '<link rel="canonical" href="https://beskel.com.br/">' qa-output/home.html
@@ -80,7 +137,7 @@ jobs:
           grep -F '<link rel="icon" type="image/png" sizes="512x512" href="/assets/img/favicon-beskel-master-512.png">' qa-output/home.html
           ! grep -F 'favicon-beskel-v2.svg' qa-output/home.html
 
-          curl -L -fsS https://beskel.com.br/site.webmanifest -o qa-output/site.webmanifest
+          curl -fsS https://beskel.com.br/site.webmanifest -o qa-output/site.webmanifest
           python - <<'PY'
           import json
           m=json.load(open("qa-output/site.webmanifest",encoding="utf-8"))
@@ -92,21 +149,11 @@ jobs:
           print("MANIFEST_LIVE_OK")
           PY
 
-          curl -L -fsS https://beskel.com.br/assets/img/favicon-beskel-master-512.png -o qa-output/favicon-live.png
-          python - <<'PY'
-          from PIL import Image, ImageChops
-          a=Image.open("qa-output/favicon-live.png").convert("RGBA")
-          b=Image.open("assets/img/favicon-beskel-master-512.png").convert("RGBA")
-          assert a.size==(512,512), a.size
-          assert ImageChops.difference(a,b).getbbox() is None, "favicon live difere do repositório"
-          print("FAVICON_LIVE_OK")
-          PY
-
           code=$(curl -sS -o /dev/null -D qa-output/produtos-headers.txt -w "%{http_code}" https://beskel.com.br/pages/produtos.html)
           test "$code" = "301"
           grep -iE '^location: (https://beskel\.com\.br)?/portfolio/?' qa-output/produtos-headers.txt
 
-          curl -L -fsS https://beskel.com.br/sitemap.xml -o qa-output/sitemap.xml
+          curl -fsS https://beskel.com.br/sitemap.xml -o qa-output/sitemap.xml
           python - <<'PY'
           from xml.etree import ElementTree as ET
           root=ET.parse("qa-output/sitemap.xml").getroot()
@@ -117,8 +164,7 @@ jobs:
               lm=u.find("s:lastmod",ns)
               data[loc]=lm.text if lm is not None else None
           assert data["https://beskel.com.br/"]=="2026-09-26"
-          others={k:v for k,v in data.items() if k!="https://beskel.com.br/"}
-          assert all(v=="2026-09-23" for v in others.values()), others
+          assert all(v=="2026-09-23" for k,v in data.items() if k!="https://beskel.com.br/")
           print("SITEMAP_LIVE_OK")
           PY
 
@@ -127,12 +173,6 @@ jobs:
           cat > /tmp/qa.py <<'PY'
           from playwright.sync_api import sync_playwright
           import json
-
-          expected = {
-              "canonical": "https://beskel.com.br/",
-              "manifest": "https://beskel.com.br/site.webmanifest",
-              "favicon": "https://beskel.com.br/assets/img/favicon-beskel-master-512.png",
-          }
 
           profiles = [
               ("desktop", {"viewport":{"width":1440,"height":1000}, "device_scale_factor":1}),
@@ -148,7 +188,7 @@ jobs:
                   errors=[]
                   page.on("console", lambda msg, errors=errors: errors.append(msg.text) if msg.type=="error" else None)
                   response=page.goto("https://beskel.com.br/", wait_until="networkidle", timeout=60000)
-                  assert response and response.status==200, response.status if response else None
+                  assert response and response.status==200
 
                   title=page.title()
                   canonical=page.locator('link[rel="canonical"]').get_attribute("href")
@@ -158,9 +198,9 @@ jobs:
                   og_image=page.locator('meta[property="og:image"]').get_attribute("content")
 
                   assert title=="BESKEL | Soluções físicas, digitais e híbridas em Brasília"
-                  assert canonical==expected["canonical"]
-                  assert manifest in ("/site.webmanifest", expected["manifest"])
-                  assert favicon in ("/assets/img/favicon-beskel-master-512.png", expected["favicon"])
+                  assert canonical=="https://beskel.com.br/"
+                  assert manifest=="/site.webmanifest"
+                  assert favicon=="/assets/img/favicon-beskel-master-512.png"
                   assert viewport=="width=device-width,initial-scale=1"
                   assert og_image=="https://beskel.com.br/assets/cases/hvb/portfolio-oficina.jpg"
 
@@ -188,10 +228,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: beskel-favicon-seo-live-qa
-          path: |
-            qa-output/
-            qa-expected-favicon.png
-            qa-actual-favicon.png
-            qa-favicon-diff.png
+          path: qa-output/
           if-no-files-found: ignore
           retention-days: 7
