@@ -8,7 +8,7 @@ import { pool } from "../src/persistence/database.ts";
 import { seedFixture } from "../scripts/seed.ts";
 import { loginWeb } from "./web-session-helper.mjs";
 
-let fixture, db, app, server, client, base, patient, episode, session;
+let fixture, db, app, server, client, base, responsible, patient, episode, session;
 before(async () => {
   const url = process.env.TEST_MIGRATION_DATABASE_URL;
   assert.equal(new URL(url).pathname, "/hvb_sistema_test");
@@ -36,11 +36,29 @@ after(async () => {
 test("piloto: paciente, episódio, evolução e leitura protegida pelo proxy real", async () => {
   assert.equal((await client.read("/v1/me")).usuario_id, fixture.admin);
   const create = (path, body) => client.send(client.prepare(path, body));
+  responsible = (
+    await create("/v1/responsaveis", {
+      nome: "Responsável fictício piloto",
+      telefone_whatsapp: "61999990000",
+      email: "piloto@example.invalid",
+      cep: "70000000",
+      logradouro: "Rua Sintética",
+      numero: "10",
+      bairro: "Centro",
+      cidade: "Brasília",
+      uf: "DF",
+    })
+  ).id;
   patient = (
     await create("/v1/pacientes", {
       nome: "Paciente fictício piloto",
       especie_codigo: "felina",
       estado_vital: "vivo",
+      responsavel_id: responsible,
+      papel_responsavel: "legal",
+      sexo: "femea",
+      castrado: false,
+      microchip: null,
     })
   ).id;
   assert.ok(
@@ -48,6 +66,13 @@ test("piloto: paciente, episódio, evolução e leitura protegida pelo proxy rea
       (p) => p.id === patient,
     ),
   );
+  const links = (
+    await client.read(`/v1/vinculos?paciente_id=${patient}`)
+  ).items;
+  assert.equal(links.length, 1);
+  assert.equal(links[0].responsavel_id, responsible);
+  assert.equal(links[0].papel, "legal");
+  assert.equal(links[0].estado, "ativo");
   episode = (
     await create("/v1/episodios", {
       unidade_id: fixture.unit,
@@ -107,6 +132,8 @@ test("piloto: RBAC, unidade e sessão inválida são preservados", async () => {
         nome: "Recusado",
         especie_codigo: "canina",
         estado_vital: "vivo",
+        responsavel_id: responsible,
+        papel_responsavel: "legal",
       }),
     ),
     { status: 403 },

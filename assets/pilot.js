@@ -2,16 +2,20 @@ import { createPilotClient, pilotError } from "./pilot-api.js";
 
 const $ = (id) => document.getElementById(`pilot-${id}`);
 const forms = {
+  responsible: $("responsible-form"),
   patient: $("patient-form"),
   episode: $("episode-form"),
   record: $("record-form"),
 };
-let client, context, patient, episode, pending;
+let client, context, responsible, patient, episode, pending;
 let patients = [],
+  responsibles = [],
   episodes = [];
 let patientCursor = null,
+  responsibleCursor = null,
   episodeCursor = null,
   recordCursor = null;
+let responsibleSearchTimer;
 let epoch = 0,
   busy = false,
   ready = false;
@@ -36,6 +40,7 @@ function sync() {
   $("start").disabled = busy || !!pending;
   $("retry").hidden = !pending;
   $("retry").disabled = busy;
+  forms.patient.querySelector("button").disabled = !responsible;
   forms.episode.querySelector("button").disabled = !patient;
   forms.record.querySelector("button").disabled =
     !episode || !!episode.encerrado_em;
@@ -43,18 +48,28 @@ function sync() {
 }
 function reset() {
   epoch++;
-  client = context = patient = episode = pending = undefined;
+  client = context = responsible = patient = episode = pending = undefined;
   busy = false;
   ready = false;
   patients = [];
+  responsibles = [];
   episodes = [];
-  patientCursor = episodeCursor = recordCursor = null;
+  patientCursor = responsibleCursor = episodeCursor = recordCursor = null;
+  clearTimeout(responsibleSearchTimer);
   for (const form of Object.values(forms)) form.reset();
-  for (const name of ["unit", "patient", "episode", "records"])
+  for (const name of ["unit", "responsible", "patient", "episode", "records"])
     $(name).replaceChildren();
-  for (const name of ["more", "episodes-more", "records-more"])
+  for (const name of [
+    "more",
+    "responsible-more",
+    "episodes-more",
+    "records-more",
+  ])
     $(name).hidden = true;
+  $("search").value = "";
+  $("responsible-search").value = "";
   $("count").textContent = "";
+  $("responsible-count").textContent = "";
   $("context").textContent = "Nenhum paciente selecionado.";
   status("Carregue o atendimento para começar.");
   sync();
@@ -115,6 +130,53 @@ async function loadPatients(version, more = false) {
   ];
   patientCursor = result.next_cursor;
   showPatients();
+}
+function showResponsibles() {
+  $("responsible").replaceChildren();
+  option(
+    $("responsible"),
+    "",
+    responsibles.length
+      ? "Selecione um responsável"
+      : "Nenhum responsável encontrado",
+  );
+  for (const item of responsibles)
+    option(
+      $("responsible"),
+      item.id,
+      `${item.nome} · ${item.cpf || item.telefone_whatsapp || item.email || item.id}`,
+    );
+  $("responsible").value = responsible?.id || "";
+  $("responsible-more").hidden = !responsibleCursor;
+  $("responsible-count").textContent =
+    `${responsibles.length}${responsibleCursor ? "+" : ""} responsável(is) carregado(s).`;
+  sync();
+}
+async function loadResponsibles(version, more = false) {
+  const search = $("responsible-search").value.trim();
+  const result = await client.read(
+    query("/v1/responsaveis", {
+      q: search || null,
+      limit: 100,
+      cursor: more ? responsibleCursor : null,
+    }),
+  );
+  if (!current(version)) return;
+  responsibles = [
+    ...new Map(
+      [...(more ? responsibles : []), ...result.items].map((item) => [
+        item.id,
+        item,
+      ]),
+    ).values(),
+  ];
+  responsibleCursor = result.next_cursor;
+  if (
+    responsible &&
+    !responsibles.some((item) => item.id === responsible.id)
+  )
+    responsible = undefined;
+  showResponsibles();
 }
 function showEpisodes() {
   $("episode").replaceChildren();
@@ -230,15 +292,34 @@ $("start").addEventListener("click", () => {
       $("unit").value = saved;
     forms.episode.elements.admitido_em.value = localNow();
     forms.record.elements.ocorrida_em.value = localNow();
-    await loadPatients(v);
+    await Promise.all([loadPatients(v), loadResponsibles(v)]);
     if (current(v)) {
       ready = true;
-      status("Selecione um paciente ou cadastre um paciente fictício.");
+      status(
+        "Selecione um paciente ou escolha/cadastre um responsável antes de cadastrar um novo paciente.",
+      );
+      sync();
     }
   });
 });
 $("search").addEventListener("input", showPatients);
 $("more").addEventListener("click", () => run((v) => loadPatients(v, true)));
+$("responsible-search").addEventListener("input", () => {
+  clearTimeout(responsibleSearchTimer);
+  responsibleSearchTimer = setTimeout(
+    () => run((v) => loadResponsibles(v, false)),
+    250,
+  );
+});
+$("responsible-more").addEventListener("click", () =>
+  run((v) => loadResponsibles(v, true)),
+);
+$("responsible").addEventListener("change", () => {
+  responsible = responsibles.find(
+    (item) => item.id === $("responsible").value,
+  );
+  sync();
+});
 $("episodes-more").addEventListener("click", () =>
   run((v) => loadEpisodes(v, true)),
 );
@@ -298,12 +379,20 @@ async function transmit(version) {
   pending = undefined;
   // Receipt is applied before any read: a refresh failure must never re-send a committed action.
   forms[active.kind].reset();
-  if (active.kind === "patient") {
+  if (active.kind === "responsible") {
+    responsible = { ...active.body, id: result.id };
+    responsibles.unshift(responsible);
+    $("responsible-search").value = "";
+    showResponsibles();
+  } else if (active.kind === "patient") {
     patient = { ...active.body, id: result.id };
     patients.push(patient);
     $("search").value = "";
     showPatients();
     clearEpisode();
+    responsible = undefined;
+    $("responsible").value = "";
+    sync();
   } else if (active.kind === "episode") {
     episode = { ...active.body, id: result.id, encerrado_em: null };
     episodes.unshift(episode);
@@ -312,9 +401,9 @@ async function transmit(version) {
   forms.episode.elements.admitido_em.value = localNow();
   forms.record.elements.ocorrida_em.value = localNow();
   status(
-    `Gravado com sucesso: ${result.id}. ${active.kind === "patient" ? "Paciente selecionado; abra ou selecione um episódio." : active.kind === "episode" ? "Episódio selecionado; registre a evolução." : "Evolução registrada."}`,
+    `Gravado com sucesso: ${result.id}. ${active.kind === "responsible" ? "Responsável selecionado; complete o cadastro do paciente." : active.kind === "patient" ? "Paciente e vínculo inicial confirmados; abra ou selecione um episódio." : active.kind === "episode" ? "Episódio selecionado; registre a evolução." : "Evolução registrada."}`,
   );
-  if (active.kind !== "patient") {
+  if (active.kind === "episode" || active.kind === "record") {
     try {
       await loadRecords(version);
     } catch (error) {
@@ -335,9 +424,32 @@ for (const [kind, form] of Object.entries(forms))
       if (!client)
         throw Object.assign(new Error("sessao_ausente"), { status: 401 });
       let path, body;
-      if (kind === "patient") {
+      const compact = (source, booleanFields = []) =>
+        Object.fromEntries(
+          Object.entries(source)
+            .filter(([, value]) => value !== "")
+            .map(([key, value]) => [
+              key,
+              booleanFields.includes(key)
+                ? value === "true"
+                : typeof value === "string"
+                  ? value.trim()
+                  : value,
+            ]),
+        );
+      if (kind === "responsible") {
+        path = "/v1/responsaveis";
+        body = compact(fields);
+      } else if (kind === "patient") {
+        if (!responsible)
+          throw Object.assign(new Error("selecione_responsavel"), {
+            status: 400,
+          });
         path = "/v1/pacientes";
-        body = { ...fields, nome: fields.nome.trim() };
+        body = {
+          ...compact(fields, ["castrado"]),
+          responsavel_id: responsible.id,
+        };
       } else {
         if (!patient || !$("unit").value)
           throw Object.assign(new Error("selecione_paciente_e_unidade"), {

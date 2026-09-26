@@ -138,15 +138,51 @@
                   <label>Filtrar pacientes carregados<input id="pilot-search" type="search" maxlength="160"></label>
                   <label>Paciente<select id="pilot-patient" aria-label="Paciente do atendimento"><option value="">Selecione um paciente</option></select></label>
                   <p id="pilot-count"></p><button type="button" class="secondary-btn" id="pilot-more" hidden>Carregar mais pacientes</button>
-                  <details><summary>Cadastrar paciente fictício</summary>
-                    <form id="pilot-patient-form">
-                      <label>Nome<input name="nome" required maxlength="160" autocomplete="off"></label>
-                      <label>Espécie<select name="especie_codigo"><option value="canina">Canina</option><option value="felina">Felina</option><option value="outra">Outra</option><option value="desconhecida">Desconhecida</option></select></label>
-                      <label>Estado vital<select name="estado_vital"><option value="desconhecido">Desconhecido</option><option value="vivo">Vivo</option><option value="obito">Óbito</option></select></label>
-                      <label class="pilot-confirm"><input type="checkbox" required>Conferi a lista e confirmo o cadastro de um paciente fictício.</label>
-                      <button class="primary-btn" type="submit">Cadastrar paciente</button>
-                    </form>
-                  </details>
+                  <div class="pilot-registration">
+                    <h4>Responsável para novo paciente</h4>
+                    <label>Buscar responsável cadastrado<input id="pilot-responsible-search" type="search" maxlength="160" autocomplete="off"></label>
+                    <label>Responsável<select id="pilot-responsible" aria-label="Responsável do novo paciente"><option value="">Selecione um responsável</option></select></label>
+                    <p id="pilot-responsible-count"></p><button type="button" class="secondary-btn" id="pilot-responsible-more" hidden>Carregar mais responsáveis</button>
+                    <details><summary>Cadastrar responsável fictício</summary>
+                      <form id="pilot-responsible-form">
+                        <label>Nome<input name="nome" required maxlength="160" autocomplete="off"></label>
+                        <label>CPF<input name="cpf" maxlength="32" inputmode="numeric" autocomplete="off"></label>
+                        <label>Telefone / WhatsApp<input name="telefone_whatsapp" maxlength="40" inputmode="tel" autocomplete="off"></label>
+                        <label>E-mail<input name="email" type="email" maxlength="254" autocomplete="off"></label>
+                        <label>Data de nascimento<input name="data_nascimento" type="date"></label>
+                        <label>CEP<input name="cep" maxlength="20" inputmode="numeric" autocomplete="off"></label>
+                        <label>Logradouro<input name="logradouro" maxlength="200" autocomplete="off"></label>
+                        <label>Número<input name="numero" maxlength="30" autocomplete="off"></label>
+                        <label>Complemento<input name="complemento" maxlength="120" autocomplete="off"></label>
+                        <label>Bairro<input name="bairro" maxlength="120" autocomplete="off"></label>
+                        <label>Cidade<input name="cidade" maxlength="120" autocomplete="off"></label>
+                        <label>UF<select name="uf"><option value="">Não informado</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select></label>
+                        <small>O endereço permanece editável. Autocomplete de CEP não é usado enquanto não houver provedor configurado.</small>
+                        <label class="pilot-confirm"><input type="checkbox" required>Conferi os dados e confirmo o cadastro de um responsável fictício.</label>
+                        <button class="primary-btn" type="submit">Cadastrar responsável</button>
+                      </form>
+                    </details>
+                    <details><summary>Cadastrar paciente fictício</summary>
+                      <form id="pilot-patient-form">
+                        <label>Nome<input name="nome" required maxlength="160" autocomplete="off"></label>
+                        <label>Espécie<select name="especie_codigo"><option value="canina">Canina</option><option value="felina">Felina</option><option value="outra">Outra</option><option value="desconhecida">Desconhecida</option></select></label>
+                        <label>Estado vital<select name="estado_vital"><option value="desconhecido">Desconhecido</option><option value="vivo">Vivo</option><option value="obito">Óbito</option></select></label>
+                        <label>Papel do responsável<select name="papel_responsavel" required><option value="legal">Responsável legal</option><option value="financeiro">Responsável financeiro</option><option value="contato">Contato</option></select></label>
+                        <label>Data de nascimento<input name="data_nascimento" type="date"></label>
+                        <label>Sexo<select name="sexo"><option value="">Não informado</option><option value="macho">Macho</option><option value="femea">Fêmea</option><option value="indeterminado">Indeterminado</option></select></label>
+                        <label>Raça<input name="raca" maxlength="120" autocomplete="off"></label>
+                        <label>Microchip<input name="microchip" maxlength="64" autocomplete="off"></label>
+                        <label>Pelagem<input name="pelagem" maxlength="120" autocomplete="off"></label>
+                        <label>Castrado<select name="castrado"><option value="">Não informado</option><option value="true">Sim</option><option value="false">Não</option></select></label>
+                        <label>Observações<textarea name="observacoes" rows="3" maxlength="4000"></textarea></label>
+                        <label>Contato de emergência — nome<input name="contato_emergencia_nome" maxlength="160" autocomplete="off"></label>
+                        <label>Contato de emergência — telefone<input name="contato_emergencia_telefone" maxlength="40" inputmode="tel" autocomplete="off"></label>
+                        <label>Contato de emergência — vínculo<input name="contato_emergencia_vinculo" maxlength="80" autocomplete="off"></label>
+                        <label class="pilot-confirm"><input type="checkbox" required>Conferi o responsável selecionado e confirmo o cadastro de um paciente fictício com vínculo inicial.</label>
+                        <button class="primary-btn" type="submit">Cadastrar paciente</button>
+                      </form>
+                    </details>
+                  </div>
                 </section>
                 <section aria-labelledby="pilot-episode-title"><h3 id="pilot-episode-title">2. Episódio</h3>
                   <label>Episódio<select id="pilot-episode" aria-label="Episódio do atendimento"><option value="">Selecione um paciente primeiro</option></select></label>
