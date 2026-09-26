@@ -96,6 +96,24 @@
     return Number.isNaN(date.getTime()) ? String(value) : new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(date);
   }
 
+  function formatDateOnly(value) {
+    if (!value) return "Não informado";
+    const match = String(value).match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
+    return match ? `${match[3]}/${match[2]}/${match[1]}` : String(value);
+  }
+
+  function patientValue(value) {
+    return value === null || value === undefined || value === ""
+      ? "Não informado"
+      : String(value);
+  }
+
+  function yesNo(value) {
+    if (value === true) return "Sim";
+    if (value === false) return "Não";
+    return "Não informado";
+  }
+
   function metric(label, value) {
     const card = document.createElement("div");
     card.className = "clinical-summary-card";
@@ -253,7 +271,24 @@
     episodeContext.hidden = true;
     patientName.textContent = patient.nome || "Paciente";
     patientMeta.textContent = `${patient.especie_codigo || "Espécie não informada"} • ID ${shortId(patient.id)}`;
-    summary.replaceChildren(metric("Estado", patient.estado_vital || "Não informado"), metric("Cadastro", formatDate(patient.criado_em)), metric("Identificador", shortId(patient.id)));
+    const emergencyContact = [
+      patient.contato_emergencia_nome,
+      patient.contato_emergencia_telefone,
+      patient.contato_emergencia_vinculo,
+    ].filter(Boolean).join(" • ") || "Não informado";
+    summary.replaceChildren(
+      metric("Estado", patient.estado_vital || "Não informado"),
+      metric("Nascimento", formatDateOnly(patient.data_nascimento)),
+      metric("Sexo", patientValue(patient.sexo)),
+      metric("Raça", patientValue(patient.raca)),
+      metric("Microchip", patientValue(patient.microchip)),
+      metric("Pelagem", patientValue(patient.pelagem)),
+      metric("Castrado", yesNo(patient.castrado)),
+      metric("Contato de emergência", emergencyContact),
+      metric("Observações", patientValue(patient.observacoes)),
+      metric("Cadastro", formatDate(patient.criado_em)),
+      metric("Identificador", shortId(patient.id)),
+    );
     loading(episodesNode, "Carregando episódios");
     loading(recordsNode, "Carregando prontuário");
     loading(supportNode, "Carregando vínculos clínicos");
