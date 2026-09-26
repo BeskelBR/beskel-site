@@ -8,9 +8,9 @@
   "lang": "pt-BR",
   "icons": [
     {
-      "src": "/assets/img/beskel-symbol-master-dark.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "/assets/img/favicon-beskel-master-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }
